@@ -17,7 +17,12 @@ Row fields
                          event with no map placement (see object_id_note)
     vanilla_contents     {"value": item or null, "source": where it comes from, "note": why it is null}
     randomizable         "yes" (changed in game and it worked), "no", or "untested"; randomizable_note
-    requirements         the logic rule ("True" = none)
+    requirements         what it takes to get the check from the start of the game, for a child and an
+                         adult: a list of alternatives (any one is enough), each a list of items and settings
+                         that must be on; [[]] = nothing needed, null = impossible at that age
+                         (logic/requirements.py)
+    requirements_note    when the answer still goes through a 'not mapped yet' placeholder region
+    check_rule           the check's own rule: only what is needed once in its region ("True" = nothing more)
     verification_status  "verified in game" or "not verified in game" (the region's "verified" flag)
     notes                the check's own note, if any
 """
@@ -30,6 +35,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
 from logic.world import World  # noqa: E402
+from logic.requirements import requirements, placeholder_ages  # noqa: E402
 
 
 def check_type(world, region, loc):
@@ -75,6 +81,8 @@ def objects(world, region, loc):
 
 def build(world, area):
     rows = []
+    req = requirements(world)
+    ph = placeholder_ages(world)
     for r in world.regions.values():
         if r.scene != area:
             continue
@@ -92,9 +100,13 @@ def build(world, area):
                 'vanilla_contents': vanilla(world, r, loc, ctype),
                 'randomizable': loc.get('randomizable'),
                 'randomizable_note': loc.get('randomizable_note'),
-                'requirements': str(loc.get('rule', True)),
+                'requirements': req[name],
+                'check_rule': str(loc.get('rule', True)),
                 'verification_status': 'verified in game' if r.verified else 'not verified in game',
             }
+            if ph.get(name):
+                row['requirements_note'] = ('the %s answer still goes through placeholder regions (not mapped yet): '
+                                            'it will change as the world is mapped' % ' and '.join(ph[name]))
             if not row['object_id']:
                 row['object_id_note'] = 'no map placement (an event); its ID in the game is still to be found'
             if loc.get('note'):

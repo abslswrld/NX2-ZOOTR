@@ -26,8 +26,17 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_01",
@@ -56,8 +65,17 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_02",
@@ -86,8 +104,17 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_03",
@@ -116,8 +143,17 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_04",
@@ -146,8 +182,17 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_05",
@@ -176,8 +221,17 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_06",
@@ -206,8 +260,17 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_07",
@@ -236,8 +299,17 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_08",
@@ -266,8 +338,17 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_BEAN_PATCH_GS",
@@ -296,7 +377,43 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "can_plant_bugs and can_child_attack",
+  "requirements": {
+   "child": [
+    [
+     "Boomerang",
+     "Bottle"
+    ],
+    [
+     "Bottle",
+     "DekuSticks"
+    ],
+    [
+     "Bottle",
+     "KokiriSword"
+    ],
+    [
+     "Bottle",
+     "Slingshot"
+    ],
+    [
+     "BombBag",
+     "Bottle",
+     "GoronBracelet"
+    ],
+    [
+     "BombBag",
+     "Bottle",
+     "start_with_goron_bracelet"
+    ],
+    [
+     "Bottle",
+     "DinsFire",
+     "Magic"
+    ]
+   ],
+   "adult": null
+  },
+  "check_rule": "can_plant_bugs and can_child_attack",
   "verification_status": "not verified in game",
   "notes": "appears once bugs are released in the soft soil (flag Gimmick_MagicBeanSoil_KokiriForest)"
  },
@@ -339,8 +456,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_BEHIND_SARIAS_HOUSE_ROCK_02",
@@ -381,8 +509,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_BEHIND_SHOP_BUSH_01",
@@ -423,8 +562,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_BEHIND_SHOP_BUSH_02",
@@ -465,8 +615,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_BEHIND_SHOP_BUSH_03",
@@ -507,8 +668,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_BUSH_01",
@@ -549,8 +721,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_BUSH_02",
@@ -591,8 +774,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_BUSH_03",
@@ -633,8 +827,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_CENTER_ROCK",
@@ -675,7 +880,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "is_child",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
   "notes": "child map only; two rocks stacked here (Obj_LiftRock_A_02 and _A_01): check in game what lifting it does"
  },
@@ -718,8 +929,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_02",
@@ -760,8 +982,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_03",
@@ -802,8 +1035,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_04",
@@ -844,8 +1088,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_05",
@@ -886,8 +1141,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_06",
@@ -928,8 +1194,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_07",
@@ -970,8 +1247,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_08",
@@ -1012,8 +1300,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_09",
@@ -1054,8 +1353,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_10",
@@ -1096,8 +1406,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_11",
@@ -1138,8 +1459,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_CIRCLE_ROCK_12",
@@ -1180,8 +1512,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_DEKU_TREE_GOSSIP_01",
@@ -1222,8 +1565,25 @@
   },
   "randomizable": "no",
   "randomizable_note": "hint stone, gives no item",
-  "requirements": "True",
+  "requirements": {
+   "child": [
+    [
+     "open_forest"
+    ],
+    [
+     "DekuShield",
+     "KokiriSword"
+    ]
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
   "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "notes": "hint stone, not an item check (left/right from its position; check)"
  },
  {
@@ -1265,8 +1625,25 @@
   },
   "randomizable": "no",
   "randomizable_note": "hint stone, gives no item",
-  "requirements": "True",
+  "requirements": {
+   "child": [
+    [
+     "open_forest"
+    ],
+    [
+     "DekuShield",
+     "KokiriSword"
+    ]
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
   "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "notes": "hint stone, not an item check (left/right from its position; check)"
  },
  {
@@ -1296,8 +1673,18 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_adult and at_night and can_use(Hookshot)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult and at_night and can_use(Hookshot)",
   "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "notes": "adult, night only (game flag); hookshot as in the N64 game: check height in game"
  },
  {
@@ -1339,8 +1726,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_HOUSE_OF_TWINS_POT_02",
@@ -1381,8 +1779,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_GS",
@@ -1411,7 +1820,36 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_child and at_night and can_child_attack",
+  "requirements": {
+   "child": [
+    [
+     "Boomerang"
+    ],
+    [
+     "DekuSticks"
+    ],
+    [
+     "KokiriSword"
+    ],
+    [
+     "Slingshot"
+    ],
+    [
+     "BombBag",
+     "GoronBracelet"
+    ],
+    [
+     "BombBag",
+     "start_with_goron_bracelet"
+    ],
+    [
+     "DinsFire",
+     "Magic"
+    ]
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child and at_night and can_child_attack",
   "verification_status": "not verified in game",
   "notes": "night only (game flag)"
  },
@@ -1454,8 +1892,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_POT_02",
@@ -1496,8 +1945,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SHOP_01",
@@ -1550,8 +2010,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SHOP_02",
@@ -1604,8 +2075,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SHOP_03",
@@ -1658,8 +2140,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SHOP_04",
@@ -1712,8 +2205,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SHOP_05",
@@ -1766,8 +2270,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SHOP_06",
@@ -1820,8 +2335,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SHOP_07",
@@ -1874,8 +2400,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SHOP_08",
@@ -1928,8 +2465,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SWORD_CHEST",
@@ -1960,7 +2508,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "True",
   "verification_status": "not verified in game"
  },
  {
@@ -1992,8 +2546,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_MIDO_CHEST_02",
@@ -2024,8 +2589,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_MIDO_CHEST_03",
@@ -2056,8 +2632,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_MIDO_CHEST_04",
@@ -2088,8 +2675,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_01",
@@ -2130,8 +2728,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_02",
@@ -2172,8 +2781,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_NEAR_LOST_WOODS_GOSSIP",
@@ -2214,8 +2834,19 @@
   },
   "randomizable": "no",
   "randomizable_note": "hint stone, gives no item",
-  "requirements": "True",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
   "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "notes": "hint stone, not an item check"
  },
  {
@@ -2257,8 +2888,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_NEAR_SARIAS_HOUSE_BUSH_02",
@@ -2299,8 +2941,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_NEAR_SARIAS_HOUSE_BUSH_03",
@@ -2341,8 +2994,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_RUPEE_BEHIND_MIDOS_HOUSE_ITEM",
@@ -2371,7 +3035,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_child",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
   "notes": "name from its position; check where it really is"
  },
@@ -2402,7 +3072,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_child",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
   "verification_status": "not verified in game"
  },
  {
@@ -2432,7 +3108,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_child",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
   "verification_status": "not verified in game"
  },
  {
@@ -2462,7 +3144,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_child",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
   "verification_status": "not verified in game"
  },
  {
@@ -2492,7 +3180,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_child",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
   "verification_status": "not verified in game"
  },
  {
@@ -2534,8 +3228,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_02",
@@ -2576,8 +3281,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_03",
@@ -2618,8 +3334,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_04",
@@ -2660,8 +3387,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_05",
@@ -2702,8 +3440,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_06",
@@ -2744,8 +3493,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_07",
@@ -2786,8 +3546,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_SHOP_RUPEE_ITEM",
@@ -2816,7 +3587,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_child",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
   "verification_status": "not verified in game"
  },
  {
@@ -2848,8 +3625,33 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    [
+     "Ocarina",
+     "SongOfStorms"
+    ],
+    [
+     "OcarinaOfTime",
+     "SongOfStorms"
+    ]
+   ],
+   "adult": [
+    [
+     "MasterSword",
+     "Ocarina",
+     "SongOfStorms"
+    ],
+    [
+     "MasterSword",
+     "OcarinaOfTime",
+     "SongOfStorms"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_TRAINING_AREA_RUPEE_ITEM_01",
@@ -2880,7 +3682,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "True",
   "verification_status": "not verified in game"
  },
  {
@@ -2910,7 +3718,13 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_child",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
   "verification_status": "not verified in game"
  },
  {
@@ -2952,8 +3766,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_WEST_OF_MIDOS_HOUSE_ROCK_02",
@@ -2994,8 +3819,19 @@
   },
   "randomizable": "untested",
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
-  "requirements": "True",
-  "verification_status": "not verified in game"
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "LW_BRIDGE_CHEST",
@@ -3040,8 +3876,26 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "True",
+  "requirements": {
+   "child": [
+    [
+     "open_forest"
+    ],
+    [
+     "DekuShield",
+     "KokiriSword",
+     "Slingshot"
+    ]
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
   "verification_status": "not verified in game",
+  "requirements_note": "the child and adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "notes": "new in the remake (not in the N64 game), about 9 units above the path: how to reach it is unknown"
  },
  {
@@ -3107,8 +3961,26 @@
   },
   "randomizable": "no",
   "randomizable_note": "hint stone, gives no item",
-  "requirements": "True",
+  "requirements": {
+   "child": [
+    [
+     "open_forest"
+    ],
+    [
+     "DekuShield",
+     "KokiriSword",
+     "Slingshot"
+    ]
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "True",
   "verification_status": "not verified in game",
+  "requirements_note": "the child and adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "notes": "hint stone, not an item check"
  },
  {
@@ -3174,8 +4046,57 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "can_stun_deku",
+  "requirements": {
+   "child": [
+    [
+     "Boomerang",
+     "open_forest"
+    ],
+    [
+     "DekuNuts",
+     "open_forest"
+    ],
+    [
+     "DekuShield",
+     "open_forest"
+    ],
+    [
+     "DekuSticks",
+     "open_forest"
+    ],
+    [
+     "KokiriSword",
+     "open_forest"
+    ],
+    [
+     "Slingshot",
+     "open_forest"
+    ],
+    [
+     "BombBag",
+     "GoronBracelet",
+     "open_forest"
+    ],
+    [
+     "BombBag",
+     "open_forest",
+     "start_with_goron_bracelet"
+    ],
+    [
+     "DekuShield",
+     "KokiriSword",
+     "Slingshot"
+    ]
+   ],
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "can_stun_deku",
   "verification_status": "not verified in game",
+  "requirements_note": "the child and adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "notes": "sells the Deku stick upgrade; the scrub is in both the child and adult maps: check adult"
  },
  {
@@ -3192,8 +4113,22 @@
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
-  "requirements": "is_child",
+  "requirements": {
+   "child": [
+    [
+     "open_forest"
+    ],
+    [
+     "DekuShield",
+     "KokiriSword",
+     "Slingshot"
+    ]
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
+  "requirements_note": "the child answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "object_id_note": "no map placement (an event); its ID in the game is still to be found",
   "notes": "Saria's ocarina on the bridge; not a map placement (an event), id still to be found"
  }

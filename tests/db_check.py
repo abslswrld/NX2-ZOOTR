@@ -116,6 +116,42 @@ for area in CLASSIFIED:
         'by type': dict(sorted(c(x['check_type'] for x in rows).items())),
     }
 
+# requirements (logic/requirements.py) agree with the search, for every check of the world
+from logic.requirements import requirements  # noqa: E402
+ALL_ITEMS = json.load(open(os.path.join(ROOT, 'data', 'items.json'), encoding='utf-8'))
+BOOL_SETTINGS = [k for k, v in w.settings_defaults.items() if isinstance(v, bool)]
+
+
+def _reaches(names, check, age):
+    settings = {k: (k in names) for k in BOOL_SETTINGS}
+    items = []
+    for n in names:
+        if n in settings:
+            continue
+        item, _, count = n.partition('*')
+        items += [item] * int(count or 1)
+    _, locs, _ = w.search(items, settings)
+    return age in locs.get(check, ())
+
+
+req = requirements(w)
+req_checked = 0
+for check, ages in req.items():
+    for age, alts in ages.items():
+        if alts is None:
+            if _reaches(list(ALL_ITEMS) + BOOL_SETTINGS, check, age):
+                errors.append('requirements: %s (%s) said impossible but the search reaches it' % (check, age))
+            req_checked += 1
+            continue
+        for s in alts:
+            if not _reaches(s, check, age):
+                errors.append('requirements: %s (%s) %s does not reach it' % (check, age, s))
+            for n in s:
+                if _reaches([x for x in s if x != n], check, age):
+                    errors.append('requirements: %s (%s) %s still reaches it without %s' % (check, age, s, n))
+            req_checked += 1
+print('requirements: %d checks x 2 ages, %d alternatives tried against the search' % (len(req), req_checked))
+
 for area, t in totals.items():
     print('== %s' % area)
     for k, v in t.items():

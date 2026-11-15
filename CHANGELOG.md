@@ -4,6 +4,17 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### Full requirements for every check
+- New `logic/requirements.py`: for each check, the smallest sets of items and settings that get it from
+  the start of the game, for a child and an adult, following every route through the region map (exits,
+  check rules, events, helpers, can_play / can_use). Stops with an error on a rule it can't handle (`not`,
+  comparisons) instead of guessing.
+- Database (`data/db/KokiriForest.json`): `requirements` is now this full answer (`[[]]` = nothing needed,
+  `null` = impossible at that age); the check's own rule moves to `check_rule`; `requirements_note` flags
+  answers that still go through placeholder regions.
+- `tests/db_check.py`: every answer of all 120 checks (both ages, 430 alternatives) is tried against the
+  search; 0 errors. The longest list today is 12 alternatives, so no shortening is needed yet.
+
 ### Check database and permanent check IDs (Kokiri Forest)
 - New ID convention (README, "Check IDs"): `<AREA>_<SUBJECT>_<TYPE>`, with `_NN` only for groups; IDs are
   written once, never computed again, never reused; retired IDs stay listed.

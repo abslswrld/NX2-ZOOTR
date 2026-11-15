@@ -77,6 +77,7 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `data/helpers.json` | shared rule shortcuts (`can_child_attack`, `has_explosives`, `can_leave_forest`...) |
 | `data/items.json`, `data/settings.json` | the item names rules can use, and the settings with their defaults |
 | `logic/rules.py`, `logic/world.py` | the rule language and the search |
+| `logic/requirements.py` | the full requirements of every check from the start of the game, for a child and an adult (the smallest sets of items and settings that work) |
 | `tools/area_map.py` | draws an area from above with every check labelled (`maps/`) |
 | `tests/logic_check.py` | situations with a known answer (closed forest, Song of Storms without an ocarina...) |
 | `data/ids.json` | every permanent check ID ever issued (active or retired), the area codes and the type codes |
@@ -142,6 +143,16 @@ digits and `_` only.
 - `tests/db_check.py` fails on a duplicate, an unregistered or reused ID, a wrong area or type code, a
   number gap, a group mixing numbered and unnumbered IDs, an object with no check, or an out-of-date
   `data/db/` file.
+
+**Requirements in the database:** `requirements` is what it takes to get the check from the start of the
+game, worked out from every route through the region map (`logic/requirements.py`): for `child` and
+`adult`, a list of alternatives (any one is enough), each a list of items and settings that must be on.
+`[[]]` means nothing is needed, `null` means impossible at that age. `check_rule` keeps the check's own
+rule (only what is needed once in its region). `requirements_note` says when an answer still goes through
+a "not mapped yet" placeholder region, so it will change as the world is mapped. Nothing here is written
+by hand: rebuilding the database updates every answer, and `tests/db_check.py` tries each one against the
+search (every listed set reaches the check, every set minus any one item doesn't, and "impossible" really
+is impossible).
 
 **Classified so far:** Kokiri Forest (80 checks). `randomizable` is `"untested"` for every check that may
 hold an item, until changing it has been tried in game; gossip stones are `"no"`.
