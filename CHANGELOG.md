@@ -12,6 +12,8 @@ Newest first. Dates are when the work was done.
 - New `data/ids.json` (80 active IDs, area codes `KF` and `LW`, type codes).
 - New `tools/build_db.py` and `data/db/KokiriForest.json` (generated): one row per check with region, name,
   type, the game's placement hashes, original contents, randomizable, requirements, verification status.
+- Rocks and bushes with no drop table: original contents noted as "probably a random drop (rupees,
+  hearts...), not confirmed in game".
 - New `tests/db_check.py`: validation and totals (0 errors). Tried with deliberately broken data: it caught
   all 13 planted errors.
 

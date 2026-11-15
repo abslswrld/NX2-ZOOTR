@@ -57,6 +57,10 @@ def vanilla(world, region, loc, ctype):
     tables = sorted({p.get('params', {}).get('Drop__DropTable') for p in spot['placements']} - {None})
     if tables:
         return {'value': None, 'source': None, 'note': 'random drop (%s)' % ', '.join(tables)}
+    if ctype in ('rock', 'bush', 'boulder'):
+        return {'value': None, 'source': None,
+                'note': 'probably a random drop (rupees, hearts...), not confirmed in game; '
+                        'no item or drop table in the map data'}
     return {'value': None, 'source': None, 'note': 'no item or drop table in the map data'}
 
 
