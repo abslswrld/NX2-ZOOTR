@@ -1,0 +1,5 @@
+# your own game path for run_tests.bat
+romfs_path.txt
+# test output
+report.txt
+__pycache__/

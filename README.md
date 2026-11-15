@@ -40,7 +40,8 @@ module already has its own texture code), save files (needed for the tracker).
 Needs Python 3.13 or newer. Python 3.14+ is much faster (it has zstd built in). Nothing is installed and
 nothing in the game folder is changed: the tests only read.
 
-- Double-click `run_tests.bat`, or
+- Double-click `run_tests.bat` (it takes the romfs folder from its first argument, the `ROMFS` environment
+  variable, or a one-line `romfs_path.txt` next to it, which is not uploaded; otherwise it asks), or
 - `python tests/roundtrip.py "<romfs folder>" [folders...] --report report.txt`
 - `python tests/edit_check.py "<romfs folder>"`
 

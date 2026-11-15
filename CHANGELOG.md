@@ -4,6 +4,11 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### No personal path in the repository
+- `run_tests.bat` no longer has a built-in game path: it takes the romfs folder from its argument, the
+  `ROMFS` environment variable, or a local `romfs_path.txt` (ignored by git), and asks otherwise.
+- `.gitignore`: `romfs_path.txt`, `report.txt`, `__pycache__/`.
+
 ### Sacred Forest Meadow mapped
 - `data/checks/SacredForestMeadow.json` extracted from the game's map files: 14 spots (2 chests, 1 Gold
   Skulltula, 4 gossip stones, 7 solid bushes).
