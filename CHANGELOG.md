@@ -4,6 +4,16 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### Sacred Forest Meadow checked in game
+- All 5 SFM regions now `"verified": true`. Confirmed in game: the child Wolfos gate (the slingshot is
+  enough), the Song of Storms grotto and its Wolfos chest, Saria's Song needs Zelda's letter, the bomb
+  grotto and its Song of Time blocks, the adult gate already open, Sheik's Minuet on the first adult visit,
+  the hookshot for the Forest Temple entrance, and the Skulltula there in the daytime.
+- `SFM GS`: rule changed from `can_use(Hookshot)` to `is_adult` (a jump reaches it).
+- `tests/logic_check.py`: 1 new case (27 in all, all pass).
+- Not tested: whether bombs also open the Song of Storms grotto (the game files say no), and the Song of
+  Time tutorial (the test save was reached with cheats).
+
 ### Event flow writer: relocation table matches the game's files
 - The first run of `run_tests.bat` on the whole game showed 32 event flows written back with one byte wrong
   in the relocation table (the list of pointers the game fixes up on loading). The game's files also list

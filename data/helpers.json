@@ -8,7 +8,7 @@
  "can_child_attack": "is_child and (Slingshot or Boomerang or DekuSticks or KokiriSword or has_explosives or (DinsFire and can_use_magic))",
  "can_defeat_wolfos": {
   "rule": "is_adult or (is_child and (KokiriSword or DekuSticks or Slingshot or has_explosives or (DinsFire and can_use_magic)))",
-  "note": "as in the N64 logic (the boomerang only stuns); check in game that the slingshot is enough"
+  "note": "as in the N64 logic (the boomerang only stuns); the slingshot is enough (checked in game, Sacred Forest Meadow gate)"
  },
  "can_stun_deku": "is_adult or DekuSticks or KokiriSword or Slingshot or Boomerang or DekuNuts or DekuShield or has_explosives",
  "has_bottle": "Bottle",

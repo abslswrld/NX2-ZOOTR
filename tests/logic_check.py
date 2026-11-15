@@ -74,6 +74,8 @@ expect('upper grotto without the Song of Time: chest out of reach', ['KokiriSwor
        not_want=['SFM Upper Grotto Chest'])
 expect('adult with hookshot + Saria\'s Song: Skulltula and Sheik', ['MasterSword', 'Hookshot', 'SariasSong', 'Ocarina'],
        {}, age_of={'SFM GS': ['adult'], 'Sheik in Forest': ['adult']})
+expect('adult Skulltula without the hookshot (a jump reaches it)', ['MasterSword', 'SariasSong', 'Ocarina'], {},
+       age_of={'SFM GS': ['adult']})
 expect('adult without Saria\'s Song: blocked by Mido', ['MasterSword', 'Hookshot'], {}, not_want=['Sheik in Forest'])
 
 print('\n%d failed' % failures)
