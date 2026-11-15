@@ -4,6 +4,14 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### Event flow writer: relocation table matches the game's files
+- The first run of `run_tests.bat` on the whole game showed 32 event flows written back with one byte wrong
+  in the relocation table (the list of pointers the game fixes up on loading). The game's files also list
+  null pointers for a flowchart's empty actor, event and entry point arrays, and for a callswitch with no
+  cases; `formats/evfl.py` now does the same. All 32 now come back identical (650 identical in all).
+- README: the status table now gives the whole-game results, and what isn't identical yet (264 event flows
+  with timelines or entry point variables, 2 BYML system files).
+
 ### No personal path in the repository
 - `run_tests.bat` no longer has a built-in game path: it takes the romfs folder from its argument, the
   `ROMFS` environment variable, or a local `romfs_path.txt` (ignored by git), and asks otherwise.

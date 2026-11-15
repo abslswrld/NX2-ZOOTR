@@ -8,16 +8,25 @@ no game files are included.
 
 ## Status
 
-| Format | Module | What it's for | Round-trip on the sample |
+| Format | Module | What it's for | Round-trip on the whole game (2026-11-15) |
 |---|---|---|---|
-| Zstandard `.zs` (with the game's dictionaries) | `formats/zstd.py` | every compressed file | 63/63 decompress correctly |
-| SARC `.pack` / `.sarc` | `formats/sarc.py` | archives (actor packs, text) | 6/6 byte-identical |
-| BYML v7, little and big endian | `formats/byml.py` | GameData, RSDB tables, map actors (`.bcett`) | 592/592 byte-identical |
-| BFEVFL event flows | `formats/evfl.py` | item hand-outs, shops, cutscenes | 11/11 byte-identical |
-| MSBT text | `formats/msbt.py` | item names, hints, dialogue | 540/540 byte-identical |
+| Zstandard `.zs` (with the game's dictionaries) | `formats/zstd.py` | every compressed file | 9,341/9,341 decompress correctly |
+| SARC `.pack` / `.sarc` | `formats/sarc.py` | archives (actor packs, text) | 8,402/8,402 byte-identical |
+| BYML v7, little and big endian | `formats/byml.py` | GameData, RSDB tables, map actors (`.bcett`) | 144,150/144,152 byte-identical (see below) |
+| BFEVFL event flows | `formats/evfl.py` | item hand-outs, shops, cutscenes | 650/914 byte-identical; 264 not readable yet (see below) |
+| MSBT text | `formats/msbt.py` | item names, hints, dialogue | 8,640/8,640 byte-identical |
 | RESTBL | `formats/restbl.py` | file-size table the game needs for changed files | 1/1 byte-identical |
 
 "Byte-identical" means: read the file, write it back without changes, and get exactly the same bytes.
+Whole game = `run_tests.bat` (the Event, RSDB, Mals, GameData, Pack and System folders, archives opened:
+171,450 files).
+
+Not identical yet:
+- **Event flows with timelines** (261 cutscene files, `Dm_...`) and **entry point variables** (3 files:
+  `Dm_SY_Get`, `Dm_SY_Ocarina`, `LinkSleepInBed`): the reader refuses them on purpose for now.
+- **2 BYML system files** (`PhiveConfig.byml`, `HeapDef.byml`) come back smaller than the originals. Not
+  files the randomizer edits.
+
 `tests/edit_check.py` also changes each format (adds an event, a table row, a file, a text, a size entry)
 and checks the result reads back correctly.
 
@@ -33,7 +42,8 @@ module already has its own texture code), save files (needed for the tracker).
   - type 5, `callswitch`: runs an entry point and branches on the value it returns (cases are 32-bit hashes);
   - type 6, `return`: ends an entry point returning a 32-bit hash value.
 - The game's files list some null pointers in the event flow relocation table (empty actor action lists,
-  entry point arrays, empty switch case lists); the writer does the same.
+  entry point arrays, empty switch and callswitch case lists, and a flowchart's actor, event and entry
+  point arrays when they are empty); the writer does the same.
 
 ## Running the tests on your PC
 

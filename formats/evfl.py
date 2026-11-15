@@ -580,10 +580,11 @@ def _write_flowchart(o, key, fc):
     for v in (len(fc.actors), nacts, nq, len(fc.events), len(fc.entry_points), 0, 0, 0):
         o.u16(v)
     o.sptr(fc.name)
-    o.ptr((key, 'actors') if fc.actors else None)
-    o.ptr((key, 'events') if fc.events else None)
+    # empty arrays: the null pointer is still listed in the RELT (as in the game's files)
+    o.ptr((key, 'actors') if fc.actors else None, listed=True)
+    o.ptr((key, 'events') if fc.events else None, listed=True)
     o.ptr((key, 'epdic'))
-    o.ptr((key, 'eps') if fc.entry_points else None)
+    o.ptr((key, 'eps') if fc.entry_points else None, listed=True)
     # actors
     o.mark((key, 'actors'))
     for i, a in enumerate(fc.actors):
@@ -624,7 +625,7 @@ def _write_flowchart(o, key, fc):
         elif t == 'callswitch':
             o.u8(5); o.u8(0); o.u16(len(e.cases)); o.u16(0); o.u16(0)
             o.ptr((k, 'params') if e.params is not None else None)
-            o.ptr((k, 'cases') if e.cases else None)
+            o.ptr((k, 'cases') if e.cases else None, listed=True)
             o.sptr(e.flowchart); o.sptr(e.entry)
         elif t == 'return':
             o.u8(6); o.u8(0); o.u16(0); o.u32(e.value)
