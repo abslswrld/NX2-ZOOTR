@@ -1,0 +1,68 @@
+[
+ {
+  "region": "Root",
+  "notes": "Where the search starts. Child starts in Link's house; adult is a placeholder until the Temple of Time is mapped.",
+  "exits": {
+   "KF Links House": "is_child",
+   "Temple of Time (not mapped yet)": "is_adult and can_become_adult"
+  }
+ },
+ {
+  "region": "Temple of Time (not mapped yet)",
+  "unmapped": true,
+  "notes": "Placeholder: assumed to connect to Hyrule Field.",
+  "exits": {
+   "Hyrule Field (not mapped yet)": "True"
+  }
+ },
+ {
+  "region": "Hyrule Field (not mapped yet)",
+  "unmapped": true,
+  "time_passes": true,
+  "notes": "Placeholder: assumed to connect everywhere nearby.",
+  "exits": {
+   "LW Bridge": "True",
+   "Temple of Time (not mapped yet)": "True",
+   "Zora River (not mapped yet)": "True",
+   "Goron City (not mapped yet)": "True"
+  }
+ },
+ {
+  "region": "Deku Tree (not mapped yet)",
+  "unmapped": true,
+  "notes": "Placeholder. Event rule from the French randomizer's finding that the vines up to 3F need the slingshot.",
+  "events": {
+   "Deku Tree Clear": "is_child and Slingshot and can_child_attack"
+  },
+  "exits": {
+   "KF Outside Deku Tree": "True"
+  }
+ },
+ {
+  "region": "Goron City (not mapped yet)",
+  "unmapped": true,
+  "notes": "Placeholder (via Death Mountain to Kakariko and Hyrule Field).",
+  "exits": {
+   "Lost Woods": "True",
+   "Hyrule Field (not mapped yet)": "True"
+  }
+ },
+ {
+  "region": "Zora River (not mapped yet)",
+  "unmapped": true,
+  "time_passes": true,
+  "notes": "Placeholder.",
+  "exits": {
+   "Lost Woods": "can_dive or can_use(IronBoots)",
+   "Hyrule Field (not mapped yet)": "True"
+  }
+ },
+ {
+  "region": "Forest Temple (not mapped yet)",
+  "unmapped": true,
+  "notes": "Placeholder.",
+  "exits": {
+   "SFM Upper": "True"
+  }
+ }
+]

@@ -1,0 +1,11 @@
+Read-and-write test, 2026-11-15 10:37
+romfs: /mnt/user-data/uploads/Longshot/nightly-130-0caf0618/romfs
+files: 27 top-level, 1177 tested in all (archives opened)
+time: 13s, zstd: pure Python
+
+byml    592 identical
+evfl    11 identical
+msbt    540 identical
+restbl  1 identical
+sarc    6 identical
+zstd    27 identical

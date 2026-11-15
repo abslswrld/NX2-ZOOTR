@@ -1,0 +1,208 @@
+[
+ {
+  "region": "Lost Woods",
+  "scene": "LostWood",
+  "time_passes": true,
+  "verified": false,
+  "notes": "The front half: the entrance from Kokiri Forest at (0, 7), the ledge over the bridge, and the maze rooms on a 24-unit grid up to adult Mido at (47.9, -28.8). Wrong turns lead back to Kokiri Forest (the game's own exits). Goron City exit at (24, -35.7); Zora's River exit underwater at (68.5, -25.6).",
+  "locations": {
+   "LW Skull Kid": {
+    "rule": "is_child and can_play(SariasSong)",
+    "kind": "gift",
+    "note": "Skull Kid on the stump at (-34.0, -3.7), heart piece (flag Npc_SkullKid_Child_IsGetHeartPiece)",
+    "pos": [
+     -34.0,
+     103.2,
+     -3.7
+    ]
+   },
+   "LW Ocarina Memory Game": {
+    "rule": "is_child and (Ocarina or OcarinaOfTime)",
+    "kind": "gift",
+    "note": "the two Skull Kids at (48.4, 15.8), heart piece (flag Minigame_SkullKidSession_IsGetHeartPiece)",
+    "pos": [
+     48.4,
+     97.8,
+     15.8
+    ]
+   },
+   "LW Target in Woods": {
+    "rule": "is_child and Slingshot",
+    "kind": "gift",
+    "note": "slingshot target at (40.3, -0.2) with the Deku Scrub (event LostWood_HitTargetOfDekuScrub_ClearDemo); the N64 prize is a bigger seed bag",
+    "pos": [
+     40.3,
+     102.9,
+     -0.2
+    ]
+   },
+   "LW GS Bean Patch Near Bridge": {
+    "spot": "skulltula@-33.0,31.5",
+    "rule": "can_plant_bugs and can_child_attack",
+    "note": "appears once bugs are released in the soft soil at (-33.2, 31.4) (flag Gimmick_MagicBeanSoil_LostWood02)"
+   },
+   "LW Boulder Over Shortcuts Grotto": {
+    "spot": "boulder@27.8,-28.1",
+    "rule": "can_blast_or_smash",
+    "kind": "boulder"
+   }
+  },
+  "events": {
+   "LW Bean Planted Near Bridge": "can_plant_bean"
+  },
+  "exits": {
+   "KF Main": "True",
+   "LW Bridge": "is_adult and (can_use(HoverBoots) or can_use(Longshot) or 'LW Bean Planted Near Bridge')",
+   "LW Near Shortcuts Grotto": "can_blast_or_smash",
+   "LW Beyond Mido": "is_child or can_play(SariasSong)",
+   "Goron City (not mapped yet)": "can_leave_forest",
+   "Zora River (not mapped yet)": "can_leave_forest and (can_dive or can_use(IronBoots))"
+  }
+ },
+ {
+  "region": "LW Near Shortcuts Grotto",
+  "scene": "LostWood",
+  "verified": false,
+  "notes": "Hole at (27.8, -28.2) under a breakable boulder, next to the Goron City exit. Nine bushes with bugs inside (y about 83). No chest in this map: the N64 grotto chest may be in a shared grotto map, still to be found.",
+  "locations": {
+   "LW Near Shortcuts Grotto Bush 1": {
+    "spot": "bush@33.0,-44.0",
+    "kind": "bush"
+   },
+   "LW Near Shortcuts Grotto Bush 2": {
+    "spot": "bush@33.2,-41.4",
+    "kind": "bush"
+   },
+   "LW Near Shortcuts Grotto Bush 3": {
+    "spot": "bush@34.4,-39.4",
+    "kind": "bush"
+   },
+   "LW Near Shortcuts Grotto Bush 4": {
+    "spot": "bush@35.4,-45.4",
+    "kind": "bush"
+   },
+   "LW Near Shortcuts Grotto Bush 5": {
+    "spot": "bush@36.0,-42.3",
+    "kind": "bush"
+   },
+   "LW Near Shortcuts Grotto Bush 6": {
+    "spot": "bush@36.6,-39.4",
+    "kind": "bush"
+   },
+   "LW Near Shortcuts Grotto Bush 7": {
+    "spot": "bush@37.7,-45.4",
+    "kind": "bush"
+   },
+   "LW Near Shortcuts Grotto Bush 8": {
+    "spot": "bush@38.7,-40.6",
+    "kind": "bush"
+   },
+   "LW Near Shortcuts Grotto Bush 9": {
+    "spot": "bush@39.0,-43.3",
+    "kind": "bush"
+   }
+  },
+  "exits": {
+   "Lost Woods": "True"
+  }
+ },
+ {
+  "region": "LW Beyond Mido",
+  "scene": "LostWood",
+  "time_passes": true,
+  "verified": false,
+  "notes": "The back half of the maze, past adult Mido: the Deku Theater clearing (around (12, -48)) and the rooms up to the Sacred Forest Meadow exit at (24, -83.7). The N64 rule for getting past adult Mido is Saria's Song.",
+  "locations": {
+   "LW Deku Scrub Near Theater Bugs": {
+    "spot": "scrub@12.0,-41.0",
+    "rule": "is_child and can_stun_deku",
+    "kind": "scrub",
+    "note": "sells bugs (Enemy_Scrub_Business_Item_SellBug)"
+   },
+   "LW Deku Scrub Near Theater Potions": {
+    "spot": "scrub@19.0,-51.0",
+    "rule": "is_child and can_stun_deku",
+    "kind": "scrub",
+    "note": "two versions at the same place: red potion / green potion / hearts, or heart / hearts / magic"
+   },
+   "LW GS Bean Patch Near Theater": {
+    "spot": "skulltula@11.0,-52.0",
+    "rule": "can_plant_bugs and can_child_attack",
+    "note": "appears once bugs are released in the soft soil at (10.9, -52.1) (flag Gimmick_MagicBeanSoil_LostWood01)"
+   },
+   "LW GS Above Theater": {
+    "spot": "skulltula@14.5,-56.5",
+    "rule": "(is_child and Boomerang) or (is_adult and can_use(Hookshot))",
+    "note": "about 6 units up; both maps have it and it is not night-only (unlike the N64 game): reach to check in game"
+   },
+   "LW Boulder Near Sacred Forest Meadow": {
+    "spot": "boulder@51.5,-75.5",
+    "rule": "can_blast_or_smash",
+    "kind": "boulder"
+   }
+  },
+  "exits": {
+   "Lost Woods": "True",
+   "Deku Theater": "True",
+   "LW Scrubs Grotto": "can_blast_or_smash",
+   "SFM Entryway": "True"
+  }
+ },
+ {
+  "region": "Deku Theater",
+  "scene": "LostWood",
+  "verified": false,
+  "notes": "Open hole at (3.8, -47.5); the stage is underground (Scrub_ForestStage_Manager at (-9.3, -47.2), the judge at (-10.0, -54.5)). N64 prizes: Skull Mask -> stick upgrade, Mask of Truth -> nut upgrade.",
+  "locations": {
+   "Deku Theater Skull Mask": {
+    "rule": "is_child and SkullMask",
+    "kind": "gift",
+    "pos": [
+     -10.0,
+     83.2,
+     -54.5
+    ]
+   },
+   "Deku Theater Mask of Truth": {
+    "rule": "is_child and MaskOfTruth",
+    "kind": "gift",
+    "pos": [
+     -8.0,
+     83.2,
+     -52.5
+    ]
+   }
+  },
+  "exits": {
+   "LW Beyond Mido": "True"
+  }
+ },
+ {
+  "region": "LW Scrubs Grotto",
+  "scene": "LostWood",
+  "verified": false,
+  "notes": "Hole at (20.5, -75.7) under a breakable boulder, next to the Sacred Forest Meadow exit.",
+  "locations": {
+   "LW Deku Scrub Grotto Nut Upgrade": {
+    "spot": "scrub@7.5,-85.5",
+    "rule": "can_stun_deku",
+    "kind": "scrub",
+    "note": "sells the Deku nut upgrade (Item_NutBag_Medium), child and adult"
+   },
+   "LW Deku Scrub Grotto Seeds or Arrows": {
+    "spot": "scrub@9.0,-89.5",
+    "rule": "can_stun_deku",
+    "kind": "scrub",
+    "note": "sells seeds to child, arrows to adult"
+   },
+   "LW Boulder Over Scrubs Grotto": {
+    "spot": "boulder@20.5,-75.7",
+    "rule": "can_blast_or_smash",
+    "kind": "boulder"
+   }
+  },
+  "exits": {
+   "LW Beyond Mido": "True"
+  }
+ }
+]

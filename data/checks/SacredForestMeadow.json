@@ -1,0 +1,551 @@
+{
+ "bush@-1.6,53.0": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -1.6,
+   100.0,
+   53.0
+  ],
+  "placements": [
+   {
+    "hash": "9741567715578520992",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "18255407930372306012",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-12.3,1.1": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -12.3,
+   100.0,
+   1.1
+  ],
+  "placements": [
+   {
+    "hash": "9129764610893735958",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   },
+   {
+    "hash": "11584460719857891610",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "bush@-2.8,52.7": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -2.8,
+   100.0,
+   52.7
+  ],
+  "placements": [
+   {
+    "hash": "15293421241716881989",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "2669182838975155515",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-3.6,51.0": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -3.6,
+   100.0,
+   51.0
+  ],
+  "placements": [
+   {
+    "hash": "17032648015876276563",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "3952888275772445673",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-8.6,38.3": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -8.6,
+   100.0,
+   38.3
+  ],
+  "placements": [
+   {
+    "hash": "5148317565845368467",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "9983734507820448325",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@1.3,4.3": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   1.3,
+   100.1,
+   4.3
+  ],
+  "placements": [
+   {
+    "hash": "1288408765345426328",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   },
+   {
+    "hash": "6943274243219023180",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "bush@1.4,38.9": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   1.4,
+   100.0,
+   38.9
+  ],
+  "placements": [
+   {
+    "hash": "3897504282010392499",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "11169424749066888813",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "chest@-3.5,67.0": {
+  "kind": "chest",
+  "item": "TBox_Rupee_Purple",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -3.7,
+   82.3,
+   67.2
+  ],
+  "placements": [
+   {
+    "hash": "7995233962349162969",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs",
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "TBox_Rupee_Purple"
+    }
+   },
+   {
+    "hash": "87261292483825904",
+    "actor": "Obj_TBoxPedestal_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "5787704546487142332",
+    "actor": "Obj_TBoxPedestal_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "chest@12.0,-74.0": {
+  "kind": "chest",
+  "item": "Item_ScrubBusinessSeed",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   12.1,
+   96.0,
+   -73.8
+  ],
+  "placements": [
+   {
+    "hash": "1764383515296652106",
+    "actor": "Obj_TBox_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Dynamic.bcett.byml.zs",
+     "SacredForestMeadow_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Item_ScrubBusinessSeed"
+    }
+   }
+  ]
+ },
+ "gossip@-16.5,-85.5": {
+  "kind": "gossip",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -16.6,
+   114.4,
+   -85.4
+  ],
+  "placements": [
+   {
+    "hash": "15614671170748746717",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_SACRED_FOREST_MEADOW_03",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_SACRED_FOREST_MEADOW_03",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   },
+   {
+    "hash": "547822598440835331",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_SACRED_FOREST_MEADOW_03",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_SACRED_FOREST_MEADOW_03",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "gossip@-16.5,18.5": {
+  "kind": "gossip",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -16.3,
+   104.6,
+   18.7
+  ],
+  "placements": [
+   {
+    "hash": "8840494132862908152",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_SACRED_FOREST_MEADOW_01",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_SACRED_FOREST_MEADOW_01",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   },
+   {
+    "hash": "14939992071483385348",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_SACRED_FOREST_MEADOW_01",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_SACRED_FOREST_MEADOW_01",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "gossip@11.0,-79.0": {
+  "kind": "gossip",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   11.0,
+   95.6,
+   -78.9
+  ],
+  "placements": [
+   {
+    "hash": "11838883554127873356",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_KOKIRI_FOREST_02",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_KOKIRI_FOREST_02",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   },
+   {
+    "hash": "3160651735793949664",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_KOKIRI_FOREST_02",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_KOKIRI_FOREST_02",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "gossip@4.0,41.0": {
+  "kind": "gossip",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   4.1,
+   104.5,
+   41.0
+  ],
+  "placements": [
+   {
+    "hash": "2858399877172893932",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_SACRED_FOREST_MEADOW_02",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_SACRED_FOREST_MEADOW_02",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   },
+   {
+    "hash": "8175208548154922840",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "SacredForestMeadow_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_SACRED_FOREST_MEADOW_02",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_SACRED_FOREST_MEADOW_02",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "skulltula@8.0,13.0": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   7.8,
+   107.4,
+   13.2
+  ],
+  "placements": [
+   {
+    "hash": "14473218207379268379",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ }
+}

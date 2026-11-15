@@ -1,0 +1,850 @@
+{
+ "boulder@20.5,-75.7": {
+  "kind": "boulder",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   20.5,
+   99.8,
+   -75.7
+  ],
+  "placements": [
+   {
+    "hash": "5207698098030997501",
+    "actor": "Obj_BrokenRock_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs",
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropTable": "None"
+    }
+   }
+  ]
+ },
+ "boulder@27.8,-28.1": {
+  "kind": "boulder",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   27.8,
+   99.8,
+   -28.1
+  ],
+  "placements": [
+   {
+    "hash": "12960902182455217518",
+    "actor": "Obj_BrokenRock_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs",
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropTable": "None"
+    }
+   }
+  ]
+ },
+ "boulder@51.5,-75.5": {
+  "kind": "boulder",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   51.5,
+   100.0,
+   -75.5
+  ],
+  "placements": [
+   {
+    "hash": "9751605155924795623",
+    "actor": "Obj_BrokenRock_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "LostWood_Adult_Dynamic.bcett.byml.zs",
+     "LostWood_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@33.0,-44.0": {
+  "kind": "bush",
+  "item": "Animal_Insect",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   33.0,
+   82.9,
+   -44.0
+  ],
+  "placements": [
+   {
+    "hash": "17993712008759335925",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   },
+   {
+    "hash": "5488835131617393219",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   }
+  ]
+ },
+ "bush@33.2,-41.4": {
+  "kind": "bush",
+  "item": "Animal_Insect",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   33.2,
+   82.9,
+   -41.4
+  ],
+  "placements": [
+   {
+    "hash": "16206638005430417269",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   },
+   {
+    "hash": "5007394544348392451",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   }
+  ]
+ },
+ "bush@34.4,-39.4": {
+  "kind": "bush",
+  "item": "Animal_Insect",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   34.4,
+   82.9,
+   -39.4
+  ],
+  "placements": [
+   {
+    "hash": "2198102825223763053",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   },
+   {
+    "hash": "5597448927131828918",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   }
+  ]
+ },
+ "bush@35.4,-45.4": {
+  "kind": "bush",
+  "item": "Animal_Insect",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   35.4,
+   82.9,
+   -45.4
+  ],
+  "placements": [
+   {
+    "hash": "14799938113178843638",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   },
+   {
+    "hash": "4453932386573032729",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   }
+  ]
+ },
+ "bush@36.0,-42.3": {
+  "kind": "bush",
+  "item": "Animal_Insect",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   36.0,
+   82.9,
+   -42.3
+  ],
+  "placements": [
+   {
+    "hash": "105365569697370932",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   },
+   {
+    "hash": "7412275398037840462",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   }
+  ]
+ },
+ "bush@36.6,-39.4": {
+  "kind": "bush",
+  "item": "Animal_Insect",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   36.6,
+   82.9,
+   -39.4
+  ],
+  "placements": [
+   {
+    "hash": "6371576460968048747",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   },
+   {
+    "hash": "12665247659442490400",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   }
+  ]
+ },
+ "bush@37.7,-45.4": {
+  "kind": "bush",
+  "item": "Animal_Insect",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   37.7,
+   82.9,
+   -45.4
+  ],
+  "placements": [
+   {
+    "hash": "700813349264257115",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   },
+   {
+    "hash": "8957227260103329265",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   }
+  ]
+ },
+ "bush@38.7,-40.6": {
+  "kind": "bush",
+  "item": "Animal_Insect",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   38.7,
+   82.9,
+   -40.6
+  ],
+  "placements": [
+   {
+    "hash": "14353012063098347569",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   },
+   {
+    "hash": "2822270749178751883",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   }
+  ]
+ },
+ "bush@39.0,-43.3": {
+  "kind": "bush",
+  "item": "Animal_Insect",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   39.0,
+   82.9,
+   -43.3
+  ],
+  "placements": [
+   {
+    "hash": "16178671185680094683",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   },
+   {
+    "hash": "4816761342260235661",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Animal_Insect"
+    }
+   }
+  ]
+ },
+ "chest@-49.5,72.0": {
+  "kind": "chest",
+  "item": "TBox_Rupee_Purple",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -49.4,
+   104.5,
+   71.9
+  ],
+  "placements": [
+   {
+    "hash": "17479747339356189279",
+    "actor": "Obj_TBox_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "LostWood_Adult_Dynamic.bcett.byml.zs",
+     "LostWood_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "TBox_Rupee_Purple"
+    }
+   }
+  ]
+ },
+ "gossip@-35.5,71.5": {
+  "kind": "gossip",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -35.6,
+   95.2,
+   71.6
+  ],
+  "placements": [
+   {
+    "hash": "16052789165605842679",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_LOST_WOOD_02",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_LOST_WOOD_02",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   },
+   {
+    "hash": "3395815220990187073",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_LOST_WOOD_02",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_LOST_WOOD_02",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "scrub@-45.0,72.5": {
+  "kind": "scrub",
+  "item": "Item_StickBag_Medium",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -45.2,
+   95.2,
+   72.6
+  ],
+  "placements": [
+   {
+    "hash": "11192313919554167152",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ScrubBusiness_ShopItemActorName0": "Item_StickBag_Medium",
+     "ScrubDeku_IsUseCustomPerceptionRange": true,
+     "TalkEventName": "Enemy_Scrub_Business_DekuStickPouch_01"
+    }
+   },
+   {
+    "hash": "5406759280757349546",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ScrubBusiness_ShopItemActorName0": "Item_StickBag_Medium",
+     "ScrubDeku_IsUseCustomPerceptionRange": true,
+     "TalkEventName": "Enemy_Scrub_Business_DekuStickPouch_01"
+    }
+   }
+  ]
+ },
+ "scrub@12.0,-41.0": {
+  "kind": "scrub",
+  "item": null,
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   12.2,
+   100.0,
+   -41.2
+  ],
+  "placements": [
+   {
+    "hash": "2569517939889411425",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "AttackedEventName": "Enemy_Scrub_Business_Item_SellBug",
+     "ScrubDeku_IsUseCustomPerceptionRange": true,
+     "TalkEventName": "Enemy_Scrub_Business_Item_SellBug"
+    }
+   }
+  ]
+ },
+ "scrub@19.0,-51.0": {
+  "kind": "scrub",
+  "item": "Item_Bottle_RedPotion",
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   19.2,
+   99.9,
+   -51.2
+  ],
+  "placements": [
+   {
+    "hash": "15048088372638595204",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "AttackedEventName": "Enemy_Scrub_Business_Potion",
+     "ScrubBusiness_ShopItemActorName0": "Item_Bottle_RedPotion",
+     "ScrubBusiness_ShopItemActorName1": "Item_Bottle_GreenPotion",
+     "ScrubBusiness_ShopItemActorName2": "Shop_Heart_Bundle",
+     "ScrubDeku_IsUseCustomPerceptionRange": true,
+     "TalkEventName": "Enemy_Scrub_Business_Potion"
+    }
+   },
+   {
+    "hash": "11385057993574159532",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "AttackedEventName": "Enemy_Scrub_Business_Potion",
+     "ScrubBusiness_ShopItemActorName0": "Obj_Heart",
+     "ScrubBusiness_ShopItemActorName1": "Shop_Heart_Bundle",
+     "ScrubBusiness_ShopItemActorName2": "Obj_MagicJar_Small",
+     "TalkEventName": "Enemy_Scrub_Business_Potion"
+    }
+   }
+  ]
+ },
+ "scrub@7.5,-85.5": {
+  "kind": "scrub",
+  "item": "Item_NutBag_Medium",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   7.3,
+   82.9,
+   -85.6
+  ],
+  "placements": [
+   {
+    "hash": "5764461665617243979",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ScrubBusiness_ShopItemActorName0": "Item_NutBag_Medium",
+     "TalkEventName": "Enemy_Scrub_Business_DekuNutsPouch_01"
+    }
+   },
+   {
+    "hash": "4328741615941752705",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ScrubBusiness_ShopItemActorName0": "Item_NutBag_Medium",
+     "TalkEventName": "Enemy_Scrub_Business_DekuNutsPouch_01"
+    }
+   }
+  ]
+ },
+ "scrub@9.0,-89.5": {
+  "kind": "scrub",
+  "item": "Shop_ArrowBundle_01",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   8.8,
+   82.9,
+   -89.4
+  ],
+  "placements": [
+   {
+    "hash": "14619830301496284497",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "FirstTimeAttackDelayFrame": 15.0,
+     "ScrubBusiness_ShopItemActorName0": "Shop_ArrowBundle_01",
+     "ScrubBusiness_ShopItemActorName1": "Shop_ArrowBundle_02",
+     "ScrubBusiness_ShopItemActorName2": "Obj_MagicJar_Small",
+     "TalkEventName": "Enemy_Scrub_Business_Arrow_01"
+    }
+   },
+   {
+    "hash": "2214083465643671502",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "FirstTimeAttackDelayFrame": 15.0,
+     "ScrubBusiness_ShopItemActorName0": "Shop_DekuSeedBundle_02",
+     "ScrubBusiness_ShopItemActorName1": "Shop_DekuSeedBundle_01",
+     "ScrubBusiness_ShopItemActorName2": "Obj_MagicJar_Small",
+     "TalkEventName": "Enemy_Scrub_Business_DekuSeed_01"
+    }
+   }
+  ]
+ },
+ "skulltula@-33.0,31.5": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   -33.2,
+   100.2,
+   31.4
+  ],
+  "placements": [
+   {
+    "hash": "9333354743976439033",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Gimmick_MagicBeanSoil_LostWood02",
+     "IsCheckLazy": false,
+     "IsNegation": false
+    },
+    "params": {
+     "Enemy_Skulltula_Gold_AppearPlayerCheck": true,
+     "Enemy_Skulltula_Gold_AppearPopOut": true,
+     "Enemy_Skulltula_Gold_AvoidTargetAngle": 120.0,
+     "Enemy_Skulltula_Gold_IsMagicBeanSoil": true
+    }
+   }
+  ]
+ },
+ "skulltula@11.0,-52.0": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   10.9,
+   99.8,
+   -52.1
+  ],
+  "placements": [
+   {
+    "hash": "17796658857969527112",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Gimmick_MagicBeanSoil_LostWood01",
+     "IsCheckLazy": false,
+     "IsNegation": false
+    },
+    "params": {
+     "Enemy_Skulltula_Gold_AppearPlayerCheck": true,
+     "Enemy_Skulltula_Gold_AppearPopOut": true,
+     "Enemy_Skulltula_Gold_IsMagicBeanSoil": true,
+     "Enemy_Skulltula_Gold_IsOverwriteAgonyStonePos": true
+    }
+   }
+  ]
+ },
+ "skulltula@14.5,-56.5": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   14.5,
+   105.9,
+   -56.4
+  ],
+  "placements": [
+   {
+    "hash": "4335656213162247230",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs",
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Enemy_Skulltula_Gold_IsOverwriteAgonyStonePos": true
+    }
+   }
+  ]
+ }
+}

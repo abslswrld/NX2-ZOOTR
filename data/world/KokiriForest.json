@@ -1,0 +1,505 @@
+[
+ {
+  "region": "KF Links House",
+  "scene": "KokiriForest",
+  "verified": false,
+  "notes": "Interior (same map). Door at (-41.3, 13.1); the bed leads to the dream world.",
+  "exits": {
+   "KF Main": "True"
+  }
+ },
+ {
+  "region": "KF Main",
+  "scene": "KokiriForest",
+  "time_passes": true,
+  "verified": false,
+  "notes": "The village. Mido stands at (25.5, 0.9) on the way to the Deku Tree. Fado at (-23.6, -9.6). Rocks: a circle of 12 small rocks around a centre rock at (-45.8, -27.8) near the door of Mido's house, plus three pairs; names from their positions. Bushes (solid ones, not the grass tufts): three near Saria's house, three beside Mido's house, three behind the shop.",
+  "locations": {
+   "KF GS Know It All House": {
+    "spot": "skulltula@-84.0,-17.5",
+    "rule": "is_child and at_night and can_child_attack",
+    "note": "night only (game flag)"
+   },
+   "KF GS Bean Patch": {
+    "spot": "skulltula@8.0,-23.5",
+    "rule": "can_plant_bugs and can_child_attack",
+    "note": "appears once bugs are released in the soft soil (flag Gimmick_MagicBeanSoil_KokiriForest)"
+   },
+   "KF GS House of Twins": {
+    "spot": "skulltula@18.0,19.0",
+    "rule": "is_adult and at_night and can_use(Hookshot)",
+    "note": "adult, night only (game flag); hookshot as in the N64 game: check height in game"
+   },
+   "KF Rupee Near Fado 1": {
+    "spot": "freestanding@-25.0,-9.5",
+    "rule": "is_child",
+    "kind": "freestanding"
+   },
+   "KF Rupee Near Fado 2": {
+    "spot": "freestanding@-21.5,-18.5",
+    "rule": "is_child",
+    "kind": "freestanding"
+   },
+   "KF Rupee Near Fado 3": {
+    "spot": "freestanding@-20.0,-22.5",
+    "rule": "is_child",
+    "kind": "freestanding"
+   },
+   "KF Rupee Behind Midos House": {
+    "spot": "freestanding@-23.5,-30.5",
+    "rule": "is_child",
+    "kind": "freestanding",
+    "note": "name from its position; check where it really is"
+   },
+   "KF Rupee Near Mido": {
+    "spot": "freestanding@14.5,-9.0",
+    "rule": "is_child",
+    "kind": "freestanding"
+   },
+   "KF Adult Rupee Circle 1": {
+    "spot": "freestanding@21.0,-13.0",
+    "rule": "is_adult",
+    "kind": "freestanding"
+   },
+   "KF Adult Rupee Circle 2": {
+    "spot": "freestanding@21.0,-14.0",
+    "rule": "is_adult",
+    "kind": "freestanding"
+   },
+   "KF Adult Rupee Circle 3": {
+    "spot": "freestanding@21.0,-14.5",
+    "rule": "is_adult",
+    "kind": "freestanding"
+   },
+   "KF Adult Rupee Circle 4": {
+    "spot": "freestanding@21.5,-13.0",
+    "rule": "is_adult",
+    "kind": "freestanding"
+   },
+   "KF Adult Rupee Circle Center": {
+    "spot": "freestanding@21.5,-13.5",
+    "rule": "is_adult",
+    "kind": "freestanding"
+   },
+   "KF Adult Rupee Circle 5": {
+    "spot": "freestanding@21.5,-14.5",
+    "rule": "is_adult",
+    "kind": "freestanding"
+   },
+   "KF Adult Rupee Circle 6": {
+    "spot": "freestanding@22.0,-13.0",
+    "rule": "is_adult",
+    "kind": "freestanding"
+   },
+   "KF Adult Rupee Circle 7": {
+    "spot": "freestanding@22.0,-14.0",
+    "rule": "is_adult",
+    "kind": "freestanding"
+   },
+   "KF Adult Rupee Circle 8": {
+    "spot": "freestanding@22.5,-13.5",
+    "rule": "is_adult",
+    "kind": "freestanding"
+   },
+   "KF Gossip Stone Near Lost Woods": {
+    "spot": "gossip@-49.0,-59.0",
+    "kind": "gossip",
+    "note": "hint stone, not an item check"
+   },
+   "KF Rock Circle Center": {
+    "spot": "rock@-45.8,-27.8",
+    "kind": "rock",
+    "rule": "is_child",
+    "note": "child map only; two rocks stacked here (Obj_LiftRock_A_02 and _A_01): check in game what lifting it does"
+   },
+   "KF Rock Circle 1": {
+    "spot": "rock@-48.2,-28.2",
+    "kind": "rock"
+   },
+   "KF Rock Circle 2": {
+    "spot": "rock@-47.3,-29.9",
+    "kind": "rock"
+   },
+   "KF Rock Circle 3": {
+    "spot": "rock@-47.1,-30.4",
+    "kind": "rock"
+   },
+   "KF Rock Circle 4": {
+    "spot": "rock@-45.8,-30.5",
+    "kind": "rock"
+   },
+   "KF Rock Circle 5": {
+    "spot": "rock@-44.2,-30.1",
+    "kind": "rock"
+   },
+   "KF Rock Circle 6": {
+    "spot": "rock@-43.8,-29.9",
+    "kind": "rock"
+   },
+   "KF Rock Circle 7": {
+    "spot": "rock@-43.3,-28.2",
+    "kind": "rock"
+   },
+   "KF Rock Circle 8": {
+    "spot": "rock@-44.1,-26.7",
+    "kind": "rock"
+   },
+   "KF Rock Circle 9": {
+    "spot": "rock@-44.7,-26.0",
+    "kind": "rock"
+   },
+   "KF Rock Circle 10": {
+    "spot": "rock@-45.7,-25.8",
+    "kind": "rock"
+   },
+   "KF Rock Circle 11": {
+    "spot": "rock@-47.6,-26.7",
+    "kind": "rock"
+   },
+   "KF Rock Circle 12": {
+    "spot": "rock@-47.8,-26.9",
+    "kind": "rock"
+   },
+   "KF Rock West of Midos House 1": {
+    "spot": "rock@-62.0,-39.4",
+    "kind": "rock"
+   },
+   "KF Rock West of Midos House 2": {
+    "spot": "rock@-63.3,-38.1",
+    "kind": "rock"
+   },
+   "KF Rock Near Know It All House 1": {
+    "spot": "rock@-62.2,-19.6",
+    "kind": "rock"
+   },
+   "KF Rock Near Know It All House 2": {
+    "spot": "rock@-63.3,-18.5",
+    "kind": "rock"
+   },
+   "KF Rock Behind Sarias House 1": {
+    "spot": "rock@-0.8,29.5",
+    "kind": "rock"
+   },
+   "KF Rock Behind Sarias House 2": {
+    "spot": "rock@-2.1,31.0",
+    "kind": "rock"
+   },
+   "KF Bush Near Sarias House 1": {
+    "spot": "bush@-4.7,8.4",
+    "kind": "bush"
+   },
+   "KF Bush Near Sarias House 2": {
+    "spot": "bush@-4.4,6.0",
+    "kind": "bush"
+   },
+   "KF Bush Near Sarias House 3": {
+    "spot": "bush@-3.4,7.3",
+    "kind": "bush"
+   },
+   "KF Bush Beside Midos House 1": {
+    "spot": "bush@-37.8,-39.2",
+    "kind": "bush"
+   },
+   "KF Bush Beside Midos House 2": {
+    "spot": "bush@-37.3,-41.0",
+    "kind": "bush"
+   },
+   "KF Bush Beside Midos House 3": {
+    "spot": "bush@-36.0,-39.3",
+    "kind": "bush"
+   },
+   "KF Bush Behind Shop 1": {
+    "spot": "bush@-9.4,-35.2",
+    "kind": "bush"
+   },
+   "KF Bush Behind Shop 2": {
+    "spot": "bush@-5.9,-34.9",
+    "kind": "bush"
+   },
+   "KF Bush Behind Shop 3": {
+    "spot": "bush@-4.5,-34.8",
+    "kind": "bush"
+   }
+  },
+  "events": {
+   "Showed Mido Sword and Shield": "is_child and KokiriSword and DekuShield"
+  },
+  "exits": {
+   "KF Links House": "True",
+   "KF Midos House": "True",
+   "KF Sarias House": "True",
+   "KF House of Twins": "True",
+   "KF Know It All House": "True",
+   "KF Shop": "True",
+   "KF Training Area": "is_child",
+   "KF Outside Deku Tree": "is_adult or open_forest or 'Showed Mido Sword and Shield'",
+   "LW Bridge": "can_leave_forest",
+   "KF Storms Grotto": "can_open_storm_grotto",
+   "Lost Woods": "True"
+  }
+ },
+ {
+  "region": "KF Midos House",
+  "scene": "KokiriForest",
+  "verified": false,
+  "notes": "Door at (-51.0, -33.8). Chest names: facing into the house from the door, right = +x, top = farther (-z).",
+  "locations": {
+   "KF Midos Top Left Chest": {
+    "spot": "chest@-53.0,-42.0"
+   },
+   "KF Midos Top Right Chest": {
+    "spot": "chest@-50.5,-42.0"
+   },
+   "KF Midos Bottom Left Chest": {
+    "spot": "chest@-54.0,-41.0"
+   },
+   "KF Midos Bottom Right Chest": {
+    "spot": "chest@-49.5,-41.0"
+   }
+  },
+  "exits": {
+   "KF Main": "True"
+  }
+ },
+ {
+  "region": "KF Sarias House",
+  "scene": "KokiriForest",
+  "verified": false,
+  "notes": "Door at (-10.6, 13.1). Six recovery hearts.",
+  "locations": {
+   "KF Sarias House Heart 1": {
+    "spot": "freestanding@-10.0,16.0",
+    "kind": "freestanding"
+   },
+   "KF Sarias House Heart 2": {
+    "spot": "freestanding@-10.0,16.5",
+    "kind": "freestanding"
+   },
+   "KF Sarias House Heart 3": {
+    "spot": "freestanding@-10.0,19.0",
+    "kind": "freestanding"
+   },
+   "KF Sarias House Heart 4": {
+    "spot": "freestanding@-11.0,18.0",
+    "kind": "freestanding"
+   },
+   "KF Sarias House Heart 5": {
+    "spot": "freestanding@-11.5,17.5",
+    "kind": "freestanding"
+   },
+   "KF Sarias House Heart 6": {
+    "spot": "freestanding@-9.0,17.5",
+    "kind": "freestanding"
+   },
+   "KF Sarias House Heart 7": {
+    "spot": "freestanding@-9.0,18.0",
+    "kind": "freestanding"
+   }
+  },
+  "exits": {
+   "KF Main": "True"
+  }
+ },
+ {
+  "region": "KF House of Twins",
+  "scene": "KokiriForest",
+  "verified": false,
+  "notes": "Door at (11.4, 14.6).",
+  "locations": {
+   "KF House of Twins Pot 1": {
+    "spot": "pot@6.0,19.5",
+    "kind": "pot"
+   },
+   "KF House of Twins Pot 2": {
+    "spot": "pot@6.5,20.5",
+    "kind": "pot"
+   }
+  },
+  "exits": {
+   "KF Main": "True"
+  }
+ },
+ {
+  "region": "KF Know It All House",
+  "scene": "KokiriForest",
+  "verified": false,
+  "notes": "Door at (-73.5, -15.8).",
+  "locations": {
+   "KF Know It All House Pot 1": {
+    "spot": "pot@-79.5,-5.5",
+    "kind": "pot"
+   },
+   "KF Know It All House Pot 2": {
+    "spot": "pot@-80.0,-6.0",
+    "kind": "pot"
+   }
+  },
+  "exits": {
+   "KF Main": "True"
+  }
+ },
+ {
+  "region": "KF Shop",
+  "scene": "KokiriForest",
+  "verified": false,
+  "notes": "Door at (-0.9, -18.3). Shelves change after meeting the Deku Tree (flag Meet_DekuTree_IsAfter_Step02_Exp): same 8 slots.",
+  "locations": {
+   "KF Shop Item 1": {
+    "spot": "shop#1",
+    "kind": "shop"
+   },
+   "KF Shop Item 2": {
+    "spot": "shop#2",
+    "kind": "shop"
+   },
+   "KF Shop Item 3": {
+    "spot": "shop#3",
+    "kind": "shop"
+   },
+   "KF Shop Item 4": {
+    "spot": "shop#4",
+    "kind": "shop"
+   },
+   "KF Shop Item 5": {
+    "spot": "shop#5",
+    "kind": "shop"
+   },
+   "KF Shop Item 6": {
+    "spot": "shop#6",
+    "kind": "shop"
+   },
+   "KF Shop Item 7": {
+    "spot": "shop#7",
+    "kind": "shop"
+   },
+   "KF Shop Item 8": {
+    "spot": "shop#Shop_Heart",
+    "kind": "shop"
+   },
+   "KF Shop Rupee": {
+    "spot": "freestanding@1.0,-27.0",
+    "rule": "is_child",
+    "kind": "freestanding"
+   }
+  },
+  "exits": {
+   "KF Main": "True"
+  }
+ },
+ {
+  "region": "KF Training Area",
+  "scene": "KokiriForest",
+  "verified": false,
+  "notes": "Behind the crawlspace at (-68.7, 8.2) -> (-75.3, 14.0); rolling boulder at (-79.9, 27.0). The adult map also has the rupee at (-87, 19.5): check whether adult can get in.",
+  "locations": {
+   "KF Kokiri Sword Chest": {
+    "spot": "chest@-82.5,33.0"
+   },
+   "KF Training Area Rupee 1": {
+    "spot": "freestanding@-87.0,19.5",
+    "kind": "freestanding"
+   },
+   "KF Training Area Rupee 2": {
+    "spot": "freestanding@-94.0,30.0",
+    "rule": "is_child",
+    "kind": "freestanding"
+   }
+  },
+  "exits": {
+   "KF Main": "True"
+  }
+ },
+ {
+  "region": "KF Outside Deku Tree",
+  "scene": "KokiriForest",
+  "time_passes": true,
+  "verified": false,
+  "notes": "Past Mido. Gossip stones at (89.2, -41.8) and (91.1, -54.4). Dungeon entrance at (92.4, -27.5): the game lists both a child and an adult destination.",
+  "exits": {
+   "KF Main": "True",
+   "Deku Tree (not mapped yet)": "is_child"
+  },
+  "locations": {
+   "KF Deku Tree Gossip Stone Left": {
+    "spot": "gossip@89.0,-42.0",
+    "kind": "gossip",
+    "note": "hint stone, not an item check (left/right from its position; check)"
+   },
+   "KF Deku Tree Gossip Stone Right": {
+    "spot": "gossip@91.0,-54.5",
+    "kind": "gossip",
+    "note": "hint stone, not an item check (left/right from its position; check)"
+   }
+  }
+ },
+ {
+  "region": "KF Storms Grotto",
+  "scene": "KokiriForest",
+  "verified": false,
+  "notes": "Underground (y about 104) near the Lost Woods exit; opened with the Song of Storms. The game also places three Deku Scrub brothers here (Scrub_Deku_Brothers_Manager): what they give is still to be found.",
+  "locations": {
+   "KF Storms Grotto Chest": {
+    "spot": "chest@-71.0,-63.5"
+   }
+  },
+  "exits": {
+   "KF Main": "True"
+  }
+ },
+ {
+  "region": "LW Bridge",
+  "scene": "KokiriForest",
+  "time_passes": true,
+  "verified": false,
+  "notes": "The bridge to Hyrule Field is part of the Kokiri Forest map in the remake. Saria waits at (-117.1, -38.2). Gossip stone at (-118.4, -16.3). Bean spot at (-116.1, -56.4). The Lost Woods map has its own copies of the bridge chest, scrub and gossip stone (different IDs): both copies get the same item; check in game whether opening one also counts the other.",
+  "locations": {
+   "LW Gift from Saria": {
+    "rule": "is_child",
+    "kind": "gift",
+    "note": "Saria's ocarina on the bridge; not a map placement (an event), id still to be found",
+    "pos": [
+     -117.1,
+     114.5,
+     -38.2
+    ]
+   },
+   "LW Deku Scrub Near Bridge": {
+    "spot": "scrub@-128.0,-15.5",
+    "rule": "can_stun_deku",
+    "note": "sells the Deku stick upgrade; the scrub is in both the child and adult maps: check adult",
+    "also": [
+     {
+      "scene": "LostWood",
+      "spot": "scrub@-45.0,72.5"
+     }
+    ]
+   },
+   "LW Bridge Chest": {
+    "spot": "chest@-132.0,-16.0",
+    "rule": "True",
+    "note": "new in the remake (not in the N64 game), about 9 units above the path: how to reach it is unknown",
+    "also": [
+     {
+      "scene": "LostWood",
+      "spot": "chest@-49.5,72.0"
+     }
+    ]
+   },
+   "LW Bridge Gossip Stone": {
+    "spot": "gossip@-118.5,-16.5",
+    "kind": "gossip",
+    "note": "hint stone, not an item check",
+    "also": [
+     {
+      "scene": "LostWood",
+      "spot": "gossip@-35.5,71.5"
+     }
+    ]
+   }
+  },
+  "exits": {
+   "KF Main": "True",
+   "Hyrule Field (not mapped yet)": "True"
+  }
+ }
+]

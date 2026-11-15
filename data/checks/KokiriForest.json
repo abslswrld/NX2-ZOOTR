@@ -1,0 +1,2843 @@
+{
+ "bush@-3.4,7.3": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -3.4,
+   110.7,
+   7.3
+  ],
+  "placements": [
+   {
+    "hash": "13009491718918701905",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "11400416564850751157",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-36.0,-39.3": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -36.0,
+   116.1,
+   -39.3
+  ],
+  "placements": [
+   {
+    "hash": "6674340586234083423",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "3535150139081827459",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-37.3,-41.0": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -37.3,
+   116.1,
+   -41.0
+  ],
+  "placements": [
+   {
+    "hash": "15188778840589944684",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "10951624736530275630",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-37.8,-39.2": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -37.8,
+   116.0,
+   -39.2
+  ],
+  "placements": [
+   {
+    "hash": "12216364986168177616",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "11271184709488608562",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-4.4,6.0": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -4.4,
+   110.7,
+   6.0
+  ],
+  "placements": [
+   {
+    "hash": "4350448546553475237",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "1640513490125741145",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-4.5,-34.8": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -4.5,
+   112.6,
+   -34.8
+  ],
+  "placements": [
+   {
+    "hash": "5190570933151534141",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "4460159811813955992",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-4.7,8.4": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -4.7,
+   110.7,
+   8.4
+  ],
+  "placements": [
+   {
+    "hash": "6890402875059286502",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "2882450735448834595",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-5.9,-34.9": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -5.9,
+   112.6,
+   -34.9
+  ],
+  "placements": [
+   {
+    "hash": "5648900055318470269",
+    "actor": "Obj_Plant_Grass_A_03",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "13297194429826823773",
+    "actor": "Obj_Plant_Grass_A_03",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "bush@-9.4,-35.2": {
+  "kind": "bush",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -9.4,
+   112.6,
+   -35.2
+  ],
+  "placements": [
+   {
+    "hash": "6438251486637186433",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "1106450200910772173",
+    "actor": "Obj_Plant_Grass_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "chest@-132.0,-16.0": {
+  "kind": "chest",
+  "item": "TBox_Rupee_Purple",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -132.2,
+   123.9,
+   -16.0
+  ],
+  "placements": [
+   {
+    "hash": "4349272251343787229",
+    "actor": "Obj_TBox_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "TBox_Rupee_Purple"
+    }
+   }
+  ]
+ },
+ "chest@-49.5,-41.0": {
+  "kind": "chest",
+  "item": "TBox_Rupee_Blue",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -49.3,
+   112.3,
+   -40.9
+  ],
+  "placements": [
+   {
+    "hash": "9725242744547055868",
+    "actor": "Obj_TBox_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "TBox_Rupee_Blue",
+     "GetEventName": "KokiriForest_TreasureBox_NaviChatOff"
+    }
+   }
+  ]
+ },
+ "chest@-50.5,-42.0": {
+  "kind": "chest",
+  "item": "TBox_Rupee_Green",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -50.3,
+   112.3,
+   -42.0
+  ],
+  "placements": [
+   {
+    "hash": "10831981390482426294",
+    "actor": "Obj_TBox_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "TBox_Rupee_Green",
+     "GetEventName": "KokiriForest_TreasureBox_NaviChatOff"
+    }
+   }
+  ]
+ },
+ "chest@-53.0,-42.0": {
+  "kind": "chest",
+  "item": "TBox_Rupee_Blue",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -53.2,
+   112.3,
+   -42.1
+  ],
+  "placements": [
+   {
+    "hash": "12786193094758345086",
+    "actor": "Obj_TBox_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "TBox_Rupee_Blue",
+     "GetEventName": "KokiriForest_TreasureBox_NaviChatOff"
+    }
+   }
+  ]
+ },
+ "chest@-54.0,-41.0": {
+  "kind": "chest",
+  "item": "TBox_Rupee_Blue",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -54.2,
+   112.3,
+   -40.9
+  ],
+  "placements": [
+   {
+    "hash": "4555665598794293658",
+    "actor": "Obj_TBox_A_01",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "TBox_Rupee_Blue",
+     "GetEventName": "KokiriForest_TreasureBox_NaviChatOff"
+    }
+   }
+  ]
+ },
+ "chest@-71.0,-63.5": {
+  "kind": "chest",
+  "item": "TBox_Rupee_Green",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -70.8,
+   103.6,
+   -63.4
+  ],
+  "placements": [
+   {
+    "hash": "14818888396401495482",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs",
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "DekuTree_T",
+    "params": {
+     "Drop__DropActor": "TBox_Rupee_Green"
+    }
+   }
+  ]
+ },
+ "chest@-82.5,33.0": {
+  "kind": "chest",
+  "item": "Item_Sword_Kokiri",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -82.6,
+   122.3,
+   33.0
+  ],
+  "placements": [
+   {
+    "hash": "16757992849254467386",
+    "actor": "Obj_TBox_A_02",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Item_Sword_Kokiri",
+     "GetEventName": "Get_StoneOfForest_GetSword"
+    }
+   }
+  ]
+ },
+ "freestanding@-10.0,16.0": {
+  "kind": "freestanding",
+  "item": "Obj_Heart",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -10.0,
+   117.6,
+   15.9
+  ],
+  "placements": [
+   {
+    "hash": "1214219023609128151",
+    "actor": "Obj_Heart",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "1135865174486388723",
+    "actor": "Obj_Heart",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-10.0,16.5": {
+  "kind": "freestanding",
+  "item": "Obj_Heart",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -9.9,
+   111.8,
+   16.7
+  ],
+  "placements": [
+   {
+    "hash": "13752432406165881016",
+    "actor": "Obj_Heart",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "9333984718219537434",
+    "actor": "Obj_Heart",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-10.0,19.0": {
+  "kind": "freestanding",
+  "item": "Obj_Heart",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -10.1,
+   111.8,
+   18.8
+  ],
+  "placements": [
+   {
+    "hash": "11501932305561522817",
+    "actor": "Obj_Heart",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "8217415107461137996",
+    "actor": "Obj_Heart",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-11.0,18.0": {
+  "kind": "freestanding",
+  "item": "Obj_Heart",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -11.1,
+   111.8,
+   17.8
+  ],
+  "placements": [
+   {
+    "hash": "4751294038826612236",
+    "actor": "Obj_Heart",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "3211747475593407179",
+    "actor": "Obj_Heart",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-11.5,17.5": {
+  "kind": "freestanding",
+  "item": "Obj_Heart",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -11.3,
+   117.6,
+   17.5
+  ],
+  "placements": [
+   {
+    "hash": "15227875255265438204",
+    "actor": "Obj_Heart",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "12744945159394614918",
+    "actor": "Obj_Heart",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-20.0,-22.5": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Blue",
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   -20.0,
+   110.4,
+   -22.5
+  ],
+  "placements": [
+   {
+    "hash": "6079532033038180376",
+    "actor": "Obj_Rupee_Blue",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-21.5,-18.5": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   -21.5,
+   109.8,
+   -18.6
+  ],
+  "placements": [
+   {
+    "hash": "11219803099333988363",
+    "actor": "Obj_Rupee_Green",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-23.5,-30.5": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Blue",
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   -23.6,
+   107.0,
+   -30.6
+  ],
+  "placements": [
+   {
+    "hash": "4490005694725260163",
+    "actor": "Obj_Rupee_Blue",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-25.0,-9.5": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Blue",
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   -24.8,
+   116.1,
+   -9.4
+  ],
+  "placements": [
+   {
+    "hash": "1564209214895161222",
+    "actor": "Obj_Rupee_Blue",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-87.0,19.5": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Blue",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -87.0,
+   118.8,
+   19.4
+  ],
+  "placements": [
+   {
+    "hash": "6618764049130440222",
+    "actor": "Obj_Rupee_Blue",
+    "ages": [
+     "adult",
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-9.0,17.5": {
+  "kind": "freestanding",
+  "item": "Obj_Heart",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -9.1,
+   117.6,
+   17.6
+  ],
+  "placements": [
+   {
+    "hash": "12317452644253046635",
+    "actor": "Obj_Heart",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "9778104484775444655",
+    "actor": "Obj_Heart",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-9.0,18.0": {
+  "kind": "freestanding",
+  "item": "Obj_Heart",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -9.0,
+   111.8,
+   17.9
+  ],
+  "placements": [
+   {
+    "hash": "16890252572970412506",
+    "actor": "Obj_Heart",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "13766700305743331316",
+    "actor": "Obj_Heart",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@-94.0,30.0": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Blue",
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   -93.9,
+   118.6,
+   30.2
+  ],
+  "placements": [
+   {
+    "hash": "16647730239269178270",
+    "actor": "Obj_Rupee_Blue",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@1.0,-27.0": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Blue",
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   1.2,
+   110.2,
+   -27.1
+  ],
+  "placements": [
+   {
+    "hash": "14381003020707329822",
+    "actor": "Obj_Rupee_Blue",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@14.5,-9.0": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Blue",
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   14.5,
+   107.6,
+   -9.0
+  ],
+  "placements": [
+   {
+    "hash": "2056926167552020049",
+    "actor": "Obj_Rupee_Blue",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@21.0,-13.0": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   20.9,
+   117.2,
+   -13.2
+  ],
+  "placements": [
+   {
+    "hash": "3669266735444406174",
+    "actor": "Obj_Rupee_Green",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@21.0,-14.0": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   20.8,
+   117.2,
+   -14.0
+  ],
+  "placements": [
+   {
+    "hash": "12079876816721924835",
+    "actor": "Obj_Rupee_Green",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@21.0,-14.5": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   21.1,
+   117.1,
+   -14.5
+  ],
+  "placements": [
+   {
+    "hash": "4576019929976975366",
+    "actor": "Obj_Rupee_Green",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@21.5,-13.0": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   21.4,
+   116.9,
+   -12.9
+  ],
+  "placements": [
+   {
+    "hash": "4462556192312188043",
+    "actor": "Obj_Rupee_Green",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@21.5,-13.5": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Purple",
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   21.6,
+   117.1,
+   -13.7
+  ],
+  "placements": [
+   {
+    "hash": "17212015369679208115",
+    "actor": "Obj_Rupee_Purple",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@21.5,-14.5": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   21.7,
+   117.1,
+   -14.5
+  ],
+  "placements": [
+   {
+    "hash": "9667799371071602538",
+    "actor": "Obj_Rupee_Green",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@22.0,-13.0": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   22.0,
+   117.2,
+   -13.0
+  ],
+  "placements": [
+   {
+    "hash": "8686048425858269244",
+    "actor": "Obj_Rupee_Green",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@22.0,-14.0": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   22.2,
+   117.1,
+   -14.2
+  ],
+  "placements": [
+   {
+    "hash": "2512122383157745514",
+    "actor": "Obj_Rupee_Green",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "freestanding@22.5,-13.5": {
+  "kind": "freestanding",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   22.3,
+   117.1,
+   -13.6
+  ],
+  "placements": [
+   {
+    "hash": "10327775662812412709",
+    "actor": "Obj_Rupee_Green",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "gossip@-118.5,-16.5": {
+  "kind": "gossip",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -118.4,
+   114.5,
+   -16.3
+  ],
+  "placements": [
+   {
+    "hash": "13435596224977177980",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_LOST_WOOD_02",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_LOST_WOOD_02",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   },
+   {
+    "hash": "17055224836346246811",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_LOST_WOOD_02",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_LOST_WOOD_02",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "gossip@-49.0,-59.0": {
+  "kind": "gossip",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -49.2,
+   121.3,
+   -58.9
+  ],
+  "placements": [
+   {
+    "hash": "16783056629993741677",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_KOKIRI_FOREST_01",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_KOKIRI_FOREST_01",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   },
+   {
+    "hash": "15788731894432615343",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_KOKIRI_FOREST_01",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_KOKIRI_FOREST_01",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "gossip@89.0,-42.0": {
+  "kind": "gossip",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   89.2,
+   114.6,
+   -41.8
+  ],
+  "placements": [
+   {
+    "hash": "14748555211169299215",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_KOKIRI_FOREST_03",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_KOKIRI_FOREST_03",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   },
+   {
+    "hash": "13209270846049921484",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_KOKIRI_FOREST_03",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_KOKIRI_FOREST_03",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "gossip@91.0,-54.5": {
+  "kind": "gossip",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   91.1,
+   115.2,
+   -54.4
+  ],
+  "placements": [
+   {
+    "hash": "3712282972620117091",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_KOKIRI_FOREST_04",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_KOKIRI_FOREST_04",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   },
+   {
+    "hash": "971528908116846958",
+    "actor": "Obj_GossipStone_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "name_in_map": "GOSSIP_KOKIRI_FOREST_04",
+    "appears_if": {
+     "FlagName": "GossipStoneDisappear.GOSSIP_KOKIRI_FOREST_04",
+     "IsCheckLazy": false,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "pot@-79.5,-5.5": {
+  "kind": "pot",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -79.3,
+   116.6,
+   -5.7
+  ],
+  "placements": [
+   {
+    "hash": "16386301107460847261",
+    "actor": "Obj_Pot_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Obj_Rupee_Green"
+    }
+   },
+   {
+    "hash": "14828228683041039284",
+    "actor": "Obj_Pot_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Obj_Rupee_Green"
+    }
+   }
+  ]
+ },
+ "pot@-80.0,-6.0": {
+  "kind": "pot",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -79.9,
+   116.6,
+   -6.1
+  ],
+  "placements": [
+   {
+    "hash": "46774521065789894",
+    "actor": "Obj_Pot_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Obj_Rupee_Green"
+    }
+   },
+   {
+    "hash": "2108281022000564101",
+    "actor": "Obj_Pot_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Obj_Rupee_Green"
+    }
+   }
+  ]
+ },
+ "pot@6.0,19.5": {
+  "kind": "pot",
+  "item": "Obj_Rupee_Blue",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   6.2,
+   110.2,
+   19.5
+  ],
+  "placements": [
+   {
+    "hash": "11634540265512998108",
+    "actor": "Obj_Pot_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Obj_Rupee_Blue"
+    }
+   },
+   {
+    "hash": "5133775918408786238",
+    "actor": "Obj_Pot_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Obj_Rupee_Blue"
+    }
+   }
+  ]
+ },
+ "pot@6.5,20.5": {
+  "kind": "pot",
+  "item": "Obj_Rupee_Green",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   6.4,
+   110.2,
+   20.5
+  ],
+  "placements": [
+   {
+    "hash": "17935200704288465987",
+    "actor": "Obj_Pot_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Obj_Rupee_Green"
+    }
+   },
+   {
+    "hash": "15406610986108637956",
+    "actor": "Obj_Pot_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Obj_Rupee_Green"
+    }
+   }
+  ]
+ },
+ "rock@-0.8,29.5": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -0.8,
+   113.3,
+   29.5
+  ],
+  "placements": [
+   {
+    "hash": "13833126295519757344",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "9810178254940844962",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-2.1,31.0": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -2.1,
+   113.3,
+   31.0
+  ],
+  "placements": [
+   {
+    "hash": "591443488390566560",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "7313645087345190627",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-43.3,-28.2": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -43.3,
+   111.7,
+   -28.2
+  ],
+  "placements": [
+   {
+    "hash": "5675403228854574159",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "13321954940214063371",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-43.8,-29.9": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -43.8,
+   111.8,
+   -29.9
+  ],
+  "placements": [
+   {
+    "hash": "5312950394209176374",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "13219695470225186387",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-44.1,-26.7": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -44.1,
+   111.8,
+   -26.7
+  ],
+  "placements": [
+   {
+    "hash": "2657789777104100407",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "8795160036094865435",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-44.2,-30.1": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -44.2,
+   111.8,
+   -30.1
+  ],
+  "placements": [
+   {
+    "hash": "15388836867476865988",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "4182932136190668163",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-44.7,-26.0": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -44.7,
+   111.8,
+   -26.0
+  ],
+  "placements": [
+   {
+    "hash": "4738397009648900238",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "12045642716728132811",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-45.7,-25.8": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -45.7,
+   111.8,
+   -25.8
+  ],
+  "placements": [
+   {
+    "hash": "802407974539353270",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "7243630621233515413",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-45.8,-27.8": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   -45.8,
+   111.8,
+   -27.8
+  ],
+  "placements": [
+   {
+    "hash": "6257885313885825332",
+    "actor": "Obj_LiftRock_A_02",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "2661037609348760452",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-45.8,-30.5": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -45.8,
+   111.8,
+   -30.5
+  ],
+  "placements": [
+   {
+    "hash": "13164882936498639212",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "16857565298886773615",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-47.1,-30.4": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -47.1,
+   111.8,
+   -30.4
+  ],
+  "placements": [
+   {
+    "hash": "15732862253800965646",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "4164292104786619976",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-47.3,-29.9": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -47.3,
+   111.8,
+   -29.9
+  ],
+  "placements": [
+   {
+    "hash": "8931631613049749371",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "6429280567576879719",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-47.6,-26.7": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -47.6,
+   111.8,
+   -26.7
+  ],
+  "placements": [
+   {
+    "hash": "5853846732169153879",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "13002777795600434992",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-47.8,-26.9": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -47.8,
+   111.8,
+   -26.9
+  ],
+  "placements": [
+   {
+    "hash": "13817169663978116369",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "16780156705177292663",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-48.2,-28.2": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -48.2,
+   111.8,
+   -28.2
+  ],
+  "placements": [
+   {
+    "hash": "10656348214587939196",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "17186151219195818834",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-62.0,-39.4": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -62.0,
+   112.5,
+   -39.4
+  ],
+  "placements": [
+   {
+    "hash": "15770142332975255876",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "14765439090025621259",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-62.2,-19.6": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -62.2,
+   116.5,
+   -19.6
+  ],
+  "placements": [
+   {
+    "hash": "15115104996046978489",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "15339892171811522074",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-63.3,-18.5": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -63.3,
+   116.5,
+   -18.5
+  ],
+  "placements": [
+   {
+    "hash": "11881247981246911148",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "9296345993092817586",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "rock@-63.3,-38.1": {
+  "kind": "rock",
+  "item": null,
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -63.3,
+   112.5,
+   -38.1
+  ],
+  "placements": [
+   {
+    "hash": "6226476025750490375",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "5556420768102851394",
+    "actor": "Obj_LiftRock_A_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ]
+   }
+  ]
+ },
+ "scrub@-128.0,-15.5": {
+  "kind": "scrub",
+  "item": "Item_StickBag_Medium",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -128.0,
+   114.6,
+   -15.3
+  ],
+  "placements": [
+   {
+    "hash": "7488448334396031424",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ScrubBusiness_ShopItemActorName0": "Item_StickBag_Medium",
+     "ScrubDeku_IsUseCustomPerceptionRange": true,
+     "TalkEventName": "Enemy_Scrub_Business_DekuStickPouch_01"
+    }
+   },
+   {
+    "hash": "182031956235860994",
+    "actor": "Enemy_Scrub_Business",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ScrubBusiness_ShopItemActorName0": "Item_StickBag_Medium",
+     "ScrubDeku_IsUseCustomPerceptionRange": true,
+     "TalkEventName": "Enemy_Scrub_Business_DekuStickPouch_01"
+    }
+   }
+  ]
+ },
+ "shop#1": {
+  "kind": "shop",
+  "item": "DekuSeedBundle_02",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -3.1,
+   111.8,
+   -26.4
+  ],
+  "placements": [
+   {
+    "hash": "10608793909085719174",
+    "actor": "Shop_DekuSeedBundle_02",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ShopItemIndex": 1
+    }
+   },
+   {
+    "hash": "12274555791381804315",
+    "actor": "Shop_DekuSeedBundle_02",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": false
+    },
+    "params": {
+     "ShopItemIndex": 1
+    }
+   },
+   {
+    "hash": "726499075643244587",
+    "actor": "Shop_DekuSeedBundle_02",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": true
+    },
+    "params": {
+     "ShopItemIndex": 1
+    }
+   }
+  ]
+ },
+ "shop#2": {
+  "kind": "shop",
+  "item": "DekuNutBundle_01",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -3.6,
+   111.2,
+   -25.9
+  ],
+  "placements": [
+   {
+    "hash": "8442446062876759020",
+    "actor": "Shop_DekuNutBundle_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ShopItemIndex": 2
+    }
+   },
+   {
+    "hash": "1212183037605930043",
+    "actor": "Shop_DekuNutBundle_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": false
+    },
+    "params": {
+     "ShopItemIndex": 2
+    }
+   },
+   {
+    "hash": "15469014478079481125",
+    "actor": "Shop_DekuNutBundle_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": true
+    },
+    "params": {
+     "ShopItemIndex": 2
+    }
+   }
+  ]
+ },
+ "shop#3": {
+  "kind": "shop",
+  "item": "DekuNutBundle_02",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -3.1,
+   111.2,
+   -26.2
+  ],
+  "placements": [
+   {
+    "hash": "5205605618390578983",
+    "actor": "Shop_DekuNutBundle_02",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ShopItemIndex": 3
+    }
+   },
+   {
+    "hash": "12416733255464110660",
+    "actor": "Shop_DekuNutBundle_02",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": false
+    },
+    "params": {
+     "ShopItemIndex": 3
+    }
+   },
+   {
+    "hash": "12981796475041639447",
+    "actor": "Shop_DekuNutBundle_02",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": true
+    },
+    "params": {
+     "ShopItemIndex": 3
+    }
+   }
+  ]
+ },
+ "shop#4": {
+  "kind": "shop",
+  "item": "DekuSeedBundle_01",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -1.3,
+   111.8,
+   -26.4
+  ],
+  "placements": [
+   {
+    "hash": "13457020963026830815",
+    "actor": "Shop_DekuSeedBundle_01",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ShopItemIndex": 4
+    }
+   },
+   {
+    "hash": "4804777660082210636",
+    "actor": "Shop_DekuSeedBundle_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": false
+    },
+    "params": {
+     "ShopItemIndex": 4
+    }
+   },
+   {
+    "hash": "8357016262118670446",
+    "actor": "Shop_DekuSeedBundle_01",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": true
+    },
+    "params": {
+     "ShopItemIndex": 4
+    }
+   }
+  ]
+ },
+ "shop#5": {
+  "kind": "shop",
+  "item": "DekuStickBundle_Medium",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -0.8,
+   111.8,
+   -26.2
+  ],
+  "placements": [
+   {
+    "hash": "4359156404841200094",
+    "actor": "Shop_DekuStickBundle_Medium",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ShopItemIndex": 5
+    }
+   },
+   {
+    "hash": "1748192465494650957",
+    "actor": "Shop_DekuStickBundle_Medium",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": false
+    },
+    "params": {
+     "ShopItemIndex": 5
+    }
+   },
+   {
+    "hash": "15329846556357339265",
+    "actor": "Shop_DekuStickBundle_Medium",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": true
+    },
+    "params": {
+     "ShopItemIndex": 5
+    }
+   }
+  ]
+ },
+ "shop#6": {
+  "kind": "shop",
+  "item": "Weapon_Shield_Deku",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -1.2,
+   111.2,
+   -26.5
+  ],
+  "placements": [
+   {
+    "hash": "6642704364901961822",
+    "actor": "Shop_Weapon_Shield_Deku",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ShopItemIndex": 6
+    }
+   },
+   {
+    "hash": "8161552603046357963",
+    "actor": "Shop_Weapon_Shield_Deku",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": false
+    },
+    "params": {
+     "ShopItemIndex": 6
+    }
+   },
+   {
+    "hash": "6236883368863181555",
+    "actor": "Shop_Weapon_Shield_Deku",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": true
+    },
+    "params": {
+     "ShopItemIndex": 6
+    }
+   }
+  ]
+ },
+ "shop#7": {
+  "kind": "shop",
+  "item": "DekuStick",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -0.8,
+   111.1,
+   -26.2
+  ],
+  "placements": [
+   {
+    "hash": "15352451833778770402",
+    "actor": "Shop_DekuStick",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "ShopItemIndex": 7
+    }
+   },
+   {
+    "hash": "13192127861177212694",
+    "actor": "Shop_DekuStick",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": false
+    },
+    "params": {
+     "ShopItemIndex": 7
+    }
+   },
+   {
+    "hash": "15086736134255051687",
+    "actor": "Shop_DekuStick",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": true
+    },
+    "params": {
+     "ShopItemIndex": 7
+    }
+   }
+  ]
+ },
+ "shop#Shop_Heart": {
+  "kind": "shop",
+  "item": "Heart",
+  "ages": [
+   "adult",
+   "child"
+  ],
+  "pos": [
+   -3.6,
+   111.8,
+   -26.0
+  ],
+  "placements": [
+   {
+    "hash": "10357707628656499332",
+    "actor": "Shop_Heart",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ]
+   },
+   {
+    "hash": "11595064306709942551",
+    "actor": "Shop_Heart",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": false
+    }
+   },
+   {
+    "hash": "1333478118027005676",
+    "actor": "Shop_Heart",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Meet_DekuTree_IsAfter_Step02_Exp",
+     "IsCheckLazy": true,
+     "IsNegation": true
+    }
+   }
+  ]
+ },
+ "skulltula@-84.0,-17.5": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   -83.8,
+   117.9,
+   -17.6
+  ],
+  "placements": [
+   {
+    "hash": "17067594426901953848",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Enemy_Skulltula_Gold_Nocturnal": true
+    }
+   }
+  ],
+  "night_only": true
+ },
+ "skulltula@18.0,19.0": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [
+   "adult"
+  ],
+  "pos": [
+   18.0,
+   117.2,
+   18.9
+  ],
+  "placements": [
+   {
+    "hash": "7116603238806634901",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [
+     "adult"
+    ],
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Enemy_Skulltula_Gold_Nocturnal": true
+    }
+   }
+  ],
+  "night_only": true
+ },
+ "skulltula@8.0,-23.5": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [
+   "child"
+  ],
+  "pos": [
+   8.2,
+   112.6,
+   -23.3
+  ],
+  "placements": [
+   {
+    "hash": "9623998892552467148",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [
+     "child"
+    ],
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "appears_if": {
+     "FlagName": "Gimmick_MagicBeanSoil_KokiriForest",
+     "IsCheckLazy": false,
+     "IsNegation": false
+    },
+    "params": {
+     "Enemy_Skulltula_Gold_AppearPlayerCheck": true,
+     "Enemy_Skulltula_Gold_AppearPopOut": true,
+     "Enemy_Skulltula_Gold_IsMagicBeanSoil": true
+    }
+   }
+  ]
+ }
+}
