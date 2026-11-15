@@ -1,0 +1,3200 @@
+[
+ {
+  "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_CENTER_ITEM",
+  "check_name": "KF Adult Rupee Circle Center",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@21.5,-13.5",
+    "hash": "17212015369679208115",
+    "actor": "Obj_Rupee_Purple",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Purple",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_01",
+  "check_name": "KF Adult Rupee Circle 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@21.0,-13.0",
+    "hash": "3669266735444406174",
+    "actor": "Obj_Rupee_Green",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_02",
+  "check_name": "KF Adult Rupee Circle 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@21.0,-14.0",
+    "hash": "12079876816721924835",
+    "actor": "Obj_Rupee_Green",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_03",
+  "check_name": "KF Adult Rupee Circle 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@21.0,-14.5",
+    "hash": "4576019929976975366",
+    "actor": "Obj_Rupee_Green",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_04",
+  "check_name": "KF Adult Rupee Circle 4",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@21.5,-13.0",
+    "hash": "4462556192312188043",
+    "actor": "Obj_Rupee_Green",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_05",
+  "check_name": "KF Adult Rupee Circle 5",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@21.5,-14.5",
+    "hash": "9667799371071602538",
+    "actor": "Obj_Rupee_Green",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_06",
+  "check_name": "KF Adult Rupee Circle 6",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@22.0,-13.0",
+    "hash": "8686048425858269244",
+    "actor": "Obj_Rupee_Green",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_07",
+  "check_name": "KF Adult Rupee Circle 7",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@22.0,-14.0",
+    "hash": "2512122383157745514",
+    "actor": "Obj_Rupee_Green",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_ADULT_RUPEE_CIRCLE_ITEM_08",
+  "check_name": "KF Adult Rupee Circle 8",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@22.5,-13.5",
+    "hash": "10327775662812412709",
+    "actor": "Obj_Rupee_Green",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_BEAN_PATCH_GS",
+  "check_name": "KF GS Bean Patch",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "skulltula",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "skulltula@8.0,-23.5",
+    "hash": "9623998892552467148",
+    "actor": "Enemy_Skulltula_Gold",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "GoldSkulltulaToken",
+   "source": "check kind (not stored in the map data)",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "can_plant_bugs and can_child_attack",
+  "verification_status": "not verified in game",
+  "notes": "appears once bugs are released in the soft soil (flag Gimmick_MagicBeanSoil_KokiriForest)"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SARIAS_HOUSE_ROCK_01",
+  "check_name": "KF Rock Behind Sarias House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-0.8,29.5",
+    "hash": "13833126295519757344",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-0.8,29.5",
+    "hash": "9810178254940844962",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SARIAS_HOUSE_ROCK_02",
+  "check_name": "KF Rock Behind Sarias House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-2.1,31.0",
+    "hash": "591443488390566560",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-2.1,31.0",
+    "hash": "7313645087345190627",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SHOP_BUSH_01",
+  "check_name": "KF Bush Behind Shop 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-9.4,-35.2",
+    "hash": "6438251486637186433",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-9.4,-35.2",
+    "hash": "1106450200910772173",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SHOP_BUSH_02",
+  "check_name": "KF Bush Behind Shop 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-5.9,-34.9",
+    "hash": "5648900055318470269",
+    "actor": "Obj_Plant_Grass_A_03",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-5.9,-34.9",
+    "hash": "13297194429826823773",
+    "actor": "Obj_Plant_Grass_A_03",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SHOP_BUSH_03",
+  "check_name": "KF Bush Behind Shop 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-4.5,-34.8",
+    "hash": "5190570933151534141",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-4.5,-34.8",
+    "hash": "4460159811813955992",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_BUSH_01",
+  "check_name": "KF Bush Beside Midos House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-37.8,-39.2",
+    "hash": "12216364986168177616",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-37.8,-39.2",
+    "hash": "11271184709488608562",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_BUSH_02",
+  "check_name": "KF Bush Beside Midos House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-37.3,-41.0",
+    "hash": "15188778840589944684",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-37.3,-41.0",
+    "hash": "10951624736530275630",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_BUSH_03",
+  "check_name": "KF Bush Beside Midos House 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-36.0,-39.3",
+    "hash": "6674340586234083423",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-36.0,-39.3",
+    "hash": "3535150139081827459",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_CENTER_ROCK",
+  "check_name": "KF Rock Circle Center",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-45.8,-27.8",
+    "hash": "6257885313885825332",
+    "actor": "Obj_LiftRock_A_02",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-45.8,-27.8",
+    "hash": "2661037609348760452",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "is_child",
+  "verification_status": "not verified in game",
+  "notes": "child map only; two rocks stacked here (Obj_LiftRock_A_02 and _A_01): check in game what lifting it does"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_01",
+  "check_name": "KF Rock Circle 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-48.2,-28.2",
+    "hash": "10656348214587939196",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-48.2,-28.2",
+    "hash": "17186151219195818834",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_02",
+  "check_name": "KF Rock Circle 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.3,-29.9",
+    "hash": "8931631613049749371",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.3,-29.9",
+    "hash": "6429280567576879719",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_03",
+  "check_name": "KF Rock Circle 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.1,-30.4",
+    "hash": "15732862253800965646",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.1,-30.4",
+    "hash": "4164292104786619976",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_04",
+  "check_name": "KF Rock Circle 4",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-45.8,-30.5",
+    "hash": "13164882936498639212",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-45.8,-30.5",
+    "hash": "16857565298886773615",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_05",
+  "check_name": "KF Rock Circle 5",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-44.2,-30.1",
+    "hash": "15388836867476865988",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-44.2,-30.1",
+    "hash": "4182932136190668163",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_06",
+  "check_name": "KF Rock Circle 6",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-43.8,-29.9",
+    "hash": "5312950394209176374",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-43.8,-29.9",
+    "hash": "13219695470225186387",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_07",
+  "check_name": "KF Rock Circle 7",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-43.3,-28.2",
+    "hash": "5675403228854574159",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-43.3,-28.2",
+    "hash": "13321954940214063371",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_08",
+  "check_name": "KF Rock Circle 8",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-44.1,-26.7",
+    "hash": "2657789777104100407",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-44.1,-26.7",
+    "hash": "8795160036094865435",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_09",
+  "check_name": "KF Rock Circle 9",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-44.7,-26.0",
+    "hash": "4738397009648900238",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-44.7,-26.0",
+    "hash": "12045642716728132811",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_10",
+  "check_name": "KF Rock Circle 10",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-45.7,-25.8",
+    "hash": "802407974539353270",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-45.7,-25.8",
+    "hash": "7243630621233515413",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_11",
+  "check_name": "KF Rock Circle 11",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.6,-26.7",
+    "hash": "5853846732169153879",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.6,-26.7",
+    "hash": "13002777795600434992",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ROCK_12",
+  "check_name": "KF Rock Circle 12",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.8,-26.9",
+    "hash": "13817169663978116369",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.8,-26.9",
+    "hash": "16780156705177292663",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_DEKU_TREE_GOSSIP_01",
+  "check_name": "KF Deku Tree Gossip Stone Left",
+  "region": "KF Outside Deku Tree",
+  "area": "KokiriForest",
+  "check_type": "gossip",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "gossip@89.0,-42.0",
+    "hash": "14748555211169299215",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "gossip@89.0,-42.0",
+    "hash": "13209270846049921484",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "hint stone, gives no item"
+  },
+  "randomizable": "no",
+  "randomizable_note": "hint stone, gives no item",
+  "requirements": "True",
+  "verification_status": "not verified in game",
+  "notes": "hint stone, not an item check (left/right from its position; check)"
+ },
+ {
+  "unique_check_id": "KF_DEKU_TREE_GOSSIP_02",
+  "check_name": "KF Deku Tree Gossip Stone Right",
+  "region": "KF Outside Deku Tree",
+  "area": "KokiriForest",
+  "check_type": "gossip",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "gossip@91.0,-54.5",
+    "hash": "3712282972620117091",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "gossip@91.0,-54.5",
+    "hash": "971528908116846958",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "hint stone, gives no item"
+  },
+  "randomizable": "no",
+  "randomizable_note": "hint stone, gives no item",
+  "requirements": "True",
+  "verification_status": "not verified in game",
+  "notes": "hint stone, not an item check (left/right from its position; check)"
+ },
+ {
+  "unique_check_id": "KF_HOUSE_OF_TWINS_GS",
+  "check_name": "KF GS House of Twins",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "skulltula",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "skulltula@18.0,19.0",
+    "hash": "7116603238806634901",
+    "actor": "Enemy_Skulltula_Gold",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "GoldSkulltulaToken",
+   "source": "check kind (not stored in the map data)",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_adult and at_night and can_use(Hookshot)",
+  "verification_status": "not verified in game",
+  "notes": "adult, night only (game flag); hookshot as in the N64 game: check height in game"
+ },
+ {
+  "unique_check_id": "KF_HOUSE_OF_TWINS_POT_01",
+  "check_name": "KF House of Twins Pot 1",
+  "region": "KF House of Twins",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@6.0,19.5",
+    "hash": "11634540265512998108",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@6.0,19.5",
+    "hash": "5133775918408786238",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_HOUSE_OF_TWINS_POT_02",
+  "check_name": "KF House of Twins Pot 2",
+  "region": "KF House of Twins",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@6.5,20.5",
+    "hash": "17935200704288465987",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@6.5,20.5",
+    "hash": "15406610986108637956",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_GS",
+  "check_name": "KF GS Know It All House",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "skulltula",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "skulltula@-84.0,-17.5",
+    "hash": "17067594426901953848",
+    "actor": "Enemy_Skulltula_Gold",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "GoldSkulltulaToken",
+   "source": "check kind (not stored in the map data)",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_child and at_night and can_child_attack",
+  "verification_status": "not verified in game",
+  "notes": "night only (game flag)"
+ },
+ {
+  "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_POT_01",
+  "check_name": "KF Know It All House Pot 1",
+  "region": "KF Know It All House",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@-79.5,-5.5",
+    "hash": "16386301107460847261",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@-79.5,-5.5",
+    "hash": "14828228683041039284",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_POT_02",
+  "check_name": "KF Know It All House Pot 2",
+  "region": "KF Know It All House",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@-80.0,-6.0",
+    "hash": "46774521065789894",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@-80.0,-6.0",
+    "hash": "2108281022000564101",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_SHOP_01",
+  "check_name": "KF Shop Item 1",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#1",
+    "hash": "10608793909085719174",
+    "actor": "Shop_DekuSeedBundle_02",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#1",
+    "hash": "12274555791381804315",
+    "actor": "Shop_DekuSeedBundle_02",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#1",
+    "hash": "726499075643244587",
+    "actor": "Shop_DekuSeedBundle_02",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuSeedBundle_02",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_SHOP_02",
+  "check_name": "KF Shop Item 2",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#2",
+    "hash": "8442446062876759020",
+    "actor": "Shop_DekuNutBundle_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#2",
+    "hash": "1212183037605930043",
+    "actor": "Shop_DekuNutBundle_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#2",
+    "hash": "15469014478079481125",
+    "actor": "Shop_DekuNutBundle_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuNutBundle_01",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_SHOP_03",
+  "check_name": "KF Shop Item 3",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#3",
+    "hash": "5205605618390578983",
+    "actor": "Shop_DekuNutBundle_02",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#3",
+    "hash": "12416733255464110660",
+    "actor": "Shop_DekuNutBundle_02",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#3",
+    "hash": "12981796475041639447",
+    "actor": "Shop_DekuNutBundle_02",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuNutBundle_02",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_SHOP_04",
+  "check_name": "KF Shop Item 4",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#4",
+    "hash": "13457020963026830815",
+    "actor": "Shop_DekuSeedBundle_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#4",
+    "hash": "4804777660082210636",
+    "actor": "Shop_DekuSeedBundle_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#4",
+    "hash": "8357016262118670446",
+    "actor": "Shop_DekuSeedBundle_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuSeedBundle_01",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_SHOP_05",
+  "check_name": "KF Shop Item 5",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#5",
+    "hash": "4359156404841200094",
+    "actor": "Shop_DekuStickBundle_Medium",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#5",
+    "hash": "1748192465494650957",
+    "actor": "Shop_DekuStickBundle_Medium",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#5",
+    "hash": "15329846556357339265",
+    "actor": "Shop_DekuStickBundle_Medium",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuStickBundle_Medium",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_SHOP_06",
+  "check_name": "KF Shop Item 6",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#6",
+    "hash": "6642704364901961822",
+    "actor": "Shop_Weapon_Shield_Deku",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#6",
+    "hash": "8161552603046357963",
+    "actor": "Shop_Weapon_Shield_Deku",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#6",
+    "hash": "6236883368863181555",
+    "actor": "Shop_Weapon_Shield_Deku",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Weapon_Shield_Deku",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_SHOP_07",
+  "check_name": "KF Shop Item 7",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#7",
+    "hash": "15352451833778770402",
+    "actor": "Shop_DekuStick",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#7",
+    "hash": "13192127861177212694",
+    "actor": "Shop_DekuStick",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#7",
+    "hash": "15086736134255051687",
+    "actor": "Shop_DekuStick",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuStick",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_SHOP_08",
+  "check_name": "KF Shop Item 8",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#Shop_Heart",
+    "hash": "10357707628656499332",
+    "actor": "Shop_Heart",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#Shop_Heart",
+    "hash": "11595064306709942551",
+    "actor": "Shop_Heart",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#Shop_Heart",
+    "hash": "1333478118027005676",
+    "actor": "Shop_Heart",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Heart",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_SWORD_CHEST",
+  "check_name": "KF Kokiri Sword Chest",
+  "region": "KF Training Area",
+  "area": "KokiriForest",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "chest@-82.5,33.0",
+    "hash": "16757992849254467386",
+    "actor": "Obj_TBox_A_02",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult",
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Sword_Kokiri",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_MIDO_CHEST_01",
+  "check_name": "KF Midos Top Left Chest",
+  "region": "KF Midos House",
+  "area": "KokiriForest",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "chest@-53.0,-42.0",
+    "hash": "12786193094758345086",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult",
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "TBox_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_MIDO_CHEST_02",
+  "check_name": "KF Midos Top Right Chest",
+  "region": "KF Midos House",
+  "area": "KokiriForest",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "chest@-50.5,-42.0",
+    "hash": "10831981390482426294",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult",
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "TBox_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_MIDO_CHEST_03",
+  "check_name": "KF Midos Bottom Left Chest",
+  "region": "KF Midos House",
+  "area": "KokiriForest",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "chest@-54.0,-41.0",
+    "hash": "4555665598794293658",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult",
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "TBox_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_MIDO_CHEST_04",
+  "check_name": "KF Midos Bottom Right Chest",
+  "region": "KF Midos House",
+  "area": "KokiriForest",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "chest@-49.5,-41.0",
+    "hash": "9725242744547055868",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult",
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "TBox_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_01",
+  "check_name": "KF Rock Near Know It All House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-62.2,-19.6",
+    "hash": "15115104996046978489",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-62.2,-19.6",
+    "hash": "15339892171811522074",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_02",
+  "check_name": "KF Rock Near Know It All House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-63.3,-18.5",
+    "hash": "11881247981246911148",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-63.3,-18.5",
+    "hash": "9296345993092817586",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_NEAR_LOST_WOODS_GOSSIP",
+  "check_name": "KF Gossip Stone Near Lost Woods",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "gossip",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "gossip@-49.0,-59.0",
+    "hash": "16783056629993741677",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "gossip@-49.0,-59.0",
+    "hash": "15788731894432615343",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "hint stone, gives no item"
+  },
+  "randomizable": "no",
+  "randomizable_note": "hint stone, gives no item",
+  "requirements": "True",
+  "verification_status": "not verified in game",
+  "notes": "hint stone, not an item check"
+ },
+ {
+  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_BUSH_01",
+  "check_name": "KF Bush Near Sarias House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-4.7,8.4",
+    "hash": "6890402875059286502",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-4.7,8.4",
+    "hash": "2882450735448834595",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_BUSH_02",
+  "check_name": "KF Bush Near Sarias House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-4.4,6.0",
+    "hash": "4350448546553475237",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-4.4,6.0",
+    "hash": "1640513490125741145",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_BUSH_03",
+  "check_name": "KF Bush Near Sarias House 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-3.4,7.3",
+    "hash": "13009491718918701905",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-3.4,7.3",
+    "hash": "11400416564850751157",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_RUPEE_BEHIND_MIDOS_HOUSE_ITEM",
+  "check_name": "KF Rupee Behind Midos House",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-23.5,-30.5",
+    "hash": "4490005694725260163",
+    "actor": "Obj_Rupee_Blue",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_child",
+  "verification_status": "not verified in game",
+  "notes": "name from its position; check where it really is"
+ },
+ {
+  "unique_check_id": "KF_RUPEE_NEAR_FADO_ITEM_01",
+  "check_name": "KF Rupee Near Fado 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-25.0,-9.5",
+    "hash": "1564209214895161222",
+    "actor": "Obj_Rupee_Blue",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_RUPEE_NEAR_FADO_ITEM_02",
+  "check_name": "KF Rupee Near Fado 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-21.5,-18.5",
+    "hash": "11219803099333988363",
+    "actor": "Obj_Rupee_Green",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_RUPEE_NEAR_FADO_ITEM_03",
+  "check_name": "KF Rupee Near Fado 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-20.0,-22.5",
+    "hash": "6079532033038180376",
+    "actor": "Obj_Rupee_Blue",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_RUPEE_NEAR_MIDO_ITEM",
+  "check_name": "KF Rupee Near Mido",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@14.5,-9.0",
+    "hash": "2056926167552020049",
+    "actor": "Obj_Rupee_Blue",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_01",
+  "check_name": "KF Sarias House Heart 1",
+  "region": "KF Sarias House",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-10.0,16.0",
+    "hash": "1214219023609128151",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-10.0,16.0",
+    "hash": "1135865174486388723",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Heart",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_02",
+  "check_name": "KF Sarias House Heart 2",
+  "region": "KF Sarias House",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-10.0,16.5",
+    "hash": "13752432406165881016",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-10.0,16.5",
+    "hash": "9333984718219537434",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Heart",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_03",
+  "check_name": "KF Sarias House Heart 3",
+  "region": "KF Sarias House",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-10.0,19.0",
+    "hash": "11501932305561522817",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-10.0,19.0",
+    "hash": "8217415107461137996",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Heart",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_04",
+  "check_name": "KF Sarias House Heart 4",
+  "region": "KF Sarias House",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-11.0,18.0",
+    "hash": "4751294038826612236",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-11.0,18.0",
+    "hash": "3211747475593407179",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Heart",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_05",
+  "check_name": "KF Sarias House Heart 5",
+  "region": "KF Sarias House",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-11.5,17.5",
+    "hash": "15227875255265438204",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-11.5,17.5",
+    "hash": "12744945159394614918",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Heart",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_06",
+  "check_name": "KF Sarias House Heart 6",
+  "region": "KF Sarias House",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-9.0,17.5",
+    "hash": "12317452644253046635",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-9.0,17.5",
+    "hash": "9778104484775444655",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Heart",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_SARIAS_HOUSE_HEART_ITEM_07",
+  "check_name": "KF Sarias House Heart 7",
+  "region": "KF Sarias House",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-9.0,18.0",
+    "hash": "16890252572970412506",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-9.0,18.0",
+    "hash": "13766700305743331316",
+    "actor": "Obj_Heart",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Heart",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_SHOP_RUPEE_ITEM",
+  "check_name": "KF Shop Rupee",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@1.0,-27.0",
+    "hash": "14381003020707329822",
+    "actor": "Obj_Rupee_Blue",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_STORMS_GROTTO_CHEST",
+  "check_name": "KF Storms Grotto Chest",
+  "region": "KF Storms Grotto",
+  "area": "KokiriForest",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "chest@-71.0,-63.5",
+    "hash": "14818888396401495482",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs",
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult",
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "TBox_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_TRAINING_AREA_RUPEE_ITEM_01",
+  "check_name": "KF Training Area Rupee 1",
+  "region": "KF Training Area",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-87.0,19.5",
+    "hash": "6618764049130440222",
+    "actor": "Obj_Rupee_Blue",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult",
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_TRAINING_AREA_RUPEE_ITEM_02",
+  "check_name": "KF Training Area Rupee 2",
+  "region": "KF Training Area",
+  "area": "KokiriForest",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "freestanding@-94.0,30.0",
+    "hash": "16647730239269178270",
+    "actor": "Obj_Rupee_Blue",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_WEST_OF_MIDOS_HOUSE_ROCK_01",
+  "check_name": "KF Rock West of Midos House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-62.0,-39.4",
+    "hash": "15770142332975255876",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-62.0,-39.4",
+    "hash": "14765439090025621259",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_WEST_OF_MIDOS_HOUSE_ROCK_02",
+  "check_name": "KF Rock West of Midos House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-63.3,-38.1",
+    "hash": "6226476025750490375",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-63.3,-38.1",
+    "hash": "5556420768102851394",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "LW_BRIDGE_CHEST",
+  "check_name": "LW Bridge Chest",
+  "region": "LW Bridge",
+  "area": "KokiriForest",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "chest@-132.0,-16.0",
+    "hash": "4349272251343787229",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs",
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult",
+     "child"
+    ]
+   },
+   {
+    "scene": "LostWood",
+    "spot": "chest@-49.5,72.0",
+    "hash": "17479747339356189279",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "LostWood_Adult_Dynamic.bcett.byml.zs",
+     "LostWood_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult",
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "TBox_Rupee_Purple",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "True",
+  "verification_status": "not verified in game",
+  "notes": "new in the remake (not in the N64 game), about 9 units above the path: how to reach it is unknown"
+ },
+ {
+  "unique_check_id": "LW_BRIDGE_GOSSIP",
+  "check_name": "LW Bridge Gossip Stone",
+  "region": "LW Bridge",
+  "area": "KokiriForest",
+  "check_type": "gossip",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "gossip@-118.5,-16.5",
+    "hash": "13435596224977177980",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "gossip@-118.5,-16.5",
+    "hash": "17055224836346246811",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "LostWood",
+    "spot": "gossip@-35.5,71.5",
+    "hash": "16052789165605842679",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "LostWood",
+    "spot": "gossip@-35.5,71.5",
+    "hash": "3395815220990187073",
+    "actor": "Obj_GossipStone_A_01",
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "hint stone, gives no item"
+  },
+  "randomizable": "no",
+  "randomizable_note": "hint stone, gives no item",
+  "requirements": "True",
+  "verification_status": "not verified in game",
+  "notes": "hint stone, not an item check"
+ },
+ {
+  "unique_check_id": "LW_NEAR_BRIDGE_SCRUB",
+  "check_name": "LW Deku Scrub Near Bridge",
+  "region": "LW Bridge",
+  "area": "KokiriForest",
+  "check_type": "scrub",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "scrub@-128.0,-15.5",
+    "hash": "7488448334396031424",
+    "actor": "Enemy_Scrub_Business",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "KokiriForest",
+    "spot": "scrub@-128.0,-15.5",
+    "hash": "182031956235860994",
+    "actor": "Enemy_Scrub_Business",
+    "files": [
+     "KokiriForest_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   },
+   {
+    "scene": "LostWood",
+    "spot": "scrub@-45.0,72.5",
+    "hash": "11192313919554167152",
+    "actor": "Enemy_Scrub_Business",
+    "files": [
+     "LostWood_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   },
+   {
+    "scene": "LostWood",
+    "spot": "scrub@-45.0,72.5",
+    "hash": "5406759280757349546",
+    "actor": "Enemy_Scrub_Business",
+    "files": [
+     "LostWood_Child_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_StickBag_Medium",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "can_stun_deku",
+  "verification_status": "not verified in game",
+  "notes": "sells the Deku stick upgrade; the scrub is in both the child and adult maps: check adult"
+ },
+ {
+  "unique_check_id": "LW_SARIA_GIFT",
+  "check_name": "LW Gift from Saria",
+  "region": "LW Bridge",
+  "area": "KokiriForest",
+  "check_type": "gift",
+  "object_id": [],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "event with no map placement; contents not found in the game data yet"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": "is_child",
+  "verification_status": "not verified in game",
+  "object_id_note": "no map placement (an event); its ID in the game is still to be found",
+  "notes": "Saria's ocarina on the bridge; not a map placement (an event), id still to be found"
+ }
+]

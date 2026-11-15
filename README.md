@@ -79,6 +79,9 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `logic/rules.py`, `logic/world.py` | the rule language and the search |
 | `tools/area_map.py` | draws an area from above with every check labelled (`maps/`) |
 | `tests/logic_check.py` | situations with a known answer (closed forest, Song of Storms without an ocarina...) |
+| `data/ids.json` | every permanent check ID ever issued (active or retired), the area codes and the type codes |
+| `tools/build_db.py`, `data/db/<Area>.json` | the check database of an area, built from the files above (generated: never edit it by hand) |
+| `tests/db_check.py` | checks the database and the IDs, and prints totals |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):
 11 regions, 7 chests, 3 Gold Skulltulas, the stick-upgrade scrub, Saria's gift, 8 shop shelves, 4 pots,
@@ -107,3 +110,39 @@ placement) carry the position of their NPC so they show on the maps.
 
 Rules look like this: `is_adult and at_night and can_use(Hookshot)`. See `logic/rules.py` for everything a
 rule can use.
+
+## Check IDs
+
+Every check has a permanent ID, written in `data/world/<Area>.json` next to the check (`"id"`) and listed in
+`data/ids.json`. The game's own placement hashes are kept separately (`object_id` in the database); the two
+are never mixed.
+
+**Format:** `<AREA>_<SUBJECT>_<TYPE>`, or `<AREA>_<SUBJECT>_<TYPE>_<NN>` for a group. Capital letters,
+digits and `_` only.
+
+- `AREA`: a code from `data/ids.json` (`KF`, `LW`...), the one in the check's name when the ID is issued.
+  Codes are unique across the game (Goron City and Ganon's Castle can't both be `GC`).
+- `SUBJECT`: words from the check's name when the ID is issued, without the area and the type word.
+- `TYPE`: `CHEST GS SCRUB SHOP POT ITEM ROCK BOULDER BUSH GIFT SONG GOSSIP`.
+- `NN`: only for groups of checks with the same subject and type, `01`, `02`... A single check has no
+  number (`KF_KOKIRI_SWORD_CHEST`). Words that aren't certain yet (left/right, top/bottom before they are
+  checked in game) are left out of IDs: `KF_MIDO_CHEST_01` to `_04`.
+
+**Rules**
+
+- One ID per check (one item handed out), not per object: a check the game places several times (child
+  and adult copies, the bridge chest in two maps) has one ID listing every placement; an NPC that gives two
+  things has two IDs.
+- IDs are written once and never computed again: renaming a check, moving it to another region or
+  extracting the map again doesn't change its ID.
+- IDs are never reused. A check that goes away is marked `"retired"` in `data/ids.json` with the date and
+  the reason. A new check gets a new ID. If a single check later gets a sibling with the same subject and
+  type, the existing ID stays as it is and the new check gets a different subject word (no `_02` without an
+  `_01`).
+- `tests/db_check.py` fails on a duplicate, an unregistered or reused ID, a wrong area or type code, a
+  number gap, a group mixing numbered and unnumbered IDs, an object with no check, or an out-of-date
+  `data/db/` file.
+
+**Classified so far:** Kokiri Forest (80 checks). `randomizable` is `"untested"` for every check that may
+hold an item, until changing it has been tried in game; gossip stones are `"no"`.
+

@@ -4,6 +4,17 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### Check database and permanent check IDs (Kokiri Forest)
+- New ID convention (README, "Check IDs"): `<AREA>_<SUBJECT>_<TYPE>`, with `_NN` only for groups; IDs are
+  written once, never computed again, never reused; retired IDs stay listed.
+- `data/world/KokiriForest.json`: every check (80) gets `"id"`, `"randomizable"` and `"randomizable_note"`.
+  Nothing else changed (checked against the previous version: 0 of 80 checks and 0 of 11 regions changed).
+- New `data/ids.json` (80 active IDs, area codes `KF` and `LW`, type codes).
+- New `tools/build_db.py` and `data/db/KokiriForest.json` (generated): one row per check with region, name,
+  type, the game's placement hashes, original contents, randomizable, requirements, verification status.
+- New `tests/db_check.py`: validation and totals (0 errors). Tried with deliberately broken data: it caught
+  all 13 planted errors.
+
 ### Sacred Forest Meadow checked in game
 - All 5 SFM regions now `"verified": true`. Confirmed in game: the child Wolfos gate (the slingshot is
   enough), the Song of Storms grotto and its Wolfos chest, Saria's Song needs Zelda's letter, the bomb

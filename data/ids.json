@@ -1,0 +1,423 @@
+{
+ "_about": "Every check ID ever issued. IDs are permanent: never renamed, never reused. A retired ID stays here with status \"retired\", the date and the reason. See README, \"Check IDs\".",
+ "areas": {
+  "KF": "Kokiri Forest",
+  "LW": "Lost Woods"
+ },
+ "types": {
+  "CHEST": "chest",
+  "GS": "Gold Skulltula",
+  "SCRUB": "Deku Scrub salesman",
+  "SHOP": "shop shelf",
+  "POT": "pot",
+  "ITEM": "freestanding item",
+  "ROCK": "liftable rock",
+  "BOULDER": "breakable boulder",
+  "BUSH": "solid bush",
+  "GIFT": "item given by an NPC or event",
+  "SONG": "song given by an NPC",
+  "GOSSIP": "gossip stone (hints only)"
+ },
+ "ids": {
+  "KF_ADULT_RUPEE_CIRCLE_CENTER_ITEM": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Adult Rupee Circle Center"
+  },
+  "KF_ADULT_RUPEE_CIRCLE_ITEM_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Adult Rupee Circle 1"
+  },
+  "KF_ADULT_RUPEE_CIRCLE_ITEM_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Adult Rupee Circle 2"
+  },
+  "KF_ADULT_RUPEE_CIRCLE_ITEM_03": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Adult Rupee Circle 3"
+  },
+  "KF_ADULT_RUPEE_CIRCLE_ITEM_04": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Adult Rupee Circle 4"
+  },
+  "KF_ADULT_RUPEE_CIRCLE_ITEM_05": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Adult Rupee Circle 5"
+  },
+  "KF_ADULT_RUPEE_CIRCLE_ITEM_06": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Adult Rupee Circle 6"
+  },
+  "KF_ADULT_RUPEE_CIRCLE_ITEM_07": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Adult Rupee Circle 7"
+  },
+  "KF_ADULT_RUPEE_CIRCLE_ITEM_08": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Adult Rupee Circle 8"
+  },
+  "KF_BEAN_PATCH_GS": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF GS Bean Patch"
+  },
+  "KF_BEHIND_SARIAS_HOUSE_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Behind Sarias House 1"
+  },
+  "KF_BEHIND_SARIAS_HOUSE_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Behind Sarias House 2"
+  },
+  "KF_BEHIND_SHOP_BUSH_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Bush Behind Shop 1"
+  },
+  "KF_BEHIND_SHOP_BUSH_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Bush Behind Shop 2"
+  },
+  "KF_BEHIND_SHOP_BUSH_03": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Bush Behind Shop 3"
+  },
+  "KF_BESIDE_MIDOS_HOUSE_BUSH_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Bush Beside Midos House 1"
+  },
+  "KF_BESIDE_MIDOS_HOUSE_BUSH_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Bush Beside Midos House 2"
+  },
+  "KF_BESIDE_MIDOS_HOUSE_BUSH_03": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Bush Beside Midos House 3"
+  },
+  "KF_CIRCLE_CENTER_ROCK": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle Center"
+  },
+  "KF_CIRCLE_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 1"
+  },
+  "KF_CIRCLE_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 2"
+  },
+  "KF_CIRCLE_ROCK_03": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 3"
+  },
+  "KF_CIRCLE_ROCK_04": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 4"
+  },
+  "KF_CIRCLE_ROCK_05": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 5"
+  },
+  "KF_CIRCLE_ROCK_06": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 6"
+  },
+  "KF_CIRCLE_ROCK_07": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 7"
+  },
+  "KF_CIRCLE_ROCK_08": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 8"
+  },
+  "KF_CIRCLE_ROCK_09": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 9"
+  },
+  "KF_CIRCLE_ROCK_10": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 10"
+  },
+  "KF_CIRCLE_ROCK_11": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 11"
+  },
+  "KF_CIRCLE_ROCK_12": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Circle 12"
+  },
+  "KF_DEKU_TREE_GOSSIP_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Deku Tree Gossip Stone Left"
+  },
+  "KF_DEKU_TREE_GOSSIP_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Deku Tree Gossip Stone Right"
+  },
+  "KF_HOUSE_OF_TWINS_GS": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF GS House of Twins"
+  },
+  "KF_HOUSE_OF_TWINS_POT_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF House of Twins Pot 1"
+  },
+  "KF_HOUSE_OF_TWINS_POT_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF House of Twins Pot 2"
+  },
+  "KF_KNOW_IT_ALL_HOUSE_GS": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF GS Know It All House"
+  },
+  "KF_KNOW_IT_ALL_HOUSE_POT_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Know It All House Pot 1"
+  },
+  "KF_KNOW_IT_ALL_HOUSE_POT_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Know It All House Pot 2"
+  },
+  "KF_KOKIRI_SHOP_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Shop Item 1"
+  },
+  "KF_KOKIRI_SHOP_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Shop Item 2"
+  },
+  "KF_KOKIRI_SHOP_03": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Shop Item 3"
+  },
+  "KF_KOKIRI_SHOP_04": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Shop Item 4"
+  },
+  "KF_KOKIRI_SHOP_05": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Shop Item 5"
+  },
+  "KF_KOKIRI_SHOP_06": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Shop Item 6"
+  },
+  "KF_KOKIRI_SHOP_07": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Shop Item 7"
+  },
+  "KF_KOKIRI_SHOP_08": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Shop Item 8"
+  },
+  "KF_KOKIRI_SWORD_CHEST": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Kokiri Sword Chest"
+  },
+  "KF_MIDO_CHEST_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Midos Top Left Chest"
+  },
+  "KF_MIDO_CHEST_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Midos Top Right Chest"
+  },
+  "KF_MIDO_CHEST_03": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Midos Bottom Left Chest"
+  },
+  "KF_MIDO_CHEST_04": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Midos Bottom Right Chest"
+  },
+  "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Near Know It All House 1"
+  },
+  "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock Near Know It All House 2"
+  },
+  "KF_NEAR_LOST_WOODS_GOSSIP": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Gossip Stone Near Lost Woods"
+  },
+  "KF_NEAR_SARIAS_HOUSE_BUSH_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Bush Near Sarias House 1"
+  },
+  "KF_NEAR_SARIAS_HOUSE_BUSH_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Bush Near Sarias House 2"
+  },
+  "KF_NEAR_SARIAS_HOUSE_BUSH_03": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Bush Near Sarias House 3"
+  },
+  "KF_RUPEE_BEHIND_MIDOS_HOUSE_ITEM": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rupee Behind Midos House"
+  },
+  "KF_RUPEE_NEAR_FADO_ITEM_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rupee Near Fado 1"
+  },
+  "KF_RUPEE_NEAR_FADO_ITEM_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rupee Near Fado 2"
+  },
+  "KF_RUPEE_NEAR_FADO_ITEM_03": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rupee Near Fado 3"
+  },
+  "KF_RUPEE_NEAR_MIDO_ITEM": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rupee Near Mido"
+  },
+  "KF_SARIAS_HOUSE_HEART_ITEM_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Sarias House Heart 1"
+  },
+  "KF_SARIAS_HOUSE_HEART_ITEM_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Sarias House Heart 2"
+  },
+  "KF_SARIAS_HOUSE_HEART_ITEM_03": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Sarias House Heart 3"
+  },
+  "KF_SARIAS_HOUSE_HEART_ITEM_04": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Sarias House Heart 4"
+  },
+  "KF_SARIAS_HOUSE_HEART_ITEM_05": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Sarias House Heart 5"
+  },
+  "KF_SARIAS_HOUSE_HEART_ITEM_06": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Sarias House Heart 6"
+  },
+  "KF_SARIAS_HOUSE_HEART_ITEM_07": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Sarias House Heart 7"
+  },
+  "KF_SHOP_RUPEE_ITEM": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Shop Rupee"
+  },
+  "KF_STORMS_GROTTO_CHEST": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Storms Grotto Chest"
+  },
+  "KF_TRAINING_AREA_RUPEE_ITEM_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Training Area Rupee 1"
+  },
+  "KF_TRAINING_AREA_RUPEE_ITEM_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Training Area Rupee 2"
+  },
+  "KF_WEST_OF_MIDOS_HOUSE_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock West of Midos House 1"
+  },
+  "KF_WEST_OF_MIDOS_HOUSE_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "KF Rock West of Midos House 2"
+  },
+  "LW_BRIDGE_CHEST": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "LW Bridge Chest"
+  },
+  "LW_BRIDGE_GOSSIP": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "LW Bridge Gossip Stone"
+  },
+  "LW_NEAR_BRIDGE_SCRUB": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "LW Deku Scrub Near Bridge"
+  },
+  "LW_SARIA_GIFT": {
+   "status": "active",
+   "issued": "2026-11-15",
+   "check": "LW Gift from Saria"
+  }
+ }
+}
