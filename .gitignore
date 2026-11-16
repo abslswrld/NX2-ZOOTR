@@ -3,3 +3,5 @@ romfs_path.txt
 # test output
 report.txt
 __pycache__/
+# built mods and test saves: modified game files, never committed
+out/

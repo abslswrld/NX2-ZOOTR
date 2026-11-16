@@ -4,6 +4,18 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### Mod builder and the first in-game item test (branch `chest-test`)
+- New `tools/build_mod.py`: changes what checks give, by check ID (chests only for now). Edits every
+  placement of the check, writes the map files back compressed with the game's dictionary, updates the
+  resource size table (keeping each entry's headroom and adding what the file grew), checks every actor of
+  each file against what was intended, and can write a launcher `.bat`. Output goes to `out/` (ignored by
+  git: it holds modified game files).
+- Found while building: identical actor settings are stored once and shared in the map files, so changing
+  one chest changed every chest with the same contents. The builder now gives each changed actor its own
+  copy.
+- Test mod: the four chests in Mido's house get a Boomerang, a Piece of Heart, a Hylian Shield and a bomb
+  bag. Waiting for the in-game result.
+
 ### Full requirements for every check
 - New `logic/requirements.py`: for each check, the smallest sets of items and settings that get it from
   the start of the game, for a child and an adult, following every route through the region map (exits,
