@@ -4,6 +4,23 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Pots: one check per age (to test)
+- Kokiri Forest's pots are separate objects in the child and adult maps, so each pot is now two checks,
+  with its own item per age. A check can name one age (`"age": "child"` / `"adult"` in the world data): it
+  covers only that age's object (builder, database, maps), and the logic counts it only at that age.
+- IDs: `KF_HOUSE_OF_TWINS_POT_01/02` and `KF_KNOW_IT_ALL_HOUSE_POT_01/02` are retired; they are replaced
+  by `..._CHILD_POT_01/02` and `..._ADULT_POT_01/02` (8 checks).
+- `tests/db_check.py` checks coverage per object (each child and adult object needs a check), not per
+  spot. New logic test: the child pot only as a child, the adult pot only as an adult.
+- Test mod: House of Twins child pots hold a Piece of Heart and Bombchus (`Obj_Bombchu`, the ground
+  version), adult pots a red rupee and Bombchus. The Boomerang test is left out (needs a ground version).
+- Still to do: pots still refill. Found while looking: the game sets a named flag when a pot breaks only
+  through small logic files linked to the pot in the map (Ice Cavern does it for two pots). Flag names are
+  hashed with MurmurHash3 in `GameDataList`. Nothing in the game remembers whether an item dropped from a
+  pot was picked up; the Gold Skulltula (`RespawnGmdHash`) is the only thing with that behaviour.
+- Same situation, not split yet: Kokiri Forest's rock circle, other rocks, bushes, Saria's house hearts and
+  the shop shelves also have separate child and adult objects.
+
 ### In-game results of the pots and freestanding test
 - Kokiri Sword chest: gave the Fairy Slingshot, no sword, no cutscene. The special event removal works.
 - Magic: no meter after the Lens of Truth or Din's Fire; after Magic both work. Double Magic before Magic

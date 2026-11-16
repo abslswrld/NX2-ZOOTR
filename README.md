@@ -135,6 +135,11 @@ digits and `_` only.
 - One ID per check (one item handed out), not per object: a check the game places several times (child
   and adult copies, the bridge chest in two maps) has one ID listing every placement; an NPC that gives two
   things has two IDs.
+- Except when the child and adult objects are separate objects that each give their item (pots: each has
+  its own "broken" memory, so one shared check could be collected once per age). Then there is one check
+  per age, with `"age": "child"` or `"adult"` in its data and `CHILD`/`ADULT` in its ID and name:
+  `KF_HOUSE_OF_TWINS_CHILD_POT_01`, `KF_HOUSE_OF_TWINS_ADULT_POT_01`. Such a check covers only that age's
+  object, and the logic only counts it at that age.
 - IDs are written once and never computed again: renaming a check, moving it to another region or
   extracting the map again doesn't change its ID.
 - IDs are never reused. A check that goes away is marked `"retired"` in `data/ids.json` with the date and
