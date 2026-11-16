@@ -14,7 +14,8 @@ Newest first. Dates are when the work was done.
   one chest changed every chest with the same contents. The builder now gives each changed actor its own
   copy.
 - Test mod: the four chests in Mido's house get a Boomerang, a Piece of Heart, a Hylian Shield and a bomb
-  bag. Waiting for the in-game result.
+  bag. **Result: all four gave the new item and it worked, no issues.** `KF_MIDO_CHEST_01`-`04` are now
+  `randomizable: "yes"`; the other Kokiri Forest chests stay `untested` (different chest models).
 
 ### Full requirements for every check
 - New `logic/requirements.py`: for each check, the smallest sets of items and settings that get it from

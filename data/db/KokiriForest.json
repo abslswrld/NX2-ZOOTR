@@ -2507,7 +2507,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work",
   "requirements": {
    "child": [
     []
@@ -2544,8 +2544,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave a Boomerang, which worked",
   "requirements": {
    "child": [
     []
@@ -2587,8 +2587,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave a Piece of Heart, which worked",
   "requirements": {
    "child": [
     []
@@ -2630,8 +2630,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave a Hylian Shield, which worked",
   "requirements": {
    "child": [
     []
@@ -2673,8 +2673,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave a bomb bag, which worked",
   "requirements": {
    "child": [
     []
@@ -3624,7 +3624,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work",
   "requirements": {
    "child": [
     [
@@ -3875,7 +3875,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work",
   "requirements": {
    "child": [
     [
