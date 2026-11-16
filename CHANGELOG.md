@@ -4,6 +4,12 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### In-game results: skippable opening and bombs without the bracelet both work
+- The opening cutscene could be skipped with `--fix skippable_opening`.
+- Bombs could be held, thrown and exploded without the Goron Bracelet with `--fix bombs_without_bracelet`.
+  The `bombs_without_bracelet` setting is now on by default (the logic counts a bomb bag alone as
+  explosives); the logic test for the no-fix case switches it off explicitly.
+
 ### Skippable opening cutscene (to test)
 - Found in the game files: the intro is `OpeningEvent` (two cutscenes, `Dm_Kokiri_0000` then
   `Dm_Kokiri_0030`). Only three cutscenes in the whole game block skipping: the opening

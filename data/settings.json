@@ -1,5 +1,5 @@
 {
  "open_forest": true,
  "start_with_goron_bracelet": true,
- "bombs_without_bracelet": false
+ "bombs_without_bracelet": true
 }

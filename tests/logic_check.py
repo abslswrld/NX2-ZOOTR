@@ -50,7 +50,8 @@ expect('Skull Kid with song + ocarina (child only)', ['SariasSong', 'Ocarina'], 
 expect('shortcuts grotto needs explosives', [], {}, not_want=['LW Near Shortcuts Grotto Bush 1'])
 expect('bomb bag opens both grottos', ['BombBag'], {},
        want=['LW Near Shortcuts Grotto Bush 1', 'LW Boulder Over Scrubs Grotto'])
-expect('bomb bag without the bracelet (setting off): no bombs', ['BombBag'], {'start_with_goron_bracelet': False},
+expect('bomb bag, no bracelet, bomb fix off: no bombs', ['BombBag'],
+       {'start_with_goron_bracelet': False, 'bombs_without_bracelet': False},
        not_want=['LW Near Shortcuts Grotto Bush 1'])
 expect('bomb bag, no bracelet, bombs_without_bracelet fix on: bombs work', ['BombBag'],
        {'start_with_goron_bracelet': False, 'bombs_without_bracelet': True}, want=['LW Near Shortcuts Grotto Bush 1'])
