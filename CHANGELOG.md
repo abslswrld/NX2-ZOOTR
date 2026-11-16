@@ -2,6 +2,14 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-16
+
+### Other chest types (branch `chest-types`, to test)
+- `tools/build_mod.py` also accepts a check's name, for areas without permanent IDs yet (it refuses a name
+  when the check has an ID).
+- Test mod adds: Kokiri Sword chest (big chest) -> Fairy Slingshot, Kokiri Forest Storms grotto chest ->
+  Lens of Truth, Sacred Forest Meadow Wolfos grotto chest (appears after the Wolfos) -> Piece of Heart.
+
 ## 2026-11-15
 
 ### In-game results: skippable opening and bombs without the bracelet both work

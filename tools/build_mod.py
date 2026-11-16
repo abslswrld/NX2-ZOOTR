@@ -66,11 +66,18 @@ start "" "%%EXE%%" --user "%(user)s"
 
 
 def find_check(world, cid):
+    """a check by its permanent ID, or by its name for areas that have no IDs yet"""
     for r in world.regions.values():
         for name, loc in r.locations.items():
             if loc.get('id') == cid:
                 return r, name, loc
-    raise SystemExit('unknown check ID %s' % cid)
+    for r in world.regions.values():
+        for name, loc in r.locations.items():
+            if name == cid:
+                if loc.get('id'):
+                    raise SystemExit('%r has a permanent ID: use %s' % (name, loc['id']))
+                return r, name, loc
+    raise SystemExit('unknown check ID or name %s' % cid)
 
 
 def plan(world, assignments):
