@@ -403,6 +403,11 @@
     [
      "BombBag",
      "Bottle",
+     "bombs_without_bracelet"
+    ],
+    [
+     "BombBag",
+     "Bottle",
      "start_with_goron_bracelet"
     ],
     [
@@ -1837,6 +1842,10 @@
     [
      "BombBag",
      "GoronBracelet"
+    ],
+    [
+     "BombBag",
+     "bombs_without_bracelet"
     ],
     [
      "BombBag",
@@ -4075,6 +4084,11 @@
     [
      "BombBag",
      "GoronBracelet",
+     "open_forest"
+    ],
+    [
+     "BombBag",
+     "bombs_without_bracelet",
      "open_forest"
     ],
     [

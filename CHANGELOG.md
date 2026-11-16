@@ -4,6 +4,20 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### Bombs without the Goron Bracelet (to test), chest pedestals
+- Found in the game files: every liftable object has a lift grade. Small rocks, bushes, pots, Cuccos and
+  Bombchus share the "no upgrade" grade; bombs (and bomb flowers, in their own files) use the Goron
+  Bracelet grade; the big rocks use the Silver and Golden Gauntlets grades. That is why a bomb vanishes
+  without the bracelet.
+- `tools/build_mod.py --fix bombs_without_bracelet`: sets the bomb's lift grade (in `Item_Bomb.pack`) to
+  the "no upgrade" grade. Changes exactly 4 bytes of the pack; same sizes, so no size-table change for
+  it. Bomb flowers keep needing the bracelet. The builder can now edit values inside actor packs.
+- New setting `bombs_without_bracelet` (off until confirmed in game); `has_explosives` counts it.
+  New logic test (28 in all, all pass).
+- Fixed: the extractor counted chest pedestals (`Obj_TBoxPedestal_A_01`, in the Sacred Forest Meadow
+  Wolfos grotto) as part of the chest. Re-extracted: only those two entries removed. The builder also
+  refuses to change anything that isn't a real chest.
+
 ### Mod builder and the first in-game item test (branch `chest-test`)
 - New `tools/build_mod.py`: changes what checks give, by check ID (chests only for now). Edits every
   placement of the check, writes the map files back compressed with the game's dictionary, updates the

@@ -283,26 +283,6 @@
     "params": {
      "Drop__DropActor": "TBox_Rupee_Purple"
     }
-   },
-   {
-    "hash": "87261292483825904",
-    "actor": "Obj_TBoxPedestal_A_01",
-    "ages": [
-     "adult"
-    ],
-    "files": [
-     "SacredForestMeadow_Adult_Static.bcett.byml.zs"
-    ]
-   },
-   {
-    "hash": "5787704546487142332",
-    "actor": "Obj_TBoxPedestal_A_01",
-    "ages": [
-     "child"
-    ],
-    "files": [
-     "SacredForestMeadow_Child_Static.bcett.byml.zs"
-    ]
    }
   ]
  },

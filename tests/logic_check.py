@@ -52,6 +52,8 @@ expect('bomb bag opens both grottos', ['BombBag'], {},
        want=['LW Near Shortcuts Grotto Bush 1', 'LW Boulder Over Scrubs Grotto'])
 expect('bomb bag without the bracelet (setting off): no bombs', ['BombBag'], {'start_with_goron_bracelet': False},
        not_want=['LW Near Shortcuts Grotto Bush 1'])
+expect('bomb bag, no bracelet, bombs_without_bracelet fix on: bombs work', ['BombBag'],
+       {'start_with_goron_bracelet': False, 'bombs_without_bracelet': True}, want=['LW Near Shortcuts Grotto Bush 1'])
 expect('adult Mido blocks the back half without Saria\'s Song', ['MasterSword', 'BombBag'], {},
        age_of={'LW Boulder Near Sacred Forest Meadow': ['child']})
 expect('adult past Mido with Saria\'s Song', ['MasterSword', 'BombBag', 'SariasSong', 'Ocarina'], {},
