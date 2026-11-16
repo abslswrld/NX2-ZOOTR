@@ -86,9 +86,11 @@ for area in CLASSIFIED:
             errors.append('%s: %s has no ID' % (area, n))
         if l.get('randomizable') not in RANDOMIZABLE:
             errors.append('%s: %s randomizable is %r' % (area, n, l.get('randomizable')))
-    covered = {sp for r, n, l in region_locs for sc, sp in w.spots_of(r, l) if sc == area}
-    for sid in sorted(set(w.checks.get(area, {})) - covered):
-        errors.append('%s: object %s has no check' % (area, sid))
+    covered = {(sp, p['hash']) for r, n, l in region_locs for sc, sp, p in w.placements_of(r, l) if sc == area}
+    for sid, spot in sorted(w.checks.get(area, {}).items()):
+        for p in spot['placements']:
+            if (sid, p['hash']) not in covered:
+                errors.append('%s: object %s (%s, %s) has no check' % (area, sid, '/'.join(p['ages']), p['hash']))
     for row in rows:
         for o in row['object_id']:
             if not o['hash'].isdigit():

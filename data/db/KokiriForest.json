@@ -1652,6 +1652,156 @@
   "notes": "hint stone, not an item check (left/right from its position; check)"
  },
  {
+  "unique_check_id": "KF_HOUSE_OF_TWINS_ADULT_POT_01",
+  "check_name": "KF House of Twins Adult Pot 1",
+  "region": "KF House of Twins",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@6.0,19.5",
+    "hash": "11634540265512998108",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game (the child pot at the same spot was)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_HOUSE_OF_TWINS_ADULT_POT_02",
+  "check_name": "KF House of Twins Adult Pot 2",
+  "region": "KF House of Twins",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@6.5,20.5",
+    "hash": "17935200704288465987",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game (the child pot at the same spot was)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_HOUSE_OF_TWINS_CHILD_POT_01",
+  "check_name": "KF House of Twins Child Pot 1",
+  "region": "KF House of Twins",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@6.0,19.5",
+    "hash": "5133775918408786238",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a Piece of Heart, but the pot refills on every visit and the child and adult pots are separate objects (the item could be taken twice)",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_HOUSE_OF_TWINS_CHILD_POT_02",
+  "check_name": "KF House of Twins Child Pot 2",
+  "region": "KF House of Twins",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@6.5,20.5",
+    "hash": "15406610986108637956",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): Bombchus (Item_BombchuBundle_Small) appeared but could not be picked up (the ground version is Obj_Bombchu); the pot refills on every visit",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
   "unique_check_id": "KF_HOUSE_OF_TWINS_GS",
   "check_name": "KF GS House of Twins",
   "region": "KF Main",
@@ -1693,16 +1843,16 @@
   "notes": "adult, night only (game flag); hookshot as in the N64 game: check height in game"
  },
  {
-  "unique_check_id": "KF_HOUSE_OF_TWINS_POT_01",
-  "check_name": "KF House of Twins Pot 1",
-  "region": "KF House of Twins",
+  "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_ADULT_POT_01",
+  "check_name": "KF Know It All House Adult Pot 1",
+  "region": "KF Know It All House",
   "area": "KokiriForest",
   "check_type": "pot",
   "object_id": [
    {
     "scene": "KokiriForest",
-    "spot": "pot@6.0,19.5",
-    "hash": "11634540265512998108",
+    "spot": "pot@-79.5,-5.5",
+    "hash": "16386301107460847261",
     "actor": "Obj_Pot_A_01",
     "files": [
      "KokiriForest_Adult_Dynamic.bcett.byml.zs"
@@ -1710,52 +1860,38 @@
     "ages": [
      "adult"
     ]
-   },
-   {
-    "scene": "KokiriForest",
-    "spot": "pot@6.0,19.5",
-    "hash": "5133775918408786238",
-    "actor": "Obj_Pot_A_01",
-    "files": [
-     "KokiriForest_Child_Dynamic.bcett.byml.zs"
-    ],
-    "ages": [
-     "child"
-    ]
    }
   ],
   "vanilla_contents": {
-   "value": "Obj_Rupee_Blue",
+   "value": "Obj_Rupee_Green",
    "source": "map data",
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a Piece of Heart, but the pot refills on every visit and the child and adult pots are separate objects (the item could be taken twice)",
+  "randomizable_note": "not yet changed in game (the child pot at the same spot was)",
   "requirements": {
-   "child": [
-    []
-   ],
+   "child": null,
    "adult": [
     [
      "MasterSword"
     ]
    ]
   },
-  "check_rule": "True",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
-  "unique_check_id": "KF_HOUSE_OF_TWINS_POT_02",
-  "check_name": "KF House of Twins Pot 2",
-  "region": "KF House of Twins",
+  "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_ADULT_POT_02",
+  "check_name": "KF Know It All House Adult Pot 2",
+  "region": "KF Know It All House",
   "area": "KokiriForest",
   "check_type": "pot",
   "object_id": [
    {
     "scene": "KokiriForest",
-    "spot": "pot@6.5,20.5",
-    "hash": "17935200704288465987",
+    "spot": "pot@-80.0,-6.0",
+    "hash": "46774521065789894",
     "actor": "Obj_Pot_A_01",
     "files": [
      "KokiriForest_Adult_Dynamic.bcett.byml.zs"
@@ -1763,11 +1899,38 @@
     "ages": [
      "adult"
     ]
-   },
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game (the child pot at the same spot was)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01",
+  "check_name": "KF Know It All House Child Pot 1",
+  "region": "KF Know It All House",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
    {
     "scene": "KokiriForest",
-    "spot": "pot@6.5,20.5",
-    "hash": "15406610986108637956",
+    "spot": "pot@-79.5,-5.5",
+    "hash": "14828228683041039284",
     "actor": "Obj_Pot_A_01",
     "files": [
      "KokiriForest_Child_Dynamic.bcett.byml.zs"
@@ -1783,20 +1946,51 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): Bombchus (Item_BombchuBundle_Small) appeared but could not be picked up (the ground version is Obj_Bombchu); the pot refills on every visit",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee, but the pot refills on every visit",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02",
+  "check_name": "KF Know It All House Child Pot 2",
+  "region": "KF Know It All House",
+  "area": "KokiriForest",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "pot@-80.0,-6.0",
+    "hash": "2108281022000564101",
+    "actor": "Obj_Pot_A_01",
+    "files": [
+     "KokiriForest_Child_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "child"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Green",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
   "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_GS",
@@ -1861,112 +2055,6 @@
   "check_rule": "is_child and at_night and can_child_attack",
   "verification_status": "not verified in game",
   "notes": "night only (game flag)"
- },
- {
-  "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_POT_01",
-  "check_name": "KF Know It All House Pot 1",
-  "region": "KF Know It All House",
-  "area": "KokiriForest",
-  "check_type": "pot",
-  "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "pot@-79.5,-5.5",
-    "hash": "16386301107460847261",
-    "actor": "Obj_Pot_A_01",
-    "files": [
-     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
-   {
-    "scene": "KokiriForest",
-    "spot": "pot@-79.5,-5.5",
-    "hash": "14828228683041039284",
-    "actor": "Obj_Pot_A_01",
-    "files": [
-     "KokiriForest_Child_Dynamic.bcett.byml.zs"
-    ],
-    "ages": [
-     "child"
-    ]
-   }
-  ],
-  "vanilla_contents": {
-   "value": "Obj_Rupee_Green",
-   "source": "map data",
-   "note": null
-  },
-  "randomizable": "untested",
-  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee, but the pot refills on every visit",
-  "requirements": {
-   "child": [
-    []
-   ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
-  },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
- },
- {
-  "unique_check_id": "KF_KNOW_IT_ALL_HOUSE_POT_02",
-  "check_name": "KF Know It All House Pot 2",
-  "region": "KF Know It All House",
-  "area": "KokiriForest",
-  "check_type": "pot",
-  "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "pot@-80.0,-6.0",
-    "hash": "46774521065789894",
-    "actor": "Obj_Pot_A_01",
-    "files": [
-     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
-   {
-    "scene": "KokiriForest",
-    "spot": "pot@-80.0,-6.0",
-    "hash": "2108281022000564101",
-    "actor": "Obj_Pot_A_01",
-    "files": [
-     "KokiriForest_Child_Dynamic.bcett.byml.zs"
-    ],
-    "ages": [
-     "child"
-    ]
-   }
-  ],
-  "vanilla_contents": {
-   "value": "Obj_Rupee_Green",
-   "source": "map data",
-   "note": null
-  },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
-  "requirements": {
-   "child": [
-    []
-   ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
-  },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
   "unique_check_id": "KF_KOKIRI_SHOP_01",

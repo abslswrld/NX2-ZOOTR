@@ -46,7 +46,12 @@ class Region:
         for name, loc in (d.get('locations') or {}).items():
             if isinstance(loc, str):
                 loc = {'rule': loc}
-            self.locations[name] = dict(loc, rule_fn=rules.compile_rule(loc.get('rule', True), name))
+            rule = loc.get('rule', True)
+            if loc.get('age') in ('child', 'adult'):
+                # a check for one age's object only (the child and adult maps place separate objects)
+                rule = 'is_%s' % loc['age'] if rule is True else 'is_%s and (%s)' % (loc['age'], rule)
+                loc = dict(loc, rule=rule)
+            self.locations[name] = dict(loc, rule_fn=rules.compile_rule(rule, name))
         for name, r in (d.get('events') or {}).items():
             self.events[name] = (r, rules.compile_rule(r, name))
         for target, r in (d.get('exits') or {}).items():
@@ -115,14 +120,20 @@ class World:
                 check_names(txt, '%s event %s' % (r.name, n))
             for n, loc in r.locations.items():
                 check_names(loc.get('rule', True), '%s: %s' % (r.name, n))
+                if 'age' in loc and loc['age'] not in ('child', 'adult'):
+                    out.append('%s: %s has age %r (child or adult)' % (r.name, n, loc['age']))
                 for scene, spot in self.spots_of(r, loc):
                     if spot not in self.checks.get(scene, {}):
                         out.append('%s: %s points at unknown spot %s %r' % (r.name, n, scene, spot))
-        placed = collections.Counter(sp for r in self.regions.values() for l in r.locations.values()
-                                     for sp in self.spots_of(r, l))
-        for (scene, spot), n in placed.items():
+                    elif loc.get('age') and not any(loc['age'] in p['ages']
+                                                    for p in self.checks[scene][spot]['placements']):
+                        out.append('%s: %s: spot %s has no %s object' % (r.name, n, spot, loc['age']))
+        # every object (placement) belongs to at most one location
+        placed = collections.Counter((sc, sp, p['hash']) for r in self.regions.values()
+                                     for l in r.locations.values() for sc, sp, p in self.placements_of(r, l))
+        for (scene, spot, h), n in placed.items():
             if n > 1:
-                out.append('%s: spot %s used by %d locations' % (scene, spot, n))
+                out.append('%s: spot %s object %s used by %d locations' % (scene, spot, h, n))
         return out
 
     @staticmethod
@@ -133,6 +144,16 @@ class World:
             out.append((region.scene, loc['spot']))
         for a in loc.get('also', []):
             out.append((a['scene'], a['spot']))
+        return out
+
+    def placements_of(self, region, loc):
+        """(scene, spot id, placement) of every map object of a location; a location with an 'age' has only
+        that age's objects"""
+        out = []
+        for sc, sp in self.spots_of(region, loc):
+            for p in self.checks.get(sc, {}).get(sp, {}).get('placements', []):
+                if not loc.get('age') or loc['age'] in p['ages']:
+                    out.append((sc, sp, p))
         return out
 
     def unplaced_spots(self, scene, kinds=None):

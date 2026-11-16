@@ -4,7 +4,8 @@
 
 Supported: chests and pots (their item is their Drop__DropActor in the map file) and freestanding items
 (the actor type itself is the item: it is replaced). For
-each check every placement is changed (child and adult copies, copies in other maps), the map files are
+each check every placement is changed (child and adult copies, copies in other maps; a check made for one
+age, "age" in its data, only has that age's), the map files are
 written back compressed with the same dictionary as the original, and the resource size table (RESTBL)
 gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, for Longshot's HOS_MODS.
 
@@ -109,16 +110,15 @@ def plan(world, assignments):
         sps = world.spots_of(r, loc)
         if not sps:
             raise SystemExit('%s has no map placement (an event): not supported yet' % cid)
-        for scene, spot_id in sps:
+        for scene, spot_id, p in world.placements_of(r, loc):
             spot = world.checks[scene][spot_id]
             if spot['kind'] not in SUPPORTED:
                 raise SystemExit('%s is a %s: only %s supported yet' % (cid, spot['kind'], ', '.join(sorted(SUPPORTED))))
-            for p in spot['placements']:
-                if not _right_actor(spot['kind'], p['actor']):
-                    raise SystemExit('%s: placement %s is a %s, not a %s' % (cid, p['hash'], p['actor'], spot['kind']))
-                for fn in p['files']:
-                    files.setdefault('Banc/%s/%s' % (scene, fn[:-3] if fn.endswith('.zs') else fn), {})[p['hash']] = \
-                        (cid, item, spot['item'], spot['kind'])
+            if not _right_actor(spot['kind'], p['actor']):
+                raise SystemExit('%s: placement %s is a %s, not a %s' % (cid, p['hash'], p['actor'], spot['kind']))
+            for fn in p['files']:
+                files.setdefault('Banc/%s/%s' % (scene, fn[:-3] if fn.endswith('.zs') else fn), {})[p['hash']] = \
+                    (cid, item, spot['item'], spot['kind'])
     return files
 
 

@@ -43,6 +43,8 @@ expect('adult with hookshot (night): House of Twins Skulltula', ['MasterSword', 
        age_of={'KF GS House of Twins': ['adult'], 'KF Adult Rupee Circle Center': ['adult']})
 expect('adult without hookshot: no House of Twins Skulltula', ['MasterSword'], {}, not_want=['KF GS House of Twins'])
 expect('Kokiri Sword chest is child-only (crawlspace)', ['MasterSword'], {}, age_of={'KF Kokiri Sword Chest': ['child']})
+expect('pots are one check per age (separate objects in the child and adult maps)', ['MasterSword'], {},
+       age_of={'KF House of Twins Child Pot 1': ['child'], 'KF House of Twins Adult Pot 1': ['adult']})
 
 # Lost Woods
 expect('Skull Kid needs Saria\'s Song and an ocarina', ['SariasSong'], {}, not_want=['LW Skull Kid'])

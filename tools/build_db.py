@@ -72,10 +72,9 @@ def vanilla(world, region, loc, ctype):
 
 def objects(world, region, loc):
     out = []
-    for sc, sp in world.spots_of(region, loc):
-        for p in world.checks[sc][sp]['placements']:
-            out.append({'scene': sc, 'spot': sp, 'hash': p['hash'], 'actor': p['actor'],
-                        'files': p['files'], 'ages': p['ages']})
+    for sc, sp, p in world.placements_of(region, loc):
+        out.append({'scene': sc, 'spot': sp, 'hash': p['hash'], 'actor': p['actor'],
+                    'files': p['files'], 'ages': p['ages']})
     return out
 
 

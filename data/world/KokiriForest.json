@@ -477,19 +477,37 @@
   "verified": false,
   "notes": "Door at (11.4, 14.6).",
   "locations": {
-   "KF House of Twins Pot 1": {
-    "id": "KF_HOUSE_OF_TWINS_POT_01",
+   "KF House of Twins Child Pot 1": {
+    "id": "KF_HOUSE_OF_TWINS_CHILD_POT_01",
     "spot": "pot@6.0,19.5",
     "kind": "pot",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a Piece of Heart, but the pot refills on every visit and the child and adult pots are separate objects (the item could be taken twice)"
    },
-   "KF House of Twins Pot 2": {
-    "id": "KF_HOUSE_OF_TWINS_POT_02",
+   "KF House of Twins Adult Pot 1": {
+    "id": "KF_HOUSE_OF_TWINS_ADULT_POT_01",
+    "spot": "pot@6.0,19.5",
+    "kind": "pot",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game (the child pot at the same spot was)"
+   },
+   "KF House of Twins Child Pot 2": {
+    "id": "KF_HOUSE_OF_TWINS_CHILD_POT_02",
     "spot": "pot@6.5,20.5",
     "kind": "pot",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): Bombchus (Item_BombchuBundle_Small) appeared but could not be picked up (the ground version is Obj_Bombchu); the pot refills on every visit"
+   },
+   "KF House of Twins Adult Pot 2": {
+    "id": "KF_HOUSE_OF_TWINS_ADULT_POT_02",
+    "spot": "pot@6.5,20.5",
+    "kind": "pot",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game (the child pot at the same spot was)"
    }
   },
   "exits": {
@@ -502,19 +520,37 @@
   "verified": false,
   "notes": "Door at (-73.5, -15.8).",
   "locations": {
-   "KF Know It All House Pot 1": {
-    "id": "KF_KNOW_IT_ALL_HOUSE_POT_01",
+   "KF Know It All House Child Pot 1": {
+    "id": "KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01",
     "spot": "pot@-79.5,-5.5",
     "kind": "pot",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee, but the pot refills on every visit"
    },
-   "KF Know It All House Pot 2": {
-    "id": "KF_KNOW_IT_ALL_HOUSE_POT_02",
+   "KF Know It All House Adult Pot 1": {
+    "id": "KF_KNOW_IT_ALL_HOUSE_ADULT_POT_01",
+    "spot": "pot@-79.5,-5.5",
+    "kind": "pot",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game (the child pot at the same spot was)"
+   },
+   "KF Know It All House Child Pot 2": {
+    "id": "KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02",
     "spot": "pot@-80.0,-6.0",
     "kind": "pot",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
+   },
+   "KF Know It All House Adult Pot 2": {
+    "id": "KF_KNOW_IT_ALL_HOUSE_ADULT_POT_02",
+    "spot": "pot@-80.0,-6.0",
+    "kind": "pot",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game (the child pot at the same spot was)"
    }
   },
   "exits": {
