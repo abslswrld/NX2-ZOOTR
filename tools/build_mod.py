@@ -31,6 +31,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
+import ground_items  # noqa: E402
 from formats import zstd, byml, restbl, sarc  # noqa: E402
 from logic.world import World  # noqa: E402
 
@@ -102,10 +103,11 @@ def _right_actor(kind, actor):
     return True                                       # freestanding: the actor is the item
 
 
-def plan(world, assignments):
-    """{map file path in romfs: {placement hash: (check id, new item, old item, kind)}}"""
+def plan(world, assignments, on_ground=lambda item: item):
+    """{map file path in romfs: {placement hash: (check id, new item, old item, kind)}}.
+    on_ground(item): the actor to use where the item lies on the ground (freestanding items, pot drops)"""
     files = {}
-    for cid, item in assignments:
+    for cid, item_given in assignments:
         r, name, loc = find_check(world, cid)
         sps = world.spots_of(r, loc)
         if not sps:
@@ -114,6 +116,7 @@ def plan(world, assignments):
             spot = world.checks[scene][spot_id]
             if spot['kind'] not in SUPPORTED:
                 raise SystemExit('%s is a %s: only %s supported yet' % (cid, spot['kind'], ', '.join(sorted(SUPPORTED))))
+            item = on_ground(item_given) if spot['kind'] in ('freestanding', 'pot') else item_given
             if not _right_actor(spot['kind'], p['actor']):
                 raise SystemExit('%s: placement %s is a %s, not a %s' % (cid, p['hash'], p['actor'], spot['kind']))
             for fn in p['files']:
@@ -257,27 +260,58 @@ class Output:
         self.romfs, self.mod_romfs, self.dicts = romfs, mod_romfs, dicts
         self.rraw = open(os.path.join(romfs, RESTBL_PATH), 'rb').read()
         self.table = restbl.Restbl.read(zstd.decompress(self.rraw, dicts))
-        self.sizes = []
+        self.sizes = {}          # path -> (original length, new length, original entry, new entry)
+        self.written = {}        # path -> (file as stored in the game, contents written): edited twice = read back
 
     def read(self, path):
-        """(file as stored, contents); a few game files are stored uncompressed (no .zs)"""
+        """(file as stored, contents); a few game files are stored uncompressed (no .zs); a file this build
+        already changed is read back as changed"""
+        if path in self.written:
+            return self.written[path]
         plain = os.path.join(self.romfs, *path.split('/'))
         if os.path.exists(plain):
             src = open(plain, 'rb').read()
-            return src, src
+            return None, src                             # None: stored uncompressed
         src = open(os.path.join(self.romfs, *(path + '.zs').split('/')), 'rb').read()
         return src, zstd.decompress(src, self.dicts)
 
     def size(self, path, old_len, new_len):
-        entry = self.table.get(path)
-        if entry is None:
-            raise SystemExit('%s is not in the resource size table' % path)
-        if new_len > old_len:
-            self.table.set(path, entry + new_len - old_len)
-        self.sizes.append((path, old_len, new_len, entry, self.table.get(path)))
+        """keep the entry's headroom over the original file and add only what the file grew (never shrink)"""
+        if path in self.sizes:
+            old_len, _, entry, _ = self.sizes[path]
+        else:
+            entry = self.table.get(path)
+            if entry is None:
+                raise SystemExit('%s is not in the resource size table' % path)
+        self.table.set(path, entry + max(0, new_len - old_len))
+        self.sizes[path] = (old_len, new_len, entry, self.table.get(path))
+
+    def add(self, path, new_len, like, like_len):
+        """entry for a file new to the game: the headroom of a similar game file (`like`, `like_len` bytes)"""
+        if self.table.get(path) is not None:
+            raise SystemExit('%s is already in the resource size table' % path)
+        e = self.table.get(like)
+        if e is None:
+            raise SystemExit('%s is not in the resource size table' % like)
+        self.table.set(path, e - like_len + new_len)
+        self.sizes[path] = (0, new_len, 0, self.table.get(path))
+
+    def write_new(self, path, data, like):
+        """write a file new to the game, compressed like the game file `like`"""
+        src = open(os.path.join(self.romfs, *(like + '.zs').split('/')), 'rb').read()
+        did = zstd.frame_dict_id(src)
+        comp = zstd.compress(data, level=16, dictionary=self.dicts.get(did) if did else None)
+        if zstd.decompress(comp, self.dicts) != data:
+            raise SystemExit('compression check failed for %s' % path)
+        dest = os.path.join(self.mod_romfs, *(path + '.zs').split('/'))
+        if os.path.exists(os.path.join(self.romfs, *(path + '.zs').split('/'))):
+            raise SystemExit('%s already exists in the game' % path)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        open(dest, 'wb').write(comp)
 
     def write(self, path, src, old, new):
-        if src is old:                                   # stored uncompressed: write it the same way
+        self.written[path] = (src, new)
+        if src is None:                                  # stored uncompressed: write it the same way
             dest = os.path.join(self.mod_romfs, *path.split('/'))
             os.makedirs(os.path.dirname(dest), exist_ok=True)
             open(dest, 'wb').write(new)
@@ -293,9 +327,9 @@ class Output:
         self.size(path, len(old), len(new))
 
     def finish(self):
-        for path, o, n, e, e2 in self.sizes:
+        for path, (o, n, e, e2) in sorted(self.sizes.items()):
             print('size %-70s %d -> %d bytes, table %d -> %d' % (path, o, n, e, e2))
-        if any(e != e2 for *_, e, e2 in self.sizes):
+        if any(e != e2 for o, n, e, e2 in self.sizes.values()):
             did = zstd.frame_dict_id(self.rraw)
             dest = os.path.join(self.mod_romfs, RESTBL_PATH)
             os.makedirs(os.path.dirname(dest), exist_ok=True)
@@ -346,7 +380,22 @@ def main(argv):
         out.size(inner, old_inner, new_inner)
         print('fix %-28s %s: %s %d -> %d' % (name, pack, key, expected, value))
 
-    for path, changes in sorted(plan(world, assignments).items()):
+    # items that lie on the ground (freestanding, pot drops) and only exist as the model shown when received
+    # get a ground version (tools/ground_items.py)
+    grounds = {}
+
+    def plain(path):
+        return out.read(path)[1]
+
+    def on_ground(item):
+        kind = ground_items.kind_of(plain, item)
+        if kind == 'ground':
+            return item
+        if kind == 'item':
+            return grounds.setdefault(item, ground_items.ground_name(item))
+        raise SystemExit('%s: not something that can lie on the ground, and no ground version can be made' % item)
+
+    for path, changes in sorted(plan(world, assignments, on_ground).items()):
         src, old = out.read(path)
         new, found, _ = patch_file(old, {h: v for h, v in changes.items()})
         for h, (cid, item, expected_old, kind) in changes.items():
@@ -374,6 +423,35 @@ def main(argv):
             if act != want:
                 raise SystemExit('read-back: actor %s (%s) differs from what was intended' % (h, act['Gyaml']))
         out.write(path, src, old, new)
+
+    new_rows = {}
+    tpl_pack_path = ground_items.pack_path(ground_items.TEMPLATE)
+    tpl_pack = plain(tpl_pack_path)
+    tpl_ap = sarc.Sarc.read(tpl_pack).files[ground_items.ap_path(ground_items.TEMPLATE)]
+    for item, name in sorted(grounds.items()):
+        got, pack, new_inner, rows = ground_items.build(
+            item, plain, lambda t: byml.loads(plain(ground_items.table_path(t))).root,
+            lambda project: os.path.exists(os.path.join(a.romfs, 'Model', project + '.anim.bfres.zs')))
+        assert got == name
+        path = ground_items.pack_path(name)
+        out.write_new(path, pack, like=tpl_pack_path)
+        out.add(path, len(pack), tpl_pack_path, len(tpl_pack))
+        tpl_files = sarc.Sarc.read(tpl_pack).files
+        for inner, data in new_inner.items():
+            like = (ground_items.anim_param_path(ground_items.TEMPLATE) if 'AnimationParam' in inner
+                    else ground_items.ap_path(ground_items.TEMPLATE))
+            out.add(inner, len(data), like, len(tpl_files[like]))
+        for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
+            if out.table.get(inner) is None:
+                raise SystemExit('%s: %s has no resource size entry' % (name, inner))
+        for t, row in rows.items():
+            new_rows.setdefault(t, []).append(row)
+        print('ground version %-22s for %s (%d bytes)' % (name, item, len(pack)))
+    for t, rws in sorted(new_rows.items()):
+        path = ground_items.table_path(t)
+        src, old = out.read(path)
+        out.write(path, src, old, ground_items.add_rows(old, rws))
+        print('table %-16s %d rows added' % (t, len(rws)))
 
     out.finish()
     print('mod folder:', os.path.join(a.out, a.name))

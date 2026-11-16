@@ -4,6 +4,28 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Ground versions of items (branch `ground-items`, to test)
+- New `tools/ground_items.py`: makes a ground version of an item that only exists as the model shown when an
+  item is received (`Item_...`), so it can lie on the ground or drop from a pot. Built like the game's own
+  ground ocarina (`Obj_Ocarina_Time`, the Ocarina of Time in the castle moat): its pack with the ocarina's
+  model, animation and item settings swapped for the item's, an actor parameter file of its own, and rows
+  in `RSDB/ActorInfo` (the item's model and `ActorName`, the ocarina's ground settings), `GameActorInfo` and
+  `PouchActorInfo` (the item's row). Named `Obj_NX2_<item>`. Items built like the ocarinas (equipment, no
+  animation file) get one made the way the ground ocarina has one.
+- `tools/build_mod.py`: a freestanding item or pot holding an item that can't lie on the ground gets its
+  ground version automatically. The builder can now write files new to the game (size table entries with
+  the headroom of a similar game file), add rows to tables, and edit a file twice in one build (the size
+  entry is always worked out from the original file).
+- Found: the Gold Skulltula token's glow comes from its effect link (`ELinkRef`, user `Obj_Token_Gold`); the
+  ground ocarina has none, so our ground items don't glow. A glow could be added later by pointing
+  `ELinkRef` at an existing effect.
+- The French randomizer (OOT26RandoBeta) was read for how it handles pots, at the user's request; facts
+  credited to its author: shuffled pots behave like Gold Skulltulas (death no longer sets the pot's flag,
+  the pot's AI hands its flag to the drop, picking the drop up sets it), and real items drop as clones of
+  the Gold Skulltula token. No code or data was copied.
+- Test mod: Bomb Bag, Boomerang and Empty Bottle as freestanding items; Fairy Ocarina and Bombchus from the
+  child House of Twins pots, Hookshot from an adult one. Checklist in `TEST_CHECKLIST.md`.
+
 ### In-game results of the per-age pots test
 - House of Twins: the child pot gave the Piece of Heart, the adult pot at the same spot gave the red
   rupee. One check per age works.

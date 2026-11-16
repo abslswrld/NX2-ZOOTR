@@ -83,7 +83,8 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `data/ids.json` | every permanent check ID ever issued (active or retired), the area codes and the type codes |
 | `tools/build_db.py`, `data/db/<Area>.json` | the check database of an area, built from the files above (generated: never edit it by hand) |
 | `tests/db_check.py` | checks the database and the IDs, and prints totals |
-| `tools/build_mod.py` | builds a Longshot mod folder: changes chest contents by check ID, applies game fixes (`--fix bombs_without_bracelet`, `--fix skippable_opening`), updates the resource size table, and can write a test launcher; output in `out/` (never committed) |
+| `tools/build_mod.py` | builds a Longshot mod folder: changes what chests, pots and freestanding items give, by check ID, applies game fixes (`--fix bombs_without_bracelet`, `--fix skippable_opening`, `--fix magic_is_separate`), updates the resource size table, and can write a test launcher; output in `out/` (never committed) |
+| `tools/ground_items.py` | makes ground versions (`Obj_NX2_<item>`) of items that only exist as the model shown when received, from the game's own ground ocarina, so they can lie on the ground or drop from a pot (used by `build_mod.py`) |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):
 11 regions, 7 chests, 3 Gold Skulltulas, the stick-upgrade scrub, Saria's gift, 8 shop shelves, 4 pots,
