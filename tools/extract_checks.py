@@ -31,8 +31,8 @@ BUSHES = {'Obj_Plant_Grass_A_01', 'Obj_Plant_Grass_A_03'}
 
 def kind_of(gyaml):
     g = gyaml
-    if g.startswith('Obj_TBox'):
-        return 'chest'
+    if g.startswith('Obj_TBox') and not g.startswith('Obj_TBoxPedestal'):
+        return 'chest'                         # (a pedestal is the stand some chests rise on, not a chest)
     if g == 'Enemy_Skulltula_Gold':
         return 'skulltula'
     if g == 'Enemy_Scrub_Business':

@@ -1,8 +1,8 @@
 {
  "_about": "Shared rule shortcuts. 'remake' notes mark where the Switch 2 remake differs from the N64 game.",
  "has_explosives": {
-  "rule": "BombBag and (GoronBracelet or start_with_goron_bracelet)",
-  "note": "remake: holding a bomb needs the bracelet's lift strength (found by the French randomizer's players; check in game)"
+  "rule": "BombBag and (bombs_without_bracelet or GoronBracelet or start_with_goron_bracelet)",
+  "note": "remake: holding a bomb needs the bracelet's lift strength (found by the French randomizer's players). The bombs_without_bracelet setting (on by default) is the game fix in tools/build_mod.py: the bomb's lift grade lowered to the 'no upgrade' grade; confirmed in game on 2026-11-15 (bombs held, thrown and exploding without the bracelet)"
  },
  "can_use_magic": "Magic",
  "can_child_attack": "is_child and (Slingshot or Boomerang or DekuSticks or KokiriSword or has_explosives or (DinsFire and can_use_magic))",

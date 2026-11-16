@@ -4,6 +4,48 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### In-game results: skippable opening and bombs without the bracelet both work
+- The opening cutscene could be skipped with `--fix skippable_opening`.
+- Bombs could be held, thrown and exploded without the Goron Bracelet with `--fix bombs_without_bracelet`.
+  The `bombs_without_bracelet` setting is now on by default (the logic counts a bomb bag alone as
+  explosives); the logic test for the no-fix case switches it off explicitly.
+
+### Skippable opening cutscene (to test)
+- Found in the game files: the intro is `OpeningEvent` (two cutscenes, `Dm_Kokiri_0000` then
+  `Dm_Kokiri_0030`). Only three cutscenes in the whole game block skipping: the opening
+  (`Dm_Kokiri_0000`), the title screen and the staff credits (setting `SkipSetting: DisableSkip`).
+  `Dm_Kokiri_0030` has no block (should already be skippable).
+- `tools/build_mod.py --fix skippable_opening` removes that setting from the opening, so it can be skipped
+  like any other cutscene; the game still runs every step of the opening. The builder can now also edit
+  uncompressed game files and remove entries from BYML files.
+
+### Bombs without the Goron Bracelet (to test), chest pedestals
+- Found in the game files: every liftable object has a lift grade. Small rocks, bushes, pots, Cuccos and
+  Bombchus share the "no upgrade" grade; bombs (and bomb flowers, in their own files) use the Goron
+  Bracelet grade; the big rocks use the Silver and Golden Gauntlets grades. That is why a bomb vanishes
+  without the bracelet.
+- `tools/build_mod.py --fix bombs_without_bracelet`: sets the bomb's lift grade (in `Item_Bomb.pack`) to
+  the "no upgrade" grade. Changes exactly 4 bytes of the pack; same sizes, so no size-table change for
+  it. Bomb flowers keep needing the bracelet. The builder can now edit values inside actor packs.
+- New setting `bombs_without_bracelet` (off until confirmed in game); `has_explosives` counts it.
+  New logic test (28 in all, all pass).
+- Fixed: the extractor counted chest pedestals (`Obj_TBoxPedestal_A_01`, in the Sacred Forest Meadow
+  Wolfos grotto) as part of the chest. Re-extracted: only those two entries removed. The builder also
+  refuses to change anything that isn't a real chest.
+
+### Mod builder and the first in-game item test (branch `chest-test`)
+- New `tools/build_mod.py`: changes what checks give, by check ID (chests only for now). Edits every
+  placement of the check, writes the map files back compressed with the game's dictionary, updates the
+  resource size table (keeping each entry's headroom and adding what the file grew), checks every actor of
+  each file against what was intended, and can write a launcher `.bat`. Output goes to `out/` (ignored by
+  git: it holds modified game files).
+- Found while building: identical actor settings are stored once and shared in the map files, so changing
+  one chest changed every chest with the same contents. The builder now gives each changed actor its own
+  copy.
+- Test mod: the four chests in Mido's house get a Boomerang, a Piece of Heart, a Hylian Shield and a bomb
+  bag. **Result: all four gave the new item and it worked, no issues.** `KF_MIDO_CHEST_01`-`04` are now
+  `randomizable: "yes"`; the other Kokiri Forest chests stay `untested` (different chest models).
+
 ### Full requirements for every check
 - New `logic/requirements.py`: for each check, the smallest sets of items and settings that get it from
   the start of the game, for a child and an adult, following every route through the region map (exits,

@@ -385,26 +385,26 @@
    "KF Midos Top Left Chest": {
     "id": "KF_MIDO_CHEST_01",
     "spot": "chest@-53.0,-42.0",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave a Boomerang, which worked"
    },
    "KF Midos Top Right Chest": {
     "id": "KF_MIDO_CHEST_02",
     "spot": "chest@-50.5,-42.0",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave a Piece of Heart, which worked"
    },
    "KF Midos Bottom Left Chest": {
     "id": "KF_MIDO_CHEST_03",
     "spot": "chest@-54.0,-41.0",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave a Hylian Shield, which worked"
    },
    "KF Midos Bottom Right Chest": {
     "id": "KF_MIDO_CHEST_04",
     "spot": "chest@-49.5,-41.0",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave a bomb bag, which worked"
    }
   },
   "exits": {
@@ -606,7 +606,7 @@
     "id": "KF_KOKIRI_SWORD_CHEST",
     "spot": "chest@-82.5,33.0",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work"
    },
    "KF Training Area Rupee 1": {
     "id": "KF_TRAINING_AREA_RUPEE_ITEM_01",
@@ -667,7 +667,7 @@
     "id": "KF_STORMS_GROTTO_CHEST",
     "spot": "chest@-71.0,-63.5",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work"
    }
   },
   "exits": {
@@ -720,7 +720,7 @@
      }
     ],
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work"
    },
    "LW Bridge Gossip Stone": {
     "id": "LW_BRIDGE_GOSSIP",
