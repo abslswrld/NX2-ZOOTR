@@ -11,6 +11,9 @@ Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     bombs_without_bracelet   bombs from the bomb bag can be held without the Goron Bracelet: the bomb's lift
                              grade becomes the "no upgrade" grade of rocks, bushes, pots and Bombchus (bomb
                              flowers have their own copy of the setting and still need the bracelet)
+    magic_is_separate        magic items (Lens of Truth, Din's Fire, Farore's Wind, Nayru's Love, magic arrows)
+                             no longer give the magic meter; only the Great Fairy's blessings do
+                             (Item_FairyBless_MP: magic, Item_FairyBless_MPDouble: double magic)
     skippable_opening        the opening cutscene (Dm_Kokiri_0000) can be skipped like every other cutscene:
                              removes its "DisableSkip" setting (only the opening, the title screen and the
                              staff credits have it)
@@ -38,6 +41,14 @@ FIXES = {
     'bombs_without_bracelet': ('Pack/Actor/Item_Bomb.pack',
                                'Component/LiftableParam/Item_Bomb.game__component__LiftableParam.bgyml',
                                'LiftGrade', LIFT_GRADE_BRACELET, LIFT_GRADE_NO_UPGRADE),
+}
+# Some chests play a special event when opened (their GetEventName), made for their original item. When the
+# item changes: 'remove' it (the chest then opens like any other) or 'keep' it. A chest with an event not
+# listed here stops the build, so every one gets a decision.
+CHEST_EVENTS = {
+    'Get_StoneOfForest_GetSword': ('remove', 'plays Dm_Kokiri_0063, which gives and equips the Kokiri Sword '
+                                             '(found in game: the sword came with any item)'),
+    'KokiriForest_TreasureBox_NaviChatOff': ('keep', 'Mido\'s chests: tested in game with four other items, harmless'),
 }
 # name -> (BYML file, path of keys to the entry to remove, value it must have now)
 FILE_FIXES = {
@@ -101,9 +112,10 @@ def plan(world, assignments):
 
 
 def patch_file(data, changes):
-    """change Drop__DropActor of the actors with these hashes; returns (new data, {hash: old item})"""
+    """change Drop__DropActor of the actors with these hashes, and handle their special opening event
+    (CHEST_EVENTS); returns (new data, {hash: old item}, {hash: new Dynamic as intended})"""
     doc = byml.loads(data)
-    found = {}
+    found, intended = {}, {}
     for a in doc.root.get('Actors', []):
         h = str(int(a['Hash']))
         if h in changes:
@@ -115,11 +127,20 @@ def patch_file(data, changes):
             # own copy before changing it, or every chest with the same contents would change too
             dyn = type(dyn)(dyn)
             dyn['Drop__DropActor'] = changes[h][1]
+            event = dyn.get('GetEventName')
+            if event is not None and changes[h][1] != found[h]:
+                what = CHEST_EVENTS.get(event)
+                if what is None:
+                    raise SystemExit('%s: chest %s has the special opening event %r, not in CHEST_EVENTS yet: '
+                                     'decide what to do with it first' % (changes[h][0], h, event))
+                if what[0] == 'remove':
+                    del dyn['GetEventName']
             a['Dynamic'] = dyn
+            intended[h] = dict(dyn)
     missing = set(changes) - set(found)
     if missing:
         raise SystemExit('placements not found: %s' % ', '.join(sorted(missing)))
-    return byml.dumps(doc), found
+    return byml.dumps(doc), found, intended
 
 
 def patch_pack(pack_data, inner, key, expected, value):
@@ -148,6 +169,47 @@ def patch_pack(pack_data, inner, key, expected, value):
     if byml.loads(back.files[inner]).root != want:
         raise SystemExit('read-back: %s differs from what was intended' % inner)
     return new_pack, (len(old_inner), len(new_inner))
+
+
+MAGIC_BLESSINGS = ('Item_FairyBless_MP', 'Pouch_FairyBless_MP', 'Item_FairyBless_MPDouble', 'Pouch_FairyBless_MPDouble')
+
+
+def magic_is_separate(data):
+    """item table (RSDB/PouchActorInfo): every item that raises the magic meter (ExpansionAvility MPMaxUP:
+    Lens of Truth, Din's Fire, Farore's Wind, Nayru's Love, magic arrows) stops doing so, except the Great
+    Fairy's magic blessings, which become the magic items of their own"""
+    doc = byml.loads(data)
+    changed = []
+    for i, row in enumerate(doc.root):
+        if row.get('ExpansionAvility') == 'MPMaxUP' and row['__RowId'] not in MAGIC_BLESSINGS:
+            row = type(row)(row)                      # own copy (shared nodes)
+            del row['ExpansionAvility']
+            row.pop('MPMax', None)
+            doc.root[i] = row
+            changed.append(row['__RowId'])
+    blessings = [r['__RowId'] for r in doc.root if r['__RowId'] in MAGIC_BLESSINGS and r.get('ExpansionAvility') == 'MPMaxUP']
+    if sorted(blessings) != sorted(MAGIC_BLESSINGS):
+        raise SystemExit('magic blessings not found as expected: %s' % blessings)
+    new = byml.dumps(doc)
+    # read back: only those rows lost those two keys
+    old_rows = byml.loads(data).root
+    new_rows = byml.loads(new).root
+    if len(old_rows) != len(new_rows):
+        raise SystemExit('read-back: row count changed')
+    for o, n in zip(old_rows, new_rows):
+        want = dict(o)
+        if o['__RowId'] in changed:
+            del want['ExpansionAvility']
+            want.pop('MPMax', None)
+        if n != want:
+            raise SystemExit('read-back: row %s differs from what was intended' % o['__RowId'])
+    return new, changed
+
+
+# name -> (file, function(data) -> (new data, list of what changed))
+TABLE_FIXES = {
+    'magic_is_separate': ('RSDB/PouchActorInfo.Product.111.rstbl.byml', magic_is_separate),
+}
 
 
 def remove_entry(data, keys, expected):
@@ -234,8 +296,9 @@ def main(argv):
     ap.add_argument('--out', required=True)
     ap.add_argument('--name', default='NX2-ZOOTR')
     ap.add_argument('--longshot', help='Longshot folder: also write a launcher .bat next to the mods folder')
-    ap.add_argument('--fix', action='append', default=[], choices=sorted(set(FIXES) | set(FILE_FIXES)),
-                    help='a game fix (see FIXES, FILE_FIXES)')
+    ap.add_argument('--fix', action='append', default=[],
+                    choices=sorted(set(FIXES) | set(FILE_FIXES) | set(TABLE_FIXES)),
+                    help='a game fix (see FIXES, FILE_FIXES, TABLE_FIXES)')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
     if not a.assign and not a.fix:
@@ -246,6 +309,13 @@ def main(argv):
     out = Output(a.romfs, os.path.join(a.out, a.name, 'romfs'), dicts)
 
     for name in a.fix:
+        if name in TABLE_FIXES:
+            path, fn = TABLE_FIXES[name]
+            src, old = out.read(path)
+            new, changed = fn(old)
+            out.write(path, src, old, new)
+            print('fix %-28s %s: %d rows changed (%s)' % (name, path, len(changed), ', '.join(changed)))
+            continue
         if name in FILE_FIXES:
             path, keys, expected = FILE_FIXES[name]
             src, old = out.read(path)
@@ -262,12 +332,13 @@ def main(argv):
 
     for path, changes in sorted(plan(world, assignments).items()):
         src, old = out.read(path)
-        new, found = patch_file(old, {h: v for h, v in changes.items()})
+        new, found, _ = patch_file(old, {h: v for h, v in changes.items()})
         for h, (cid, item, expected_old) in changes.items():
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
             print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item))
-        # read back: only the changed values differ
+        # read back: only the changed values differ (worked out again here from the original, not from
+        # what patch_file did)
         before = {str(int(x['Hash'])): x for x in byml.loads(old).root['Actors']}
         back = byml.loads(new).root['Actors']
         if len(back) != len(before):
@@ -276,7 +347,12 @@ def main(argv):
             h = str(int(act['Hash']))
             want = dict(before[h])
             if h in changes:
-                want['Dynamic'] = dict(want['Dynamic'], Drop__DropActor=changes[h][1])
+                dyn = dict(want['Dynamic'], Drop__DropActor=changes[h][1])
+                ev = dyn.get('GetEventName')
+                if ev is not None and changes[h][1] != found[h] and CHEST_EVENTS[ev][0] == 'remove':
+                    del dyn['GetEventName']
+                    print('%-18s   special opening event %s removed' % (changes[h][0], ev))
+                want['Dynamic'] = dyn
             if act != want:
                 raise SystemExit('read-back: actor %s (%s) differs from what was intended' % (h, act['Gyaml']))
         out.write(path, src, old, new)

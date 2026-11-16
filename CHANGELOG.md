@@ -4,6 +4,23 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Chest special events, magic as its own item (to test)
+- In-game result of the chest-types test: the big chest (Kokiri Sword chest), the Kokiri Forest Storms
+  grotto chest and the meadow's Wolfos grotto chest all gave their new item. But the Kokiri Sword chest
+  still gave and equipped the sword, and the Lens of Truth gave the magic meter.
+- Found: about 30 chests have a special opening event made for their original item (`GetEventName`). The
+  Kokiri Sword chest's (`Get_StoneOfForest_GetSword`) plays `Dm_Kokiri_0063`, which gives and equips the
+  sword. Others are presentation only (dungeon maps), and some carry story (Ruto's chests, Nabooru, the
+  Serenade of Water after the Iron Boots).
+- `tools/build_mod.py`: new `CHEST_EVENTS` table, deciding per event whether it is removed or kept when a
+  chest's item changes; a chest with an event not in the table stops the build. The sword's is removed;
+  Mido's chests' "Navi stays quiet" event is kept (tested harmless).
+- Found: in the item table (`RSDB/PouchActorInfo`) every magic item raises the magic meter
+  (`ExpansionAvility: MPMaxUP`, `MPMax: 24`). The Great Fairy's blessings exist as items of their own:
+  `Item_FairyBless_MP` (magic, 24) and `Item_FairyBless_MPDouble` (48); also `Item_FairyBless_DefenseDouble`.
+- `--fix magic_is_separate`: the magic items (21 rows: Lens, Din's, Farore's, Nayru's, magic arrows) stop
+  raising the meter; only the blessings do.
+
 ### Other chest types (branch `chest-types`, to test)
 - `tools/build_mod.py` also accepts a check's name, for areas without permanent IDs yet (it refuses a name
   when the check has an ID).
