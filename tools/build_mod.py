@@ -7,10 +7,13 @@ each check every placement is changed (child and adult copies, copies in other m
 written back compressed with the same dictionary as the original, and the resource size table (RESTBL)
 gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, for Longshot's HOS_MODS.
 
-Game fixes (--fix NAME, see FIXES) change a value inside an actor pack:
+Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     bombs_without_bracelet   bombs from the bomb bag can be held without the Goron Bracelet: the bomb's lift
                              grade becomes the "no upgrade" grade of rocks, bushes, pots and Bombchus (bomb
                              flowers have their own copy of the setting and still need the bracelet)
+    skippable_opening        the opening cutscene (Dm_Kokiri_0000) can be skipped like every other cutscene:
+                             removes its "DisableSkip" setting (only the opening, the title screen and the
+                             staff credits have it)
 
 The game's own files are only read. The output contains modified game files: it must never be committed
 or shared (out/ is ignored by git).
@@ -35,6 +38,13 @@ FIXES = {
     'bombs_without_bracelet': ('Pack/Actor/Item_Bomb.pack',
                                'Component/LiftableParam/Item_Bomb.game__component__LiftableParam.bgyml',
                                'LiftGrade', LIFT_GRADE_BRACELET, LIFT_GRADE_NO_UPGRADE),
+}
+# name -> (BYML file, path of keys to the entry to remove, value it must have now)
+FILE_FIXES = {
+    'skippable_opening': (
+        'Event/EventSetting/EventSettingComponentList/Dm_Kokiri_0000.engine__event__EventSettingComponentList.bgyml',
+        ['Components', 'SkipSetting'],
+        '?Event/EventSetting/EventSettingComponent/SkipSetting/DisableSkip.engine__event__SkipSetting.bgyml'),
 }
 LAUNCHER = r"""@echo off
 rem NX2-ZOOTR test launcher (made by tools/build_mod.py). Starts Longshot with the mods in
@@ -133,6 +143,28 @@ def patch_pack(pack_data, inner, key, expected, value):
     return new_pack, (len(old_inner), len(new_inner))
 
 
+def remove_entry(data, keys, expected):
+    """remove one entry (found by its path of keys) from a BYML file; checks its current value first and that
+    nothing else changed"""
+    doc = byml.loads(data)
+    parent = doc.root
+    for k in keys[:-1]:
+        parent = parent[k]
+    if parent.get(keys[-1]) != expected:
+        raise SystemExit('%s is %r, expected %r (game files differ from what this fix was made for)'
+                         % ('/'.join(keys), parent.get(keys[-1]), expected))
+    del parent[keys[-1]]
+    new = byml.dumps(doc)
+    want = byml.loads(data).root
+    p = want
+    for k in keys[:-1]:
+        p = p[k]
+    del p[keys[-1]]
+    if byml.loads(new).root != want:
+        raise SystemExit('read-back: %s differs from what was intended' % '/'.join(keys))
+    return new
+
+
 class Output:
     """writes changed files into the mod folder and keeps the resource size table up to date"""
 
@@ -143,6 +175,11 @@ class Output:
         self.sizes = []
 
     def read(self, path):
+        """(file as stored, contents); a few game files are stored uncompressed (no .zs)"""
+        plain = os.path.join(self.romfs, *path.split('/'))
+        if os.path.exists(plain):
+            src = open(plain, 'rb').read()
+            return src, src
         src = open(os.path.join(self.romfs, *(path + '.zs').split('/')), 'rb').read()
         return src, zstd.decompress(src, self.dicts)
 
@@ -155,6 +192,12 @@ class Output:
         self.sizes.append((path, old_len, new_len, entry, self.table.get(path)))
 
     def write(self, path, src, old, new):
+        if src is old:                                   # stored uncompressed: write it the same way
+            dest = os.path.join(self.mod_romfs, *path.split('/'))
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
+            open(dest, 'wb').write(new)
+            self.size(path, len(old), len(new))
+            return
         did = zstd.frame_dict_id(src)
         comp = zstd.compress(new, level=16, dictionary=self.dicts.get(did) if did else None)
         if zstd.decompress(comp, self.dicts) != new:
@@ -184,7 +227,8 @@ def main(argv):
     ap.add_argument('--out', required=True)
     ap.add_argument('--name', default='NX2-ZOOTR')
     ap.add_argument('--longshot', help='Longshot folder: also write a launcher .bat next to the mods folder')
-    ap.add_argument('--fix', action='append', default=[], choices=sorted(FIXES), help='a game fix (see FIXES)')
+    ap.add_argument('--fix', action='append', default=[], choices=sorted(set(FIXES) | set(FILE_FIXES)),
+                    help='a game fix (see FIXES, FILE_FIXES)')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
     if not a.assign and not a.fix:
@@ -195,6 +239,12 @@ def main(argv):
     out = Output(a.romfs, os.path.join(a.out, a.name, 'romfs'), dicts)
 
     for name in a.fix:
+        if name in FILE_FIXES:
+            path, keys, expected = FILE_FIXES[name]
+            src, old = out.read(path)
+            out.write(path, src, old, remove_entry(old, keys, expected))
+            print('fix %-28s %s: removed %s' % (name, path, '/'.join(keys)))
+            continue
         pack, inner, key, expected, value = FIXES[name]
         src, old = out.read(pack)
         new, (old_inner, new_inner) = patch_pack(old, inner, key, expected, value)

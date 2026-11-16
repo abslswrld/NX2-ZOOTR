@@ -4,6 +4,15 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-15
 
+### Skippable opening cutscene (to test)
+- Found in the game files: the intro is `OpeningEvent` (two cutscenes, `Dm_Kokiri_0000` then
+  `Dm_Kokiri_0030`). Only three cutscenes in the whole game block skipping: the opening
+  (`Dm_Kokiri_0000`), the title screen and the staff credits (setting `SkipSetting: DisableSkip`).
+  `Dm_Kokiri_0030` has no block (should already be skippable).
+- `tools/build_mod.py --fix skippable_opening` removes that setting from the opening, so it can be skipped
+  like any other cutscene; the game still runs every step of the opening. The builder can now also edit
+  uncompressed game files and remove entries from BYML files.
+
 ### Bombs without the Goron Bracelet (to test), chest pedestals
 - Found in the game files: every liftable object has a lift grade. Small rocks, bushes, pots, Cuccos and
   Bombchus share the "no upgrade" grade; bombs (and bomb flowers, in their own files) use the Goron
