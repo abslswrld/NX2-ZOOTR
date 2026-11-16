@@ -1730,7 +1730,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a Piece of Heart, but the pot refills on every visit and the child and adult pots are separate objects (the item could be taken twice)",
   "requirements": {
    "child": [
     []
@@ -1783,7 +1783,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): Bombchus (Item_BombchuBundle_Small) appeared but could not be picked up (the ground version is Obj_Bombchu); the pot refills on every visit",
   "requirements": {
    "child": [
     []
@@ -1900,7 +1900,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee, but the pot refills on every visit",
   "requirements": {
    "child": [
     []
@@ -2515,8 +2515,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave the Fairy Slingshot; with its special opening event removed, no sword is given",
   "requirements": {
    "child": [
     []
@@ -3043,7 +3043,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): the Boomerang (Item_Boomerang) appeared but could not be picked up: Item_ actors are only the model shown when an item is received, a ground item needs an Obj_ actor. The spot is in the water, not behind the house",
   "requirements": {
    "child": [
     []
@@ -3187,8 +3187,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): a Piece of Heart, picked up and counted",
   "requirements": {
    "child": [
     []
@@ -3594,8 +3594,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): a red rupee, picked up",
   "requirements": {
    "child": [
     []
@@ -3632,8 +3632,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave its new item",
   "requirements": {
    "child": [
     [

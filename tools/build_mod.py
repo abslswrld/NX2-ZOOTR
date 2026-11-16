@@ -48,7 +48,8 @@ FIXES = {
 # listed here stops the build, so every one gets a decision.
 CHEST_EVENTS = {
     'Get_StoneOfForest_GetSword': ('remove', 'plays Dm_Kokiri_0063, which gives and equips the Kokiri Sword '
-                                             '(found in game: the sword came with any item)'),
+                                             '(found in game: the sword came with any item; removed and '
+                                             'retested 2026-11-16: slingshot only, no sword)'),
     'KokiriForest_TreasureBox_NaviChatOff': ('keep', 'Mido\'s chests: tested in game with four other items, harmless'),
 }
 # name -> (BYML file, path of keys to the entry to remove, value it must have now)

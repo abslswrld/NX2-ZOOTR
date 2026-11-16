@@ -4,6 +4,28 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### In-game results of the pots and freestanding test
+- Kokiri Sword chest: gave the Fairy Slingshot, no sword, no cutscene. The special event removal works.
+- Magic: no meter after the Lens of Truth or Din's Fire; after Magic both work. Double Magic before Magic
+  gives the big meter at once (to handle with progressive items later).
+- Freestanding: the Piece of Heart and the red rupee worked. The Boomerang appeared but could not be
+  picked up. The spot named "behind Mido's house" is in the water.
+- Pots: the Piece of Heart and the red rupee worked; the Bombchus appeared but could not be picked up.
+  Both pots came back with their items when returning (as an adult), so the items could be taken again.
+- Found (Boomerang, Bombchus): `Item_` actors are only the model shown when an item is received (parent
+  `Item_EventObject_Base`, no pick-up collision). Ground items are `Obj_` actors (parent `Obj_Item_Base`).
+  Only 24 exist (rupees, hearts, Piece of Heart, Bombchus as `Obj_Bombchu`, small keys, shields, ...); most
+  major items have none. `Obj_Ocarina_Time` (the ocarina in the moat) is a thin wrapper around
+  `Item_Ocarina_Time`'s model and item data, so the same can be built for other items. The earlier note
+  about an `Item_` actor placed freestanding was wrong as a general rule.
+- Found (pots refilling): the game keeps one saved flag per placed object, keyed by its placement hash
+  (`GameData/GameDataList`, `Bool64bitKey`). Its `ResetTypeValue` decides when it resets: 24 = never
+  (chests, heart pieces, freestanding rupees, tokens), 88 = when the area reloads (pots, rocks, grass),
+  280 = enemies, 25 = shops and fairies. Kokiri Forest's pots are two objects each, one in the child map
+  and one in the adult map, each with its own flag. No pot in the base game holds a one-time item.
+- Data: Kokiri Sword chest, Storms grotto chest, the freestanding rupee near Mido and the shop rupee are
+  now randomizable "yes"; the other tested pots and items stay "untested" with what was found.
+
 ### Pots and freestanding items in the builder (to test)
 - Found: pots name their item like chests (`Drop__DropActor`); freestanding items have no settings, the
   actor type itself is the item (`Obj_Rupee_Blue`, `Obj_Heart`). Freestanding heart pieces elsewhere in the

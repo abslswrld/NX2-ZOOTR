@@ -70,15 +70,15 @@
     "kind": "freestanding",
     "note": "name from its position; check where it really is",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): the Boomerang (Item_Boomerang) appeared but could not be picked up: Item_ actors are only the model shown when an item is received, a ground item needs an Obj_ actor. The spot is in the water, not behind the house"
    },
    "KF Rupee Near Mido": {
     "id": "KF_RUPEE_NEAR_MIDO_ITEM",
     "spot": "freestanding@14.5,-9.0",
     "rule": "is_child",
     "kind": "freestanding",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): a Piece of Heart, picked up and counted"
    },
    "KF Adult Rupee Circle 1": {
     "id": "KF_ADULT_RUPEE_CIRCLE_ITEM_01",
@@ -482,14 +482,14 @@
     "spot": "pot@6.0,19.5",
     "kind": "pot",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a Piece of Heart, but the pot refills on every visit and the child and adult pots are separate objects (the item could be taken twice)"
    },
    "KF House of Twins Pot 2": {
     "id": "KF_HOUSE_OF_TWINS_POT_02",
     "spot": "pot@6.5,20.5",
     "kind": "pot",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): Bombchus (Item_BombchuBundle_Small) appeared but could not be picked up (the ground version is Obj_Bombchu); the pot refills on every visit"
    }
   },
   "exits": {
@@ -507,7 +507,7 @@
     "spot": "pot@-79.5,-5.5",
     "kind": "pot",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee, but the pot refills on every visit"
    },
    "KF Know It All House Pot 2": {
     "id": "KF_KNOW_IT_ALL_HOUSE_POT_02",
@@ -588,8 +588,8 @@
     "spot": "freestanding@1.0,-27.0",
     "rule": "is_child",
     "kind": "freestanding",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): a red rupee, picked up"
    }
   },
   "exits": {
@@ -605,8 +605,8 @@
    "KF Kokiri Sword Chest": {
     "id": "KF_KOKIRI_SWORD_CHEST",
     "spot": "chest@-82.5,33.0",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave the Fairy Slingshot; with its special opening event removed, no sword is given"
    },
    "KF Training Area Rupee 1": {
     "id": "KF_TRAINING_AREA_RUPEE_ITEM_01",
@@ -666,8 +666,8 @@
    "KF Storms Grotto Chest": {
     "id": "KF_STORMS_GROTTO_CHEST",
     "spot": "chest@-71.0,-63.5",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game; same method as KF_MIDO_CHEST_01-04 (which worked), expected to work"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-15 (tools/build_mod.py, Longshot nightly-178): gave its new item"
    }
   },
   "exits": {
