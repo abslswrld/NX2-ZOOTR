@@ -1677,7 +1677,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game (the child pot at the same spot was)",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee while the child pot gave a Piece of Heart: the two ages are separate; the pot still refills on every visit (one-time rule not built yet)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1716,7 +1716,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game (the child pot at the same spot was)",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): Obj_Bombchu was picked up but showed 0/0 (no bomb bag, see the child pot); the pot still refills on every visit (one-time rule not built yet)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1755,7 +1755,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a Piece of Heart, but the pot refills on every visit and the child and adult pots are separate objects (the item could be taken twice)",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a Piece of Heart; the adult pot at the same spot gave its own item; the pot still refills on every visit (one-time rule not built yet)",
   "requirements": {
    "child": [
     []
@@ -1791,7 +1791,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): Bombchus (Item_BombchuBundle_Small) appeared but could not be picked up (the ground version is Obj_Bombchu); the pot refills on every visit",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): Obj_Bombchu was picked up but showed 0/0 and did not reach the inventory: Bombchus use the bomb bag's capacity, and there was no bomb bag; the pot still refills on every visit (one-time rule not built yet)",
   "requirements": {
    "child": [
     []

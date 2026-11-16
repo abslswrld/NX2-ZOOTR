@@ -4,6 +4,15 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### In-game results of the per-age pots test
+- House of Twins: the child pot gave the Piece of Heart, the adult pot at the same spot gave the red
+  rupee. One check per age works.
+- Bombchus (`Obj_Bombchu`) could be picked up this time, but showed 0/0 and never reached the inventory.
+- Found: Bombchus have no capacity of their own. Their maximum is the bomb bag's (`MaxNumGameData: Bomb` on
+  `Item_Bombchu` in `RSDB/PouchActorInfo`), and each bomb bag raises both bombs and Bombchus
+  (`ExpansionMaxNumActor`). Without a bomb bag the maximum is 0. Bombchus need the bomb bag, as in the
+  remake itself; with a bomb bag they are not tested yet.
+
 ### Pots: one check per age (to test)
 - Kokiri Forest's pots are separate objects in the child and adult maps, so each pot is now two checks,
   with its own item per age. A check can name one age (`"age": "child"` / `"adult"` in the world data): it
