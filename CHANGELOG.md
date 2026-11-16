@@ -4,6 +4,17 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Pots and freestanding items in the builder (to test)
+- Found: pots name their item like chests (`Drop__DropActor`); freestanding items have no settings, the
+  actor type itself is the item (`Obj_Rupee_Blue`, `Obj_Heart`). Freestanding heart pieces elsewhere in the
+  game are placed with no settings and no condition either, so the "already collected" memory comes with
+  the actor type. The game also places an `Item_` actor freestanding (a bottle of milk in Hyrule Field).
+- `tools/build_mod.py` now changes pots (their `Drop__DropActor`) and freestanding items (their actor type).
+- Test mod adds: Piece of Heart and Boomerang as freestanding items, a red rupee in the shop; Piece of
+  Heart and Bombchus in the House of Twins pots, a red rupee in a Know-It-All house pot. The Storms
+  grotto chest is back to normal (no duplicate Lens of Truth).
+- `TEST_CHECKLIST.md`: what to check in game for this test mod.
+
 ### Chest special events, magic as its own item (to test)
 - In-game result of the chest-types test: the big chest (Kokiri Sword chest), the Kokiri Forest Storms
   grotto chest and the meadow's Wolfos grotto chest all gave their new item. But the Kokiri Sword chest

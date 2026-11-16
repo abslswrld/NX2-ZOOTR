@@ -2,7 +2,8 @@
 
     python tools/build_mod.py --romfs "<romfs>" --out out\\mods --name NX2-ZOOTR KF_MIDO_CHEST_01=Item_Boomerang ...
 
-For now only chests are supported (their item is the Drop__DropActor of the chest in the map file). For
+Supported: chests and pots (their item is their Drop__DropActor in the map file) and freestanding items
+(the actor type itself is the item: it is replaced). For
 each check every placement is changed (child and adult copies, copies in other maps), the map files are
 written back compressed with the same dictionary as the original, and the resource size table (RESTBL)
 gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, for Longshot's HOS_MODS.
@@ -33,7 +34,7 @@ from formats import zstd, byml, restbl, sarc  # noqa: E402
 from logic.world import World  # noqa: E402
 
 RESTBL_PATH = os.path.join('System', 'Resource', 'ResourceSizeTable.Product.111.Nin_Ounce_NVN2.rsizetable.zs')
-SUPPORTED = {'chest'}
+SUPPORTED = {'chest', 'pot', 'freestanding'}
 # name -> (actor pack, file inside the pack, key, value it must have now, new value)
 LIFT_GRADE_NO_UPGRADE = 3069107721      # small rocks, bushes, pots, Cuccos, Bombchus
 LIFT_GRADE_BRACELET = 3655598229        # bombs and bomb flowers
@@ -91,8 +92,16 @@ def find_check(world, cid):
     raise SystemExit('unknown check ID or name %s' % cid)
 
 
+def _right_actor(kind, actor):
+    if kind == 'chest':
+        return actor.startswith('Obj_TBox') and not actor.startswith('Obj_TBoxPedestal')
+    if kind == 'pot':
+        return actor.startswith('Obj_Pot')
+    return True                                       # freestanding: the actor is the item
+
+
 def plan(world, assignments):
-    """{map file path in romfs: {placement hash: (check id, new item, old item)}}"""
+    """{map file path in romfs: {placement hash: (check id, new item, old item, kind)}}"""
     files = {}
     for cid, item in assignments:
         r, name, loc = find_check(world, cid)
@@ -102,22 +111,28 @@ def plan(world, assignments):
         for scene, spot_id in sps:
             spot = world.checks[scene][spot_id]
             if spot['kind'] not in SUPPORTED:
-                raise SystemExit('%s is a %s: only %s supported yet' % (cid, spot['kind'], ', '.join(SUPPORTED)))
+                raise SystemExit('%s is a %s: only %s supported yet' % (cid, spot['kind'], ', '.join(sorted(SUPPORTED))))
             for p in spot['placements']:
-                if not p['actor'].startswith('Obj_TBox') or p['actor'].startswith('Obj_TBoxPedestal'):
-                    raise SystemExit('%s: placement %s is a %s, not a chest' % (cid, p['hash'], p['actor']))
+                if not _right_actor(spot['kind'], p['actor']):
+                    raise SystemExit('%s: placement %s is a %s, not a %s' % (cid, p['hash'], p['actor'], spot['kind']))
                 for fn in p['files']:
-                    files.setdefault('Banc/%s/%s' % (scene, fn[:-3] if fn.endswith('.zs') else fn), {})[p['hash']] = (cid, item, spot['item'])
+                    files.setdefault('Banc/%s/%s' % (scene, fn[:-3] if fn.endswith('.zs') else fn), {})[p['hash']] = \
+                        (cid, item, spot['item'], spot['kind'])
     return files
 
 
 def patch_file(data, changes):
-    """change Drop__DropActor of the actors with these hashes, and handle their special opening event
-    (CHEST_EVENTS); returns (new data, {hash: old item}, {hash: new Dynamic as intended})"""
+    """change what the actors with these hashes give: chests and pots through their Drop__DropActor (chests'
+    special opening events handled by CHEST_EVENTS), freestanding items by their actor type (Gyaml);
+    returns (new data, {hash: old item}, {hash: new Dynamic as intended})"""
     doc = byml.loads(data)
     found, intended = {}, {}
     for a in doc.root.get('Actors', []):
         h = str(int(a['Hash']))
+        if h in changes and changes[h][3] == 'freestanding':
+            found[h] = a['Gyaml']
+            a['Gyaml'] = changes[h][1]
+            continue
         if h in changes:
             dyn = a.get('Dynamic')
             if dyn is None or 'Drop__DropActor' not in dyn:
@@ -333,7 +348,7 @@ def main(argv):
     for path, changes in sorted(plan(world, assignments).items()):
         src, old = out.read(path)
         new, found, _ = patch_file(old, {h: v for h, v in changes.items()})
-        for h, (cid, item, expected_old) in changes.items():
+        for h, (cid, item, expected_old, kind) in changes.items():
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
             print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item))
@@ -346,7 +361,9 @@ def main(argv):
         for act in back:
             h = str(int(act['Hash']))
             want = dict(before[h])
-            if h in changes:
+            if h in changes and changes[h][3] == 'freestanding':
+                want['Gyaml'] = changes[h][1]
+            elif h in changes:
                 dyn = dict(want['Dynamic'], Drop__DropActor=changes[h][1])
                 ev = dyn.get('GetEventName')
                 if ev is not None and changes[h][1] != found[h] and CHEST_EVENTS[ev][0] == 'remove':
