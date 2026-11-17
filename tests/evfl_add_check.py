@@ -73,6 +73,8 @@ def example_shop_bottle(flow, selected, item, price):
     (sorts the item by kind, asks `EventQueryCheckBuyResult`: the buy check) -> "buy it?" talk -> pay -> get.
     The new branch goes in front of that callswitch:
 
+    (a yes/no query answers 0 for yes and 1 for no in this game's flows: case 0 = yes, case 1 = no)
+
       is Shop_SelectItemName == `selected`?            (GameDataActor.EventQueryIsGameDataString64)
         no  -> the game's callswitch, as before
         yes -> has Link `price` rupees?                (PouchSystemActor.EventQueryHasRuppe)
@@ -113,10 +115,10 @@ def example_shop_bottle(flow, selected, item, price):
     n['give'] = example_item_get(fc, item, next=n['sold'])
     n['show'] = fc.events[n['give']].next
     n['pay'] = fc.add_action(shop, 'EventTriggerPayItemPriceAtShop', next=n['give'])
-    n['rupees'] = fc.add_switch('PouchSystemActor', 'EventQueryHasRuppe', [(0, check), (1, n['pay'])],
+    n['rupees'] = fc.add_switch('PouchSystemActor', 'EventQueryHasRuppe', [(0, n['pay']), (1, check)],
                                 Params(Value=price))
     n['is_item'] = fc.add_switch('GameDataActor', 'EventQueryIsGameDataString64',
-                                 [(0, check), (1, n['rupees'])],
+                                 [(0, n['rupees']), (1, check)],
                                  Params(GameDataName=SHOP_SELECTED, Index=-1, Value=selected))
     # what pointed at the game's callswitch now points at the new first step (not the two new "no" cases)
     links = fc.repoint(check, n['is_item'], keep=(n['is_item'], n['rupees']))
@@ -436,9 +438,9 @@ def shop_bottle_test(rd):
     back = E[n['back']]
     old_back = next(e for e in fo.events if e.type == 'subflow' and e.entry == 'Buy_ReturnStart_NoDofReset')
     steps = (
-        is_switch('is_item', 'GameDataActor', 'EventQueryIsGameDataString64', [(0, check_i), (1, n['rupees'])],
+        is_switch('is_item', 'GameDataActor', 'EventQueryIsGameDataString64', [(0, n['rupees']), (1, check_i)],
                   [('GameDataName', SHOP_SELECTED), ('Index', -1), ('Value', selected)])
-        and is_switch('rupees', 'PouchSystemActor', 'EventQueryHasRuppe', [(0, check_i), (1, n['pay'])],
+        and is_switch('rupees', 'PouchSystemActor', 'EventQueryHasRuppe', [(0, n['pay']), (1, check_i)],
                       [('Value', price)])
         and is_action('pay', 'Npc_EventStarter', 'EventTriggerPayItemPriceAtShop', 'give')
         and is_action('give', 'PouchSystemActor', 'EventTriggerAddOrRemovePouchContent', 'show',
