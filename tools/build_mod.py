@@ -14,8 +14,7 @@ gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, f
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
                              Deku Tree (the "low on stock" set is removed, every shelf is open from the
-                             start, the shopkeeper greets as after the Deku Tree), and the adult
-                             shopkeeper gets a shop list of its own; needed to change
+                             start), and the adult shopkeeper gets a shop list of its own; needed to change
                              shop shelves (each shelf's item, sold once, goes into the shopkeeper's list)
     bombchus_without_bag     Bombchus get a capacity of their own (BOMBCHU_MAX, as in the original game) and
                              no longer need the bomb bag: in the remake their maximum is the bomb bag's, so
@@ -43,7 +42,7 @@ sys.path.insert(0, ROOT)
 
 import ground_items  # noqa: E402
 import shop_items  # noqa: E402
-from formats import zstd, byml, restbl, sarc, evfl  # noqa: E402
+from formats import zstd, byml, restbl, sarc  # noqa: E402
 from logic.world import World  # noqa: E402
 
 RESTBL_PATH = os.path.join('System', 'Resource', 'ResourceSizeTable.Product.111.Nin_Ounce_NVN2.rsizetable.zs')
@@ -347,31 +346,6 @@ SHOP_KEEPERS = {'child': 'Npc_Kokiri_001_Shop_Child', 'adult': 'Npc_Kokiri_001_S
 SHOP_LIST = 'Component/ShopParam/Npc_Kokiri_001_Shop_Child.game__component__ShopParam.bgyml'
 SHOP_LIST_ADULT = 'Component/ShopParam/Npc_Kokiri_001_Shop_Adult.game__component__ShopParam.bgyml'
 SHOP_STOCK_ONCE = 1
-SHOP_FLOW = 'Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl'   # the child shopkeeper's talk
-
-
-def shop_greeting(data):
-    """the child shopkeeper's talk: its one branch on meeting the Deku Tree (before: Mido blocks the way, low
-    on stock) always takes the "after" side"""
-    ef = evfl.loads(data)
-    hits = [i for i, e in enumerate(ef.flowchart.events)
-            if e.type == 'switch' and isinstance(e.params, dict) and e.params.get('GameDataName') == SHOP_FLAG]
-    if len(hits) != 1:
-        raise SystemExit('%s: %d branches on %s, expected 1' % (SHOP_FLOW, len(hits), SHOP_FLAG))
-    e = ef.flowchart.events[hits[0]]
-    after = dict(e.cases).get(1)
-    if after is None or sorted(v for v, _ in e.cases) != [0, 1]:
-        raise SystemExit('%s: branch on %s not as expected: %r' % (SHOP_FLOW, SHOP_FLAG, e.cases))
-    e.cases = [(0, after), (1, after)]
-    new = evfl.dumps(ef)
-    back, orig = evfl.loads(new).flowchart.events, evfl.loads(data).flowchart.events
-    for i, (b, o) in enumerate(zip(back, orig)):
-        want = dict(vars(o), cases=[(0, after), (1, after)]) if i == hits[0] else vars(o)
-        if vars(b) != want:
-            raise SystemExit('read-back: %s event %d differs from what was intended' % (SHOP_FLOW, i))
-    if len(back) != len(orig):
-        raise SystemExit('read-back: %s event count changed' % SHOP_FLOW)
-    return new
 
 
 def _is_shop_actor(actor):
@@ -658,9 +632,6 @@ def main(argv):
             out.write(SHOP_MAP, src, old, new)
             print('fix %-28s %s: %d shop objects removed (before the Deku Tree), %d always there'
                   % (name, SHOP_MAP, len(shop_removed), len(always)))
-            src, old = out.read(SHOP_FLOW)
-            out.write(SHOP_FLOW, src, old, shop_greeting(old))
-            print('fix %-28s %s: greeting always as after the Deku Tree' % (name, SHOP_FLOW))
             continue
         if name in TABLE_FIXES:
             path, fn = TABLE_FIXES[name]
