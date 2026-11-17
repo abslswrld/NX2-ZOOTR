@@ -4,6 +4,15 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### In-game results of the automatic pickup test
+- Passed: every ground item is picked up by walking into it. The game loads on the updated Longshot.
+- Bug: the **Bottle** is picked up without Link holding it above his head (the other items have that).
+- Bug: the **Fairy Ocarina** from the pot can't be played after pickup until the game is saved, quit and
+  reloaded (switching to adult also fixes it). Probably there since the first ground ocarina; the French
+  randomizer has the same bug.
+- Lead (not confirmed): these are the only two test items with a "special deal" in the game's item table
+  (`PouchSpecialDeal`: `Bottle`, `Ocarina`), handled apart from ordinary items when received.
+
 ### Ground items picked up by walking into them (to test)
 - Each ground version (`Obj_NX2_*`) now has item settings of its own (`PouchContentParam`), built like the
   ground shield's: the item's own settings as parent, plus `DefaultAutoGet: true`. Only the ground versions
