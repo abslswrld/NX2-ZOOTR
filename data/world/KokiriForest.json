@@ -20,8 +20,8 @@
     "spot": "skulltula@-84.0,-17.5",
     "rule": "is_child and at_night and can_child_attack",
     "note": "night only (game flag)",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor, as for rocks): dropped a Piece of Heart instead of its token"
    },
    "KF GS Bean Patch": {
     "id": "KF_BEAN_PATCH_GS",
@@ -29,7 +29,7 @@
     "rule": "can_plant_bugs and can_child_attack",
     "note": "appears once bugs are released in the soft soil (flag Gimmick_MagicBeanSoil_KokiriForest)",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "not yet changed in game (same method as the Know-It-All House skulltula, which worked)"
    },
    "KF GS House of Twins": {
     "id": "KF_HOUSE_OF_TWINS_GS",
@@ -37,7 +37,7 @@
     "rule": "is_adult and at_night and can_use(Hookshot)",
     "note": "adult, night only (game flag); hookshot as in the N64 game: check height in game",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "not yet changed in game (same method as the Know-It-All House skulltula, which worked)"
    },
    "KF Rupee Near Fado 1": {
     "id": "KF_RUPEE_NEAR_FADO_ITEM_01",
@@ -168,6 +168,24 @@
     "note": "child map only; two rocks stacked here: Obj_LiftRock_A_02 (a prop with no lift setting, for the Kokiri Npc_Kokiri_008_Child who acts out trying to lift it) and Obj_LiftRock_A_01 (liftable). In the game a child level logic (Logic/KokiriForest_Child_Level_All_02_6960) swaps the prop for the liftable rock once the Kokiri Emerald is got (Get_StoneOfForest_IsCompleted_Exp), and the Kokiri's schedule moves him away then. With --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) both happen from the start (Kokiri moved: confirmed in game 2026-11-17; the swap: confirmed in game 2026-11-17, the middle rock lifts and gives its rupee)",
     "randomizable": "untested",
     "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+   },
+   "KF Rock Circle Kokiri Gift": {
+    "id": "KF_CIRCLE_KOKIRI_GIFT",
+    "rule": "is_child",
+    "kind": "gift",
+    "gift": {
+     "flow": "Npc_Kokiri_008_Child",
+     "event": "Event224",
+     "item": "Obj_Rupee_Blue"
+    },
+    "note": "the Kokiri Npc_Kokiri_008_Child gives a blue rupee once all the circle rocks (the ring of 8 and the middle rock) are lifted (after HaveTalked_Special.Npc_Kokiri_008_Child_LiftRock_AllBroken_Talk_Event166); new in the remake. Without --fix kokiri_circle_after_dungeons the middle rock can only be lifted after the Kokiri Emerald, so the builder refuses an item here without the fix",
+    "pos": [
+     -45.8,
+     111.8,
+     -27.8
+    ],
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-17 with --fix kokiri_circle_after_dungeons (tools/build_mod.py sets the ActorName of his Dm_SY_GetInEvent call): gave a gold rupee"
    },
    "KF Child Rock Circle 1": {
     "id": "KF_CIRCLE_CHILD_ROCK_01",

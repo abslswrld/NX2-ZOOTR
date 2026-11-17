@@ -1,6 +1,6 @@
 """Build the small test mod that tells whether event flow (.bfevfl) edits work in game.
 
-    python tools/evfl_test_mod.py --romfs "<romfs>" --out out\\mods-evfl-test --longshot "<Longshot folder>"
+    python tools/evfl_test_mod.py --romfs "<romfs>" --out out\\mods-evfl-test
 
 One event flow is edited, `Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl` (the child Kokiri shopkeeper's
 talk), in two independent ways:
@@ -15,8 +15,8 @@ talk), in two independent ways:
 
 Also in the mod: the skippable opening (a BYML edit already seen to work), only to get to the shop faster.
 
-Output: <out>/NX2-ZOOTR-evfl-test/romfs/..., and with --longshot a launcher "Launch evfl test.bat" next to
-<out>, using the same test save folder as the main launcher (<out>/../user). `out/` is ignored by git.
+Output: <out>/NX2-ZOOTR-evfl-test/romfs/... It writes no launcher of its own (the only test launcher is the
+builder's "Launch NX2-ZOOTR test.bat"). `out/` is ignored by git.
 """
 import argparse
 import os
@@ -63,7 +63,6 @@ def main(argv):
     ap.add_argument('--romfs', required=True)
     ap.add_argument('--out', required=True, help='mods folder for this test only (not out\\mods)')
     ap.add_argument('--name', default='NX2-ZOOTR-evfl-test')
-    ap.add_argument('--longshot', help='Longshot folder: also write "Launch evfl test.bat" next to --out')
     a = ap.parse_args(argv)
     mods = os.path.abspath(a.out)
     if os.path.basename(mods).lower() == 'mods':
@@ -86,13 +85,6 @@ def main(argv):
 
     out.finish()
     print('mod folder:', os.path.join(mods, a.name))
-    if a.longshot:
-        bat = os.path.join(os.path.dirname(mods), 'Launch evfl test.bat')
-        user = os.path.join(os.path.dirname(mods), 'user')
-        with open(bat, 'w', encoding='ascii', newline='\r\n') as f:
-            f.write(build_mod.LAUNCHER.replace('NX2-ZOOTR test launcher (made by tools/build_mod.py)',
-                                               'NX2-ZOOTR event flow test launcher (made by tools/evfl_test_mod.py)') % {'longshot': os.path.abspath(a.longshot), 'mods': mods, 'user': user})
-        print('launcher:', bat)
 
 
 if __name__ == '__main__':

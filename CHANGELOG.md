@@ -4,6 +4,55 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Gold Skulltulas, gifts and Deku Scrubs: how the game gives their items (research, test build only)
+None of the three can be changed by the builder yet. Read from the game's own files:
+- **Gold Skulltula** (`Enemy_Skulltula_Gold`): its token comes from a drop table in its pack
+  (`DropTable_Token_Gold` -> `Obj_Token_Gold`), and it has the same `Drop__DropActor` instance setting as pots
+  and rocks. So the builder's map edit for rocks (add `Drop__DropActor` to the placement) may work for it too.
+- **Gifts**: most hand their item over through the shared flow `Dm_SY_GetInEvent` (entries `GetInEvent`,
+  `GetInEvent_NotTurn`, ...) with the item as its `ActorName` setting: the Skull Kids' heart pieces, the Lost
+  Woods target prize, the Deku Theater upgrades, Fado. A few cutscenes add the item directly
+  (`PouchSystemActor.EventTriggerAddOrRemovePouchContent`, `Actor`): Saria's ocarina (`Dm_Kokiri_0155`), the
+  Ocarina of Time. Songs are in cutscene flows with timelines, which `formats/evfl.py` can't read yet.
+- **New check found**: the rock-circle Kokiri (`Npc_Kokiri_008_Child`) gives a blue rupee once all the circle
+  rocks are lifted (`Event224`, after `..._LiftRock_AllBroken_Talk_Event166`). Not in the data yet.
+- **Deku Scrubs** (`Enemy_Scrub_Business`): the map placement names what it sells
+  (`ScrubBusiness_ShopItemActorName0..2`); the shared flow `Enemy_Scrub_Business_Common` matches that name and
+  calls a sell step with the item as a setting. The one-time upgrades (stick bag, nut bag, heart piece) use
+  `SimpleShopSub_Scrub_Business_OneTime` (`ActorName`, `Price`), which pays and gives through `Dm_SY_GetInEvent`.
+  The flow is shared by every scrub, so per-scrub items will need a branch per scrub.
+- Test build (`out/mods-kinds-test`, nothing in the builder): the Know-It-All House skulltula drops a Piece of
+  Heart (rock-style map edit), the rock-circle Kokiri's gift is a gold rupee, the Lost Woods stick-bag scrub
+  sells a Bomb Bag. **Confirmed in game, all three:** the skulltula dropped the Piece of Heart, the Kokiri gave
+  the gold rupee (also with the rock circle fix moving him), the scrub sold a Bomb Bag (held up, 40 rupees).
+  The scrub's lines still talk about the Deku Stick bag (its `SellerMessageId`).
+- **Builder: Gold Skulltulas and gifts.** `tools/build_mod.py` now changes:
+  - Gold Skulltulas: `Drop__DropActor` added to the placement, as for rocks (`DROP_ADDED`); the item lies on
+    the ground (`DROP_ON_GROUND`).
+  - gifts with `"gift": {"flow", "event", "item"}` in their data: the `ActorName` of that event's call of
+    `Dm_SY_GetInEvent` (checked: it is such a call and gives the expected item; read back, only those values
+    change). Gifts that add their item directly (Saria's ocarina) have no such data yet and are still refused.
+  With the test's assignments the builder writes the map and the flow byte for byte as tested.
+- New check `KF_CIRCLE_KOKIRI_GIFT` ("KF Rock Circle Kokiri Gift", kind gift, child): the Kokiri's blue rupee
+  for lifting all the circle rocks. Refused without `--fix kokiri_circle_after_dungeons` (tested only with it).
+  `KF_KNOW_IT_ALL_HOUSE_GS` randomizable "yes". `tools/build_db.py` gives a gift's original item from its data.
+  Kokiri Forest: 120 checks; db_check 0 errors, logic tests pass.
+- **Generic scrub sales line** (test build only, `out/mods-scrub-test`): a new label
+  `Enemy_Scrub_Business_NX2_Item` in `EventFlowMsg/Enemy_Event.msbt` (all 16 languages, English text; the
+  file has no attribute section, so a new label is only a label and a text): "Ah, the <item>! It's <price>
+  rupees. Wanna buy it?". The item name is the shop's item-name tag (2,3) reading
+  `Scrub_Business_TempItemName_00`, which the scrub fills from its map setting `ScrubBusiness_ShopItemActorName0`;
+  the price is the scrub lines' own tag. The stick-bag scrub: map setting -> `Item_BombBag_Small`, the flow's
+  name check (`Event315`) and its three sell calls follow, with the new line. **Confirmed in game:** "Ah, the
+  bomb bag! It's 40 rupees." and the sale worked.
+- **One test launcher.** Test builds now go into `out/mods/NX2-ZOOTR` and are started with
+  `Launch NX2-ZOOTR test.bat` (plus `Launch 100 save (unmodded).bat`); the per-test launchers were deleted.
+  `tools/build_mod.py` removes its earlier output (`<out>/<name>/romfs`) before building, so no file of an older
+  build stays in the mod. `tools/evfl_test_mod.py` no longer writes a launcher (`--longshot` removed).
+- Scrubs are not in the builder yet: the Lost Woods isn't classified (no check IDs), each scrub needs its own
+  branch in the shared flow, and the sales lines name the original item (no line names the item from a
+  variable).
+
 ### Shopkeeper greeting back in, rock circle after the dungeons, Bottle shelf retest
 - `--fix kokiri_shop_full_stock` again makes the child shopkeeper greet as after the Deku Tree, now wired
   the right way round (case 0 = yes = the "after" side). Same edit as the confirmed event flow test: the

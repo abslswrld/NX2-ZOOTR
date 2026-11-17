@@ -56,6 +56,9 @@ def vanilla(world, region, loc, ctype):
         return {'value': None, 'source': None, 'note': 'hint stone, gives no item'}
     if ctype == 'skulltula':
         return {'value': 'GoldSkulltulaToken', 'source': 'check kind (not stored in the map data)', 'note': None}
+    if not sps and loc.get('gift'):
+        g = loc['gift']
+        return {'value': g['item'], 'source': 'event flow %s, %s' % (g['flow'], g['event']), 'note': None}
     if not sps:
         return {'value': None, 'source': None,
                 'note': 'event with no map placement; contents not found in the game data yet'}
