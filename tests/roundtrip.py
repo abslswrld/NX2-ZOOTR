@@ -18,7 +18,7 @@ import traceback
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 
-from formats import zstd, sarc, byml, evfl, msbt, restbl  # noqa: E402
+from formats import zstd, sarc, byml, evfl, msbt, restbl, ainb  # noqa: E402
 
 
 def kind_of(name):
@@ -35,6 +35,8 @@ def kind_of(name):
         return 'msbt'
     if n.endswith('.rsizetable'):
         return 'restbl'
+    if n.endswith('.ainb'):
+        return 'ainb'
     return None
 
 
@@ -49,6 +51,8 @@ def roundtrip(kind, data):
         return msbt.Msbt.read(data).write()
     if kind == 'restbl':
         return restbl.Restbl.read(data).write()
+    if kind == 'ainb':
+        return ainb.Ainb.read(data).write()
     raise ValueError(kind)
 
 

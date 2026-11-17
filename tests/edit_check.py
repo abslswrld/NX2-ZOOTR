@@ -1,20 +1,36 @@
 """Edit test: change each format the way a randomizer would, write it, read it back, and check the change
 is there and everything else is unchanged. Reads only; writes nothing to the romfs.
+(The AINB edits are compared through the text dump of tools/ainb_dump.py: only the edited lines may differ.)
 
     python tests/edit_check.py "C:\\...\\romfs"
 """
+import io
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 
-from formats import zstd, sarc, byml, evfl, msbt, restbl  # noqa: E402
+from formats import zstd, sarc, byml, evfl, msbt, restbl, ainb  # noqa: E402
+from tools import ainb_dump  # noqa: E402
 
 
 def check(name, ok):
     print('%-58s %s' % (name, 'OK' if ok else 'FAILED'))
     return ok
+
+
+def ainb_text(doc):
+    out = io.StringIO()
+    ainb_dump.dump(doc, out)
+    return out.getvalue().split('\n')
+
+
+def changed_lines(before, after):
+    """Lines that differ between two dumps of the same length (None if the line counts differ)."""
+    if len(before) != len(after):
+        return None
+    return [(a, b) for a, b in zip(before, after) if a != b]
 
 
 def main(romfs):
@@ -75,6 +91,44 @@ def main(romfs):
     t.set('Test/hello.txt', 1234)
     back = restbl.Restbl.read(t.write())
     good &= check('RESTBL: new entry read back', back.get('Test/hello.txt') == 1234)
+
+    # AINB: change a number (the pot respawn logic waits 1200 frames; make it 60)
+    raw = open(os.path.join(romfs, 'Logic', 'Obj_Pot_A_05_Respawn_Prefab_1c6c.logic.module.ainb'), 'rb').read()
+    a = ainb.Ainb.read(raw)
+    before = ainb_text(a)
+    delay = next(n for n in a.nodes if n.name == 'HoldGeneralDelayBool')
+    frame = next(x for x in delay.inputs['float'] if x.name == 'Frame')
+    was = frame.value
+    frame.value = 60.0
+    out = a.write()
+    b = ainb.Ainb.read(out)
+    diff = changed_lines(before, ainb_text(b))
+    good &= check('AINB: changed number read back, nothing else changed',
+                  was == 1200.0 and diff is not None and len(diff) == 1 and 'Frame = 60' in diff[0][1]
+                  and len(out) == len(raw) and sum(x != y for x, y in zip(out, raw)) <= 4)
+    good &= check('AINB: rewriting the edited file is stable', b.write() == out)
+
+    # AINB: change a string to a new one, and take one source away from an input with several
+    raw = open(os.path.join(romfs, 'Logic', 'KokiriForest_Common_Level_All_01_6aaf.logic.module.ainb'), 'rb').read()
+    a = ainb.Ainb.read(raw)
+    before = ainb_text(a)
+    setter = next(n for n in a.nodes if n.name == 'TriggerGameDataSetBoolTrue')
+    name = next(x for x in setter.inputs['string'] if x.name == 'GameDataNameBool')
+    old_name = name.value
+    name.value = 'NX2_Test_Flag'
+    both = next(n for n in a.nodes if n.name == 'OperateAND' and len(n.inputs['bool'][0].sources or ()) == 2)
+    both.inputs['bool'][0].sources = both.inputs['bool'][0].sources[:1]
+    out = a.write()
+    b = ainb.Ainb.read(out)
+    diff = changed_lines(before, ainb_text(b))
+    other = next(n for n in b.nodes if n.name == 'TriggerGameDataSetBoolFalse')
+    good &= check('AINB: new string, removed source; nothing else changed',
+                  diff is not None and len(diff) == 2
+                  and any('GameDataNameBool = "NX2_Test_Flag"' in d[1] for d in diff)
+                  and any('BoolMulti' in d[1] and 'HoldGameDataGetBoolSimple' not in d[1] for d in diff)
+                  and other.inputs['string'][0].value == old_name
+                  and out.endswith(b'NX2_Test_Flag\0'))
+    good &= check('AINB: rewriting the edited file is stable', b.write() == out)
 
     # zstd: compress and decompress
     blob = evfl.dumps(f)

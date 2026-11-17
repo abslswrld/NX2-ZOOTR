@@ -4,6 +4,86 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### AINB: reader and writer for the game's AI and logic files (branch `claude/ainb-format-aa01ca`)
+- **New `formats/ainb.py`**: reads an `.ainb` file (magic `AIB `, version 0x408) into Python objects and
+  writes it back: commands (entry points), nodes with their fixed values, inputs, outputs, links,
+  preconditions and attachments, global parameters with their defaults and file references, embedded
+  module names, entry strings, the replacement table. Written from the game's own files: no public
+  description of this version was reachable, and it differs from what I knew of the older 0x404/0x407
+  (node bodies hold index+count pairs instead of offsets; 7 global parameter types instead of 6).
+- **Round trip: 11,707/11,707 byte-identical** (1,942 loose files in `AI`, `Logic`, `Sequence`, 9,765
+  inside packs; 5,036 different files). In `tests/roundtrip.py`; `run_tests.bat` now also covers the
+  `AI`, `Logic` and `Sequence` folders.
+- **Kept as they are, not decoded:** the expression block (EXB: small formulas some nodes use; 1,079 of
+  the 5,036 files have one) is raw bytes; the string pool is kept as read and new strings go at the end;
+  the extra words of links, parameter flags and the replacement table are numbers (the dump tool names
+  the ones understood: selector conditions, "value comes from global parameter N / expression N").
+  Not possible yet: adding or changing an expression. Adding nodes is possible in the object model but
+  not tested in game.
+- **Edit test** (`tests/edit_check.py`): changes a number (the pot respawn delay, 1200 -> 60 frames), a
+  string (a flag name, new in the pool) and removes one source of an input with several; each result
+  reads back with only those lines changed in the text dump, and writing it again gives the same bytes.
+- **New `tools/ainb_dump.py`** (read only): prints an AINB as text, from a file or from a path in the
+  romfs that may go through a pack; `--find <text>` lists where AINB files with that name are.
+- Found on the way: the `AI`, `Logic` and `Sequence` folders hold 3 BYML node definition tables
+  (`NodeDefinition/Node.Product.111.aidefn.byml`) that the BYML writer gives back smaller (not AINB;
+  same kind as the 2 known BYML system files). Not fixed here.
+
+What the three files do (analysis only, nothing changed in the builder; all from the dumps):
+
+- **Rock circle** (`Logic/KokiriForest_Common_Level_All_01_6aaf.logic.module.ainb`, 38 nodes). Two sets
+  of liftable rocks. The 8 (`Obj_LiftRock_A_01_4079`, `_4151`, `_6b1c`, `_79ff`, `_ab49`, `_b129`,
+  `_e464`, `_f107`) are always created and are deleted when "adult AND the flag
+  `SageOfForest_IsBefore_Step08`" is true. The 4 (`_1345`, `_39ec`, `_b2db`, `_f726`) are created only
+  when that same condition is true. So: child = the 8; adult while `SageOfForest_IsBefore_Step08` = the 4;
+  adult after = the 8 again. This matches what was seen in game, and names the exact flag (a step of the
+  Forest Sage's story, not "Forest Temple completed" as such). When all 8 are broken it sets
+  `KokiriForest_Npc_Kokiri_008_Child_LiftRock_AllBroken` to true (false otherwise). 8 trigger areas, one
+  per rock of the 8, watch for the player: player inside one -> `Npc_Kokiri_008_Child_AttentionFlag`
+  false, otherwise true; each area is deleted when its rock is lifted or broken, or when
+  `Get_StoneOfForest_IsCompleted_Exp` (by its name: the Kokiri Emerald is obtained) is true. The middle rock is not in this
+  module. To make the circle the same at every age, the one node to change is the "adult AND flag" node
+  (or the flag name it reads).
+- **Ground item pick-up** (`AI/PouchContent.event.root.ainb` in `Pack/AI.Global.Product.111.pack.zs`, 380
+  nodes, 60 entry points). It is the list of things an event flow can ask of or tell an item actor
+  (`EventQuery...`, `EventTrigger...`); each query answers with a number the event flow switches on.
+  - `EventTriggerAddOwnToPouch` (the push to the pouch) runs two game-code nodes at once:
+    `OneShotPouchContentPushToPouchOwnInEvent` and `OneShotActorChangeIsRespawn(false)` (the picked-up
+    object will not come back). Nothing else: what the push does (equip, count, refresh the ocarina
+    button) is inside the game's code, not in this file.
+  - `SpecialDeal` is read by `QueryPouchContentGetSpecialDeal` in two entry points with the same graph:
+    `EventQueryOwnIsMaxLifeUpPouchContent` and `EventQueryOwnIsNotPushPouchContent`. Both answer 0 ("yes")
+    when SpecialDeal is 3 and 1 ("no") for anything else. So in this file SpecialDeal 3 means "heart
+    container kind: don't put it in the pouch"; no other value is looked at here.
+  - `EventQueryGetRequestedTargetProcess`: 0 put in the pouch, 1 equip, 2 heal (also the default).
+    `EventQueryCanAddToPorchSelf` asks the pouch manager (`QueryPouchMgrIsEnablePushToPouch`, by actor
+    name): 0 can be taken, 1 cannot. `EventTriggerReserveNotPushToPouchProcess` /
+    `EventQueryIsNotPushToPouchInEvent`: an event can reserve "don't push this one".
+    `EventQueryCheckOwnPouchContentCategory`: 0 weapon, 1 bow, 2 arrow, 3 shield, 4 armour, 5 material,
+    6 important item, 7 rupee, 8 healing item, 9 head gear, 10 boots, 11 other.
+    `EventQueryCheckTagOnPouchActor`: actor tags `LetterBottle` 0, `Obj_Fire_Arrow` 1, `BiggoronSword` 2,
+    `Token_Gold` 3, other 4. `EventQueryIsAutoSavePouchContent`: save after the get scene or not.
+  - For the Fairy Ocarina that can't be played until a reload: this file gives no handle on it (the push
+    is one game-code node). The place to compare next is the event flow that calls these entry points
+    for the Ocarina of Time in the moat against the one used for our ground ocarina.
+- **Pots.** The pot's own AI (`AI/Obj_Pot.root.ainb`, in every pot, rock and grass pack, 40 nodes) only
+  decides when it breaks: thrown or fallen and then touching something, thrown and hitting an actor
+  (unless that actor has the tag `UnbreakHitPotAttack`), or damaged by a Wallmaster; each ends in
+  `OneShotDeathRequestDeath`. Other ways of breaking (a sword hit) are not in this file. Nothing in it
+  brings a pot back or remembers it. What brings a broken pot back is outside the AI:
+  - ordinary pots (`Obj_Pot_A_01`...) use the actor setting `ActorGameDataSetting/SupplyObject` and the
+    saved per-object flag found earlier (reset when the area reloads);
+  - the `..._Respawn` pots use `ActorGameDataSetting/AlwaysRespawn` and a death procedure
+    `Default_AlwaysRespawn`, and are driven by a logic module, e.g.
+    `Logic/Obj_Pot_A_05_Respawn_Prefab_1c6c.logic.module.ainb` (16 nodes): the pot is re-created
+    (`RespawnTrigger`) when all of these hold: the pot has been gone for 1200 frames, the player has a
+    bomb bag but no bombs and no Bombchus, no bomb (`Obj_Bomb`) is in the object area and the player is
+    not in the player area around it, it is not on camera, and a condition given by the map that uses
+    the module is true. A supply pot that refills when you are out of bombs. (The module also writes an
+    auto-generated saved flag when the pot dies and uses it to decide whether to create the pot.)
+  So a one-time rule for pots is not an AI change: the lead is the `SupplyObject` game data setting
+  (and the reset type of the flag), to look at with the BYML tools.
+
 ### Rock circle corrected (branch `rock-circle`)
 - **Correction:** the circle by Mido's house has **8** rocks as a child, not 12 (earlier notes said 12).
   The map places 12 rock objects; the level logic shows 8 to a child, and to an adult 4 before the Forest

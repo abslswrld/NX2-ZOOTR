@@ -16,6 +16,7 @@ no game files are included.
 | BFEVFL event flows | `formats/evfl.py` | item hand-outs, shops, cutscenes | 650/914 byte-identical; 264 not readable yet (see below) |
 | MSBT text | `formats/msbt.py` | item names, hints, dialogue | 8,640/8,640 byte-identical |
 | RESTBL | `formats/restbl.py` | file-size table the game needs for changed files | 1/1 byte-identical |
+| AINB v0x408 (AI, logic and sequence graphs) | `formats/ainb.py` | pot respawn rules, item pick-up logic, level logic (the rock circle) | 11,707/11,707 byte-identical (2026-11-17: 1,942 loose files in `AI`, `Logic`, `Sequence` and 9,765 inside packs; 5,036 different files) |
 
 "Byte-identical" means: read the file, write it back without changes, and get exactly the same bytes.
 Whole game = `run_tests.bat` (the Event, RSDB, Mals, GameData, Pack and System folders, archives opened:
@@ -27,10 +28,17 @@ Not identical yet:
 - **2 BYML system files** (`PhiveConfig.byml`, `HeapDef.byml`) come back smaller than the originals. Not
   files the randomizer edits.
 
-`tests/edit_check.py` also changes each format (adds an event, a table row, a file, a text, a size entry)
+`tests/edit_check.py` also changes each format (adds an event, a table row, a file, a text, a size entry,
+changes a number and a string in an AI file)
 and checks the result reads back correctly.
 
-Not covered yet: AINB (AI/logic files, inside packs), BFRES models, BNTX textures (the tunic-colour
+AINB notes: the expression block (EXB) inside a file is kept as raw bytes, and the string pool is kept as
+read (new strings go at the end); see the top of `formats/ainb.py`. `tools/ainb_dump.py` prints a file as
+text. The `AI`, `Logic` and `Sequence` folders (now part of `run_tests.bat`) also hold 3 BYML node
+definition tables (`NodeDefinition/Node.Product.111.aidefn.byml`) that come back smaller, like the 2 BYML
+system files above.
+
+Not covered yet: BFRES models, BNTX textures (the tunic-colour
 module already has its own texture code), save files (needed for the tracker).
 
 ## Things this game does differently from the public documentation
