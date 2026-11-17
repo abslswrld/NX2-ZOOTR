@@ -2,6 +2,20 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-17
+
+### In-game results of the full Kokiri Shop test
+- Child: all 8 shelves are there before the Deku Tree. The **Boomerang** can be bought and works. The
+  **5 Bombchus** can be bought without a bomb bag and work. The game's own items can still be bought again
+  and again.
+- Child: the **Empty Bottle** (on the Recovery Heart's shelf) could not be bought.
+- Child: the shopkeeper still says Mido is blocking the way and he can't restock (the greeting of the
+  set before the Deku Tree), though all 8 shelves are there.
+- Some single items show an "x5" count board (the boards are separate objects linked to the shelf, made
+  for the original bundle). Wanted: no count board on single items.
+- Adult: the **Hookshot** shows, but partly inside the shelf. Bought, works, and the shelf stays empty
+  afterwards (sold once works).
+
 ## 2026-11-16
 
 ### Kokiri Shop: one full shop per age (to test)
