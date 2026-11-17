@@ -5,7 +5,8 @@ Newest first. Dates are when the work was done.
 ## 2026-11-17
 
 ### Why event flow edits showed nothing: yes and no were the wrong way round (branch `claude/evfl-in-game-0d5942`)
-Looked into offline (game, Longshot and its logs only read). Not yet confirmed in game: a test mod is ready.
+Looked into offline (game, Longshot and its logs only read). **Confirmed in game (2026-11-17):** with the test mod, the
+ child shopkeeper greeted normally before the Deku Tree and the goodbye line was replaced. Event flow edits work.
 
 - **Likely cause: in this game's flows a yes/no question answers 0 for yes and 1 for no.** Both edits
   assumed the opposite (1 = yes, as in Breath of the Wild). Read from the game's own flows, four ways:
