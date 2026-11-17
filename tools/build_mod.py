@@ -6,7 +6,8 @@ Supported: chests and pots (their item is their Drop__DropActor in the map file;
 Skulltulas get one added: a skulltula then drops the item instead of its token), freestanding items
 (the actor type itself is the item: it is replaced), gifts that hand their item over through the shared
 event flow Dm_SY_GetInEvent (the item is that call's ActorName; the check's data names the flow, the event and
-the item, "gift": {...}), Deku Scrubs that sell one thing once (the upgrade scrubs: their map setting
+the item, "gift": {...}), songs (the song cutscene, "song": {...} in the data, only fades in and hands over
+the item: song_skip), Deku Scrubs that sell one thing once (the upgrade scrubs: their map setting
 ScrubBusiness_ShopItemActorName0 becomes the item, and the shared flow Enemy_Scrub_Business_Common gets one new
 branch per item, selling it at the scrub's original price with a new generic line that names the item; see
 scrub_flow_edit) and shop shelves (the shelf actor is replaced by a shop
@@ -148,7 +149,7 @@ def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: 
     for cid, item_given in assignments:
         r, name, loc = find_check(world, cid)
         sps = world.spots_of(r, loc)
-        if not sps and loc.get('gift'):
+        if not sps and (loc.get('gift') or loc.get('song')):
             continue                                  # an event: plan_gifts
         if not sps:
             raise SystemExit('%s has no map placement (an event): not supported yet' % cid)
@@ -186,6 +187,8 @@ def plan_gifts(world, assignments):
         r, name, loc = find_check(world, cid)
         if world.spots_of(r, loc):
             continue
+        if loc.get('song'):
+            continue                                  # plan_songs
         g = loc.get('gift')
         if not g:
             raise SystemExit('%s has no map placement (an event) and no "gift" data: not supported yet' % cid)
@@ -194,6 +197,60 @@ def plan_gifts(world, assignments):
             raise SystemExit('%s: %s %s is also %s' % (cid, g['flow'], g['event'], events[g['event']][0]))
         events[g['event']] = (cid, item, g['item'])
     return flows
+
+
+# what the song cutscenes themselves give the song with: "You got ..." window, then the item (Dm_SY_GetInEvent
+# called from the cutscene gave nothing and the cutscene didn't count as played: seen in game)
+SONG_GET = ('GetPouchContent', 'GetPouchContentByActorName')
+
+
+def plan_songs(world, assignments):
+    """{song cutscene flow path: (check id, new item, song)} for the song checks among the assignments.
+    A song's data: "song": {"flow": its cutscene (Dm_MelodyGet_*), "item": the song it gives}"""
+    out = {}
+    for cid, item in assignments:
+        r, name, loc = find_check(world, cid)
+        sg = loc.get('song')
+        if not sg:
+            continue
+        path = 'Event/EventFlow/%s.bfevfl' % sg['flow']
+        if path in out:
+            raise SystemExit('%s: %s is also %s' % (cid, sg['flow'], out[path][0]))
+        out[path] = (cid, item, sg['item'])
+    return out
+
+
+def song_skip(fc, cid, item, song):
+    """the song cutscene (Dm_MelodyGet_*) is still started as before, so the game records it as played (that
+    is what keeps its trigger from coming back, e.g. SacredForestMeadow_Child_Prefab_bbc3: "Dm_MelodyGet_Saria"
+    not played), but its first entry point now only fades in, hands over the item the way the cutscene hands
+    over the song (GetPouchContent<GetPouchContentByActorName>: "You got ..." window, then the item; plus what the
+    item needs, SCRUB_COMPANIONS) and ends: no lesson, no song. Returns lines saying what was changed."""
+    gives = [e for e in fc.events if e.type == 'subflow' and e.flowchart == 'GetPouchContent'
+             and isinstance(e.params, dict) and e.params.get('ActorName') == song]
+    if len(gives) != 1:
+        raise SystemExit('%s: %d events give %s in the cutscene, expected 1' % (cid, len(gives), song))
+    ep = next((p for p in fc.entry_points if p.name == 'EntryPoint0'), None)
+    if ep is None:
+        raise SystemExit('%s: the cutscene has no EntryPoint0' % cid)
+    fade = next((e for e in fc.events if e.type == 'action'
+                 and fc.actors[e.actor].actions[e.action] == 'EventEventFadeIn'), None)
+    if fade is None:
+        raise SystemExit('%s: no fade-in found in the cutscene' % cid)
+    params = evfl.Params(fade.params)
+    params['IsWaitEnd'] = True
+    nxt = None
+    for companion in reversed(SCRUB_COMPANIONS.get(item, [])):
+        nxt = fc.add_action('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent',
+                            evfl.Params(Num=1, Actor=companion, IsGetEvent=False,
+                                        IsSetMessageTargetActorName=False, IsEquipDIrect=False), next=nxt)
+    get = fc.add_subflow(SONG_GET[0], SONG_GET[1], evfl.Params(ActorName=item), next=nxt)
+    first = fc.add_action(fade.actor, 'EventEventFadeIn', params, next=get)
+    was = fc.events[ep.main].name
+    ep.main = first
+    fc.update_entry_points()
+    return ['%-18s cutscene starts with the get of %s instead of the song lesson (%s; was %s)'
+            % (cid, item, fc.events[first].name, was)]
 
 
 def gift_edit(fc, events):
@@ -1261,6 +1318,15 @@ def main(argv):
             if act != want:
                 raise SystemExit('read-back: actor %s (%s) differs from what was intended' % (h, act['Gyaml']))
         out.write(path, src, old, new)
+
+    # songs: the cutscene only hands over the item
+    for path, (cid, item, song) in sorted(plan_songs(world, assignments).items()):
+        src, old = out.read(path)
+        ef = evfl.loads(old)
+        said = song_skip(ef.flowchart, cid, item, song)
+        out.write(path, src, old, flow_write_checked(ef))
+        for line in said:
+            print(line, '(%s)' % path.split('/')[-1])
 
     # gifts: the item of their call of Dm_SY_GetInEvent (read back: only those values change)
     for path, events in sorted(plan_gifts(world, assignments).items()):
