@@ -24,6 +24,13 @@ from the shield's (ground parts) and X's (model, name, item row). The name is `O
 
 No glow and no effects: the shield's effect link (only its burning effect) is left out, and its row's
 `ELinkUserName` removed. Its sound link stays.
+
+Picked up by walking into it, without pressing A: `DefaultAutoGet` in an item's settings (`PouchContentParam`)
+decides that. The Bottle's has it, as does the ground shield's (its own settings inherit from `AutoPickShield`);
+the Boomerang's, Bomb Bag's, Fairy Ocarina's and Hookshot's don't, and in game (2026-11-16) those showed
+"Take" (A). So the ground version gets item settings of its own, built like the ground shield's: the item's
+settings as `$parent`, plus `DefaultAutoGet: true`. Only the ground version's pack has them; the item itself
+(chests, NPCs) is unchanged.
 """
 import copy
 import os
@@ -127,6 +134,10 @@ def kind_of(read_pack, item):
     return None
 
 
+def pouch_param_path(actor):
+    return 'Component/PouchContentParam/%s.game__component__PouchContentParam.bgyml' % actor
+
+
 def anim_param_path(actor):
     return 'Component/AnimationParam/%s.engine__component__AnimationParam.bgyml' % actor
 
@@ -191,6 +202,16 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False):
         tdoc.root['AnimationResources'] = swapped
         files[anim_param_path(name)] = byml.dumps(tdoc)
         comp['AnimationRef'] = '?' + anim_param_path(name)
+    # picked up by walking into it: item settings of its own (the item's as parent, DefaultAutoGet on), as
+    # the ground shield's own settings over AutoPickShield
+    pdoc = byml.loads(tpl.files[_ref_path(tc['PouchContentRef'])])
+    pdoc.root = type(pdoc.root)()
+    pdoc.root['$parent'] = 'Work/' + _ref_path(ic['PouchContentRef'])[:-len('.bgyml')] + '.gyml'
+    pdoc.root['DefaultAutoGet'] = True
+    files[pouch_param_path(name)] = byml.dumps(pdoc)
+    comp['PouchContentRef'] = '?' + pouch_param_path(name)
+    if _parent_path(byml.loads(files[pouch_param_path(name)]).root) != _ref_path(ic['PouchContentRef']):
+        raise SystemExit('read-back: item settings parent of %s' % name)
     for r in TEMPLATE_ONLY:                         # as Obj_Item_Base
         comp.pop(r, None)
     doc = copy.copy(tpl_ap)

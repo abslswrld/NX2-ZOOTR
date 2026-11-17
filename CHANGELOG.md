@@ -4,6 +4,24 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Ground items picked up by walking into them (to test)
+- Each ground version (`Obj_NX2_*`) now has item settings of its own (`PouchContentParam`), built like the
+  ground shield's: the item's own settings as parent, plus `DefaultAutoGet: true`. Only the ground versions
+  change; the items from chests and NPCs keep their own settings.
+- Test mod rebuilt with the same items in the same places, now from Longshot's new single folder
+  (`romfs_path.txt` and the launcher point at it).
+
+### In-game results of the ground items test, second try (Deku Shield template)
+- Passed. The game loaded. The Bomb Bag, Boomerang and Empty Bottle were picked up, went into the item
+  menu and work. The Fairy Ocarina (child pot), Bombchus (child pot, after the Bomb Bag) and Hookshot
+  (adult pot) were picked up and work too.
+- Every item except the Bottle needed **A ("Take")** to pick up. Wanted: picked up automatically, by
+  walking into it, like the Bottle.
+- Found: the item's own pick-up settings (`PouchContentParam`, copied into the ground version) decide
+  this. The Bottle's has `DefaultAutoGet: true`, and so does the shield template's (`AutoPickShield`). The
+  Boomerang, Bomb Bag, Fairy Ocarina and Hookshot have no `DefaultAutoGet`, so the game shows "Take". Not
+  changed yet.
+
 ### Ground items rebuilt from the ground Deku Shield (to test)
 - `tools/ground_items.py` now copies the game's ground Deku Shield (`Obj_Shield_Deku`) instead of the ground
   ocarina. It is a single equipment item lying on the ground, with the pick-up collision of ordinary ground

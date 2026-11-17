@@ -439,6 +439,7 @@ def main(argv):
         tpl_files = sarc.Sarc.read(tpl_pack).files
         for inner, data in new_inner.items():
             like = (ground_items.anim_param_path(ground_items.TEMPLATE) if 'AnimationParam' in inner
+                    else ground_items.pouch_param_path(ground_items.TEMPLATE) if 'PouchContentParam' in inner
                     else ground_items.ap_path(ground_items.TEMPLATE))
             out.add(inner, len(data), like, len(tpl_files[like]))
         for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
