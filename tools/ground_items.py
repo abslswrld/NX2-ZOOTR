@@ -31,12 +31,6 @@ the Boomerang's, Bomb Bag's, Fairy Ocarina's and Hookshot's don't, and in game (
 "Take" (A). So the ground version gets item settings of its own, built like the ground shield's: the item's
 settings as `$parent`, plus `DefaultAutoGet: true`. Only the ground version's pack has them; the item itself
 (chests, NPCs) is unchanged.
-
-No "special deal" (to test, 2026-11-16): the ground pick-up logic (`AI/PouchContent.event.root.ainb`) reads
-the item's `SpecialDeal` and runs bottle-only steps for `Bottle`: in game the ground Bottle was taken
-without the hold-up. The ocarinas have `Ocarina`, and the ground Fairy Ocarina could not be played until a
-reload. When the item's settings have a special deal, the ground version's own settings set it to "None"
-(`SPECIAL_DEAL_NONE`, the value `KeyItemDefault` uses). The item table row (`PouchActorInfo`) keeps it.
 """
 import copy
 import os
@@ -56,7 +50,6 @@ ITEM_REFS = ('ActorNameRef', 'AnimationRef', 'ModelInfoRef', 'PouchContentRef')
 TEMPLATE_ONLY = ('GameParameterTableRef', 'LiftableRef', 'ELinkRef')
 ROW_FROM_ITEM = ('ActorName', 'FmdbName', 'ModelAabbMax', 'ModelAabbMin', 'ModelProjectName')
 TABLES = ('ActorInfo', 'GameActorInfo', 'PouchActorInfo')
-SPECIAL_DEAL_NONE = 3069107721                      # hash of "None" (KeyItemDefault's SpecialDeal)
 
 
 def table_path(t):
@@ -215,13 +208,6 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False):
     pdoc.root = type(pdoc.root)()
     pdoc.root['$parent'] = 'Work/' + _ref_path(ic['PouchContentRef'])[:-len('.bgyml')] + '.gyml'
     pdoc.root['DefaultAutoGet'] = True
-    path, deal = _ref_path(ic['PouchContentRef']), None
-    while path in files and deal is None:          # the item's special deal, through its parents
-        proot = byml.loads(files[path]).root
-        deal = proot.get('SpecialDeal')
-        path = _parent_path(proot)
-    if deal is not None and int(deal) != SPECIAL_DEAL_NONE:
-        pdoc.root['SpecialDeal'] = type(deal)(SPECIAL_DEAL_NONE)
     files[pouch_param_path(name)] = byml.dumps(pdoc)
     comp['PouchContentRef'] = '?' + pouch_param_path(name)
     if _parent_path(byml.loads(files[pouch_param_path(name)]).root) != _ref_path(ic['PouchContentRef']):

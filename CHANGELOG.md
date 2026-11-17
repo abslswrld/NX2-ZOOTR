@@ -4,6 +4,11 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Special deal change undone
+- The ground versions keep the item's special deal again (`tools/ground_items.py` as before the test): the
+  change fixed neither the Bottle nor the ocarina. Test mod rebuilt (same items, Fairy Ocarina still in
+  Mido's chest).
+
 ### In-game results of the special deal test
 - Ground **Bottle** with no special deal: still no hold-up ("You got an empty bottle!" with Link standing).
   The special deal is not the cause.
