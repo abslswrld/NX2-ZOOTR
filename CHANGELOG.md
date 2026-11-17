@@ -4,6 +4,74 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Deku Scrubs in the builder (branch `claude/scrubs-in-builder`, on top of the event flow tool branch)
+- `tools/build_mod.py` now changes what a Deku Scrub sells, for the scrubs that sell one thing once (their talk
+  runs `SimpleShopRoot_Enemy_Scrub_Business_Pouch`: the stick and nut upgrade scrubs, the Death Mountain heart
+  piece scrub):
+  - map: the scrub's `ScrubBusiness_ShopItemActorName0` becomes the item (every copy and age; read back);
+  - flow `Enemy_Scrub_Business_Common`: in front of the root's first item comparison, one new branch per item
+    (`Scrub_Business_TempItemName_00 == item` -> `SimpleShopSub_Scrub_Business_OneTime` with the item, the
+    price the game's own calls ask for the scrub's original item, and the generic line), made with the event
+    flow tool's `add_switch`, `add_subflow`, `repoint`;
+  - text: the generic line `Enemy_Scrub_Business_NX2_Item` in every language (as confirmed in game).
+- Refused for now: the other scrubs (potions, seeds, bugs, the Dream scrubs: several items each), and items
+  the game's own branches already sell (Piece of Heart, stick bag, nut bag): a new branch for one would also
+  catch the game's other scrubs selling it (the Death Mountain heart-piece scrub would sell at 40, not 100).
+- Every scrub in the game (all maps): 4 stick-bag, 2 nut-bag, 3 heart-piece (`Heart_01` x2, `Heart_02`),
+  consumable sellers, 25 Dream scrubs (`Enemy_Scrub_Business_Dream*`).
+- Areas without IDs: the builder takes the check's name (`"LW Deku Scrub Grotto Nut Upgrade=Item"`).
+- Test build (`out/mods`): `LW_NEAR_BRIDGE_SCRUB` = Bomb Bag: **confirmed in game** (made by the builder).
+  The grotto nut scrub was given `Item_BulletBag_Small`, thought to be the slingshot: it is the **seed bag**;
+  bought, then the game froze while Link held it up (nothing gives that item alone in the game). The slingshot
+  is `Item_Range_SlingShot` (what the Deku Tree chest gives). Retest: **the slingshot was given, without the
+  seed bag (0/0 seeds)**. Nothing in the game files gives the bag with the slingshot (the Deku Tree chest's
+  special event `InsideTheDekuTree_GetSlingShot` only plays a Navi line; the item tables don't link them).
+- So a scrub selling an item also gives what it needs (`SCRUB_COMPANIONS`: slingshot -> `Item_BulletBag_Small`),
+  silently (`PouchSystemActor.EventTriggerAddOrRemovePouchContent`, `IsGetEvent` false) and only after a
+  successful buy (`ScrubBusiness_BuySuccess`, as the game's own callers check it). Not yet tested.
+- The grotto seed scrub then sold seeds to the slingshot without a bag ("pretty full, buy anyway?") and buying
+  gave the seed bag. Its offer checks `IsGet.Weapon_Range_SlingShot`, not the bag. When any check gives the
+  slingshot, the builder now puts a check in front of both seed sales of `Enemy_Scrub_Business_Common`
+  (`IsGet.Item_BulletBag_Small`): without the bag the scrub says a new line `Enemy_Scrub_Business_NX2_NoSeedBag`
+  ("Squee... On second thought, you've got nothing to carry these in!") and the sale ends as not bought, like
+  the game's "not enough rupees" refusal. Not yet tested. Not done yet: the seed sales of the Dream scrubs and
+  the wandering seed scrub (their own flow files).
+- **Confirmed in game:** the grotto scrub sold the slingshot **and** the seed bag (30/30). A slingshot from a
+  chest (Kokiri Sword chest) also comes with 30/30 by itself: only the scrubs' way of giving
+  (`Dm_SY_GetInEvent`) needs the companion; gifts use the same flow, so probably they do too (not tested).
+  The seed scrub refusal wasn't seen (the bag-less slingshot was no longer reachable in that test).
+- Seen: a seed scrub sells seeds again and again. In the randomizer a scrub must sell its item once.
+  How the game keeps a one-time scrub gone: the scrub sits in a prefab (`Enemy_Scrub_Business_Set_01_d7f2`)
+  that a logic module per scrub (`Logic/Enemy_Scrub_Business_DekuStickPouch_300c`, `..._DekuNutsPouch_a676`,
+  `..._Heart_Piece_86ac`, ...) creates only while the scrub's sold flag (e.g.
+  `LostWood_Enemy_Scrub_Business_DekuStickPouch_01`, set by the talk entry after a buy) is off. The repeat
+  sellers (seeds, potions, bugs) have no flag and no such module. Making one sell once needs a sold flag of its
+  own: the game's flag list (`GameData/GameDataList`, 11,292 bools, by hash, each with a place in the save) has
+  no free one, so it would mean adding flags, not tried yet. Also every talk name is registered in
+  `RSDB/EventSetting`.
+- **Flags looked into.** `GameData/GameDataList`: a flag's key is MurmurHash3 (32-bit, seed 0) of its name
+  (checked on `LostWood_Enemy_Scrub_Business_DekuStickPouch_01`, `ScrubBusiness_BuySuccess`,
+  `Npc_SkullKid_Child_IsGetHeartPiece`); each has `DefaultValue`, `ResetTypeValue`, `SaveFileIndex`, and
+  `MetaData` gives each save file's size and offsets (`progress.sav` 703,884 bytes), so adding saved flags
+  would also mean changing the save layout. Not needed for scrubs: the 11,657 `Bool64bitKey` flags are keyed
+  by **map placement hash** (287 placements in Kokiri Forest and the Lost Woods: rocks, bushes, enemies, ...),
+  and **every Business Scrub placement has one** (reset type 280), repeat sellers included. Most likely the
+  "gone" state that the one-time sale's `EventTriggerRequestDeath` records.
+- So the builder now makes **any** scrub sell once (`scrub_flow_edit`): a scrub whose talk doesn't run the
+  one-time root (seeds, arrows, potions) gets at the start of its talk the root's own first step
+  (`EventScrubBusinessWriteGameDataBancItemName`, which copies the map setting into
+  `Scrub_Business_TempItemName_00`) and a check: its item -> the one-time root (the new branch sells it once,
+  the scrub leaves), anything else -> the game's talk as before (other scrubs with the same talk are not
+  changed). The price is what the game asks for the scrub's original item (copies may differ: the first's).
+  Still refused: scrubs with nothing set in the map (the bug seller), the Dream scrubs (other flow files).
+- Test build: the Lost Woods grotto seed scrub (child seeds / adult arrows) sells a gold rupee once.
+  **Confirmed in game:** it sold the gold rupee and stayed gone. No new flags needed.
+- The other grotto scrub (seeds, unchanged) offers nothing without a slingshot; talking to it a second time
+  and choosing "see ya later" froze the game. Its talk never reaches the changed root or the new steps, and
+  the flow's entry point lists are the game's apart from the root's: most likely the original game (not yet
+  checked unmodded).
+- Event flow tool PR merged (#10).
+
 ### Gold Skulltulas, gifts and Deku Scrubs: how the game gives their items (research, test build only)
 None of the three can be changed by the builder yet. Read from the game's own files:
 - **Gold Skulltula** (`Enemy_Skulltula_Gold`): its token comes from a drop table in its pack
