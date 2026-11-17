@@ -563,59 +563,131 @@
   "verified": false,
   "notes": "Door at (-0.9, -18.3). Shelves change after meeting the Deku Tree (flag Meet_DekuTree_IsAfter_Step02_Exp): same 8 slots.",
   "locations": {
-   "KF Shop Item 1": {
-    "id": "KF_KOKIRI_SHOP_01",
+   "KF Shop Child Item 1": {
+    "id": "KF_KOKIRI_CHILD_SHOP_01",
     "spot": "shop#1",
     "kind": "shop",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
    },
-   "KF Shop Item 2": {
-    "id": "KF_KOKIRI_SHOP_02",
+   "KF Shop Adult Item 1": {
+    "id": "KF_KOKIRI_ADULT_SHOP_01",
+    "spot": "shop#1",
+    "kind": "shop",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "KF Shop Child Item 2": {
+    "id": "KF_KOKIRI_CHILD_SHOP_02",
     "spot": "shop#2",
     "kind": "shop",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
    },
-   "KF Shop Item 3": {
-    "id": "KF_KOKIRI_SHOP_03",
+   "KF Shop Adult Item 2": {
+    "id": "KF_KOKIRI_ADULT_SHOP_02",
+    "spot": "shop#2",
+    "kind": "shop",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "KF Shop Child Item 3": {
+    "id": "KF_KOKIRI_CHILD_SHOP_03",
     "spot": "shop#3",
     "kind": "shop",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
    },
-   "KF Shop Item 4": {
-    "id": "KF_KOKIRI_SHOP_04",
+   "KF Shop Adult Item 3": {
+    "id": "KF_KOKIRI_ADULT_SHOP_03",
+    "spot": "shop#3",
+    "kind": "shop",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "KF Shop Child Item 4": {
+    "id": "KF_KOKIRI_CHILD_SHOP_04",
     "spot": "shop#4",
     "kind": "shop",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
    },
-   "KF Shop Item 5": {
-    "id": "KF_KOKIRI_SHOP_05",
+   "KF Shop Adult Item 4": {
+    "id": "KF_KOKIRI_ADULT_SHOP_04",
+    "spot": "shop#4",
+    "kind": "shop",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "KF Shop Child Item 5": {
+    "id": "KF_KOKIRI_CHILD_SHOP_05",
     "spot": "shop#5",
     "kind": "shop",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
    },
-   "KF Shop Item 6": {
-    "id": "KF_KOKIRI_SHOP_06",
+   "KF Shop Adult Item 5": {
+    "id": "KF_KOKIRI_ADULT_SHOP_05",
+    "spot": "shop#5",
+    "kind": "shop",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "KF Shop Child Item 6": {
+    "id": "KF_KOKIRI_CHILD_SHOP_06",
     "spot": "shop#6",
     "kind": "shop",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
    },
-   "KF Shop Item 7": {
-    "id": "KF_KOKIRI_SHOP_07",
+   "KF Shop Adult Item 6": {
+    "id": "KF_KOKIRI_ADULT_SHOP_06",
+    "spot": "shop#6",
+    "kind": "shop",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "KF Shop Child Item 7": {
+    "id": "KF_KOKIRI_CHILD_SHOP_07",
     "spot": "shop#7",
     "kind": "shop",
+    "age": "child",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
    },
-   "KF Shop Item 8": {
-    "id": "KF_KOKIRI_SHOP_08",
+   "KF Shop Adult Item 7": {
+    "id": "KF_KOKIRI_ADULT_SHOP_07",
+    "spot": "shop#7",
+    "kind": "shop",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "KF Shop Child Item 8": {
+    "id": "KF_KOKIRI_CHILD_SHOP_08",
     "spot": "shop#Shop_Heart",
     "kind": "shop",
+    "age": "child",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "KF Shop Adult Item 8": {
+    "id": "KF_KOKIRI_ADULT_SHOP_08",
+    "spot": "shop#Shop_Heart",
+    "kind": "shop",
+    "age": "adult",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
    },

@@ -2,7 +2,156 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-17
+
+### Tidy before merging `ocarina-chus-shop`
+- Removed the test-only Empty Bottle shelf variants and the shop Bottle's special-deal workaround (bottles
+  never reach a shelf now). Results stay above.
+- Kept as it is for now (decided 2026-11-17): a chest giving the Fairy Ocarina gives the held-up version
+  (`Item_NX2_Ocarina_Fairy`): visible when held up, playable after a save and reload or a change of
+  scene, not straight away. The pot / ground ocarina behaves the same.
+
+### No bottles on shop shelves (for now)
+- The builder refuses any item with the "Bottle" special deal on a shop shelf (the Empty Bottle, potions,
+  fish, Ruto's letter... `REFUSED_SPECIAL_DEALS` / `refusal()` in `tools/shop_items.py`), with a message
+  saying why and where it can go instead (chest, pot, ground, NPC). The game's own bottle shelves
+  (`Shop_Bottle_*`, special deal `NotPushToPouch`: poured into a bottle Link owns) are still allowed.
+
+### In-game results of the Empty Bottle variants
+- Neither variant can be bought: for both, the shopkeeper goes through his "on second thought" lines.
+  With the special deal, the item settings' `PouchActor` and the row's bottle slot each ruled out, the
+  refusal is in the game's buy code itself. Conclusion: an Empty Bottle can't be sold on a shelf (the game
+  never sells one). It works everywhere else (chest, pot, freestanding, NPC).
+
+### Empty Bottle on a shelf: two test variants (to test)
+- The game's buy code refuses the shop Empty Bottle. Two test-only variants (`shop_items.VARIANTS`, given on
+  the builder's command line as `CHECK=Item_Bottle~A` / `~B`), one guess each:
+  - **A** (Recovery Heart shelf, 5 rupees): no `PouchActor`, so the shop version itself goes into the
+    pouch, as the first ground Bottle did (which worked as a bottle).
+  - **B** (Deku Nuts 10 shelf, 30 rupees): the row without its item-button slot (`AssignableItem:
+    BottleA`) and bottle action guide, in case the buy code treats anything with a bottle slot as bottle
+    contents; `Item_Bottle` still goes into the pouch.
+
+### In-game results of the Kokiri Shop fixes
+- **Count boards:** right. No board under single items (no "x10" under the Hookshot), "x3" under the
+  3 Bombchus, which give 3. Bought shelves stay empty.
+- **Hookshot on the shelf:** 0.3 m higher looks right, maybe a touch high: now 0.25 m.
+- **Greeting:** still "low on stock" as a child before the Deku Tree, so the branch changed in
+  `Npc_Kokiri_001_Shop_Child` is not where that line comes from. Left for later.
+- **Empty Bottle:** still cannot be bought, so the special deal (row and item settings) is not the cause
+  either. The shopkeeper says "That'll cost 5 rupees ... oh, wait, actually..." (`Shop_01_02_*`, played by
+  `DisplayShop`'s `NotAvailableTalk`). Every route to it in `DisplayShop` goes through the engine's own
+  buy check (`EventQueryCheckBuyResult`) answering "failed"; for bottle-kind items the flow asks about a
+  free empty bottle first and then makes the same check. So the game's buy code refuses it. The game never
+  sells an empty bottle (shops only sell bottle contents, poured into one you own), so the buy code most
+  likely has no way to add a new bottle. Not something the files decide, as far as found.
+
+### Kokiri Shop fixes after the first full-shop test (to test)
+- **Greeting:** the child shopkeeper's talk (`Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl`) has one
+  branch on meeting the Deku Tree (before: "Mido is blocking the way, can't restock"). Part of
+  `kokiri_shop_full_stock` now: both sides of that branch go to the "after" greeting. The file is read and
+  written by our event flow writer (byte-identical round trip checked).
+- **Count boards ("x5"):** the builder now handles the boards of changed shelves: a single item gets none
+  (the board and the links to it are removed), a bundle gets the board with its own count when the game
+  has one (03 05 08 10 15 20 30 50), e.g. 3 Bombchus on the Deku Nuts 10 shelf: "x10" -> "x3".
+- **Empty Bottle not for sale:** the shop flow (`DisplayShop`) sorts the selected item by kind; the
+  "bottled goods" kind (potions, fish) is only sold when an empty bottle is free. The Empty Bottle's
+  "Bottle" special deal most likely puts it in that kind. The shop version of an item with the "Bottle"
+  special deal now has none (item table row and item settings); what goes into the pouch is still
+  `Item_Bottle` (`PouchActor`).
+- **Hookshot inside the shelf:** shelves stand an item in a pose made for it (the Deku Stick's long side,
+  Z, stands up); the game never sells the Hookshot, and it stood on end, half inside the shelf. Items like
+  that are placed higher (`SHELF_LIFT` in `tools/shop_items.py`, Hookshot 0.3 m to start, to tune).
+- Test mod adds 3 Bombchus (the game's shelf, 45 rupees) on the Deku Nuts 10 shelf (child).
+
+### In-game results of the full Kokiri Shop test
+- Child: all 8 shelves are there before the Deku Tree. The **Boomerang** can be bought and works. The
+  **5 Bombchus** can be bought without a bomb bag and work. The game's own items can still be bought again
+  and again.
+- Child: the **Empty Bottle** (on the Recovery Heart's shelf) could not be bought.
+- Child: the shopkeeper still says Mido is blocking the way and he can't restock (the greeting of the
+  set before the Deku Tree), though all 8 shelves are there.
+- Some single items show an "x5" count board (the boards are separate objects linked to the shelf, made
+  for the original bundle). Wanted: no count board on single items.
+- Adult: the **Hookshot** shows, but partly inside the shelf. Bought, works, and the shelf stays empty
+  afterwards (sold once works).
+
 ## 2026-11-16
+
+### Kokiri Shop: one full shop per age (to test)
+- New `--fix kokiri_shop_full_stock` (needed to change shop shelves):
+  - Child map: the shop set placed before meeting the Deku Tree (the "low on stock" shopkeeper
+    `Npc_Kokiri_001_Shop_Child_ShortStock`, its 8 shelves, 2 "sold out" boards and a bundle board: 12
+    objects) is removed, and the set placed after it is always there (its `Presence` removed). Nothing
+    else links to the removed objects (checked by the build).
+  - The child shopkeeper's list: every shelf open from the start (release flags off).
+  - The adult shopkeeper gets a list of its own (`Npc_Kokiri_001_Shop_Adult` ShopParam, its actor's
+    `ShopRef`), same shelves, all open. The copy of the child list in its pack is kept identical to the
+    child shopkeeper's.
+  - A changed shelf: the map's shelf actor shows the item, and the shopkeeper's list entry names the same
+    actor (what is sold, and its price), with stock 1 (sold once, as the game's "low on stock" list).
+    Shop versions also keep `NoRespawn`.
+- The data keeps both child placements of each shelf (as in the game files); with the fix on, the builder
+  skips the ones the fix removes.
+- Side effect: the vanilla items are on sale from the start as a child too (Deku Seeds before the
+  Slingshot, the Recovery Heart).
+- Test mod (shop only, plus `bombchus_without_bag`): child shelf 1 Boomerang (15), shelf 2 the game's
+  5 Bombchus, Heart shelf Empty Bottle (5); adult shelf 1 Hookshot (15). The freestanding rupee in the
+  shop (`KF_SHOP_RUPEE_ITEM`) is a gold rupee (`Obj_Rupee_Gold`), to have rupees for the test.
+
+### In-game results of the held-up ocarina, Bombchus and shop test
+- **Chest ocarina (held-up version):** now visible above Link's head, but **not playable** (the plain
+  `Item_Ocarina_Fairy` from the same chest was playable). So naming the item (`PouchActor`) is not enough:
+  what goes into the pouch is still our own actor, and only the real `Item_Ocarina_Fairy` is playable.
+- **Pot ocarina (ground version, with `PouchActor`):** picked up and held up, still not playable until a
+  reload. `PouchActor` did not fix it.
+- **Bombchus without a bomb bag:** work. They go into the item menu (not 0/0) and can be used.
+- **Kokiri Shop, child before the Deku Tree:** only 3 items show (Bombchus x5 on shelf 2, Deku Shield, Deku
+  Stick); the other slots show only a sign. No Boomerang. The Bombchus cost **20** rupees, not the 75 of the
+  game's 5-Bombchu shelf; buying them works.
+- **Kokiri Shop, adult:** the same 3 slots show (Deku Nuts x5, Deku Shield, Deku Stick); the others say
+  "Coming Soon". No Hookshot.
+- So: the price comes from the shop slot, not from the shelf actor, and our shop versions don't appear at
+  all.
+- Found (game files): the **shopkeeper** decides what is sold. Its shop list (`ShopParam` -> `GoodsList`)
+  has one entry per slot, in `ShopItemIndex` order (0 Heart, 1 Deku Seeds 30, 2 Deku Nuts 5, 3 Deku Nuts
+  10, 4 Deku Seeds ..., 5 Deku Sticks bundle, 6 Deku Shield, 7 Deku Stick). Each entry names the shelf
+  actor that is sold (its price), a release flag (`Release`: most slots only after meeting the Deku Tree)
+  and a stock (`StockNum`: -1 unlimited, 1 = once, as the "low on stock" list before the Deku Tree). The
+  shelf actor in the map only shows the item. Kokiri shopkeepers: `Npc_Kokiri_001_Shop_Child` (after the
+  Deku Tree), `..._Child_ShortStock` (before: its own list over the child one), `..._Shop_Adult`, which
+  has no list of its own: it uses the child one (same file, a copy in each pack).
+
+### Held-up ocarina, Bombchus without a bomb bag, shop shelves (branch `ocarina-chus-shop`, to test)
+- **What goes into the pouch:** every game ground item and shelf that stands for another item names it in its
+  item settings (`PouchActor`: ground bomb `Item_Bomb`, ground Deku Shield and its shelf `Weapon_Shield_Deku`,
+  Bombchu shelves `Item_Bombchu`...). Ours didn't, so the ground version itself went into the pouch. That is
+  the likely cause of the ground ocarina only playing after a reload. Ground versions, held-up versions and
+  shop versions now name the item.
+- **Chest ocarina invisible:** the items a chest shows (Boomerang, Bottle...) are item event actors with
+  get-demo animation settings (`ASInfo: Item_GetDemo`, `AS/Item_Common`, `Item_Common_Animation`). The
+  ocarinas' actors are Link's playable instrument instead, with none of that. New **held-up versions**
+  (`Item_NX2_<x>`, in `tools/ground_items.py`): the Boomerang's item actor with the item's model, animation
+  (`Item_Common_Animation` + `<item>_Animation`) and item settings. A chest uses one only for items that are
+  not item event actors already (the ocarinas). Link's real ocarina is not touched.
+- **`--fix bombchus_without_bag`:** in the remake Bombchus have no maximum of their own (the bomb bag's:
+  `MaxNumGameData: Bomb`), so without a bag it is 0. The fix gives them a fixed maximum of 50, as in the
+  original game (`FixedMaxNum`, as the Magic Beans' 10 and the Gold Skulltula tokens' 100), and the bomb
+  bags stop raising and refilling them (`ExpansionMaxNumActor`, `ActorFullOnlyIfIsGetWhenGetBag`). Rows
+  changed: `Item_Bombchu`, the 1-Bombchu shelf `Shop_BombchuBundle_03`, the six bomb bag rows.
+- **Shop shelves, one check per age:** the 8 Kokiri Shop shelves become 16 checks
+  (`KF_KOKIRI_CHILD_SHOP_01`-`08`, `KF_KOKIRI_ADULT_SHOP_01`-`08`; the child check covers both child
+  shelves, before and after meeting the Deku Tree). `KF_KOKIRI_SHOP_01`-`08` retired. Kokiri Forest: 92
+  checks.
+- **Shop shelves in the builder:** a shelf is changed by replacing its actor (the shelf number stays). A
+  game shelf actor (`Shop_...`) is used as it is; any other item gets a **shop version**
+  (`tools/shop_items.py`, `Shop_NX2_<item>_<price>_Once`): the game's Deku Shield shelf with the item's
+  model, animation and item settings, the price of what the shelf sold, and **sold once** (`NoRespawn`, as
+  the silver rupee tokens; untested).
+- Test mod: Fairy Ocarina in Mido's chest (held-up version) and in the House of Twins child pot (ground
+  version); Bombchus in the other child pot and the Bomb Bag on the ground near Mido, with
+  `bombchus_without_bag`; Kokiri Shop shelf 1: Boomerang (child) and Hookshot (adult), 15 rupees, sold once;
+  shelf 2 (child): the game's 5-Bombchu shelf.
 
 ### Special deal change undone
 - The ground versions keep the item's special deal again (`tools/ground_items.py` as before the test): the
