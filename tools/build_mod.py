@@ -6,7 +6,10 @@ Supported: chests and pots (their item is their Drop__DropActor in the map file;
 Skulltulas get one added: a skulltula then drops the item instead of its token), freestanding items
 (the actor type itself is the item: it is replaced), gifts that hand their item over through the shared
 event flow Dm_SY_GetInEvent (the item is that call's ActorName; the check's data names the flow, the event and
-the item, "gift": {...}) and shop shelves (the shelf actor is replaced by a shop
+the item, "gift": {...}), Deku Scrubs that sell one thing once (the upgrade scrubs: their map setting
+ScrubBusiness_ShopItemActorName0 becomes the item, and the shared flow Enemy_Scrub_Business_Common gets one new
+branch per item, selling it at the scrub's original price with a new generic line that names the item; see
+scrub_flow_edit) and shop shelves (the shelf actor is replaced by a shop
 version of the item, tools/shop_items.py, at the shelf's original price, sold once). For
 each check every placement is changed (child and adult copies, copies in other maps; a check made for one
 age, "age" in its data, only has that age's), the map files are
@@ -44,6 +47,7 @@ or shared (out/ is ignored by git).
 import argparse
 import os
 import shutil
+import struct
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -52,11 +56,11 @@ sys.path.insert(0, ROOT)
 
 import ground_items  # noqa: E402
 import shop_items  # noqa: E402
-from formats import zstd, byml, restbl, sarc, evfl, ainb  # noqa: E402
+from formats import zstd, byml, restbl, sarc, evfl, ainb, msbt  # noqa: E402
 from logic.world import World  # noqa: E402
 
 RESTBL_PATH = os.path.join('System', 'Resource', 'ResourceSizeTable.Product.111.Nin_Ounce_NVN2.rsizetable.zs')
-SUPPORTED = {'chest', 'pot', 'freestanding', 'shop', 'rock', 'bush', 'skulltula', 'gift'}
+SUPPORTED = {'chest', 'pot', 'freestanding', 'shop', 'rock', 'bush', 'skulltula', 'gift', 'scrub'}
 REPLACED = ('freestanding', 'shop')      # kinds whose actor itself is replaced
 # kinds whose drop is usually not set in the map: the builder adds Drop__DropActor (the game itself sets it on
 # some rocks and bushes elsewhere, e.g. Obj_LiftRock_A_01 in Desert Colossus, Obj_Plant_Grass_A_01 in Hyrule Field)
@@ -160,6 +164,8 @@ def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: 
                 item = on_shelf(item_given, p['actor'])
             else:
                 item = item_given
+            if spot['kind'] == 'scrub':
+                continue                              # plan_scrubs
             if not _right_actor(spot['kind'], p['actor']):
                 raise SystemExit('%s: placement %s is a %s, not a %s' % (cid, p['hash'], p['actor'], spot['kind']))
             old = 'Shop_' + spot['item'] if spot['kind'] == 'shop' else spot['item']   # shelf data drops 'Shop_'
@@ -205,6 +211,276 @@ def gift_edit(fc, events):
         e.params['ActorName'] = item
         said.append('%-18s %s: %s -> %s' % (cid, ev, old, item))
     return said
+
+
+# Deku Scrubs. When Link talks to one, the game copies its map setting ScrubBusiness_ShopItemActorName0 into
+# the game data string Scrub_Business_TempItemName_00 and runs the entry point named by its TalkEventName in
+# Enemy_Scrub_Business_Common. The scrubs that sell one thing once (stick and nut upgrades) run
+# SimpleShopRoot_Enemy_Scrub_Business_Pouch, which compares that string with the items it knows and calls
+# SimpleShopSub_Scrub_Business_OneTime (ActorName, Price, SellerMessageId): talk, pay, held-up get, the scrub
+# leaves. Each sales line there is written for one item, so a new one names the item from the string.
+SCRUB_FLOW = 'Event/EventFlow/Enemy_Scrub_Business_Common.bfevfl'
+SCRUB_ROOT = 'SimpleShopRoot_Enemy_Scrub_Business_Pouch'
+SCRUB_SELL = 'SimpleShopSub_Scrub_Business_OneTime'
+SCRUB_VAR = 'Scrub_Business_TempItemName_00'
+SCRUB_SETTING = 'ScrubBusiness_ShopItemActorName0'
+SCRUB_MSG_FILE = 'EventFlowMsg/Enemy_Event.msbt'
+SCRUB_LABEL = 'Enemy_Scrub_Business_NX2_Item'
+
+
+def _msg_tag(group, kind, params=b''):
+    return (b'\x0e' + struct.pack('<HHH', group, kind, len(params)) + params).decode('utf-8', 'surrogateescape')
+
+
+def _msg_name(name):
+    raw = name.encode('ascii')
+    return struct.pack('<H', len(raw)) + raw + b'\xff\xff'
+
+
+# "Ah, the <item>! It's <price> rupees. Wanna buy it?" (English, in every language), built from the game's own
+# tags: the scrub lines' start (3,0) and price (2,12), the shop's item-name tag (2,3) with the (201,15) it has
+# before it (Npc_Kokiri_001_Shop_Child Shop_01), colour on/off (0,3), the pause (5,0). Confirmed in game.
+SCRUB_LINE = (_msg_tag(3, 0, b'\x0f\x00\x00') + 'Ah, the ' + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(201, 15)
+              + _msg_tag(2, 3, _msg_name(SCRUB_VAR)) + _msg_tag(0, 3, b'\xff\xff') + "! It's "
+              + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(2, 12, _msg_name('SimpleShop_Price')) + ' rupees'
+              + _msg_tag(0, 3, b'\xff\xff') + '.' + _msg_tag(5, 0) + ' Wanna buy it?\x00')
+
+
+# what an item needs to be usable, given with it when a scrub sells it (silently, after a successful buy: held up
+# alone the seed bag froze the game). The slingshot sold alone came with no seed bag: 0/0 seeds (seen in game).
+SCRUB_COMPANIONS = {'Item_Range_SlingShot': ['Item_BulletBag_Small']}
+SEED_BAG = 'Item_BulletBag_Small'
+SEED_SELL = 'SimpleShopSub_Scrub_Business_Seed_Consume'
+SCRUB_NOBAG_LABEL = 'Enemy_Scrub_Business_NX2_NoSeedBag'
+# "Squee... On second thought, you've got nothing to carry these in!" (built like the game's refusal lines,
+# e.g. Enemy_Scrub_Business_Seed_10: start (3,0) 0x11, pause (5,1))
+SCRUB_NOBAG_LINE = (_msg_tag(3, 0, b'\x11\x00\x00') + 'Squee... On second thought, ' + _msg_tag(5, 1)
+                    + "you've got nothing to carry these in!\x00")
+
+
+def seed_bag_guard(fc):
+    """the seed sales of Enemy_Scrub_Business_Common (SimpleShopSub_Scrub_Business_Seed_Consume with
+    NecessaryActor Item_BulletBag_Small) sell to a slingshot without the bag ("pretty full, buy anyway?", and
+    buying gave the bag: seen in game). In front of each, a new check:
+        IsGet.Item_BulletBag_Small?   yes (0) -> the game's sale
+                                      no  (1) -> the scrub says the new refusal line; not bought (as the game's
+                                                 own "not enough rupees" refusal ends)
+    Returns lines saying what was changed."""
+    by = fc.events
+    sales = [i for i, e in enumerate(by) if e.type == 'subflow' and e.flowchart == '' and e.entry == SEED_SELL
+             and isinstance(e.params, dict) and e.params.get('NecessaryActor') == SEED_BAG]
+    if not sales:
+        raise SystemExit('no seed sales found in the scrub flow')
+    talk = next(e for e in by if e.type == 'action' and isinstance(e.params, dict)
+                and e.params.get('MessageId') == 'EventFlowMsg/Enemy_Event:Enemy_Scrub_Business_Seed_10')
+    scrub = fc.actor_index(('Enemy_Scrub_Business', ''))
+    said = []
+    for i in sales:
+        if by[i].next is not None:
+            raise SystemExit('seed sale %s is not the end of its branch' % by[i].name)
+        params = evfl.Params(talk.params)
+        params['MessageId'] = 'EventFlowMsg/Enemy_Event:' + SCRUB_NOBAG_LABEL
+        not_bought = fc.add_action('GameDataActor', 'EventTriggerSetGameDataBool',
+                                   evfl.Params(GameDataName='ScrubBusiness_BuySuccess', Value=False, Index=-1))
+        refuse = fc.add_action(scrub, 'EventTalk', params, next=not_bought)
+        sw = fc.add_switch('GameDataActor', 'EventQueryIsGameDataBool', [(0, i), (1, refuse)],
+                           evfl.Params(GameDataName='IsGet.' + SEED_BAG, Index=-1))
+        if fc.repoint(i, sw, keep=(sw,)) < 1:
+            raise SystemExit('nothing led to seed sale %s' % by[i].name)
+        said.append('seed sale %s (%s): refused without the seed bag (new check %s)'
+                    % (by[i].name, by[i].params.get('Actor'), by[sw].name))
+    return said
+
+
+def plan_scrubs(world, assignments):
+    """[(check id, new item, [(map path, placement hash, talk event, original item)])] for the scrubs among the
+    assignments (the copies of one check may differ: e.g. seeds as a child, arrows as an adult)"""
+    out = []
+    for cid, item in assignments:
+        r, name, loc = find_check(world, cid)
+        places = [(sc, sp, p) for sc, sp, p in world.placements_of(r, loc)
+                  if world.checks[sc][sp]['kind'] == 'scrub']
+        if not places:
+            continue
+        rows = []
+        for sc, _, p in places:
+            prm = p.get('params', {})
+            if not prm.get('TalkEventName') or not prm.get(SCRUB_SETTING):
+                raise SystemExit('%s: scrub %s has no %s/TalkEventName (it sells nothing set in the map): '
+                                 'not supported yet' % (cid, p['hash'], SCRUB_SETTING))
+            for fn in p['files']:
+                rows.append(('Banc/%s/%s' % (sc, fn[:-3] if fn.endswith('.zs') else fn), p['hash'],
+                             prm['TalkEventName'], prm[SCRUB_SETTING]))
+        out.append((cid, item, rows))
+    return out
+
+
+def scrub_map_edit(data, changes):
+    """{placement hash: (check id, new item, original item)}: the scrub's ScrubBusiness_ShopItemActorName0;
+    read back: nothing else changes"""
+    doc = byml.loads(data)
+    done = set()
+    for a in doc.root.get('Actors', []):
+        h = str(int(a['Hash']))
+        if h not in changes:
+            continue
+        cid, item, old = changes[h]
+        dyn = a.get('Dynamic')
+        if a['Gyaml'] != 'Enemy_Scrub_Business' or dyn is None or dyn.get(SCRUB_SETTING) != old:
+            raise SystemExit('%s: placement %s is not a scrub selling %s' % (cid, h, old))
+        dyn = type(dyn)(dyn)                          # its own copy: identical settings are shared in the file
+        dyn[SCRUB_SETTING] = item
+        a['Dynamic'] = dyn
+        done.add(h)
+    if done != set(changes):
+        raise SystemExit('placements not found: %s' % ', '.join(sorted(set(changes) - done)))
+    new = byml.dumps(doc)
+    before = {str(int(x['Hash'])): x for x in byml.loads(data).root['Actors']}
+    back = byml.loads(new).root['Actors']
+    if len(back) != len(before):
+        raise SystemExit('read-back: actor count changed')
+    for x in back:
+        h = str(int(x['Hash']))
+        want = dict(before[h])
+        if h in changes:
+            want['Dynamic'] = dict(want['Dynamic'], **{SCRUB_SETTING: changes[h][1]})
+        if x != want:
+            raise SystemExit('read-back: scrub %s differs from what was intended' % h)
+    return new
+
+
+SCRUB_PRICE_KEYS = {SCRUB_SELL: 'ActorName', SEED_SELL: 'Actor',
+                    'SimpleShopSub_Scrub_Business_Seed_Bottle': 'DisplayActor'}
+SCRUB_ONE_TIME_TALK = 'Enemy_Scrub_Business_DekuStickPouch_01'   # its call of the root: the greetings to copy
+
+
+def scrub_flow_edit(fc, sales):
+    """sales: [(check id, new item, [(talk event, original item)])]. Every changed scrub sells its item once.
+    1. In front of the first item comparison of SimpleShopRoot_Enemy_Scrub_Business_Pouch, one branch per item:
+           Scrub_Business_TempItemName_00 == item?   yes (0) -> SimpleShopSub_Scrub_Business_OneTime with the
+                                                                item, the scrub's price, the generic line (and
+                                                                what the item needs, SCRUB_COMPANIONS)
+                                                     no  (1) -> the next branch, at the end the game's own checks
+       The one-time sale ends with the scrub leaving (EventTriggerRequestDeath).
+    2. A scrub that normally sells again and again (its talk doesn't run that root: seeds, arrows, potions) gets,
+       at the start of its talk, the root's own first step (EventScrubBusinessWriteGameDataBancItemName: copies
+       the map setting into Scrub_Business_TempItemName_00), then
+           Scrub_Business_TempItemName_00 == item?   yes (0) -> the root, so the branch above
+                                                     no  (1) -> the game's talk, as before
+    The price is what the game's own calls ask for the scrub's original item (the first copy's). Returns lines
+    saying what was changed."""
+    eps = {p.name: p.main for p in fc.entry_points}
+    by = fc.events
+    root = eps.get(SCRUB_ROOT)
+    head = next((i for i in flow_reachable(fc, root) if by[i].type == 'switch' and isinstance(by[i].params, dict)
+                 and by[i].params.get('GameDataName') == SCRUB_VAR), None)
+    if head is None:
+        raise SystemExit('%s: no comparison of %s found' % (SCRUB_ROOT, SCRUB_VAR))
+    calls = [e for e in by if e.type == 'subflow' and e.flowchart == '' and e.entry in SCRUB_PRICE_KEYS
+             and isinstance(e.params, dict)]
+    # items the game's own branches already sell: a new branch for one would also catch the game's other
+    # scrubs selling it (e.g. the Death Mountain heart-piece scrub, 100 rupees), so they are refused for now
+    known = {by[i].params.get('Value') for i in flow_reachable(fc, root) if by[i].type == 'switch'
+             and isinstance(by[i].params, dict) and by[i].params.get('GameDataName') == SCRUB_VAR}
+    prices, repeat, said = {}, {}, []
+    for cid, item, copies in sales:
+        if item in known:
+            raise SystemExit('%s: %s is sold by the game\'s own scrub branches (other scrubs would sell it at '
+                             'this price too): not supported yet' % (cid, item))
+        asked = []
+        for talk, old in copies:
+            start = eps.get(talk)
+            if start is None:
+                raise SystemExit('%s: its talk %s is not in %s: not supported yet' % (cid, talk, SCRUB_FLOW))
+            if not (by[start].type == 'subflow' and by[start].entry == SCRUB_ROOT):
+                repeat.setdefault(talk, []).append(item)
+            asked += sorted({e.params.get('Price') for e in calls if e.params.get(SCRUB_PRICE_KEYS[e.entry]) == old})
+        if not asked:
+            raise SystemExit('%s: price of %s not found' % (cid, [o for _, o in copies]))
+        price = asked[0]
+        if len(set(asked)) > 1:
+            said.append('%s: its copies cost %s; sells at %s' % (cid, sorted(set(asked)), price))
+        if prices.get(item, (price,))[0] != price:
+            raise SystemExit('%s: %s is also sold by %s at %s rupees, here %s'
+                             % (cid, item, prices[item][1], prices[item][0], price))
+        prices[item] = (price, cid)
+    template = next(e for e in calls if e.entry == SCRUB_SELL)
+    first_new = len(by)
+    for item, (price, cid) in prices.items():
+        params = evfl.Params(template.params)
+        params['ActorName'] = item
+        params['Price'] = price
+        params['SellerMessageId'] = 'EventFlowMsg/Enemy_Event:' + SCRUB_LABEL
+        sell = fc.add_subflow('', SCRUB_SELL, params)
+        extra = SCRUB_COMPANIONS.get(item, [])
+        if extra:
+            # after a successful buy only (ScrubBusiness_BuySuccess, as the game's own callers check it)
+            nxt = None
+            for companion in reversed(extra):
+                nxt = fc.add_action('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent',
+                                    evfl.Params(Num=1, Actor=companion, IsGetEvent=False,
+                                                IsSetMessageTargetActorName=False, IsEquipDIrect=False), next=nxt)
+            fc.events[sell].next = fc.add_switch('GameDataActor', 'EventQueryIsGameDataBool', [(0, nxt)],
+                                                 evfl.Params(GameDataName='ScrubBusiness_BuySuccess', Index=-1))
+        sw = fc.add_switch('GameDataActor', 'EventQueryIsGameDataString64', [(0, sell), (1, head)],
+                           evfl.Params(GameDataName=SCRUB_VAR, Index=-1, Value=item))
+        if fc.repoint(head, sw, keep=(sw,)) < 1:
+            raise SystemExit('%s: nothing led to %s' % (SCRUB_ROOT, by[head].name))
+        head = sw
+        said.append('%s sells %s at %s rupees, once (new branch %s)%s' % (cid, item, price, fc.events[sw].name,
+                    ', with %s' % ', '.join(extra) if extra else ''))
+    if repeat:
+        write = next(i for i in flow_reachable(fc, root) if by[i].type == 'action'
+                     and fc.actors[by[i].actor].actions[by[i].action] == 'EventScrubBusinessWriteGameDataBancItemName')
+        root_call = by[eps[SCRUB_ONE_TIME_TALK]]
+        assert root_call.type == 'subflow' and root_call.entry == SCRUB_ROOT
+        for talk, items in sorted(repeat.items()):
+            start = eps[talk]
+            new = []
+            nxt = start
+            for item in sorted(set(items)):
+                call = fc.add_subflow('', SCRUB_ROOT, evfl.Params(root_call.params))
+                nxt = fc.add_switch('GameDataActor', 'EventQueryIsGameDataString64', [(0, call), (1, nxt)],
+                                    evfl.Params(GameDataName=SCRUB_VAR, Index=-1, Value=item))
+                new += [call, nxt]
+            first = fc.add_action(by[write].actor, 'EventScrubBusinessWriteGameDataBancItemName',
+                                  evfl.Params(by[write].params), next=nxt)
+            new.append(first)
+            if fc.repoint(start, first, keep=set(new)) < 1:
+                raise SystemExit('%s: nothing led to the start of %s' % (SCRUB_FLOW, talk))
+            said.append('talk %s: sells %s once through the one-time root (new start %s)'
+                        % (talk, ', '.join(sorted(set(items))), fc.events[first].name))
+    reached = set()
+    for p in fc.entry_points:
+        reached |= set(flow_reachable(fc, p.main))
+    missing = [i for i in range(first_new, len(fc.events)) if i not in reached]
+    if missing:
+        raise SystemExit('%s: new steps not reached: %s' % (SCRUB_FLOW, [fc.events[i].name for i in missing]))
+    fc.update_entry_points()
+    return said
+
+
+def scrub_messages(out, romfs, lines):
+    """new scrub lines {label: text} in every language's message archive"""
+    for fn in sorted(os.listdir(os.path.join(romfs, 'Mals'))):
+        if not fn.endswith('.sarc.zs'):
+            continue
+        path = 'Mals/' + fn[:-3]
+        src, old = out.read(path)
+        arc = sarc.Sarc.read(old)
+        m = msbt.Msbt.read(arc.files[SCRUB_MSG_FILE])
+        if m.write() != arc.files[SCRUB_MSG_FILE] or set(lines) & set(m.texts):
+            raise SystemExit('%s: %s does not round-trip or already has %s' % (path, SCRUB_MSG_FILE, sorted(lines)))
+        m.texts.update(lines)
+        new_msg = m.write()
+        if msbt.Msbt.read(new_msg).texts != m.texts:
+            raise SystemExit('read-back: %s in %s' % (SCRUB_MSG_FILE, path))
+        arc.files[SCRUB_MSG_FILE] = new_msg
+        new = arc.write()
+        back = sarc.Sarc.read(new)
+        if set(back.files) != set(arc.files) or any(back.files[k] != v for k, v in arc.files.items()):
+            raise SystemExit('read-back: %s differs from what was intended' % path)
+        out.write(path, src, old, new)
 
 
 def patch_file(data, changes):
@@ -1004,6 +1280,34 @@ def main(argv):
         out.write(path, src, old, new)
         for line in said:
             print(line, '(%s)' % path.split('/')[-1])
+
+    # scrubs: their map setting, one branch each in the shared flow, the generic line
+    scrubs = plan_scrubs(world, assignments)
+    # a slingshot given anywhere may come without its seed bag: the scrubs' seed sales then refuse
+    guard = any(item == 'Item_Range_SlingShot' for _, item in assignments)
+    if scrubs or guard:
+        maps = {}
+        for cid, item, rows in scrubs:
+            for path, h, talk, was in rows:
+                maps.setdefault(path, {})[h] = (cid, item, was)
+        for path, changes in sorted(maps.items()):
+            src, old = out.read(path)
+            out.write(path, src, old, scrub_map_edit(old, changes))
+            for h, (cid, item, was) in sorted(changes.items()):
+                print('%-18s %s: scrub %s sells %s instead of %s' % (cid, path.split('/')[-1], h, item, was))
+        src, old = out.read(SCRUB_FLOW)
+        ef = evfl.loads(old)
+        said = scrub_flow_edit(ef.flowchart, [(c, i, [(t, w) for _, _, t, w in rows]) for c, i, rows in scrubs]) if scrubs else []
+        lines = {SCRUB_LABEL: SCRUB_LINE} if scrubs else {}
+        if guard:
+            said += seed_bag_guard(ef.flowchart)
+            lines[SCRUB_NOBAG_LABEL] = SCRUB_NOBAG_LINE
+        ef.flowchart.update_entry_points()
+        out.write(SCRUB_FLOW, src, old, flow_write_checked(ef))
+        for line in said:
+            print('scrub flow         %s' % line)
+        scrub_messages(out, a.romfs, lines)
+        print('scrub lines        %s added to %s (every language)' % (', '.join(lines), SCRUB_MSG_FILE))
 
     # count boards of changed shelves: none for a single item, the right count for a bundle
     pouch_rows = {r['__RowId']: r for r in table_rows('PouchActorInfo')}
