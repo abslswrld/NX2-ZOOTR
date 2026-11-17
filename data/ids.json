@@ -70,44 +70,60 @@
    "check": "KF GS Bean Patch"
   },
   "KF_BEHIND_SARIAS_HOUSE_ROCK_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Behind Sarias House 1"
+   "check": "KF Rock Behind Sarias House 1",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_BEHIND_SARIAS_HOUSE_ROCK_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Behind Sarias House 2"
+   "check": "KF Rock Behind Sarias House 2",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_BEHIND_SHOP_BUSH_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Bush Behind Shop 1"
+   "check": "KF Bush Behind Shop 1",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_BEHIND_SHOP_BUSH_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Bush Behind Shop 2"
+   "check": "KF Bush Behind Shop 2",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_BEHIND_SHOP_BUSH_03": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Bush Behind Shop 3"
+   "check": "KF Bush Behind Shop 3",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_BESIDE_MIDOS_HOUSE_BUSH_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Bush Beside Midos House 1"
+   "check": "KF Bush Beside Midos House 1",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_BESIDE_MIDOS_HOUSE_BUSH_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Bush Beside Midos House 2"
+   "check": "KF Bush Beside Midos House 2",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_BESIDE_MIDOS_HOUSE_BUSH_03": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Bush Beside Midos House 3"
+   "check": "KF Bush Beside Midos House 3",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_CENTER_ROCK": {
    "status": "active",
@@ -115,64 +131,88 @@
    "check": "KF Rock Circle Center"
   },
   "KF_CIRCLE_ROCK_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 1"
+   "check": "KF Rock Circle 1",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 2"
+   "check": "KF Rock Circle 2",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_03": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 3"
+   "check": "KF Rock Circle 3",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_04": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 4"
+   "check": "KF Rock Circle 4",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_05": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 5"
+   "check": "KF Rock Circle 5",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_06": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 6"
+   "check": "KF Rock Circle 6",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_07": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 7"
+   "check": "KF Rock Circle 7",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_08": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 8"
+   "check": "KF Rock Circle 8",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_09": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 9"
+   "check": "KF Rock Circle 9",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_10": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 10"
+   "check": "KF Rock Circle 10",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_11": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 11"
+   "check": "KF Rock Circle 11",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_CIRCLE_ROCK_12": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Circle 12"
+   "check": "KF Rock Circle 12",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_DEKU_TREE_GOSSIP_01": {
    "status": "active",
@@ -304,14 +344,18 @@
    "check": "KF Midos Bottom Right Chest"
   },
   "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Near Know It All House 1"
+   "check": "KF Rock Near Know It All House 1",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock Near Know It All House 2"
+   "check": "KF Rock Near Know It All House 2",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_NEAR_LOST_WOODS_GOSSIP": {
    "status": "active",
@@ -319,19 +363,25 @@
    "check": "KF Gossip Stone Near Lost Woods"
   },
   "KF_NEAR_SARIAS_HOUSE_BUSH_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Bush Near Sarias House 1"
+   "check": "KF Bush Near Sarias House 1",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_NEAR_SARIAS_HOUSE_BUSH_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Bush Near Sarias House 2"
+   "check": "KF Bush Near Sarias House 2",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_NEAR_SARIAS_HOUSE_BUSH_03": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Bush Near Sarias House 3"
+   "check": "KF Bush Near Sarias House 3",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_RUPEE_BEHIND_MIDOS_HOUSE_ITEM": {
    "status": "active",
@@ -414,14 +464,18 @@
    "check": "KF Training Area Rupee 2"
   },
   "KF_WEST_OF_MIDOS_HOUSE_ROCK_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock West of Midos House 1"
+   "check": "KF Rock West of Midos House 1",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "KF_WEST_OF_MIDOS_HOUSE_ROCK_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Rock West of Midos House 2"
+   "check": "KF Rock West of Midos House 2",
+   "retired": "2026-11-17",
+   "reason": "split by age: the child and adult maps place separate rocks and bushes, each giving its own item (tested in game 2026-11-17), one check per age"
   },
   "LW_BRIDGE_CHEST": {
    "status": "active",
@@ -562,6 +616,276 @@
    "status": "active",
    "issued": "2026-11-16",
    "check": "KF Shop Adult Item 8"
+  },
+  "KF_CIRCLE_CHILD_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 1"
+  },
+  "KF_CIRCLE_ADULT_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 1"
+  },
+  "KF_CIRCLE_CHILD_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 2"
+  },
+  "KF_CIRCLE_ADULT_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 2"
+  },
+  "KF_CIRCLE_CHILD_ROCK_03": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 3"
+  },
+  "KF_CIRCLE_ADULT_ROCK_03": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 3"
+  },
+  "KF_CIRCLE_CHILD_ROCK_04": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 4"
+  },
+  "KF_CIRCLE_ADULT_ROCK_04": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 4"
+  },
+  "KF_CIRCLE_CHILD_ROCK_05": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 5"
+  },
+  "KF_CIRCLE_ADULT_ROCK_05": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 5"
+  },
+  "KF_CIRCLE_CHILD_ROCK_06": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 6"
+  },
+  "KF_CIRCLE_ADULT_ROCK_06": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 6"
+  },
+  "KF_CIRCLE_CHILD_ROCK_07": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 7"
+  },
+  "KF_CIRCLE_ADULT_ROCK_07": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 7"
+  },
+  "KF_CIRCLE_CHILD_ROCK_08": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 8"
+  },
+  "KF_CIRCLE_ADULT_ROCK_08": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 8"
+  },
+  "KF_CIRCLE_CHILD_ROCK_09": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 9"
+  },
+  "KF_CIRCLE_ADULT_ROCK_09": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 9"
+  },
+  "KF_CIRCLE_CHILD_ROCK_10": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 10"
+  },
+  "KF_CIRCLE_ADULT_ROCK_10": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 10"
+  },
+  "KF_CIRCLE_CHILD_ROCK_11": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 11"
+  },
+  "KF_CIRCLE_ADULT_ROCK_11": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 11"
+  },
+  "KF_CIRCLE_CHILD_ROCK_12": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Circle 12"
+  },
+  "KF_CIRCLE_ADULT_ROCK_12": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Circle 12"
+  },
+  "KF_WEST_OF_MIDOS_HOUSE_CHILD_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock West of Midos House 1"
+  },
+  "KF_WEST_OF_MIDOS_HOUSE_ADULT_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock West of Midos House 1"
+  },
+  "KF_WEST_OF_MIDOS_HOUSE_CHILD_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock West of Midos House 2"
+  },
+  "KF_WEST_OF_MIDOS_HOUSE_ADULT_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock West of Midos House 2"
+  },
+  "KF_NEAR_KNOW_IT_ALL_HOUSE_CHILD_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Near Know It All House 1"
+  },
+  "KF_NEAR_KNOW_IT_ALL_HOUSE_ADULT_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Near Know It All House 1"
+  },
+  "KF_NEAR_KNOW_IT_ALL_HOUSE_CHILD_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Near Know It All House 2"
+  },
+  "KF_NEAR_KNOW_IT_ALL_HOUSE_ADULT_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Near Know It All House 2"
+  },
+  "KF_BEHIND_SARIAS_HOUSE_CHILD_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Behind Sarias House 1"
+  },
+  "KF_BEHIND_SARIAS_HOUSE_ADULT_ROCK_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Behind Sarias House 1"
+  },
+  "KF_BEHIND_SARIAS_HOUSE_CHILD_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Rock Behind Sarias House 2"
+  },
+  "KF_BEHIND_SARIAS_HOUSE_ADULT_ROCK_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Rock Behind Sarias House 2"
+  },
+  "KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Bush Near Sarias House 1"
+  },
+  "KF_NEAR_SARIAS_HOUSE_ADULT_BUSH_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Bush Near Sarias House 1"
+  },
+  "KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Bush Near Sarias House 2"
+  },
+  "KF_NEAR_SARIAS_HOUSE_ADULT_BUSH_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Bush Near Sarias House 2"
+  },
+  "KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_03": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Bush Near Sarias House 3"
+  },
+  "KF_NEAR_SARIAS_HOUSE_ADULT_BUSH_03": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Bush Near Sarias House 3"
+  },
+  "KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Bush Beside Midos House 1"
+  },
+  "KF_BESIDE_MIDOS_HOUSE_ADULT_BUSH_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Bush Beside Midos House 1"
+  },
+  "KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Bush Beside Midos House 2"
+  },
+  "KF_BESIDE_MIDOS_HOUSE_ADULT_BUSH_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Bush Beside Midos House 2"
+  },
+  "KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_03": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Bush Beside Midos House 3"
+  },
+  "KF_BESIDE_MIDOS_HOUSE_ADULT_BUSH_03": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Bush Beside Midos House 3"
+  },
+  "KF_BEHIND_SHOP_CHILD_BUSH_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Bush Behind Shop 1"
+  },
+  "KF_BEHIND_SHOP_ADULT_BUSH_01": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Bush Behind Shop 1"
+  },
+  "KF_BEHIND_SHOP_CHILD_BUSH_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Bush Behind Shop 2"
+  },
+  "KF_BEHIND_SHOP_ADULT_BUSH_02": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Bush Behind Shop 2"
+  },
+  "KF_BEHIND_SHOP_CHILD_BUSH_03": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Child Bush Behind Shop 3"
+  },
+  "KF_BEHIND_SHOP_ADULT_BUSH_03": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Adult Bush Behind Shop 3"
   }
  }
 }

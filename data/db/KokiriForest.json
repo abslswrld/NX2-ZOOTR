@@ -423,8 +423,8 @@
   "notes": "appears once bugs are released in the soft soil (flag Gimmick_MagicBeanSoil_KokiriForest)"
  },
  {
-  "unique_check_id": "KF_BEHIND_SARIAS_HOUSE_ROCK_01",
-  "check_name": "KF Rock Behind Sarias House 1",
+  "unique_check_id": "KF_BEHIND_SARIAS_HOUSE_ADULT_ROCK_01",
+  "check_name": "KF Adult Rock Behind Sarias House 1",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
@@ -440,7 +440,73 @@
     "ages": [
      "adult"
     ]
-   },
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SARIAS_HOUSE_ADULT_ROCK_02",
+  "check_name": "KF Adult Rock Behind Sarias House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-2.1,31.0",
+    "hash": "591443488390566560",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SARIAS_HOUSE_CHILD_ROCK_01",
+  "check_name": "KF Child Rock Behind Sarias House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
    {
     "scene": "KokiriForest",
     "spot": "rock@-0.8,29.5",
@@ -460,40 +526,23 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_BEHIND_SARIAS_HOUSE_ROCK_02",
-  "check_name": "KF Rock Behind Sarias House 2",
+  "unique_check_id": "KF_BEHIND_SARIAS_HOUSE_CHILD_ROCK_02",
+  "check_name": "KF Child Rock Behind Sarias House 2",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-2.1,31.0",
-    "hash": "591443488390566560",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-2.1,31.0",
@@ -513,24 +562,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_BEHIND_SHOP_BUSH_01",
-  "check_name": "KF Bush Behind Shop 1",
+  "unique_check_id": "KF_BEHIND_SHOP_ADULT_BUSH_01",
+  "check_name": "KF Adult Bush Behind Shop 1",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "bush",
@@ -546,7 +590,112 @@
     "ages": [
      "adult"
     ]
-   },
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SHOP_ADULT_BUSH_02",
+  "check_name": "KF Adult Bush Behind Shop 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-5.9,-34.9",
+    "hash": "5648900055318470269",
+    "actor": "Obj_Plant_Grass_A_03",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SHOP_ADULT_BUSH_03",
+  "check_name": "KF Adult Bush Behind Shop 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-4.5,-34.8",
+    "hash": "5190570933151534141",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_BEHIND_SHOP_CHILD_BUSH_01",
+  "check_name": "KF Child Bush Behind Shop 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
    {
     "scene": "KokiriForest",
     "spot": "bush@-9.4,-35.2",
@@ -566,40 +715,23 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_BEHIND_SHOP_BUSH_02",
-  "check_name": "KF Bush Behind Shop 2",
+  "unique_check_id": "KF_BEHIND_SHOP_CHILD_BUSH_02",
+  "check_name": "KF Child Bush Behind Shop 2",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "bush",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "bush@-5.9,-34.9",
-    "hash": "5648900055318470269",
-    "actor": "Obj_Plant_Grass_A_03",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "bush@-5.9,-34.9",
@@ -619,40 +751,23 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_BEHIND_SHOP_BUSH_03",
-  "check_name": "KF Bush Behind Shop 3",
+  "unique_check_id": "KF_BEHIND_SHOP_CHILD_BUSH_03",
+  "check_name": "KF Child Bush Behind Shop 3",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "bush",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "bush@-4.5,-34.8",
-    "hash": "5190570933151534141",
-    "actor": "Obj_Plant_Grass_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "bush@-4.5,-34.8",
@@ -672,24 +787,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_BUSH_01",
-  "check_name": "KF Bush Beside Midos House 1",
+  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_ADULT_BUSH_01",
+  "check_name": "KF Adult Bush Beside Midos House 1",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "bush",
@@ -705,7 +815,112 @@
     "ages": [
      "adult"
     ]
-   },
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_ADULT_BUSH_02",
+  "check_name": "KF Adult Bush Beside Midos House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-37.3,-41.0",
+    "hash": "15188778840589944684",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_ADULT_BUSH_03",
+  "check_name": "KF Adult Bush Beside Midos House 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-36.0,-39.3",
+    "hash": "6674340586234083423",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_01",
+  "check_name": "KF Child Bush Beside Midos House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
    {
     "scene": "KokiriForest",
     "spot": "bush@-37.8,-39.2",
@@ -725,40 +940,23 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_BUSH_02",
-  "check_name": "KF Bush Beside Midos House 2",
+  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_02",
+  "check_name": "KF Child Bush Beside Midos House 2",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "bush",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "bush@-37.3,-41.0",
-    "hash": "15188778840589944684",
-    "actor": "Obj_Plant_Grass_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "bush@-37.3,-41.0",
@@ -778,40 +976,23 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_BUSH_03",
-  "check_name": "KF Bush Beside Midos House 3",
+  "unique_check_id": "KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_03",
+  "check_name": "KF Child Bush Beside Midos House 3",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "bush",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "bush@-36.0,-39.3",
-    "hash": "6674340586234083423",
-    "actor": "Obj_Plant_Grass_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "bush@-36.0,-39.3",
@@ -831,20 +1012,571 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
+   "adult": null
+  },
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_01",
+  "check_name": "KF Adult Rock Circle 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-48.2,-28.2",
+    "hash": "10656348214587939196",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_02",
+  "check_name": "KF Adult Rock Circle 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.3,-29.9",
+    "hash": "8931631613049749371",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_03",
+  "check_name": "KF Adult Rock Circle 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.1,-30.4",
+    "hash": "15732862253800965646",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "requirements": {
+   "child": null,
    "adult": [
     [
      "MasterSword"
     ]
    ]
   },
-  "check_rule": "True",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before",
+  "missable": "gone once the Forest Temple is completed: never place anything required here"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_04",
+  "check_name": "KF Adult Rock Circle 4",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-45.8,-30.5",
+    "hash": "13164882936498639212",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_05",
+  "check_name": "KF Adult Rock Circle 5",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-44.2,-30.1",
+    "hash": "15388836867476865988",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_06",
+  "check_name": "KF Adult Rock Circle 6",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-43.8,-29.9",
+    "hash": "5312950394209176374",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before",
+  "missable": "gone once the Forest Temple is completed: never place anything required here"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_07",
+  "check_name": "KF Adult Rock Circle 7",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-43.3,-28.2",
+    "hash": "5675403228854574159",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_08",
+  "check_name": "KF Adult Rock Circle 8",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-44.1,-26.7",
+    "hash": "2657789777104100407",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_09",
+  "check_name": "KF Adult Rock Circle 9",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-44.7,-26.0",
+    "hash": "4738397009648900238",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before",
+  "missable": "gone once the Forest Temple is completed: never place anything required here"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_10",
+  "check_name": "KF Adult Rock Circle 10",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-45.7,-25.8",
+    "hash": "802407974539353270",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_11",
+  "check_name": "KF Adult Rock Circle 11",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.6,-26.7",
+    "hash": "5853846732169153879",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+ },
+ {
+  "unique_check_id": "KF_CIRCLE_ADULT_ROCK_12",
+  "check_name": "KF Adult Rock Circle 12",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-47.8,-26.9",
+    "hash": "13817169663978116369",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before",
+  "missable": "gone once the Forest Temple is completed: never place anything required here"
  },
  {
   "unique_check_id": "KF_CIRCLE_CENTER_ROCK",
@@ -896,24 +1628,12 @@
   "notes": "child map only; two rocks stacked here (Obj_LiftRock_A_02 and _A_01): check in game what lifting it does"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_01",
-  "check_name": "KF Rock Circle 1",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_01",
+  "check_name": "KF Child Rock Circle 1",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-48.2,-28.2",
-    "hash": "10656348214587939196",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-48.2,-28.2",
@@ -933,40 +1653,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_02",
-  "check_name": "KF Rock Circle 2",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_02",
+  "check_name": "KF Child Rock Circle 2",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-47.3,-29.9",
-    "hash": "8931631613049749371",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-47.3,-29.9",
@@ -986,40 +1690,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_03",
-  "check_name": "KF Rock Circle 3",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_03",
+  "check_name": "KF Child Rock Circle 3",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-47.1,-30.4",
-    "hash": "15732862253800965646",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-47.1,-30.4",
@@ -1039,40 +1727,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_04",
-  "check_name": "KF Rock Circle 4",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_04",
+  "check_name": "KF Child Rock Circle 4",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-45.8,-30.5",
-    "hash": "13164882936498639212",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-45.8,-30.5",
@@ -1092,40 +1764,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_05",
-  "check_name": "KF Rock Circle 5",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_05",
+  "check_name": "KF Child Rock Circle 5",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-44.2,-30.1",
-    "hash": "15388836867476865988",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-44.2,-30.1",
@@ -1145,40 +1801,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_06",
-  "check_name": "KF Rock Circle 6",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_06",
+  "check_name": "KF Child Rock Circle 6",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-43.8,-29.9",
-    "hash": "5312950394209176374",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-43.8,-29.9",
@@ -1198,40 +1838,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_07",
-  "check_name": "KF Rock Circle 7",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_07",
+  "check_name": "KF Child Rock Circle 7",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-43.3,-28.2",
-    "hash": "5675403228854574159",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-43.3,-28.2",
@@ -1251,40 +1875,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_08",
-  "check_name": "KF Rock Circle 8",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_08",
+  "check_name": "KF Child Rock Circle 8",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-44.1,-26.7",
-    "hash": "2657789777104100407",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-44.1,-26.7",
@@ -1304,40 +1912,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_09",
-  "check_name": "KF Rock Circle 9",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_09",
+  "check_name": "KF Child Rock Circle 9",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-44.7,-26.0",
-    "hash": "4738397009648900238",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-44.7,-26.0",
@@ -1357,40 +1949,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_10",
-  "check_name": "KF Rock Circle 10",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_10",
+  "check_name": "KF Child Rock Circle 10",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-45.7,-25.8",
-    "hash": "802407974539353270",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-45.7,-25.8",
@@ -1410,40 +1986,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_11",
-  "check_name": "KF Rock Circle 11",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_11",
+  "check_name": "KF Child Rock Circle 11",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-47.6,-26.7",
-    "hash": "5853846732169153879",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-47.6,-26.7",
@@ -1463,40 +2023,24 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
-  "unique_check_id": "KF_CIRCLE_ROCK_12",
-  "check_name": "KF Rock Circle 12",
+  "unique_check_id": "KF_CIRCLE_CHILD_ROCK_12",
+  "check_name": "KF Child Rock Circle 12",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-47.8,-26.9",
-    "hash": "13817169663978116369",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-47.8,-26.9",
@@ -1516,20 +2060,16 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
  },
  {
   "unique_check_id": "KF_DEKU_TREE_GOSSIP_01",
@@ -2963,8 +3503,8 @@
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
  },
  {
-  "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_01",
-  "check_name": "KF Rock Near Know It All House 1",
+  "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ADULT_ROCK_01",
+  "check_name": "KF Adult Rock Near Know It All House 1",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
@@ -2980,7 +3520,73 @@
     "ages": [
      "adult"
     ]
-   },
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ADULT_ROCK_02",
+  "check_name": "KF Adult Rock Near Know It All House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-63.3,-18.5",
+    "hash": "11881247981246911148",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_CHILD_ROCK_01",
+  "check_name": "KF Child Rock Near Know It All House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
    {
     "scene": "KokiriForest",
     "spot": "rock@-62.2,-19.6",
@@ -3000,40 +3606,23 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_02",
-  "check_name": "KF Rock Near Know It All House 2",
+  "unique_check_id": "KF_NEAR_KNOW_IT_ALL_HOUSE_CHILD_ROCK_02",
+  "check_name": "KF Child Rock Near Know It All House 2",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-63.3,-18.5",
-    "hash": "11881247981246911148",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-63.3,-18.5",
@@ -3053,20 +3642,15 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
   "unique_check_id": "KF_NEAR_LOST_WOODS_GOSSIP",
@@ -3123,8 +3707,8 @@
   "notes": "hint stone, not an item check"
  },
  {
-  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_BUSH_01",
-  "check_name": "KF Bush Near Sarias House 1",
+  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_ADULT_BUSH_01",
+  "check_name": "KF Adult Bush Near Sarias House 1",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "bush",
@@ -3140,7 +3724,112 @@
     "ages": [
      "adult"
     ]
-   },
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_ADULT_BUSH_02",
+  "check_name": "KF Adult Bush Near Sarias House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-4.4,6.0",
+    "hash": "4350448546553475237",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_ADULT_BUSH_03",
+  "check_name": "KF Adult Bush Near Sarias House 3",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "bush@-3.4,7.3",
+    "hash": "13009491718918701905",
+    "actor": "Obj_Plant_Grass_A_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_01",
+  "check_name": "KF Child Bush Near Sarias House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "bush",
+  "object_id": [
    {
     "scene": "KokiriForest",
     "spot": "bush@-4.7,8.4",
@@ -3160,40 +3849,23 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_BUSH_02",
-  "check_name": "KF Bush Near Sarias House 2",
+  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_02",
+  "check_name": "KF Child Bush Near Sarias House 2",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "bush",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "bush@-4.4,6.0",
-    "hash": "4350448546553475237",
-    "actor": "Obj_Plant_Grass_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "bush@-4.4,6.0",
@@ -3213,40 +3885,23 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_BUSH_03",
-  "check_name": "KF Bush Near Sarias House 3",
+  "unique_check_id": "KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_03",
+  "check_name": "KF Child Bush Near Sarias House 3",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "bush",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "bush@-3.4,7.3",
-    "hash": "13009491718918701905",
-    "actor": "Obj_Plant_Grass_A_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "bush@-3.4,7.3",
@@ -3266,20 +3921,15 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
   "unique_check_id": "KF_RUPEE_BEHIND_MIDOS_HOUSE_ITEM",
@@ -4001,8 +4651,8 @@
   "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_WEST_OF_MIDOS_HOUSE_ROCK_01",
-  "check_name": "KF Rock West of Midos House 1",
+  "unique_check_id": "KF_WEST_OF_MIDOS_HOUSE_ADULT_ROCK_01",
+  "check_name": "KF Adult Rock West of Midos House 1",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
@@ -4018,7 +4668,73 @@
     "ages": [
      "adult"
     ]
-   },
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_WEST_OF_MIDOS_HOUSE_ADULT_ROCK_02",
+  "check_name": "KF Adult Rock West of Midos House 2",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "rock@-63.3,-38.1",
+    "hash": "6226476025750490375",
+    "actor": "Obj_LiftRock_A_01",
+    "files": [
+     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_WEST_OF_MIDOS_HOUSE_CHILD_ROCK_01",
+  "check_name": "KF Child Rock West of Midos House 1",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "rock",
+  "object_id": [
    {
     "scene": "KokiriForest",
     "spot": "rock@-62.0,-39.4",
@@ -4038,40 +4754,23 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_WEST_OF_MIDOS_HOUSE_ROCK_02",
-  "check_name": "KF Rock West of Midos House 2",
+  "unique_check_id": "KF_WEST_OF_MIDOS_HOUSE_CHILD_ROCK_02",
+  "check_name": "KF Child Rock West of Midos House 2",
   "region": "KF Main",
   "area": "KokiriForest",
   "check_type": "rock",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "rock@-63.3,-38.1",
-    "hash": "6226476025750490375",
-    "actor": "Obj_LiftRock_A_01",
-    "files": [
-     "KokiriForest_Adult_Dynamic.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "rock@-63.3,-38.1",
@@ -4091,20 +4790,15 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
   "requirements": {
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
   "unique_check_id": "LW_BRIDGE_CHEST",

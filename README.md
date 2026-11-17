@@ -83,13 +83,14 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `data/ids.json` | every permanent check ID ever issued (active or retired), the area codes and the type codes |
 | `tools/build_db.py`, `data/db/<Area>.json` | the check database of an area, built from the files above (generated: never edit it by hand) |
 | `tests/db_check.py` | checks the database and the IDs, and prints totals |
-| `tools/build_mod.py` | builds a Longshot mod folder: changes what chests, pots, freestanding items and shop shelves give, by check ID, applies game fixes (`--fix bombs_without_bracelet`, `--fix skippable_opening`, `--fix magic_is_separate`, `--fix bombchus_without_bag`, `--fix kokiri_shop_full_stock`: one full shop per age, needed for shelves), updates the resource size table, and can write a test launcher; output in `out/` (never committed) |
+| `tools/build_mod.py` | builds a Longshot mod folder: changes what chests, pots, freestanding items, shop shelves, liftable rocks and solid bushes give, by check ID, applies game fixes (`--fix bombs_without_bracelet`, `--fix skippable_opening`, `--fix magic_is_separate`, `--fix bombchus_without_bag`, `--fix kokiri_shop_full_stock`: one full shop per age, needed for shelves), updates the resource size table, and can write a test launcher; output in `out/` (never committed) |
 | `tools/ground_items.py` | makes ground versions (`Obj_NX2_<item>`) of items that only exist as the model shown when received, from the game's own ground Deku Shield, so they can lie on the ground or drop from a pot and are picked up by walking into them; also held-up versions (`Item_NX2_<item>`) for chests giving items with no get-demo setup of their own (ocarinas), from the Boomerang's item actor (used by `build_mod.py`) |
 | `tools/shop_items.py` | makes shop versions (`Shop_NX2_<item>_<price>_Once`) of items for shop shelves, from the game's own Deku Shield shelf, sold once (used by `build_mod.py`) |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):
 11 regions, 7 chests, 3 Gold Skulltulas, the stick-upgrade scrub, Saria's gift, 8 shop shelves (one check per age, like the pots: 16), 4 pots,
-24 freestanding items, 19 liftable rocks and 9 solid bushes (rocks and bushes as their own randomizer option),
+24 freestanding items, 19 liftable rocks and 9 solid bushes (rocks and bushes as their own randomizer option;
+one check per age, like the pots; the adult rock circle changes after the Forest Temple),
 all taken from the game files. The 4 gossip stones are listed too (kind "gossip"): they give no item, they're
 kept for hints. Every region is marked `"verified": false` until its
 rules have been checked in game; anything uncertain has a `note`.
@@ -137,7 +138,7 @@ digits and `_` only.
 - One ID per check (one item handed out), not per object: a check the game places several times (child
   and adult copies, the bridge chest in two maps) has one ID listing every placement; an NPC that gives two
   things has two IDs.
-- Except when the child and adult objects are separate objects that each give their item (pots: each has
+- Except when the child and adult objects are separate objects that each give their item (pots, rocks, bushes: each has
   its own "broken" memory, so one shared check could be collected once per age). Then there is one check
   per age, with `"age": "child"` or `"adult"` in its data and `CHILD`/`ADULT` in its ID and name:
   `KF_HOUSE_OF_TWINS_CHILD_POT_01`, `KF_HOUSE_OF_TWINS_ADULT_POT_01`. Such a check covers only that age's
@@ -162,6 +163,6 @@ by hand: rebuilding the database updates every answer, and `tests/db_check.py` t
 search (every listed set reaches the check, every set minus any one item doesn't, and "impossible" really
 is impossible).
 
-**Classified so far:** Kokiri Forest (92 checks). `randomizable` is `"untested"` for every check that may
+**Classified so far:** Kokiri Forest (119 checks). `randomizable` is `"untested"` for every check that may
 hold an item, until changing it has been tried in game; gossip stones are `"no"`.
 

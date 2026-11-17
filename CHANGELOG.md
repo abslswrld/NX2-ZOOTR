@@ -4,6 +4,53 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Rocks and bushes: one check per age
+- Each liftable rock and solid bush in Kokiri Forest is now two checks, a child one and an adult one (like
+  the pots: separate objects per age, each giving its own item, tested in game). New IDs like
+  `KF_CIRCLE_CHILD_ROCK_01` / `KF_CIRCLE_ADULT_ROCK_01`, `KF_BEHIND_SHOP_CHILD_BUSH_01`; the 27 old IDs
+  retired. The rock in the middle of the circle stays one child-only check (`KF_CIRCLE_CENTER_ROCK`).
+  Kokiri Forest: 119 checks.
+- **Adult rock circle:** 4 rocks before the Forest Temple is completed, 8 others after (seen in game, and
+  in a 100% save). The 8 have the rule `'Forest Temple Clear'`, a new event of the Forest Temple
+  placeholder (rule for now: reaching the temple; the real one when it's mapped). The 4 are marked
+  `missable` ("gone once the Forest Temple is completed: never place anything required here"); the field
+  goes into the database (`tools/build_db.py`). Two new tests in `tests/logic_check.py`.
+
+### In-game results of the rocks and bushes test
+- **Rocks work:** the 12 circle rocks each dropped a red rupee (20) as a child. As an adult, the 4 circle
+  rocks there dropped red rupees too.
+- **The rock in the middle of the circle** can't be lifted as a child: a Kokiri is trying to lift it (an
+  NPC scene). Maybe it can be lifted later in the game; to look at before it becomes a check.
+- **Bushes work:** the 3 bushes beside Mido's house each dropped a Piece of Heart, as a child and again as
+  an adult. The Piece of Heart needs A to pick up (the game's own ground Piece of Heart does; may be
+  changed later).
+- **Separate objects per age:** the adult rocks and bushes gave their items again after the child ones, so
+  like the pots, rocks and bushes need one check per age.
+- **Adult circle rocks:** only 4 are there as an adult (screenshot), though the adult map places all 12 at
+  the same spots as the child ones, the same way (same rock, no `Presence`, nothing linked to them; some
+  are only ~0.3 m apart). The unmodded game shows 4 too.
+- Found: the circle is run by a level logic module (`Logic/KokiriForest_Common_Level_All_01_6aaf`, the map's
+  `AiGroups` entry referencing the 12 rocks and 8 trigger areas). From its text: it creates and deletes
+  rocks (`Logic_Create` / `Logic_Delete`) in two sets (8 and 4), checks the age and story flags
+  (`Get_StoneOfForest_IsCompleted_Exp`, `SageOfForest_IsBefore_Step08`), and sets
+  `KokiriForest_Npc_Kokiri_008_Child_LiftRock_AllBroken` when all are broken: it belongs to the scene of
+  the Kokiri lifting the middle rock (`Npc_Kokiri_008_Child`). As an adult (in our test) only the set of 4
+  is there: `KF_CIRCLE_ROCK_03`, `_06`, `_09`, `_12`. The exact conditions need an AI file reader (not
+  built yet): the other 8 may appear as an adult at another point of the story.
+- **Respawn:** after going to the Lost Woods and back, the bushes had **not** come back (pots do come back
+  when the area reloads). What makes them come back is not known yet.
+
+### Rocks and bushes in the builder (branch `rocks-bushes`, to test)
+- Liftable rocks (`Obj_LiftRock_*`) and solid bushes (`Obj_Plant_Grass_*`) can be given an item: the builder
+  adds `Drop__DropActor` to them (in Kokiri Forest none has a drop set; the game itself sets it on some
+  rocks and bushes elsewhere, e.g. `Obj_LiftRock_A_01` with a red rupee in Desert Colossus,
+  `Obj_Plant_Grass_A_01` with a blue rupee in Hyrule Field). A rock or bush that drops from a drop table
+  (`Drop__DropTable`) is refused for now. Boulders are not included.
+- Like the pots, each rock and bush is a separate object in the child and the adult map; if they work,
+  they will probably need one check per age (decided after the test).
+- Test mod: the 12 circle rocks near Mido's house: red rupee each; the rock in the middle of the circle
+  (child only): Boomerang (ground version); the 3 bushes beside Mido's house: Piece of Heart each.
+
 ### Tidy before merging `ocarina-chus-shop`
 - Removed the test-only Empty Bottle shelf variants and the shop Bottle's special-deal workaround (bottles
   never reach a shelf now). Results stay above.
