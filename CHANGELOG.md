@@ -4,6 +4,20 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### In-game test of the two new tools (scratch build; branches `claude/ainb-format-aa01ca`, `claude/evfl-add-events-b2737c` not merged)
+- **AINB tool: works in game.** The rock circle module (`Logic/KokiriForest_Common_Level_All_01_6aaf`)
+  with the "is adult" input taken out of its switch (node 32, `OperateAND`): a child on a new file saw the 4
+  corner rocks instead of the ring of 8, so the game ran our edited AI file.
+- **Wanted (the user, 2026-11-17):** the rock circle as it is after the dungeons, at both ages: the ring of
+  8 rocks, and the Kokiri (`Npc_Kokiri_008_Child`) away from the middle rock. Needs the circle module
+  changed so the 8 are never deleted and the 4 never created, and finding what keeps the Kokiri there.
+- **Event flow tool: the shop Bottle still can't be bought** (same "take it back" line). The new branch was
+  added to `DisplayShop` twice (selected item `Shop_NX2_Bottle_5_Once`, then `Item_Bottle`), in front of the
+  only call of the game's buy check (`NormalFlow`: sold out? -> callswitch `SelectItem_CheckAvailable`);
+  the other two callers of the take-back talk are for the Hylian Shield and the tunics only. So either the
+  selected item's name is stored as something else, or the game doesn't read our copy of `DisplayShop`.
+  Next: a test that tells the two apart.
+
 ### Rock circle corrected (branch `rock-circle`)
 - **Correction:** the circle by Mido's house has **8** rocks as a child, not 12 (earlier notes said 12).
   The map places 12 rock objects; the level logic shows 8 to a child, and to an adult 4 before the Forest
