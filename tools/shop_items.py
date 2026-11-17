@@ -47,9 +47,15 @@ SHELF_LIFT = {'Item_Hookshot': 0.25}         # 0.3 tested 2026-11-17: right, a t
 NO_RESPAWN = '?Component/ActorGameDataSetting/NoRespawn.game__component__ActorGameDataSetting.bgyml'
 
 
-def shop_name(item, price, once=False):
+# test-only variants (CHECK=Item~VARIANT on the builder's command line), to find out what the game's buy code
+# refuses (the Empty Bottle, 2026-11-17): A: no PouchActor (the shop version itself goes into the pouch, as
+# the first ground versions did); B: the row without its item-button slot (AssignableItem) and action guide
+VARIANTS = {'A': 'no PouchActor', 'B': 'no AssignableItem / ActionGuideType on the row'}
+
+
+def shop_name(item, price, once=False, variant=''):
     base = item[5:] if item.startswith('Item_') else item
-    return '%s%s_%d%s' % (PREFIX, base, price, '_Once' if once else '')
+    return '%s%s_%d%s%s' % (PREFIX, base, price, '_Once' if once else '', '_' + variant if variant else '')
 
 
 def gpt_path(actor):
@@ -113,10 +119,12 @@ def can_sell(read_pack, item):
     return all(r in c for r in ('ActorNameRef', 'ModelInfoRef', 'PouchContentRef'))
 
 
-def build(item, price, read_pack, read_table_rows, once=False):
-    """the shop version of `item` at `price` rupees.
+def build(item, price, read_pack, read_table_rows, once=False, variant=''):
+    """the shop version of `item` at `price` rupees (variant: see VARIANTS).
     Returns (name, pack data, {inner path: (data, similar game file)} for files new to the game, {table: row})."""
-    name = shop_name(item, price, once)
+    if variant and variant not in VARIANTS:
+        raise SystemExit('unknown shop test variant %r (%s)' % (variant, ', '.join(VARIANTS)))
+    name = shop_name(item, price, once, variant)
     tpl = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))
     base = sarc.Sarc.read(read_pack(pack_path(PRICE_TEMPLATE)))
     itm = sarc.Sarc.read(read_pack(pack_path(item)))
@@ -178,7 +186,8 @@ def build(item, price, read_pack, read_table_rows, once=False):
     pdoc = byml.loads(tpl.files[tpp])
     pdoc.root = type(pdoc.root)()
     pdoc.root['$parent'] = 'Work/' + _ref_path(ic['PouchContentRef'])[:-len('.bgyml')] + '.gyml'
-    pdoc.root['PouchActor'] = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
+    if variant != 'A':
+        pdoc.root['PouchActor'] = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
     if read_table_rows and any(r['__RowId'] == item and r.get('PouchSpecialDeal') in NO_SPECIAL_DEAL
                                for r in read_table_rows('PouchActorInfo')):
         pdoc.root['SpecialDeal'] = byml.UInt(SPECIAL_DEAL_NONE)   # see the PouchActorInfo row below
@@ -242,6 +251,9 @@ def build(item, price, read_pack, read_table_rows, once=False):
     # (2026-11-17). The shelf row drops it; the item that goes into the pouch (PouchActor) keeps its own.
     if pa.get('PouchSpecialDeal') in NO_SPECIAL_DEAL:
         pa['PouchSpecialDeal'] = type(pa['PouchSpecialDeal'])('None')
+    if variant == 'B':
+        pa.pop('AssignableItem', None)
+        pa.pop('ActionGuideType', None)
     pa['__RowId'] = name
     rows = {'ActorInfo': ai, 'GameActorInfo': ga, 'PouchActorInfo': pa}
 

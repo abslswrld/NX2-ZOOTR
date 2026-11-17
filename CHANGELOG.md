@@ -4,6 +4,15 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Empty Bottle on a shelf: two test variants (to test)
+- The game's buy code refuses the shop Empty Bottle. Two test-only variants (`shop_items.VARIANTS`, given on
+  the builder's command line as `CHECK=Item_Bottle~A` / `~B`), one guess each:
+  - **A** (Recovery Heart shelf, 5 rupees): no `PouchActor`, so the shop version itself goes into the
+    pouch, as the first ground Bottle did (which worked as a bottle).
+  - **B** (Deku Nuts 10 shelf, 30 rupees): the row without its item-button slot (`AssignableItem:
+    BottleA`) and bottle action guide, in case the buy code treats anything with a bottle slot as bottle
+    contents; `Item_Bottle` still goes into the pouch.
+
 ### In-game results of the Kokiri Shop fixes
 - **Count boards:** right. No board under single items (no "x10" under the Hookshot), "x3" under the
   3 Bombchus, which give 3. Bought shelves stay empty.
