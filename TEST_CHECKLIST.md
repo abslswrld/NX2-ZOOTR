@@ -1,31 +1,37 @@
-# In-game test checklist (test mod rebuilt 2026-11-16 late, branch `ground-items`)
+# In-game test checklist (test mod rebuilt 2026-11-16, branch `ocarina-chus-shop`)
 
-**Start:** run `out\Launch NX2-ZOOTR test.bat`, then make a **new file** (important: a fresh file, so you
-don't already own a bottle or an ocarina). Skip the opening.
-This round: **the Bottle's hold-up and the ocarina being playable.** The ground Bottle and ground Fairy
-Ocarina no longer carry their "special deal". There is also a Fairy Ocarina in one of Mido's chests.
-Everything else is the same as last time.
+**Start:** run `out\Launch NX2-ZOOTR test.bat`, then make a **new file**. Skip the opening.
+This round: the chest ocarina, the pot ocarina, Bombchus without a bomb bag, and the Kokiri Shop.
+You'll need some rupees for the shop (15 for the Boomerang, 75 for the Bombchus).
 
-## 0. Does it load?
-- [ ] The game reaches Kokiri Forest without crashing.
+## 1. Fairy Ocarina from Mido's chest (new file, before touching the pot ocarina)
+One of Mido's four chests gives it.
+- [ ] Is the ocarina **visible** above Link's head this time?
+- [ ] Can you play it straight away (still)?
 
-## 1. Empty Bottle (in the shop, as a child)
-- [ ] Does Link now hold it above his head when he picks it up?
-- [ ] Does it still work as a bottle (shows as an empty bottle in the item menu; can you catch something in
-      it, e.g. a bug or fairy, if one is handy)?
+## 2. Fairy Ocarina from the House of Twins pot (a second new file, without the chest ocarina)
+- [ ] Picked up automatically, held up?
+- [ ] **Can you play it straight away**, without a reload?
 
-## 2. Fairy Ocarina from the pot (House of Twins, child)
-- [ ] Picked up automatically, with the hold-up?
-- [ ] **Can you play it straight away**, without saving and reloading?
+## 3. Bombchus without a bomb bag (before picking up the Bomb Bag near Mido)
+The other House of Twins child pot drops Bombchus.
+- [ ] Do they go into the item menu (not 0/0)? How many, and what maximum does it show (should be 50)?
+- [ ] Can you use them?
+- [ ] Then take the Bomb Bag (on the ground near the path to Mido): bombs work, and the Bombchus are not
+      changed (not refilled, maximum still 50)?
 
-## 3. Fairy Ocarina in Mido's chest (start a new file for this, or do it before step 2)
-Do this on a **new file where you haven't picked up the pot ocarina yet**, otherwise you'd already own one.
-Mido's house has four chests; one of them gives the ocarina (we don't know which yet: note it).
-- [ ] Does the chest give the Fairy Ocarina, with the normal chest animation and message?
-- [ ] **Can you play it straight away?**
+## 4. Kokiri Shop (child)
+Shelf 1 now sells the **Boomerang** (15 rupees), shelf 2 the game's own **5 Bombchus** (75 rupees).
+- [ ] Do both show on the shelves (model, name and price when you look at them)? Note what the description
+      text says for the Boomerang (it may be empty: the game has no shop text for it).
+- [ ] Buy the Boomerang: do you get it, and does it work?
+- [ ] After buying it, is the shelf **empty** (sold once), also after leaving the shop and coming back?
+- [ ] Buy the Bombchus without a bomb bag: do they go into the item menu?
 
-## 4. Quick look at the rest
-- [ ] Bomb Bag, Boomerang, Bombchus, Hookshot still picked up automatically and working.
-- [ ] Anything odd: wrong name or icon, crash.
+## 5. Kokiri Shop (adult, if you can get there)
+- [ ] Shelf 1 sells the **Hookshot** (15 rupees): buy it, does it work, and is the shelf empty afterwards?
+
+## 6. Anything odd
+- [ ] Wrong name or icon, crash, the shop's other shelves wrong.
 
 Pots still refill (not built yet), so the pot items can be taken again: that's expected.
