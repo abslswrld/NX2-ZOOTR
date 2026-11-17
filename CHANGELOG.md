@@ -14,6 +14,9 @@ Newest first. Dates are when the work was done.
   changed later).
 - **Separate objects per age:** the adult rocks and bushes gave their items again after the child ones, so
   like the pots, rocks and bushes need one check per age.
+- **Adult circle rocks:** only 4 are there as an adult (screenshot), though the adult map places all 12 at
+  the same spots as the child ones, the same way (same rock, no `Presence`, nothing linked to them; some
+  are only ~0.3 m apart). Cause unknown (to find out).
 - **Respawn:** after going to the Lost Woods and back, the bushes had **not** come back (pots do come back
   when the area reloads). What makes them come back is not known yet.
 
