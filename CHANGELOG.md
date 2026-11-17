@@ -17,7 +17,15 @@ Newest first. Dates are when the work was done.
 - **Kokiri Shop, adult:** the same 3 slots show (Deku Nuts x5, Deku Shield, Deku Stick); the others say
   "Coming Soon". No Hookshot.
 - So: the price comes from the shop slot, not from the shelf actor, and our shop versions don't appear at
-  all (to look at).
+  all.
+- Found (game files): the **shopkeeper** decides what is sold. Its shop list (`ShopParam` -> `GoodsList`)
+  has one entry per slot, in `ShopItemIndex` order (0 Heart, 1 Deku Seeds 30, 2 Deku Nuts 5, 3 Deku Nuts
+  10, 4 Deku Seeds ..., 5 Deku Sticks bundle, 6 Deku Shield, 7 Deku Stick). Each entry names the shelf
+  actor that is sold (its price), a release flag (`Release`: most slots only after meeting the Deku Tree)
+  and a stock (`StockNum`: -1 unlimited, 1 = once, as the "low on stock" list before the Deku Tree). The
+  shelf actor in the map only shows the item. Kokiri shopkeepers: `Npc_Kokiri_001_Shop_Child` (after the
+  Deku Tree), `..._Child_ShortStock` (before: its own list over the child one), `..._Shop_Adult`, which
+  has no list of its own: it uses the child one (same file, a copy in each pack).
 
 ### Held-up ocarina, Bombchus without a bomb bag, shop shelves (branch `ocarina-chus-shop`, to test)
 - **What goes into the pouch:** every game ground item and shelf that stands for another item names it in its
