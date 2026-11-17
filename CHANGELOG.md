@@ -4,6 +4,17 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Rocks and bushes in the builder (branch `rocks-bushes`, to test)
+- Liftable rocks (`Obj_LiftRock_*`) and solid bushes (`Obj_Plant_Grass_*`) can be given an item: the builder
+  adds `Drop__DropActor` to them (in Kokiri Forest none has a drop set; the game itself sets it on some
+  rocks and bushes elsewhere, e.g. `Obj_LiftRock_A_01` with a red rupee in Desert Colossus,
+  `Obj_Plant_Grass_A_01` with a blue rupee in Hyrule Field). A rock or bush that drops from a drop table
+  (`Drop__DropTable`) is refused for now. Boulders are not included.
+- Like the pots, each rock and bush is a separate object in the child and the adult map; if they work,
+  they will probably need one check per age (decided after the test).
+- Test mod: the 12 circle rocks near Mido's house: red rupee each; the rock in the middle of the circle
+  (child only): Boomerang (ground version); the 3 bushes beside Mido's house: Piece of Heart each.
+
 ### Tidy before merging `ocarina-chus-shop`
 - Removed the test-only Empty Bottle shelf variants and the shop Bottle's special-deal workaround (bottles
   never reach a shelf now). Results stay above.

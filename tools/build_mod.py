@@ -2,7 +2,8 @@
 
     python tools/build_mod.py --romfs "<romfs>" --out out\\mods --name NX2-ZOOTR KF_MIDO_CHEST_01=Item_Boomerang ...
 
-Supported: chests and pots (their item is their Drop__DropActor in the map file), freestanding items
+Supported: chests and pots (their item is their Drop__DropActor in the map file; rocks and bushes get one
+added), freestanding items
 (the actor type itself is the item: it is replaced) and shop shelves (the shelf actor is replaced by a shop
 version of the item, tools/shop_items.py, at the shelf's original price, sold once). For
 each check every placement is changed (child and adult copies, copies in other maps; a check made for one
@@ -46,8 +47,12 @@ from formats import zstd, byml, restbl, sarc, evfl  # noqa: E402
 from logic.world import World  # noqa: E402
 
 RESTBL_PATH = os.path.join('System', 'Resource', 'ResourceSizeTable.Product.111.Nin_Ounce_NVN2.rsizetable.zs')
-SUPPORTED = {'chest', 'pot', 'freestanding', 'shop'}
+SUPPORTED = {'chest', 'pot', 'freestanding', 'shop', 'rock', 'bush'}
 REPLACED = ('freestanding', 'shop')      # kinds whose actor itself is replaced
+# kinds whose drop is usually not set in the map: the builder adds Drop__DropActor (the game itself sets it on
+# some rocks and bushes elsewhere, e.g. Obj_LiftRock_A_01 in Desert Colossus, Obj_Plant_Grass_A_01 in Hyrule Field)
+DROP_ADDED = ('rock', 'bush')
+DROP_ON_GROUND = ('freestanding', 'pot', 'rock', 'bush')   # kinds whose item lies on the ground
 # name -> (actor pack, file inside the pack, key, value it must have now, new value)
 LIFT_GRADE_NO_UPGRADE = 3069107721      # small rocks, bushes, pots, Cuccos, Bombchus
 LIFT_GRADE_BRACELET = 3655598229        # bombs and bomb flowers
@@ -113,6 +118,10 @@ def _right_actor(kind, actor):
         return actor.startswith('Obj_Pot')
     if kind == 'shop':
         return actor.startswith('Shop_')
+    if kind == 'rock':
+        return actor.startswith('Obj_LiftRock')
+    if kind == 'bush':
+        return actor.startswith('Obj_Plant_Grass')
     return True                                       # freestanding: the actor is the item
 
 
@@ -132,7 +141,7 @@ def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: 
             spot = world.checks[scene][spot_id]
             if spot['kind'] not in SUPPORTED:
                 raise SystemExit('%s is a %s: only %s supported yet' % (cid, spot['kind'], ', '.join(sorted(SUPPORTED))))
-            if spot['kind'] in ('freestanding', 'pot'):
+            if spot['kind'] in DROP_ON_GROUND:
                 item = on_ground(item_given)
             elif spot['kind'] == 'chest':
                 item = in_chest(item_given)
@@ -163,6 +172,12 @@ def patch_file(data, changes):
             continue
         if h in changes:
             dyn = a.get('Dynamic')
+            if changes[h][3] in DROP_ADDED and (dyn is None or 'Drop__DropActor' not in dyn):
+                if dyn is not None and 'Drop__DropTable' in dyn:
+                    raise SystemExit('actor %s (%s) drops from a drop table (%s): not supported yet'
+                                     % (h, a['Gyaml'], dyn['Drop__DropTable']))
+                dyn = type(dyn)(dyn) if dyn is not None else {}
+                dyn['Drop__DropActor'] = None             # nothing set: found below as None
             if dyn is None or 'Drop__DropActor' not in dyn:
                 raise SystemExit('actor %s (%s) has no Drop__DropActor' % (h, a['Gyaml']))
             found[h] = dyn['Drop__DropActor']
@@ -752,7 +767,7 @@ def main(argv):
             if h in changes and changes[h][3] in REPLACED:
                 want['Gyaml'] = changes[h][1]
             elif h in changes:
-                dyn = dict(want['Dynamic'], Drop__DropActor=changes[h][1])
+                dyn = dict(want.get('Dynamic') or {}, Drop__DropActor=changes[h][1])
                 ev = dyn.get('GetEventName')
                 if ev is not None and changes[h][1] != found[h] and CHEST_EVENTS[ev][0] == 'remove':
                     del dyn['GetEventName']
