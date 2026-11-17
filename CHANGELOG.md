@@ -4,6 +4,29 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Songs: an item instead of the song, without the lesson (branch `claude/song-skip`)
+- How Saria's Song is started: an `EventRequestActor` in the child Sacred Forest Meadow map requests
+  `SacredForestMeadow_Field_MelodyGet_Saria` (flow `SacredForestMeadow`): fade out, then
+  `EventSystemActor.EventTransition` to the cutscene event `Dm_MelodyGet_Saria`, then Saria sits, a challenge
+  step (`Get_StoneOfFire_MelodyGet_Saria`), Saria marked as talked to. Its trigger area
+  (`Logic/SacredForestMeadow_Child_Prefab_bbc3`) exists while `DoorOfTime_IsAfter_Step01_Exp` (Zelda's letter)
+  is set **and the cutscene `Dm_MelodyGet_Saria` has not been played**: what stops it repeating is "played", not
+  owning the song. Saria herself is created on the same letter flag (`..._Prefab_3265`). The cutscene sets no
+  flags of its own; it only gives the song (`GetPouchContent<GetPouchContentByActorName>`). There is no flow
+  action that marks an event as played.
+- `tools/build_mod.py`: a check with `"song": {"flow", "item"}` in its data (first: "Song from Saria" in the
+  Sacred Forest Meadow). The cutscene is still started, so the game records it as played, but its
+  `EntryPoint0` now only fades in, hands over the item through `Dm_SY_GetInEvent<GetInEvent_NotTurn_NotNpc>`
+  (as the Skull Kid hands over his heart piece) and ends: no lesson, no song (`song_skip`).
+- Test build (`out/mods`): Saria's Song -> Piece of Heart, plus a test-only change (not in the builder) so a new
+  file can reach it: Saria and her trigger no longer need Zelda's letter (Saria was there, on her stump).
+  **In game: the screen faded out and in, nothing was given, and it happened again every time** (not counted
+  as played). Most likely the cutscene event stopped at the call of `Dm_SY_GetInEvent`, which no song cutscene
+  uses. Changed to the step the cutscene itself gives the song with, `GetPouchContent<GetPouchContentByActorName>`
+  ("You got ..." window, then the item; the Song of Time cutscene shows the Ocarina of Time with the same
+  flow), plus the item's companions (slingshot -> seed bag). **Confirmed in game:** fade out and in, the Piece
+  of Heart window, the heart piece given, no Saria's Song, and the trigger did not come back.
+
 ### Correction: song cutscenes are ordinary event flows (first look at timelines)
 - **Correction:** an earlier note here said the songs are in cutscene flows with timelines that
   `formats/evfl.py` can't read. Wrong: all 12 `Dm_MelodyGet_*` song flows (and `GetPouchContent`) are plain

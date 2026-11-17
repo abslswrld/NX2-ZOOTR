@@ -81,7 +81,11 @@
    "Song from Saria": {
     "rule": "is_child and ZeldasLetter",
     "kind": "gift",
-    "note": "Saria's Song (event SacredForestMeadow_Field_MelodyGet_Saria). Zelda's letter needed, as in the N64 game (checked in game)",
+    "song": {
+     "flow": "Dm_MelodyGet_Saria",
+     "item": "Item_Melody_SariaSong"
+    },
+    "note": "Saria's Song (event SacredForestMeadow_Field_MelodyGet_Saria). Zelda's letter needed, as in the N64 game (checked in game). The trigger area exists while DoorOfTime_IsAfter_Step01_Exp is set and the cutscene Dm_MelodyGet_Saria has not been played (Logic/SacredForestMeadow_Child_Prefab_bbc3). Replaced by an item in game on 2026-11-17 (tools/build_mod.py song_skip): the item window, no lesson, no repeat",
     "pos": [
      -2.2,
      114.4,
