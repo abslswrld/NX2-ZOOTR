@@ -13,7 +13,7 @@ no game files are included.
 | Zstandard `.zs` (with the game's dictionaries) | `formats/zstd.py` | every compressed file | 9,341/9,341 decompress correctly |
 | SARC `.pack` / `.sarc` | `formats/sarc.py` | archives (actor packs, text) | 8,402/8,402 byte-identical |
 | BYML v7, little and big endian | `formats/byml.py` | GameData, RSDB tables, map actors (`.bcett`) | 144,150/144,152 byte-identical (see below) |
-| BFEVFL event flows | `formats/evfl.py` | item hand-outs, shops, cutscenes | 650/914 byte-identical; 264 not readable yet (see below) |
+| BFEVFL event flows | `formats/evfl.py` | item hand-outs, shops, cutscenes | 650/914 byte-identical; 264 not readable yet (see below). New steps can be added to a flow, not only existing ones changed (see "Adding steps to an event flow") |
 | MSBT text | `formats/msbt.py` | item names, hints, dialogue | 8,640/8,640 byte-identical |
 | RESTBL | `formats/restbl.py` | file-size table the game needs for changed files | 1/1 byte-identical |
 | AINB v0x408 (AI, logic and sequence graphs) | `formats/ainb.py` | pot respawn rules, item pick-up logic, level logic (the rock circle) | 11,707/11,707 byte-identical (2026-11-17: 1,942 loose files in `AI`, `Logic`, `Sequence` and 9,765 inside packs; 5,036 different files) |
@@ -30,7 +30,8 @@ Not identical yet:
 
 `tests/edit_check.py` also changes each format (adds an event, a table row, a file, a text, a size entry,
 changes a number and a string in an AI file)
-and checks the result reads back correctly.
+and checks the result reads back correctly. `tests/evfl_add_check.py` adds new steps to every event flow
+read and checks the read-back (see "Adding steps to an event flow").
 
 AINB notes: the expression block (EXB) inside a file is kept as raw bytes, and the string pool is kept as
 read (new strings go at the end); see the top of `formats/ainb.py`. `tools/ainb_dump.py` prints a file as
@@ -61,6 +62,50 @@ module already has its own texture code), save files (needed for the tracker).
 - The game's files list some null pointers in the event flow relocation table (empty actor action lists,
   entry point arrays, empty switch and callswitch case lists, and a flowchart's actor, event and entry
   point arrays when they are empty); the writer does the same.
+- The 32-bit values of `return` events and `callswitch` cases are the **FNV-1a hash of a name** (`Yes`,
+  `No`, `Complete`... match; `evfl.return_hash`).
+- Each entry point of an event flow lists the subflow and callswitch events that can run from it (true of
+  all 5,465 entry points in the 650 files read); the writer's helpers keep that list up to date.
+
+## Adding steps to an event flow
+
+`formats/evfl.py` can add to a flowchart as well as change it (2026-11-17):
+
+| Call | What it adds |
+|---|---|
+| `fc.add_action(actor, action, params, next)` | a step where an actor does something (the action is added to the actor when it's new) |
+| `fc.add_switch(actor, query, cases, params)` | a branch on an actor's answer (the query is added when new) |
+| `fc.add_fork(forks, join)`, `fc.add_join(next)` | branches run side by side, and where they meet |
+| `fc.add_subflow(flowchart, entry, params, next)` | runs an entry point of this or another flow |
+| `fc.add_callswitch(flowchart, entry, cases, params)`, `fc.add_return(value)` | the game's two extra types: run an entry point and branch on what it returns; return a value (a name or a number) |
+| `fc.add_actor(name, secondary, params=...)` | a new actor |
+| `fc.add_entry_point(name, main)` | a new entry point |
+| `fc.repoint(old, new, keep=())` | every link to event `old` now goes to `new` (to put new steps in front of an old one) |
+| `evfl.dumps_checked(flow)` | brings the entry point lists up to date, checks the flow (names unique, every index in range), writes it, reads it back and compares every event, actor, action, query, parameter and entry point with what was meant |
+
+Everything new goes at the end of its list, so every existing index stays valid. `actor` is an index, a name
+or (name, secondary name). `tests/evfl_add_check.py` adds one of everything to each of the 650 flows and
+checks the read-back, and keeps two worked examples (examples only: the builder doesn't use them and they
+haven't been tried in the game):
+
+- **Giving an item with its get window** (`example_item_get`), as `Dm_Kokiri_0155` gives the Fairy Ocarina:
+  1. action `PouchSystemActor.EventTriggerAddOrRemovePouchContent` `{Num: 1, IsEquipDIrect: False,
+     IsSetMessageTargetActorName: True, Actor: <item>, IsGetEvent: False}`: into the pouch;
+  2. subflow `GetPouchContent` entry `DisplayGetByActorName` `{ActorName: <item>}`: the window
+     (`EventTriggerSetForGetWindow`, then `OpenGetWindow`, which picks the window by kind of item).
+
+  One subflow does both and more, as chests and pick-ups do: `GetPouchContent` entry
+  `GetPouchContentByActorName` `{ActorName: <item>}` (window, rupee counter, pouch, autosave).
+- **Selling an Empty Bottle on a shelf** (`example_shop_bottle`), in `DisplayShop`, the flow every shop
+  shares. Its `NormalFlow` runs when an item is chosen: sold out? then callswitch `SelectItem_CheckAvailable`
+  (holds the game's buy check, `EventQueryCheckBuyResult`, which refuses a new bottle), then the talk, pay
+  and get steps. The example puts a branch in front of that callswitch: if `Shop_SelectItemName` is the named
+  item (`GameDataActor.EventQueryIsGameDataString64`) and Link has the price
+  (`PouchSystemActor.EventQueryHasRuppe`): pay (`Npc_EventStarter.EventTriggerPayItemPriceAtShop`), the two
+  item get steps above, mark the shelf sold (`EventTriggerAddShopItemSoldNum`,
+  `EventTriggerSendMessageToShopBoard`, a one-frame wait, `EventTriggerVisibleItemAtShop`: what the game does
+  after a "sold out" buy), back to the shelves (subflow `Buy_ReturnStart_NoDofReset`). Otherwise the game's
+  own steps, untouched. 10 new events, 1 new action name, 1 link moved.
 
 ## Running the tests on your PC
 

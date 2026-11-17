@@ -23,10 +23,67 @@ Model
     Params: an ordered dict {key: value}; values are int, bool, float, str, Argument(str),
             WString(str), lists of those (IntArray/BoolArray/FloatArray/StrArray/WStrArray), ActorId(a, b),
             or a nested Params.
+
+Adding to a flowchart (new steps, not only changed ones)
+    fc.add_actor(name, secondary, params=...)                 -> actor index
+    fc.action_index(actor, 'EventX', add=True)                -> index of the action on that actor (added if new)
+    fc.query_index(actor, 'EventQueryX', add=True)
+    fc.add_action(actor, action, params, next)                -> event index (one helper per event type:
+    fc.add_switch / add_fork / add_join / add_subflow / add_callswitch / add_return)
+    fc.add_entry_point(name, main)
+    fc.repoint(old, new)                                      every link to event `old` now goes to `new`
+    fc.update_entry_points()                                  entry point lists of subflow events, recomputed
+    fc.check()                                                names unique, every index in range
+    dumps_checked(flow)                                       writes, reads back, compares with what was meant
+  New events, actors, actions and queries go at the end of their lists, so every existing index stays valid.
+  `actor` is an index, a name, or (name, secondary name). Links are event indexes (None = no event).
 """
 import struct
 
 NONE16 = 0xFFFF
+EVENT_TYPES = ('action', 'switch', 'fork', 'join', 'subflow', 'callswitch', 'return')
+
+
+def return_hash(name):
+    """The 32-bit value a `return` event gives back and a `callswitch` case matches: the FNV-1a hash of a
+    name (found by trying: the game's values match 'Yes', 'No', 'Complete'...). A number is kept as it is."""
+    if isinstance(name, int):
+        return name
+    h = 0x811C9DC5
+    for c in name.encode('utf-8'):
+        h = ((h ^ c) * 0x01000193) & 0xFFFFFFFF
+    return h
+
+
+def _flat(t):
+    nxt, join, cases, forks = t
+    return [nxt, join] + [ev for _, ev in cases] + list(forks)
+
+
+def _check_params(bad, where, v, key=None):
+    """parameter values the writer can't store as meant"""
+    here = where if key is None else '%s, parameter %s' % (where, key)
+    if v is None and key is None:
+        return
+    if key is None and not isinstance(v, Params):
+        bad.append('%s: parameters must be an evfl.Params' % where)
+        return
+    try:
+        t = _item_type(v)
+    except TypeError as e:
+        bad.append('%s: %s' % (here, e))
+        return
+    if t == 1:
+        for k, x in v.items():
+            if not isinstance(k, str):
+                bad.append('%s: key %r is not text' % (here, k))
+            _check_params(bad, where, x, k if key is None else '%s.%s' % (key, k))
+    elif t in (2, 7):
+        for x in ([v] if t == 2 else v):
+            if not isinstance(x, int) or not -2 ** 31 <= x < 2 ** 31:
+                bad.append('%s: %r does not fit a signed 32-bit number' % (here, x))
+    elif t == 12 and len(v) != 2:
+        bad.append('%s: an ActorId is (name, secondary name)' % here)
 EVENT_SIZE = 0x30          # 0x28 in Breath of the Wild; this game adds one (so far always null) pointer
 
 
@@ -109,6 +166,237 @@ class Flowchart:
             if e.name == name:
                 return i
         raise KeyError(name)
+
+    # ------------------------------------------------------------------ adding
+    def actor_index(self, actor):
+        """index of an actor given as an index, a name, or (name, secondary name)"""
+        if isinstance(actor, int):
+            if not 0 <= actor < len(self.actors):
+                raise IndexError('no actor %d' % actor)
+            return actor
+        name, secondary = (actor, None) if isinstance(actor, str) else actor
+        hits = [i for i, a in enumerate(self.actors)
+                if a.name == name and (secondary is None or (a.secondary or '') == secondary)]
+        if not hits:
+            raise KeyError('no actor %r' % (actor,))
+        if len(hits) > 1:
+            raise KeyError('%d actors named %r: give (name, secondary name)' % (len(hits), name))
+        return hits[0]
+
+    def add_actor(self, name, secondary='', argument='', params=None, actions=(), queries=(), entry_point=None,
+                  cut=1):
+        """a new actor, at the end; (name, secondary name) must be new. Returns its index."""
+        if any(a.name == name and (a.secondary or '') == secondary for a in self.actors):
+            raise ValueError('actor %r / %r is already in %s' % (name, secondary, self.name))
+        self.actors.append(Actor(name, secondary, argument, actions, queries, params, entry_point, cut))
+        return len(self.actors) - 1
+
+    def _slot(self, actor, kind, name, add):
+        a = self.actors[self.actor_index(actor)]
+        names = getattr(a, kind)
+        if name in names:
+            return names.index(name)
+        if not add:
+            raise KeyError('actor %r has no %r in its %s' % (a.name, name, kind))
+        names.append(name)
+        return len(names) - 1
+
+    def action_index(self, actor, action, add=False):
+        """index of an action in the actor's list; add=True adds it at the end when it isn't there"""
+        return self._slot(actor, 'actions', action, add)
+
+    def query_index(self, actor, query, add=False):
+        return self._slot(actor, 'queries', query, add)
+
+    def new_event_name(self, prefix='Event'):
+        """a name no event has yet: prefix + the first free number (the game's own are Event0, Event1...)"""
+        used = {e.name for e in self.events}
+        n = len(self.events)
+        while '%s%d' % (prefix, n) in used:
+            n += 1
+        return '%s%d' % (prefix, n)
+
+    def add_event(self, event):
+        """a ready-made Event, at the end; its name must be new (None: one is made up). Returns its index."""
+        if event.name is None:
+            event.name = self.new_event_name()
+        if any(e.name == event.name for e in self.events):
+            raise ValueError('event %r is already in %s' % (event.name, self.name))
+        if len(self.events) >= NONE16:
+            raise ValueError('too many events')
+        self.events.append(event)
+        return len(self.events) - 1
+
+    def add_action(self, actor, action, params=None, next=None, name=None):
+        """`actor` does `action` (added to the actor when new), then goes to `next`"""
+        a = self.actor_index(actor)
+        return self.add_event(Event(name, 'action', actor=a, action=self.action_index(a, action, add=True),
+                                    params=params, next=next))
+
+    def add_switch(self, actor, query, cases, params=None, name=None):
+        """asks `actor` the `query` (added when new) and goes to the event of the matching (value, event) case"""
+        a = self.actor_index(actor)
+        return self.add_event(Event(name, 'switch', actor=a, query=self.query_index(a, query, add=True),
+                                    params=params, cases=cases))
+
+    def add_fork(self, forks, join, name=None):
+        """runs the branches starting at the `forks` events side by side; all end at the join event `join`"""
+        return self.add_event(Event(name, 'fork', forks=forks, join=join))
+
+    def add_join(self, next=None, name=None):
+        return self.add_event(Event(name, 'join', next=next))
+
+    def add_subflow(self, flowchart, entry, params=None, next=None, name=None):
+        """runs entry point `entry` of `flowchart` ('' = this file), then goes to `next`"""
+        return self.add_event(Event(name, 'subflow', flowchart=flowchart, entry=entry, params=params, next=next))
+
+    def add_callswitch(self, flowchart, entry, cases, params=None, name=None):
+        """runs entry point `entry` of `flowchart` ('' = this file) and branches on what it returns;
+        case values are 32-bit hashes or names (hashed with return_hash)"""
+        return self.add_event(Event(name, 'callswitch', flowchart=flowchart, entry=entry, params=params,
+                                    cases=[(return_hash(v), ev) for v, ev in cases]))
+
+    def add_return(self, value, name=None):
+        """ends the entry point, returning `value` (a 32-bit hash, or a name) to the callswitch that ran it"""
+        return self.add_event(Event(name, 'return', value=return_hash(value)))
+
+    def entry_point(self, name):
+        for ep in self.entry_points:
+            if ep.name == name:
+                return ep
+        raise KeyError(name)
+
+    def add_entry_point(self, name, main, subflows=None):
+        """a new entry point starting at event `main`; its list of subflow events is worked out when not given"""
+        if any(ep.name == name for ep in self.entry_points):
+            raise ValueError('entry point %r is already in %s' % (name, self.name))
+        ep = EntryPoint(name, main, subflows)
+        self.entry_points.append(ep)
+        if subflows is None:
+            ep.subflows = self._subflows_from(main)
+        return ep
+
+    def links(self, i):
+        """every event index event `i` points at"""
+        e = self.events[i]
+        return [x for x in _flat((e.next, e.join, e.cases, e.forks)) if x is not None]
+
+    def links_to(self, i):
+        """indexes of the events pointing at event `i`"""
+        return [k for k in range(len(self.events)) if i in self.links(k)]
+
+    def repoint(self, old, new, keep=()):
+        """every link to event `old` (next, cases, forks, join, entry point start) now goes to `new`, but
+        for the events whose indexes are in `keep` (the new steps that must still reach `old`).
+        Returns how many links changed."""
+        n = 0
+        sw = lambda v: new if v == old else v
+        for i, e in enumerate(self.events):
+            if i in keep:
+                continue
+            before = _flat((e.next, e.join, e.cases, e.forks))
+            e.next, e.join = sw(e.next), sw(e.join)
+            e.forks = [sw(f) for f in e.forks]
+            e.cases = [(v, sw(ev)) for v, ev in e.cases]
+            n += sum(1 for a, b in zip(before, _flat((e.next, e.join, e.cases, e.forks))) if a != b)
+        for ep in self.entry_points:
+            if ep.main == old:
+                ep.main = new
+                n += 1
+        return n
+
+    def reachable(self, start):
+        """indexes of the events that can run from event `start`, in the order found"""
+        seen, mark = [], set()
+        todo = [] if start is None else [start]
+        while todo:
+            i = todo.pop(0)
+            if i in mark:
+                continue
+            mark.add(i)
+            seen.append(i)
+            todo += self.links(i)
+        return seen
+
+    def _subflows_from(self, main):
+        return [i for i in self.reachable(main) if self.events[i].type in ('subflow', 'callswitch')]
+
+    def update_entry_points(self):
+        """Each entry point lists the subflow and callswitch events that can run from it (true of every
+        entry point in the game's files). After adding or repointing events: the lists are worked out again,
+        keeping the order they had and putting newly reached events at the end."""
+        for ep in self.entry_points:
+            want = self._subflows_from(ep.main)
+            keep = [i for i in ep.subflows if i in want]
+            ep.subflows = keep + [i for i in want if i not in keep]
+
+    def check(self):
+        """raises ValueError when the flowchart can't be written as meant: names not unique, an index out of
+        range, a fork without a join..."""
+        bad = []
+        ne = len(self.events)
+
+        def dup(what, names):
+            seen = set()
+            for n in names:
+                if n in seen:
+                    bad.append('%s %r is there twice' % (what, n))
+                seen.add(n)
+
+        dup('event', [e.name for e in self.events])
+        dup('actor', [(a.name, a.secondary or '') for a in self.actors])
+        dup('entry point', [ep.name for ep in self.entry_points])
+        for a in self.actors:
+            dup('action of %s' % a.name, a.actions)
+            dup('query of %s' % a.name, a.queries)
+            if a.entry_point is not None and not 0 <= a.entry_point < len(self.entry_points):
+                bad.append('actor %s: no entry point %r' % (a.name, a.entry_point))
+            _check_params(bad, 'actor %s' % a.name, a.params)
+
+        def link(e, what, v, none_ok=True):
+            if v is None:
+                if not none_ok:
+                    bad.append('event %s: %s is missing' % (e.name, what))
+            elif not isinstance(v, int) or isinstance(v, bool) or not 0 <= v < ne:
+                bad.append('event %s: %s points at event %r, there are %d' % (e.name, what, v, ne))
+
+        for e in self.events:
+            if not isinstance(e.name, str) or not e.name:
+                bad.append('an event has no name')
+            if e.type not in EVENT_TYPES:
+                bad.append('event %s: unknown type %r' % (e.name, e.type))
+                continue
+            if e.type in ('action', 'switch'):
+                kind, idx = ('actions', e.action) if e.type == 'action' else ('queries', e.query)
+                if not isinstance(e.actor, int) or not 0 <= e.actor < len(self.actors):
+                    bad.append('event %s: no actor %r' % (e.name, e.actor))
+                elif not isinstance(idx, int) or not 0 <= idx < len(getattr(self.actors[e.actor], kind)):
+                    bad.append('event %s: actor %s has no %s number %r'
+                               % (e.name, self.actors[e.actor].name, kind, idx))
+            if e.type in ('action', 'join', 'subflow'):
+                link(e, 'next', e.next)
+            if e.type in ('switch', 'callswitch'):
+                for v, ev in e.cases:
+                    link(e, 'case %r' % (v,), ev, none_ok=False)
+                    if not isinstance(v, int) or not 0 <= v <= 0xFFFFFFFF:
+                        bad.append('event %s: case value %r is not a 32-bit number' % (e.name, v))
+            if e.type == 'fork':
+                for f in e.forks:
+                    link(e, 'fork', f, none_ok=False)
+                link(e, 'join', e.join, none_ok=False)
+                if isinstance(e.join, int) and 0 <= e.join < ne and self.events[e.join].type != 'join':
+                    bad.append('event %s: its join, event %s, is not a join' % (e.name, self.events[e.join].name))
+            if e.type == 'return' and not (isinstance(e.value, int) and 0 <= e.value <= 0xFFFFFFFF):
+                bad.append('event %s: return value %r is not a 32-bit number' % (e.name, e.value))
+            if e.type in ('action', 'switch', 'subflow', 'callswitch'):
+                _check_params(bad, 'event %s' % e.name, e.params)
+        for ep in self.entry_points:
+            for what, v in [('start', ep.main)] + [('subflow list', s) for s in ep.subflows]:
+                if v is not None and not (isinstance(v, int) and 0 <= v < ne):
+                    bad.append('entry point %s: %s points at event %r, there are %d' % (ep.name, what, v, ne))
+        if bad:
+            raise ValueError('%s: %s' % (self.name, '; '.join(bad[:10])
+                                         + ('; and %d more' % (len(bad) - 10) if len(bad) > 10 else '')))
 
 
 class EventFlow:
@@ -677,3 +965,99 @@ def _write_flowchart(o, key, fc):
             o.u16(s)
         o.align(8)
         o.b += b'\0' * 0x18
+
+
+# ============================================================================ checking what was written
+def _f32(x):
+    return struct.unpack('<f', struct.pack('<f', x))[0]
+
+
+def _norm(v):
+    """a parameter value as (type, value), so that 1 / True / 1.0 and text / Argument don't compare equal;
+    floats as the 32-bit value the file can hold"""
+    if v is None:
+        return None
+    t = _item_type(v)
+    if t == 1:
+        return (1, [(k, _norm(x)) for k, x in v.items()])
+    if t == 4:
+        return (4, _f32(v))
+    if t == 9:
+        return (9, [_f32(x) for x in v])
+    if t in (7, 8, 10, 11, 12):
+        return (t, list(v))
+    return (t, str(v) if t in (0, 5, 6) else v)
+
+
+def _event_fields(e):
+    d = {'name': e.name, 'type': e.type}
+    if e.type in ('action', 'join', 'subflow'):
+        d['next'] = e.next
+    if e.type in ('action', 'switch'):
+        d['actor'] = e.actor
+        d['action' if e.type == 'action' else 'query'] = e.action if e.type == 'action' else e.query
+    if e.type in ('action', 'switch', 'subflow', 'callswitch'):
+        d['params'] = _norm(e.params)
+    if e.type in ('switch', 'callswitch'):
+        d['cases'] = [tuple(c) for c in e.cases]
+    if e.type == 'fork':
+        d['forks'], d['join'] = list(e.forks), e.join
+    if e.type in ('subflow', 'callswitch'):
+        d['flowchart'], d['entry'] = e.flowchart or '', e.entry or ''
+    if e.type == 'return':
+        d['value'] = e.value
+    return d
+
+
+def _actor_fields(a):
+    return {'name': a.name, 'secondary': a.secondary or '', 'argument': a.argument or '',
+            'actions': list(a.actions), 'queries': list(a.queries), 'params': _norm(a.params),
+            'entry_point': a.entry_point, 'cut': a.cut}
+
+
+def _entry_fields(ep):
+    return {'name': ep.name, 'main': ep.main, 'subflows': list(ep.subflows)}
+
+
+def differences(a, b):
+    """What differs between two event flows, as a list of lines (empty = the same): every flowchart, actor,
+    action, query, event, link, parameter (with its type) and entry point is compared."""
+    out = []
+    if a.name != b.name:
+        out.append('file name: %r / %r' % (a.name, b.name))
+    if tuple(a.version) != tuple(b.version):
+        out.append('version: %r / %r' % (a.version, b.version))
+    if len(a.flowcharts) != len(b.flowcharts):
+        out.append('flowcharts: %d / %d' % (len(a.flowcharts), len(b.flowcharts)))
+    for fa, fb in zip(a.flowcharts, b.flowcharts):
+        w = fa.name
+        if fa.name != fb.name:
+            out.append('flowchart name: %r / %r' % (fa.name, fb.name))
+        for what, la, lb, fields in (('actor', fa.actors, fb.actors, _actor_fields),
+                                     ('event', fa.events, fb.events, _event_fields),
+                                     ('entry point', fa.entry_points, fb.entry_points, _entry_fields)):
+            if len(la) != len(lb):
+                out.append('%s: %d %ss / %d' % (w, len(la), what, len(lb)))
+            for i, (x, y) in enumerate(zip(la, lb)):
+                dx, dy = fields(x), fields(y)
+                for k in sorted(dx.keys() | dy.keys()):
+                    if (k in dx) != (k in dy) or dx.get(k) != dy.get(k):
+                        out.append('%s: %s %d (%s) %s: %r / %r' % (w, what, i, x.name, k, dx.get(k), dy.get(k)))
+    return out
+
+
+def dumps_checked(flow, update_entry_points=True):
+    """dumps() for an edited flow: brings the entry points' subflow lists up to date, checks the flow, writes
+    it, reads the result back and compares it with what was meant (every event, actor, action, query,
+    parameter, entry point). Raises ValueError when anything is wrong or differs."""
+    for fc in flow.flowcharts:
+        if update_entry_points:
+            fc.update_entry_points()
+        fc.check()
+    data = dumps(flow)
+    diff = differences(flow, loads(data))
+    if diff:
+        raise ValueError('%s: what was written does not read back as meant: %s' % (flow.name, '; '.join(diff[:10])))
+    if dumps(loads(data)) != data:
+        raise ValueError('%s: the written file does not rewrite identically' % flow.name)
+    return data
