@@ -11,7 +11,12 @@ Newest first. Dates are when the work was done.
 - **Greeting:** still "low on stock" as a child before the Deku Tree, so the branch changed in
   `Npc_Kokiri_001_Shop_Child` is not where that line comes from. Left for later.
 - **Empty Bottle:** still cannot be bought, so the special deal (row and item settings) is not the cause
-  either.
+  either. The shopkeeper says "That'll cost 5 rupees ... oh, wait, actually..." (`Shop_01_02_*`, played by
+  `DisplayShop`'s `NotAvailableTalk`). Every route to it in `DisplayShop` goes through the engine's own
+  buy check (`EventQueryCheckBuyResult`) answering "failed"; for bottle-kind items the flow asks about a
+  free empty bottle first and then makes the same check. So the game's buy code refuses it. The game never
+  sells an empty bottle (shops only sell bottle contents, poured into one you own), so the buy code most
+  likely has no way to add a new bottle. Not something the files decide, as far as found.
 
 ### Kokiri Shop fixes after the first full-shop test (to test)
 - **Greeting:** the child shopkeeper's talk (`Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl`) has one
