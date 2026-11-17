@@ -4,6 +4,24 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Correction: song cutscenes are ordinary event flows (first look at timelines)
+- **Correction:** an earlier note here said the songs are in cutscene flows with timelines that
+  `formats/evfl.py` can't read. Wrong: all 12 `Dm_MelodyGet_*` song flows (and `GetPouchContent`) are plain
+  flowcharts and round-trip byte for byte. Each gives its song with one call of the shared flow
+  `GetPouchContent`, entry `GetPouchContentByActorName`, parameter `ActorName` (Saria event 20, Forest 11,
+  Epona 50, Fire 208, Shadow 15, Light (`Shine`) 249, Spirit (`Spilit`) 11, Storm 21, Sun in `Dm_MelodyGet_Sun_03`
+  30, Time 93, Water 120, Zelda 66; `Dm_MelodyGet_Time` event 255 also shows the Ocarina of Time). Inside,
+  that entry ends in `PouchSystemActor.EventTriggerAddOrRemovePouchContent`, as for other gifts. The lesson
+  (notes shown and played) is separate (`Dm_SY_Ocarina`, `MelodyType`). Changing a song's item: not tried in
+  game yet; open questions: does the game skip/replay a song cutscene by checking the song is owned, how the
+  get window looks mid-cutscene.
+- The 264 unreadable flows: 261 are pure timelines (cinematic tracks `Dm_<Area>_<nnnn>` and their `_Effect`,
+  `_Env` companions: camera, animation, light, sound; none gives an item or sets a flag) and 3 use entry point
+  variables (`Dm_SY_Ocarina`, `Dm_SY_Get`, `LinkSleepInBed`). Timelines are laid out much as in the public
+  Breath of the Wild documentation (a read-only scratch parser reads all 261; one clip field is of unknown
+  use). Entry point variables are a small addition (5 entry points use them) and would make `Dm_SY_Ocarina`
+  editable, needed only to change or skip song lessons.
+
 ### Deku Scrubs in the builder (branch `claude/scrubs-in-builder`, on top of the event flow tool branch)
 - `tools/build_mod.py` now changes what a Deku Scrub sells, for the scrubs that sell one thing once (their talk
   runs `SimpleShopRoot_Enemy_Scrub_Business_Pouch`: the stick and nut upgrade scrubs, the Death Mountain heart
