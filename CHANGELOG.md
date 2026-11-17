@@ -4,6 +4,12 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### In-game results of the Empty Bottle variants
+- Neither variant can be bought: for both, the shopkeeper goes through his "on second thought" lines.
+  With the special deal, the item settings' `PouchActor` and the row's bottle slot each ruled out, the
+  refusal is in the game's buy code itself. Conclusion: an Empty Bottle can't be sold on a shelf (the game
+  never sells one). It works everywhere else (chest, pot, freestanding, NPC).
+
 ### Empty Bottle on a shelf: two test variants (to test)
 - The game's buy code refuses the shop Empty Bottle. Two test-only variants (`shop_items.VARIANTS`, given on
   the builder's command line as `CHECK=Item_Bottle~A` / `~B`), one guess each:
