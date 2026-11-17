@@ -12,6 +12,19 @@ Newest first. Dates are when the work was done.
   randomizer has the same bug.
 - Lead (not confirmed): these are the only two test items with a "special deal" in the game's item table
   (`PouchSpecialDeal`: `Bottle`, `Ocarina`), handled apart from ordinary items when received.
+- Looked at (game files only):
+  - The ground pick-up logic (`AI/PouchContent.event.root.ainb`, in `AI.Global`) reads the item's special
+    deal (`QueryPouchContentGetSpecialDeal`) and has bottle-only steps (taking a bottle out, a bottle
+    message, the bottle's position): a bottle picked up from the ground is handled like catching something
+    in a bottle, not with the hold-up. The special deal it reads is in the item's settings
+    (`PouchContentParam` `SpecialDeal`; the hash `3069107721` is "None", as in `KeyItemDefault`).
+  - The game never lets Link pick a Fairy Ocarina up from the ground: Saria gives it in a cutscene
+    (`Dm_Kokiri_0155`: add to the pouch, then the shared `GetPouchContent` get window), during which Link
+    goes offstage and comes back. The shared get flow has nothing ocarina-specific. The ocarina reaching
+    the pouch but only becoming playable after a reload or an age change suggests Link's ocarina is set up
+    when Link himself is (re)loaded, which a cutscene does and a ground pickup doesn't (not confirmed).
+  - The Ocarina of Time on the ground in the vanilla game is also followed straight away by an event
+    (`DoorOfTime_GetOcarinaOfTime`, the Song of Time lesson).
 
 ### Ground items picked up by walking into them (to test)
 - Each ground version (`Obj_NX2_*`) now has item settings of its own (`PouchContentParam`), built like the
