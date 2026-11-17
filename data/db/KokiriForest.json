@@ -2057,8 +2057,8 @@
   "notes": "night only (game flag)"
  },
  {
-  "unique_check_id": "KF_KOKIRI_SHOP_01",
-  "check_name": "KF Shop Item 1",
+  "unique_check_id": "KF_KOKIRI_ADULT_SHOP_01",
+  "check_name": "KF Shop Adult Item 1",
   "region": "KF Shop",
   "area": "KokiriForest",
   "check_type": "shop",
@@ -2074,7 +2074,307 @@
     "ages": [
      "adult"
     ]
-   },
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuSeedBundle_02",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_ADULT_SHOP_02",
+  "check_name": "KF Shop Adult Item 2",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#2",
+    "hash": "8442446062876759020",
+    "actor": "Shop_DekuNutBundle_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuNutBundle_01",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_ADULT_SHOP_03",
+  "check_name": "KF Shop Adult Item 3",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#3",
+    "hash": "5205605618390578983",
+    "actor": "Shop_DekuNutBundle_02",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuNutBundle_02",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_ADULT_SHOP_04",
+  "check_name": "KF Shop Adult Item 4",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#4",
+    "hash": "13457020963026830815",
+    "actor": "Shop_DekuSeedBundle_01",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuSeedBundle_01",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_ADULT_SHOP_05",
+  "check_name": "KF Shop Adult Item 5",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#5",
+    "hash": "4359156404841200094",
+    "actor": "Shop_DekuStickBundle_Medium",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuStickBundle_Medium",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_ADULT_SHOP_06",
+  "check_name": "KF Shop Adult Item 6",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#6",
+    "hash": "6642704364901961822",
+    "actor": "Shop_Weapon_Shield_Deku",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Weapon_Shield_Deku",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_ADULT_SHOP_07",
+  "check_name": "KF Shop Adult Item 7",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#7",
+    "hash": "15352451833778770402",
+    "actor": "Shop_DekuStick",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "DekuStick",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_ADULT_SHOP_08",
+  "check_name": "KF Shop Adult Item 8",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
+   {
+    "scene": "KokiriForest",
+    "spot": "shop#Shop_Heart",
+    "hash": "10357707628656499332",
+    "actor": "Shop_Heart",
+    "files": [
+     "KokiriForest_Adult_Static.bcett.byml.zs"
+    ],
+    "ages": [
+     "adult"
+    ]
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Heart",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "MasterSword"
+    ]
+   ]
+  },
+  "check_rule": "is_adult",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "KF_KOKIRI_CHILD_SHOP_01",
+  "check_name": "KF Shop Child Item 1",
+  "region": "KF Shop",
+  "area": "KokiriForest",
+  "check_type": "shop",
+  "object_id": [
    {
     "scene": "KokiriForest",
     "spot": "shop#1",
@@ -2111,35 +2411,18 @@
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_KOKIRI_SHOP_02",
-  "check_name": "KF Shop Item 2",
+  "unique_check_id": "KF_KOKIRI_CHILD_SHOP_02",
+  "check_name": "KF Shop Child Item 2",
   "region": "KF Shop",
   "area": "KokiriForest",
   "check_type": "shop",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "shop#2",
-    "hash": "8442446062876759020",
-    "actor": "Shop_DekuNutBundle_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "shop#2",
@@ -2176,35 +2459,18 @@
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_KOKIRI_SHOP_03",
-  "check_name": "KF Shop Item 3",
+  "unique_check_id": "KF_KOKIRI_CHILD_SHOP_03",
+  "check_name": "KF Shop Child Item 3",
   "region": "KF Shop",
   "area": "KokiriForest",
   "check_type": "shop",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "shop#3",
-    "hash": "5205605618390578983",
-    "actor": "Shop_DekuNutBundle_02",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "shop#3",
@@ -2241,35 +2507,18 @@
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_KOKIRI_SHOP_04",
-  "check_name": "KF Shop Item 4",
+  "unique_check_id": "KF_KOKIRI_CHILD_SHOP_04",
+  "check_name": "KF Shop Child Item 4",
   "region": "KF Shop",
   "area": "KokiriForest",
   "check_type": "shop",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "shop#4",
-    "hash": "13457020963026830815",
-    "actor": "Shop_DekuSeedBundle_01",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "shop#4",
@@ -2306,35 +2555,18 @@
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_KOKIRI_SHOP_05",
-  "check_name": "KF Shop Item 5",
+  "unique_check_id": "KF_KOKIRI_CHILD_SHOP_05",
+  "check_name": "KF Shop Child Item 5",
   "region": "KF Shop",
   "area": "KokiriForest",
   "check_type": "shop",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "shop#5",
-    "hash": "4359156404841200094",
-    "actor": "Shop_DekuStickBundle_Medium",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "shop#5",
@@ -2371,35 +2603,18 @@
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_KOKIRI_SHOP_06",
-  "check_name": "KF Shop Item 6",
+  "unique_check_id": "KF_KOKIRI_CHILD_SHOP_06",
+  "check_name": "KF Shop Child Item 6",
   "region": "KF Shop",
   "area": "KokiriForest",
   "check_type": "shop",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "shop#6",
-    "hash": "6642704364901961822",
-    "actor": "Shop_Weapon_Shield_Deku",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "shop#6",
@@ -2436,35 +2651,18 @@
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_KOKIRI_SHOP_07",
-  "check_name": "KF Shop Item 7",
+  "unique_check_id": "KF_KOKIRI_CHILD_SHOP_07",
+  "check_name": "KF Shop Child Item 7",
   "region": "KF Shop",
   "area": "KokiriForest",
   "check_type": "shop",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "shop#7",
-    "hash": "15352451833778770402",
-    "actor": "Shop_DekuStick",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "shop#7",
@@ -2501,35 +2699,18 @@
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
-  "unique_check_id": "KF_KOKIRI_SHOP_08",
-  "check_name": "KF Shop Item 8",
+  "unique_check_id": "KF_KOKIRI_CHILD_SHOP_08",
+  "check_name": "KF Shop Child Item 8",
   "region": "KF Shop",
   "area": "KokiriForest",
   "check_type": "shop",
   "object_id": [
-   {
-    "scene": "KokiriForest",
-    "spot": "shop#Shop_Heart",
-    "hash": "10357707628656499332",
-    "actor": "Shop_Heart",
-    "files": [
-     "KokiriForest_Adult_Static.bcett.byml.zs"
-    ],
-    "ages": [
-     "adult"
-    ]
-   },
    {
     "scene": "KokiriForest",
     "spot": "shop#Shop_Heart",
@@ -2566,15 +2747,10 @@
    "child": [
     []
    ],
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "True",
-  "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+  "check_rule": "is_child",
+  "verification_status": "not verified in game"
  },
  {
   "unique_check_id": "KF_KOKIRI_SWORD_CHEST",

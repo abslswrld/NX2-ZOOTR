@@ -27,7 +27,7 @@ def expect(desc, items, settings, want=(), not_want=(), age_of=None):
 print('data problems:', w.problems() or 'none')
 
 expect('child, nothing, open forest: village checks', [], {},
-       want=['KF Kokiri Sword Chest', 'KF Midos Top Left Chest', 'KF Shop Item 1', 'LW Gift from Saria', 'LW Bridge Chest'],
+       want=['KF Kokiri Sword Chest', 'KF Midos Top Left Chest', 'KF Shop Child Item 1', 'LW Gift from Saria', 'LW Bridge Chest'],
        not_want=['KF GS Know It All House', 'LW Deku Scrub Near Bridge', 'KF Storms Grotto Chest', 'KF GS House of Twins'])
 expect('closed forest, nothing: no bridge, no Deku Tree', [], {'open_forest': False},
        want=['KF Kokiri Sword Chest'], not_want=['LW Gift from Saria', 'LW Bridge Chest'])
@@ -43,8 +43,10 @@ expect('adult with hookshot (night): House of Twins Skulltula', ['MasterSword', 
        age_of={'KF GS House of Twins': ['adult'], 'KF Adult Rupee Circle Center': ['adult']})
 expect('adult without hookshot: no House of Twins Skulltula', ['MasterSword'], {}, not_want=['KF GS House of Twins'])
 expect('Kokiri Sword chest is child-only (crawlspace)', ['MasterSword'], {}, age_of={'KF Kokiri Sword Chest': ['child']})
-expect('pots are one check per age (separate objects in the child and adult maps)', ['MasterSword'], {},
-       age_of={'KF House of Twins Child Pot 1': ['child'], 'KF House of Twins Adult Pot 1': ['adult']})
+
+expect('pots and shop shelves are one check per age (separate objects per age)', ['MasterSword'], {},
+       age_of={'KF House of Twins Child Pot 1': ['child'], 'KF House of Twins Adult Pot 1': ['adult'],
+               'KF Shop Child Item 1': ['child'], 'KF Shop Adult Item 1': ['adult']})
 
 # Lost Woods
 expect('Skull Kid needs Saria\'s Song and an ocarina', ['SariasSong'], {}, not_want=['LW Skull Kid'])

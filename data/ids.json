@@ -223,44 +223,60 @@
    "reason": "split by age: the child and adult maps place separate pots, each its own check (the item could be taken once per age)"
   },
   "KF_KOKIRI_SHOP_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Shop Item 1"
+   "check": "KF Shop Item 1",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate shelf objects (child: two, before and after meeting the Deku Tree), one check per age"
   },
   "KF_KOKIRI_SHOP_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Shop Item 2"
+   "check": "KF Shop Item 2",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate shelf objects (child: two, before and after meeting the Deku Tree), one check per age"
   },
   "KF_KOKIRI_SHOP_03": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Shop Item 3"
+   "check": "KF Shop Item 3",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate shelf objects (child: two, before and after meeting the Deku Tree), one check per age"
   },
   "KF_KOKIRI_SHOP_04": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Shop Item 4"
+   "check": "KF Shop Item 4",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate shelf objects (child: two, before and after meeting the Deku Tree), one check per age"
   },
   "KF_KOKIRI_SHOP_05": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Shop Item 5"
+   "check": "KF Shop Item 5",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate shelf objects (child: two, before and after meeting the Deku Tree), one check per age"
   },
   "KF_KOKIRI_SHOP_06": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Shop Item 6"
+   "check": "KF Shop Item 6",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate shelf objects (child: two, before and after meeting the Deku Tree), one check per age"
   },
   "KF_KOKIRI_SHOP_07": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Shop Item 7"
+   "check": "KF Shop Item 7",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate shelf objects (child: two, before and after meeting the Deku Tree), one check per age"
   },
   "KF_KOKIRI_SHOP_08": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Shop Item 8"
+   "check": "KF Shop Item 8",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate shelf objects (child: two, before and after meeting the Deku Tree), one check per age"
   },
   "KF_KOKIRI_SWORD_CHEST": {
    "status": "active",
@@ -466,6 +482,86 @@
    "status": "active",
    "issued": "2026-11-16",
    "check": "KF Know It All House Adult Pot 2"
+  },
+  "KF_KOKIRI_CHILD_SHOP_01": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Child Item 1"
+  },
+  "KF_KOKIRI_ADULT_SHOP_01": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Adult Item 1"
+  },
+  "KF_KOKIRI_CHILD_SHOP_02": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Child Item 2"
+  },
+  "KF_KOKIRI_ADULT_SHOP_02": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Adult Item 2"
+  },
+  "KF_KOKIRI_CHILD_SHOP_03": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Child Item 3"
+  },
+  "KF_KOKIRI_ADULT_SHOP_03": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Adult Item 3"
+  },
+  "KF_KOKIRI_CHILD_SHOP_04": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Child Item 4"
+  },
+  "KF_KOKIRI_ADULT_SHOP_04": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Adult Item 4"
+  },
+  "KF_KOKIRI_CHILD_SHOP_05": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Child Item 5"
+  },
+  "KF_KOKIRI_ADULT_SHOP_05": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Adult Item 5"
+  },
+  "KF_KOKIRI_CHILD_SHOP_06": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Child Item 6"
+  },
+  "KF_KOKIRI_ADULT_SHOP_06": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Adult Item 6"
+  },
+  "KF_KOKIRI_CHILD_SHOP_07": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Child Item 7"
+  },
+  "KF_KOKIRI_ADULT_SHOP_07": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Adult Item 7"
+  },
+  "KF_KOKIRI_CHILD_SHOP_08": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Child Item 8"
+  },
+  "KF_KOKIRI_ADULT_SHOP_08": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Shop Adult Item 8"
   }
  }
 }

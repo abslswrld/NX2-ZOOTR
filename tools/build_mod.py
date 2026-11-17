@@ -2,14 +2,18 @@
 
     python tools/build_mod.py --romfs "<romfs>" --out out\\mods --name NX2-ZOOTR KF_MIDO_CHEST_01=Item_Boomerang ...
 
-Supported: chests and pots (their item is their Drop__DropActor in the map file) and freestanding items
-(the actor type itself is the item: it is replaced). For
+Supported: chests and pots (their item is their Drop__DropActor in the map file), freestanding items
+(the actor type itself is the item: it is replaced) and shop shelves (the shelf actor is replaced by a shop
+version of the item, tools/shop_items.py, at the shelf's original price, sold once). For
 each check every placement is changed (child and adult copies, copies in other maps; a check made for one
 age, "age" in its data, only has that age's), the map files are
 written back compressed with the same dictionary as the original, and the resource size table (RESTBL)
 gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, for Longshot's HOS_MODS.
 
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
+    bombchus_without_bag     Bombchus get a capacity of their own (BOMBCHU_MAX, as in the original game) and
+                             no longer need the bomb bag: in the remake their maximum is the bomb bag's, so
+                             without one it is 0; bomb bags stop raising and refilling them
     bombs_without_bracelet   bombs from the bomb bag can be held without the Goron Bracelet: the bomb's lift
                              grade becomes the "no upgrade" grade of rocks, bushes, pots and Bombchus (bomb
                              flowers have their own copy of the setting and still need the bracelet)
@@ -32,11 +36,13 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
 import ground_items  # noqa: E402
+import shop_items  # noqa: E402
 from formats import zstd, byml, restbl, sarc  # noqa: E402
 from logic.world import World  # noqa: E402
 
 RESTBL_PATH = os.path.join('System', 'Resource', 'ResourceSizeTable.Product.111.Nin_Ounce_NVN2.rsizetable.zs')
-SUPPORTED = {'chest', 'pot', 'freestanding'}
+SUPPORTED = {'chest', 'pot', 'freestanding', 'shop'}
+REPLACED = ('freestanding', 'shop')      # kinds whose actor itself is replaced
 # name -> (actor pack, file inside the pack, key, value it must have now, new value)
 LIFT_GRADE_NO_UPGRADE = 3069107721      # small rocks, bushes, pots, Cuccos, Bombchus
 LIFT_GRADE_BRACELET = 3655598229        # bombs and bomb flowers
@@ -100,12 +106,17 @@ def _right_actor(kind, actor):
         return actor.startswith('Obj_TBox') and not actor.startswith('Obj_TBoxPedestal')
     if kind == 'pot':
         return actor.startswith('Obj_Pot')
+    if kind == 'shop':
+        return actor.startswith('Shop_')
     return True                                       # freestanding: the actor is the item
 
 
-def plan(world, assignments, on_ground=lambda item: item):
+def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: item,
+         on_shelf=lambda item, shelf_actor: item):
     """{map file path in romfs: {placement hash: (check id, new item, old item, kind)}}.
-    on_ground(item): the actor to use where the item lies on the ground (freestanding items, pot drops)"""
+    on_ground(item): the actor to use where the item lies on the ground (freestanding items, pot drops);
+    in_chest(item): the actor a chest gives (and shows held up); on_shelf(item, actor now on the shelf): the
+    shelf actor that sells the item"""
     files = {}
     for cid, item_given in assignments:
         r, name, loc = find_check(world, cid)
@@ -116,12 +127,20 @@ def plan(world, assignments, on_ground=lambda item: item):
             spot = world.checks[scene][spot_id]
             if spot['kind'] not in SUPPORTED:
                 raise SystemExit('%s is a %s: only %s supported yet' % (cid, spot['kind'], ', '.join(sorted(SUPPORTED))))
-            item = on_ground(item_given) if spot['kind'] in ('freestanding', 'pot') else item_given
+            if spot['kind'] in ('freestanding', 'pot'):
+                item = on_ground(item_given)
+            elif spot['kind'] == 'chest':
+                item = in_chest(item_given)
+            elif spot['kind'] == 'shop':
+                item = on_shelf(item_given, p['actor'])
+            else:
+                item = item_given
             if not _right_actor(spot['kind'], p['actor']):
                 raise SystemExit('%s: placement %s is a %s, not a %s' % (cid, p['hash'], p['actor'], spot['kind']))
+            old = 'Shop_' + spot['item'] if spot['kind'] == 'shop' else spot['item']   # shelf data drops 'Shop_'
             for fn in p['files']:
                 files.setdefault('Banc/%s/%s' % (scene, fn[:-3] if fn.endswith('.zs') else fn), {})[p['hash']] = \
-                    (cid, item, spot['item'], spot['kind'])
+                    (cid, item, old, spot['kind'])
     return files
 
 
@@ -133,7 +152,7 @@ def patch_file(data, changes):
     found, intended = {}, {}
     for a in doc.root.get('Actors', []):
         h = str(int(a['Hash']))
-        if h in changes and changes[h][3] == 'freestanding':
+        if h in changes and changes[h][3] in REPLACED:
             found[h] = a['Gyaml']
             a['Gyaml'] = changes[h][1]
             continue
@@ -225,8 +244,51 @@ def magic_is_separate(data):
     return new, changed
 
 
+BOMBCHU_MAX = 50
+BOMBCHU_ROW = 'Item_Bombchu'                     # the Bombchu itself; bundles and shelves give it (BundleActor)
+BOMBCHU_ACTOR = 'Work/Actor/Item_Bombchu.engine__actor__ActorParam.gyml'
+
+
+def bombchus_without_bag(data):
+    """item table (RSDB/PouchActorInfo): Bombchus' maximum stops being the bomb bag's (MaxNumGameData: Bomb,
+    SmallBagActor: the small bomb bag) and becomes a fixed number (FixedMaxNum, as the Magic Beans' 10 and the
+    Gold Skulltula tokens' 100); the bomb bags stop raising (ExpansionMaxNumActor) and refilling
+    (ActorFullOnlyIfIsGetWhenGetBag) Bombchus. Rows that give one Bombchu with the bag's maximum
+    (Item_Bombchu, the 1-Bombchu shelf Shop_BombchuBundle_03) change the same way."""
+    doc = byml.loads(data)
+    rows = {r['__RowId']: r for r in doc.root}
+    fixed_type = type(rows['Item_MagicBean']['FixedMaxNum'])
+    want = {}
+    for i, row in enumerate(doc.root):
+        rid, new = row['__RowId'], None
+        if 'Bombchu' in rid and row.get('MaxNumGameData') == 'Bomb':
+            new = type(row)(row)
+            del new['MaxNumGameData']
+            new.pop('SmallBagActor', None)
+            new['FixedMaxNum'] = fixed_type(BOMBCHU_MAX)
+        elif (BOMBCHU_ACTOR in str(row.get('ExpansionMaxNumActor', ''))
+              or row.get('ActorFullOnlyIfIsGetWhenGetBag') == BOMBCHU_ACTOR):
+            new = type(row)(row)
+            if 'ExpansionMaxNumActor' in new:
+                kept = [x for x in str(new['ExpansionMaxNumActor']).split(',') if x != BOMBCHU_ACTOR]
+                new['ExpansionMaxNumActor'] = type(row['ExpansionMaxNumActor'])(','.join(kept))
+            if new.get('ActorFullOnlyIfIsGetWhenGetBag') == BOMBCHU_ACTOR:
+                del new['ActorFullOnlyIfIsGetWhenGetBag']
+        if new is not None:
+            doc.root[i] = new
+            want[rid] = dict(new)
+    if BOMBCHU_ROW not in want:
+        raise SystemExit('bombchus_without_bag: %s not as expected' % BOMBCHU_ROW)
+    new_data = byml.dumps(doc)
+    for o, n in zip(byml.loads(data).root, byml.loads(new_data).root):
+        if n != want.get(o['__RowId'], dict(o)):
+            raise SystemExit('read-back: row %s differs from what was intended' % o['__RowId'])
+    return new_data, sorted(want)
+
+
 # name -> (file, function(data) -> (new data, list of what changed))
 TABLE_FIXES = {
+    'bombchus_without_bag': ('RSDB/PouchActorInfo.Product.111.rstbl.byml', bombchus_without_bag),
     'magic_is_separate': ('RSDB/PouchActorInfo.Product.111.rstbl.byml', magic_is_separate),
 }
 
@@ -381,8 +443,9 @@ def main(argv):
         print('fix %-28s %s: %s %d -> %d' % (name, pack, key, expected, value))
 
     # items that lie on the ground (freestanding, pot drops) and only exist as the model shown when received
-    # get a ground version (tools/ground_items.py)
-    grounds = {}
+    # get a ground version; items a chest gives that have no get-demo settings (ocarinas: Link's instrument)
+    # get a held-up version (tools/ground_items.py)
+    grounds = {}                                       # (item, version) -> name
 
     def plain(path):
         return out.read(path)[1]
@@ -391,11 +454,29 @@ def main(argv):
         kind = ground_items.kind_of(plain, item)
         if kind == 'ground':
             return item
-        if kind == 'item':
-            return grounds.setdefault(item, ground_items.ground_name(item))
+        if kind in ('item', 'equipment'):
+            return grounds.setdefault((item, 'ground'), ground_items.ground_name(item))
         raise SystemExit('%s: not something that can lie on the ground, and no ground version can be made' % item)
 
-    for path, changes in sorted(plan(world, assignments, on_ground).items()):
+    def in_chest(item):
+        if ground_items.kind_of(plain, item) == 'equipment':
+            return grounds.setdefault((item, 'held'), ground_items.ground_name(item, 'held'))
+        return item
+
+    # shelves: a game shelf actor (Shop_...) is used as it is; any other item gets a shop version at the price
+    # of what the shelf sold, sold once (tools/shop_items.py)
+    shops = {}                                         # (item, price) -> name
+    table_rows = lambda t: byml.loads(plain(ground_items.table_path(t))).root  # noqa: E731
+
+    def on_shelf(item, shelf_actor):
+        if item.startswith('Shop_'):
+            return item
+        if not shop_items.can_sell(plain, item):
+            raise SystemExit('%s: cannot be put on a shop shelf' % item)
+        price = shop_items.price_of(table_rows, shelf_actor)
+        return shops.setdefault((item, price), shop_items.shop_name(item, price, once=True))
+
+    for path, changes in sorted(plan(world, assignments, on_ground, in_chest, on_shelf).items()):
         src, old = out.read(path)
         new, found, _ = patch_file(old, {h: v for h, v in changes.items()})
         for h, (cid, item, expected_old, kind) in changes.items():
@@ -411,7 +492,7 @@ def main(argv):
         for act in back:
             h = str(int(act['Hash']))
             want = dict(before[h])
-            if h in changes and changes[h][3] == 'freestanding':
+            if h in changes and changes[h][3] in REPLACED:
                 want['Gyaml'] = changes[h][1]
             elif h in changes:
                 dyn = dict(want['Dynamic'], Drop__DropActor=changes[h][1])
@@ -425,29 +506,48 @@ def main(argv):
         out.write(path, src, old, new)
 
     new_rows = {}
-    tpl_pack_path = ground_items.pack_path(ground_items.TEMPLATE)
-    tpl_pack = plain(tpl_pack_path)
-    tpl_ap = sarc.Sarc.read(tpl_pack).files[ground_items.ap_path(ground_items.TEMPLATE)]
-    for item, name in sorted(grounds.items()):
+    for (item, version), name in sorted(grounds.items()):
+        tpl_name = ground_items.template_of(name)
+        tpl_pack_path = ground_items.pack_path(tpl_name)
+        tpl_pack = plain(tpl_pack_path)
         got, pack, new_inner, rows = ground_items.build(
             item, plain, lambda t: byml.loads(plain(ground_items.table_path(t))).root,
-            lambda project: os.path.exists(os.path.join(a.romfs, 'Model', project + '.anim.bfres.zs')))
+            lambda project: os.path.exists(os.path.join(a.romfs, 'Model', project + '.anim.bfres.zs')), version)
         assert got == name
         path = ground_items.pack_path(name)
         out.write_new(path, pack, like=tpl_pack_path)
         out.add(path, len(pack), tpl_pack_path, len(tpl_pack))
         tpl_files = sarc.Sarc.read(tpl_pack).files
         for inner, data in new_inner.items():
-            like = (ground_items.anim_param_path(ground_items.TEMPLATE) if 'AnimationParam' in inner
-                    else ground_items.pouch_param_path(ground_items.TEMPLATE) if 'PouchContentParam' in inner
-                    else ground_items.ap_path(ground_items.TEMPLATE))
+            like = (ground_items.anim_param_path(tpl_name) if 'AnimationParam' in inner
+                    else ground_items.pouch_param_path(tpl_name) if 'PouchContentParam' in inner
+                    else ground_items.ap_path(tpl_name))
             out.add(inner, len(data), like, len(tpl_files[like]))
         for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
             if out.table.get(inner) is None:
                 raise SystemExit('%s: %s has no resource size entry' % (name, inner))
         for t, row in rows.items():
             new_rows.setdefault(t, []).append(row)
-        print('ground version %-22s for %s (%d bytes)' % (name, item, len(pack)))
+        print('%-6s version %-22s for %s (%d bytes)' % (version, name, item, len(pack)))
+    for (item, price), name in sorted(shops.items()):
+        tpl_pack_path = ground_items.pack_path(shop_items.TEMPLATE)
+        tpl_pack = plain(tpl_pack_path)
+        got, pack, new_inner, rows = shop_items.build(item, price, plain, table_rows, once=True)
+        assert got == name
+        path = ground_items.pack_path(name)
+        out.write_new(path, pack, like=tpl_pack_path)
+        out.add(path, len(pack), tpl_pack_path, len(tpl_pack))
+        like_files = {}
+        for actor in (shop_items.TEMPLATE, shop_items.PRICE_TEMPLATE):
+            like_files.update(sarc.Sarc.read(plain(ground_items.pack_path(actor))).files)
+        for inner, (data, like) in new_inner.items():
+            out.add(inner, len(data), like, len(like_files[like]))
+        for inner in sarc.Sarc.read(pack).files:
+            if out.table.get(inner) is None:
+                raise SystemExit('%s: %s has no resource size entry' % (name, inner))
+        for t, row in rows.items():
+            new_rows.setdefault(t, []).append(row)
+        print('shop   version %-22s for %s, %d rupees, sold once (%d bytes)' % (name, item, price, len(pack)))
     for t, rws in sorted(new_rows.items()):
         path = ground_items.table_path(t)
         src, old = out.read(path)

@@ -4,6 +4,37 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Held-up ocarina, Bombchus without a bomb bag, shop shelves (branch `ocarina-chus-shop`, to test)
+- **What goes into the pouch:** every game ground item and shelf that stands for another item names it in its
+  item settings (`PouchActor`: ground bomb `Item_Bomb`, ground Deku Shield and its shelf `Weapon_Shield_Deku`,
+  Bombchu shelves `Item_Bombchu`...). Ours didn't, so the ground version itself went into the pouch. That is
+  the likely cause of the ground ocarina only playing after a reload. Ground versions, held-up versions and
+  shop versions now name the item.
+- **Chest ocarina invisible:** the items a chest shows (Boomerang, Bottle...) are item event actors with
+  get-demo animation settings (`ASInfo: Item_GetDemo`, `AS/Item_Common`, `Item_Common_Animation`). The
+  ocarinas' actors are Link's playable instrument instead, with none of that. New **held-up versions**
+  (`Item_NX2_<x>`, in `tools/ground_items.py`): the Boomerang's item actor with the item's model, animation
+  (`Item_Common_Animation` + `<item>_Animation`) and item settings. A chest uses one only for items that are
+  not item event actors already (the ocarinas). Link's real ocarina is not touched.
+- **`--fix bombchus_without_bag`:** in the remake Bombchus have no maximum of their own (the bomb bag's:
+  `MaxNumGameData: Bomb`), so without a bag it is 0. The fix gives them a fixed maximum of 50, as in the
+  original game (`FixedMaxNum`, as the Magic Beans' 10 and the Gold Skulltula tokens' 100), and the bomb
+  bags stop raising and refilling them (`ExpansionMaxNumActor`, `ActorFullOnlyIfIsGetWhenGetBag`). Rows
+  changed: `Item_Bombchu`, the 1-Bombchu shelf `Shop_BombchuBundle_03`, the six bomb bag rows.
+- **Shop shelves, one check per age:** the 8 Kokiri Shop shelves become 16 checks
+  (`KF_KOKIRI_CHILD_SHOP_01`-`08`, `KF_KOKIRI_ADULT_SHOP_01`-`08`; the child check covers both child
+  shelves, before and after meeting the Deku Tree). `KF_KOKIRI_SHOP_01`-`08` retired. Kokiri Forest: 92
+  checks.
+- **Shop shelves in the builder:** a shelf is changed by replacing its actor (the shelf number stays). A
+  game shelf actor (`Shop_...`) is used as it is; any other item gets a **shop version**
+  (`tools/shop_items.py`, `Shop_NX2_<item>_<price>_Once`): the game's Deku Shield shelf with the item's
+  model, animation and item settings, the price of what the shelf sold, and **sold once** (`NoRespawn`, as
+  the silver rupee tokens; untested).
+- Test mod: Fairy Ocarina in Mido's chest (held-up version) and in the House of Twins child pot (ground
+  version); Bombchus in the other child pot and the Bomb Bag on the ground near Mido, with
+  `bombchus_without_bag`; Kokiri Shop shelf 1: Boomerang (child) and Hookshot (adult), 15 rupees, sold once;
+  shelf 2 (child): the game's 5-Bombchu shelf.
+
 ### Special deal change undone
 - The ground versions keep the item's special deal again (`tools/ground_items.py` as before the test): the
   change fixed neither the Bottle nor the ocarina. Test mod rebuilt (same items, Fairy Ocarina still in

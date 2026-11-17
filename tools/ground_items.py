@@ -31,6 +31,22 @@ the Boomerang's, Bomb Bag's, Fairy Ocarina's and Hookshot's don't, and in game (
 "Take" (A). So the ground version gets item settings of its own, built like the ground shield's: the item's
 settings as `$parent`, plus `DefaultAutoGet: true`. Only the ground version's pack has them; the item itself
 (chests, NPCs) is unchanged.
+
+What goes into the pouch: every game ground item that stands for another item names it in its item settings
+(`PouchActor`: the ground shield `Weapon_Shield_Deku`, the ground bomb `Item_Bomb`, the Goron Tunic
+`Armor_Adult_Goron`...). Without it the ground actor itself is added. The Fairy Ocarina's own settings have
+none (the game never puts it on the ground): in game (2026-11-16) the ground ocarina went into the pouch but
+could not be played until a reload. The ground version's settings name the item (`PouchActor`), as the game's
+ground items do (to test).
+
+Held-up versions (`Item_NX2_<x>`, to test): what a chest shows when it gives an item. The items that show
+(Boomerang, Bottle...) are item event actors (parent `Item_EventObject_Base`) with the get-demo animation
+settings (`ASInfo: Item_GetDemo`, `AS/Item_Common`, the `Item_Common_Animation` animations). The ocarinas'
+actors are Link's playable instrument instead (equipment: no get-demo settings); a chest giving the Fairy
+Ocarina showed nothing (2026-11-16), though the ocarina could be played. A held-up version is built the same
+way as a ground version, from the Boomerang's item actor (`Item_Boomerang`) instead of the ground shield:
+the Boomerang's own model, animation, item settings and boomerang settings out, the item's in, and item
+settings of its own naming the item (`PouchActor`). Only for items that are not item event actors already.
 """
 import copy
 import os
@@ -48,6 +64,12 @@ ITEM_REFS = ('ActorNameRef', 'AnimationRef', 'ModelInfoRef', 'PouchContentRef')
 # the ground shield's own settings, left out (the item base's are used): price table (equipment), hookshot
 # hold position, effect link
 TEMPLATE_ONLY = ('GameParameterTableRef', 'LiftableRef', 'ELinkRef')
+# kind of version -> (template actor, the item the template stands for, name prefix, template-only settings left
+# out, picked up by walking into it)
+VERSIONS = {
+    'ground': (TEMPLATE, TEMPLATE_ITEM, PREFIX, TEMPLATE_ONLY, True),
+    'held': ('Item_Boomerang', 'Item_Boomerang', 'Item_NX2_', ('GameParameterTableRef',), False),
+}
 ROW_FROM_ITEM = ('ActorName', 'FmdbName', 'ModelAabbMax', 'ModelAabbMin', 'ModelProjectName')
 TABLES = ('ActorInfo', 'GameActorInfo', 'PouchActorInfo')
 
@@ -64,8 +86,16 @@ def ap_path(actor):
     return 'Actor/%s.engine__actor__ActorParam.bgyml' % actor
 
 
-def ground_name(item):
-    return PREFIX + (item[5:] if item.startswith('Item_') else item)
+def ground_name(item, version='ground'):
+    return VERSIONS[version][2] + (item[5:] if item.startswith('Item_') else item)
+
+
+def template_of(name):
+    """the template actor a version (by its name) was built from"""
+    for tpl, _, prefix, _, _ in VERSIONS.values():
+        if name.startswith(prefix):
+            return tpl
+    raise KeyError(name)
 
 
 def _ref_path(ref):
@@ -130,7 +160,7 @@ def kind_of(read_pack, item):
         return 'item'
     comp = byml.loads(files.get(ap_path(item), b'')).root.get('Components', {}) if ap_path(item) in files else {}
     if 'ModelInfoRef' in comp and 'PouchContentRef' in comp:
-        return 'item'                                 # built like Item_Ocarina_Time (equipment: ocarinas)
+        return 'equipment'                            # built like Item_Ocarina_Time (equipment: ocarinas)
     return None
 
 
@@ -142,12 +172,13 @@ def anim_param_path(actor):
     return 'Component/AnimationParam/%s.engine__component__AnimationParam.bgyml' % actor
 
 
-def build(item, read_pack, read_table_rows, model_exists=lambda project: False):
-    """the ground version of `item`.
+def build(item, read_pack, read_table_rows, model_exists=lambda project: False, version='ground'):
+    """the ground version (version='ground') or held-up version (version='held') of `item`.
     read_pack(path) -> decompressed pack; read_table_rows(table) -> list of rows; model_exists(project name)
     -> whether Model/<project>.anim.bfres exists (items with no animation file of their own: ocarinas).
     Returns (name, pack data, {inner path: data} of files new to the game, {table: new row})."""
-    name = ground_name(item)
+    TEMPLATE, TEMPLATE_ITEM, _, TEMPLATE_ONLY, auto_get = VERSIONS[version]
+    name = ground_name(item, version)
     tpl = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))
     itm = sarc.Sarc.read(read_pack(pack_path(item)))
     tpl_ap = byml.loads(tpl.files[ap_path(TEMPLATE)])
@@ -207,7 +238,9 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False):
     pdoc = byml.loads(tpl.files[_ref_path(tc['PouchContentRef'])])
     pdoc.root = type(pdoc.root)()
     pdoc.root['$parent'] = 'Work/' + _ref_path(ic['PouchContentRef'])[:-len('.bgyml')] + '.gyml'
-    pdoc.root['DefaultAutoGet'] = True
+    if auto_get:
+        pdoc.root['DefaultAutoGet'] = True
+    pdoc.root['PouchActor'] = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
     files[pouch_param_path(name)] = byml.dumps(pdoc)
     comp['PouchContentRef'] = '?' + pouch_param_path(name)
     if _parent_path(byml.loads(files[pouch_param_path(name)]).root) != _ref_path(ic['PouchContentRef']):
