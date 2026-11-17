@@ -83,7 +83,8 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `data/ids.json` | every permanent check ID ever issued (active or retired), the area codes and the type codes |
 | `tools/build_db.py`, `data/db/<Area>.json` | the check database of an area, built from the files above (generated: never edit it by hand) |
 | `tests/db_check.py` | checks the database and the IDs, and prints totals |
-| `tools/build_mod.py` | builds a Longshot mod folder: changes chest contents by check ID, applies game fixes (`--fix bombs_without_bracelet`, `--fix skippable_opening`), updates the resource size table, and can write a test launcher; output in `out/` (never committed) |
+| `tools/build_mod.py` | builds a Longshot mod folder: changes what chests, pots and freestanding items give, by check ID, applies game fixes (`--fix bombs_without_bracelet`, `--fix skippable_opening`, `--fix magic_is_separate`), updates the resource size table, and can write a test launcher; output in `out/` (never committed) |
+| `tools/ground_items.py` | makes ground versions (`Obj_NX2_<item>`) of items that only exist as the model shown when received, from the game's own ground Deku Shield, so they can lie on the ground or drop from a pot and are picked up by walking into them (used by `build_mod.py`) |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):
 11 regions, 7 chests, 3 Gold Skulltulas, the stick-upgrade scrub, Saria's gift, 8 shop shelves, 4 pots,
@@ -135,6 +136,11 @@ digits and `_` only.
 - One ID per check (one item handed out), not per object: a check the game places several times (child
   and adult copies, the bridge chest in two maps) has one ID listing every placement; an NPC that gives two
   things has two IDs.
+- Except when the child and adult objects are separate objects that each give their item (pots: each has
+  its own "broken" memory, so one shared check could be collected once per age). Then there is one check
+  per age, with `"age": "child"` or `"adult"` in its data and `CHILD`/`ADULT` in its ID and name:
+  `KF_HOUSE_OF_TWINS_CHILD_POT_01`, `KF_HOUSE_OF_TWINS_ADULT_POT_01`. Such a check covers only that age's
+  object, and the logic only counts it at that age.
 - IDs are written once and never computed again: renaming a check, moving it to another region or
   extracting the map again doesn't change its ID.
 - IDs are never reused. A check that goes away is marked `"retired"` in `data/ids.json` with the date and

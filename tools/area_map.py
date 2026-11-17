@@ -47,7 +47,7 @@ def main(romfs, area, age, out):
                     continue
             else:
                 s = spots[sids[0]]
-            if age not in s['ages']:
+            if age not in s['ages'] or loc.get('age', age) != age:
                 continue
             kind = s['kind']
             x, z = s['pos'][0], s['pos'][2]

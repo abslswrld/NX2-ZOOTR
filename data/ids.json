@@ -190,14 +190,18 @@
    "check": "KF GS House of Twins"
   },
   "KF_HOUSE_OF_TWINS_POT_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF House of Twins Pot 1"
+   "check": "KF House of Twins Pot 1",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate pots, each its own check (the item could be taken once per age)"
   },
   "KF_HOUSE_OF_TWINS_POT_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF House of Twins Pot 2"
+   "check": "KF House of Twins Pot 2",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate pots, each its own check (the item could be taken once per age)"
   },
   "KF_KNOW_IT_ALL_HOUSE_GS": {
    "status": "active",
@@ -205,14 +209,18 @@
    "check": "KF GS Know It All House"
   },
   "KF_KNOW_IT_ALL_HOUSE_POT_01": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Know It All House Pot 1"
+   "check": "KF Know It All House Pot 1",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate pots, each its own check (the item could be taken once per age)"
   },
   "KF_KNOW_IT_ALL_HOUSE_POT_02": {
-   "status": "active",
+   "status": "retired",
    "issued": "2026-11-15",
-   "check": "KF Know It All House Pot 2"
+   "check": "KF Know It All House Pot 2",
+   "retired": "2026-11-16",
+   "reason": "split by age: the child and adult maps place separate pots, each its own check (the item could be taken once per age)"
   },
   "KF_KOKIRI_SHOP_01": {
    "status": "active",
@@ -418,6 +426,46 @@
    "status": "active",
    "issued": "2026-11-15",
    "check": "LW Gift from Saria"
+  },
+  "KF_HOUSE_OF_TWINS_CHILD_POT_01": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF House of Twins Child Pot 1"
+  },
+  "KF_HOUSE_OF_TWINS_ADULT_POT_01": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF House of Twins Adult Pot 1"
+  },
+  "KF_HOUSE_OF_TWINS_CHILD_POT_02": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF House of Twins Child Pot 2"
+  },
+  "KF_HOUSE_OF_TWINS_ADULT_POT_02": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF House of Twins Adult Pot 2"
+  },
+  "KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Know It All House Child Pot 1"
+  },
+  "KF_KNOW_IT_ALL_HOUSE_ADULT_POT_01": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Know It All House Adult Pot 1"
+  },
+  "KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Know It All House Child Pot 2"
+  },
+  "KF_KNOW_IT_ALL_HOUSE_ADULT_POT_02": {
+   "status": "active",
+   "issued": "2026-11-16",
+   "check": "KF Know It All House Adult Pot 2"
   }
  }
 }
