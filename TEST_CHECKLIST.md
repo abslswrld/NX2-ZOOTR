@@ -1,10 +1,9 @@
 # In-game test checklist
 
-Nothing to test right now (branch `rocks-bushes`: rocks and bushes give items, tested; now one check per
-age, a data change only).
+Nothing to test right now (branch `rock-circle`: the child rock circle is confirmed).
 
 Known, left for later (see CHANGELOG.md):
-- The rock in the middle of the circle: a Kokiri is lifting it; when it can be lifted is not known.
+- The middle rock of the circle: assumed liftable after the Deku Tree (free in a 100% save).
 - Bushes didn't come back after leaving the area; pots do. What resets them is not known.
 - A Piece of Heart on the ground needs A to pick up (the game's own).
 - A Fairy Ocarina from a chest or the ground plays only after a save and reload or a change of scene.
