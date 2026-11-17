@@ -4,6 +4,13 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Shopkeeper greeting edit removed
+- `--fix kokiri_shop_full_stock` no longer edits the child shopkeeper's talk
+  (`Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl`): tested, it changed nothing (he still greets with
+  "low on stock" before the Deku Tree), so the mod no longer carries that file. The rest of the fix (one shop
+  set, every shelf open, the adult's own list) is unchanged and tested. No event flow file is edited by the
+  builder now; the greeting can come back once event flow edits are shown to work in game.
+
 ### In-game test of the two new tools (scratch build; branches `claude/ainb-format-aa01ca`, `claude/evfl-add-events-b2737c` not merged)
 - **AINB tool: works in game.** The rock circle module (`Logic/KokiriForest_Common_Level_All_01_6aaf`)
   with the "is adult" input taken out of its switch (node 32, `OperateAND`): a child on a new file saw the 4
