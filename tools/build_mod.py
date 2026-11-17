@@ -2,9 +2,11 @@
 
     python tools/build_mod.py --romfs "<romfs>" --out out\\mods --name NX2-ZOOTR KF_MIDO_CHEST_01=Item_Boomerang ...
 
-Supported: chests and pots (their item is their Drop__DropActor in the map file; rocks and bushes get one
-added), freestanding items
-(the actor type itself is the item: it is replaced) and shop shelves (the shelf actor is replaced by a shop
+Supported: chests and pots (their item is their Drop__DropActor in the map file; rocks, bushes and Gold
+Skulltulas get one added: a skulltula then drops the item instead of its token), freestanding items
+(the actor type itself is the item: it is replaced), gifts that hand their item over through the shared
+event flow Dm_SY_GetInEvent (the item is that call's ActorName; the check's data names the flow, the event and
+the item, "gift": {...}) and shop shelves (the shelf actor is replaced by a shop
 version of the item, tools/shop_items.py, at the shelf's original price, sold once). For
 each check every placement is changed (child and adult copies, copies in other maps; a check made for one
 age, "age" in its data, only has that age's), the map files are
@@ -41,6 +43,7 @@ or shared (out/ is ignored by git).
 """
 import argparse
 import os
+import shutil
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -53,12 +56,12 @@ from formats import zstd, byml, restbl, sarc, evfl, ainb  # noqa: E402
 from logic.world import World  # noqa: E402
 
 RESTBL_PATH = os.path.join('System', 'Resource', 'ResourceSizeTable.Product.111.Nin_Ounce_NVN2.rsizetable.zs')
-SUPPORTED = {'chest', 'pot', 'freestanding', 'shop', 'rock', 'bush'}
+SUPPORTED = {'chest', 'pot', 'freestanding', 'shop', 'rock', 'bush', 'skulltula', 'gift'}
 REPLACED = ('freestanding', 'shop')      # kinds whose actor itself is replaced
 # kinds whose drop is usually not set in the map: the builder adds Drop__DropActor (the game itself sets it on
 # some rocks and bushes elsewhere, e.g. Obj_LiftRock_A_01 in Desert Colossus, Obj_Plant_Grass_A_01 in Hyrule Field)
-DROP_ADDED = ('rock', 'bush')
-DROP_ON_GROUND = ('freestanding', 'pot', 'rock', 'bush')   # kinds whose item lies on the ground
+DROP_ADDED = ('rock', 'bush', 'skulltula')
+DROP_ON_GROUND = ('freestanding', 'pot', 'rock', 'bush', 'skulltula')   # kinds whose item lies on the ground
 # name -> (actor pack, file inside the pack, key, value it must have now, new value)
 LIFT_GRADE_NO_UPGRADE = 3069107721      # small rocks, bushes, pots, Cuccos, Bombchus
 LIFT_GRADE_BRACELET = 3655598229        # bombs and bomb flowers
@@ -141,6 +144,8 @@ def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: 
     for cid, item_given in assignments:
         r, name, loc = find_check(world, cid)
         sps = world.spots_of(r, loc)
+        if not sps and loc.get('gift'):
+            continue                                  # an event: plan_gifts
         if not sps:
             raise SystemExit('%s has no map placement (an event): not supported yet' % cid)
         for scene, spot_id, p in world.placements_of(r, loc):
@@ -162,6 +167,44 @@ def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: 
                 files.setdefault('Banc/%s/%s' % (scene, fn[:-3] if fn.endswith('.zs') else fn), {})[p['hash']] = \
                     (cid, item, old, spot['kind'])
     return files
+
+
+GIFT_FLOW = 'Dm_SY_GetInEvent'                    # the shared flow most gifts hand their item over with
+
+
+def plan_gifts(world, assignments):
+    """{flow path in romfs: {event name: (check id, new item, old item)}} for the gifts among the assignments.
+    A gift's data: "gift": {"flow": flow name, "event": the event calling Dm_SY_GetInEvent, "item": what it gives}"""
+    flows = {}
+    for cid, item in assignments:
+        r, name, loc = find_check(world, cid)
+        if world.spots_of(r, loc):
+            continue
+        g = loc.get('gift')
+        if not g:
+            raise SystemExit('%s has no map placement (an event) and no "gift" data: not supported yet' % cid)
+        events = flows.setdefault('Event/EventFlow/%s.bfevfl' % g['flow'], {})
+        if g['event'] in events:
+            raise SystemExit('%s: %s %s is also %s' % (cid, g['flow'], g['event'], events[g['event']][0]))
+        events[g['event']] = (cid, item, g['item'])
+    return flows
+
+
+def gift_edit(fc, events):
+    """set the item of each gift event (a call of Dm_SY_GetInEvent); returns lines saying what was changed"""
+    said = []
+    by_name = {e.name: e for e in fc.events}
+    for ev, (cid, item, old) in sorted(events.items()):
+        e = by_name.get(ev)
+        if e is None:
+            raise SystemExit('%s: event %s not in the flow' % (cid, ev))
+        if e.type != 'subflow' or e.flowchart != GIFT_FLOW or not isinstance(e.params, dict):
+            raise SystemExit('%s: event %s is not a call of %s' % (cid, ev, GIFT_FLOW))
+        if e.params.get('ActorName') != old:
+            raise SystemExit('%s: event %s gives %r, the data says %s' % (cid, ev, e.params.get('ActorName'), old))
+        e.params['ActorName'] = item
+        said.append('%-18s %s: %s -> %s' % (cid, ev, old, item))
+    return said
 
 
 def patch_file(data, changes):
@@ -330,7 +373,7 @@ TABLE_FIXES = {
 # never there, liftable rock always there.
 CIRCLE_MIDDLE = 'Logic/KokiriForest_Child_Level_All_02_6960.logic.module.ainb'
 CIRCLE_MIDDLE_ROCKS = {'Obj_LiftRock_A_02_2143': False, 'Obj_LiftRock_A_01_0de2': True}   # instance -> there
-CIRCLE_NEEDS_FIX = ('KF_CIRCLE_ADULT_ROCK_', 'KF_CIRCLE_CENTER_ROCK')
+CIRCLE_NEEDS_FIX = ('KF_CIRCLE_ADULT_ROCK_', 'KF_CIRCLE_CENTER_ROCK', 'KF_CIRCLE_KOKIRI_GIFT')
 CIRCLE_LOGIC = 'Logic/KokiriForest_Common_Level_All_01_6aaf.logic.module.ainb'
 CIRCLE_FLAG = 'SageOfForest_IsBefore_Step08'
 CIRCLE_KOKIRI = 'Component/AIScheduleParam/Npc_Kokiri_008_Child.game__component__AIScheduleParam.bgyml'
@@ -791,7 +834,12 @@ def main(argv):
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
     world = World()
     dicts = zstd.Dictionaries.from_pack(open(os.path.join(a.romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
-    out = Output(a.romfs, os.path.join(a.out, a.name, 'romfs'), dicts)
+    mod_romfs = os.path.join(a.out, a.name, 'romfs')
+    if os.path.isdir(mod_romfs):
+        # files of an earlier build would stay in the mod otherwise (only this build's output folder is removed)
+        shutil.rmtree(mod_romfs)
+        print('earlier build removed:', mod_romfs)
+    out = Output(a.romfs, mod_romfs, dicts)
 
     shop_fix = 'kokiri_shop_full_stock' in a.fix
     for cid, _ in assignments:
@@ -937,6 +985,25 @@ def main(argv):
             if act != want:
                 raise SystemExit('read-back: actor %s (%s) differs from what was intended' % (h, act['Gyaml']))
         out.write(path, src, old, new)
+
+    # gifts: the item of their call of Dm_SY_GetInEvent (read back: only those values change)
+    for path, events in sorted(plan_gifts(world, assignments).items()):
+        src, old = out.read(path)
+        ef = evfl.loads(old)
+        said = gift_edit(ef.flowchart, events)
+        new = flow_write_checked(ef)
+        back = {e.name: e for e in evfl.loads(new).flowchart.events}
+        orig = {e.name: e for e in evfl.loads(old).flowchart.events}
+        for name, e in back.items():
+            want = dict(orig[name].params) if isinstance(orig[name].params, dict) else orig[name].params
+            if name in events:
+                want['ActorName'] = events[name][1]
+            got = dict(e.params) if isinstance(e.params, dict) else e.params
+            if got != want or e.type != orig[name].type:
+                raise SystemExit('read-back: %s %s differs from what was intended' % (path, name))
+        out.write(path, src, old, new)
+        for line in said:
+            print(line, '(%s)' % path.split('/')[-1])
 
     # count boards of changed shelves: none for a single item, the right count for a bundle
     pouch_rows = {r['__RowId']: r for r in table_rows('PouchActorInfo')}

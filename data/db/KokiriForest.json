@@ -376,7 +376,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game (same method as the Know-It-All House skulltula, which worked)",
   "requirements": {
    "child": [
     [
@@ -1968,6 +1968,31 @@
   "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one never appears as a child"
  },
  {
+  "unique_check_id": "KF_CIRCLE_KOKIRI_GIFT",
+  "check_name": "KF Rock Circle Kokiri Gift",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "gift",
+  "object_id": [],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "event flow Npc_Kokiri_008_Child, Event224",
+   "note": null
+  },
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-17 with --fix kokiri_circle_after_dungeons (tools/build_mod.py sets the ActorName of his Dm_SY_GetInEvent call): gave a gold rupee",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
+  "verification_status": "not verified in game",
+  "object_id_note": "no map placement (an event); its ID in the game is still to be found",
+  "notes": "the Kokiri Npc_Kokiri_008_Child gives a blue rupee once all the circle rocks (the ring of 8 and the middle rock) are lifted (after HaveTalked_Special.Npc_Kokiri_008_Child_LiftRock_AllBroken_Talk_Event166); new in the remake. Without --fix kokiri_circle_after_dungeons the middle rock can only be lifted after the Kokiri Emerald, so the builder refuses an item here without the fix"
+ },
+ {
   "unique_check_id": "KF_DEKU_TREE_GOSSIP_01",
   "check_name": "KF Deku Tree Gossip Stone Left",
   "region": "KF Outside Deku Tree",
@@ -2263,7 +2288,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game (same method as the Know-It-All House skulltula, which worked)",
   "requirements": {
    "child": null,
    "adult": [
@@ -2453,8 +2478,8 @@
    "source": "check kind (not stored in the map data)",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor, as for rocks): dropped a Piece of Heart instead of its token",
   "requirements": {
    "child": [
     [
