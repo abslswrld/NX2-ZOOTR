@@ -1,6 +1,7 @@
 # In-game test checklist
 
-Nothing to test right now (branch `rock-circle`: the child rock circle is confirmed).
+**To test: event flows** (branch `claude/evfl-in-game-0d5942`). Run `out\Launch evfl test.bat` and follow
+`out\EVFL_TEST_CHECKLIST.md` (talk to the child Kokiri shopkeeper before the Deku Tree: greeting and goodbye).
 
 Known, left for later (see CHANGELOG.md):
 - The middle rock of the circle: assumed liftable after the Deku Tree (free in a 100% save).

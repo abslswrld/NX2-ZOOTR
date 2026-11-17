@@ -4,6 +4,56 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Why event flow edits showed nothing: yes and no were the wrong way round (branch `claude/evfl-in-game-0d5942`)
+Looked into offline (game, Longshot and its logs only read). Not yet confirmed in game: a test mod is ready.
+
+- **Likely cause: in this game's flows a yes/no question answers 0 for yes and 1 for no.** Both edits
+  assumed the opposite (1 = yes, as in Breath of the Wild). Read from the game's own flows, four ways:
+  - `DisplayShop`: "has Link 20 rupees" (`EventQueryHasRuppe`): case 0 -> "You wanna transfer 20 rupees?",
+    case 1 -> "it doesn't look like you have enough rupees";
+  - `DisplayShop`: "is child" (`EventQueryPlayerIsChild`): case 0 -> the child's Deku Shield lines, case 1 ->
+    the adult's ("They're just for kids, you know");
+  - `DisplayShop`: "selected item is `Weapon_Shield_Deku`" (`EventQueryIsGameDataString64`): case 0 -> the
+    Deku Shield lines, case 1 -> the checks for the other shields and tunics;
+  - `Npc_Kokiri_001_Shop_Child`: after buying, "has the Deku Shield" case 0 and "tutorial already given"
+    case 1 -> the Deku Shield tutorial talk, then the flag is set.
+  And the game itself: on a new file the shopkeeper says the "low on stock" lines, which are on case 1 of
+  the switch on `Meet_DekuTree_IsAfter_Step02_Exp`.
+- **What the two edits really did:**
+  - Shopkeeper greeting: both cases were sent to case 1's step, which is the "low on stock" side. So the
+    edit forced the greeting the game already gave. (The line removed from `build_mod.py` took
+    `dict(e.cases).get(1)` as the "after" side.)
+  - `DisplayShop` branches: "name matches" was wired as case 1, so a matching item went straight on to the
+    game's buy check, and a non-matching item went to the rupee test and then (having the rupees = 0) on to
+    the game's check too. The new steps could only run for an item that did NOT match while Link had fewer
+    than 5 rupees. So that test said nothing about what `Shop_SelectItemName` holds: still open.
+    The same mistake is in `tests/evfl_add_check.py` (`example_shop_bottle`) on
+    `claude/evfl-add-events-b2737c`: to fix there before any further use.
+- **The game does read our flow files.** Longshot's logs (`logs/longshot_log*.txt`) print a line each time
+  the game opens a file from the mod folder (`mods: <path> <- <mod file>`). The two test sessions with flows
+  show `Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl.zs` and `Event/EventFlow/DisplayShop.bfevfl.zs`
+  opened from our folder, like the map, table and pack files. No error or rejection lines about them.
+  Longshot also merges its own button prompt sizes into the mod's resource size table (harmless).
+- **No other copy of the flows.** Searched 14,921 files outside `Event/EventFlow` (every folder except
+  textures, models, sound, shaders, terrain, physics, animation and effects), packs opened (three levels
+  deep): no BFEVFL file anywhere else, in no pack. What names flows: `RSDB/EventSetting` (2,380 rows: an
+  event's flow file `Work/Event/EventFlow/<name>.evfc`, its entry point, its settings),
+  `RSDB/GameAnalyzedEventInfo` (2,379 rows: per event, `SubFlowList`, the other flow files it calls; a
+  custom event that calls a flow file not in its list may need its row changed: not tested),
+  the actor packs (the flow an actor starts) and the address table (2 mentions of the folder).
+- **Our written files are sound.** Both flows round-trip byte for byte. The edited files have the same
+  header fields as the game's (magic, version 0.4.0.0, byte order, alignment, file size field = real size,
+  one flowchart, relocation table at its place with its own offset) and the same `.zs` frame (single
+  segment, dictionary 1, content size present and right, no checksum). The shopkeeper file differed from
+  the game's by one byte (the case's event index).
+- **Test mod** (`tools/evfl_test_mod.py`, new; output in `out/mods-evfl-test`, launcher
+  `out/Launch evfl test.bat`, checklist `out/EVFL_TEST_CHECKLIST.md`; `out/mods` untouched). One flow,
+  `Npc_Kokiri_001_Shop_Child`, two independent edits: the greeting switch with both cases to the normal
+  greeting (the fix: case 0 is the "after" side; the Talk entry point's list is recomputed), and the three
+  goodbye lines replaced by the "not enough rupees" line (control: shows that the flow is read whatever
+  yes/no means). Plus the skippable opening, to get there fast.
+- README: the yes/no rule and where flows are named, under "Things this game does differently".
+
 ### Shopkeeper greeting edit removed
 - `--fix kokiri_shop_full_stock` no longer edits the child shopkeeper's talk
   (`Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl`): tested, it changed nothing (he still greets with
