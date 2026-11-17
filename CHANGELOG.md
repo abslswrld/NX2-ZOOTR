@@ -4,6 +4,259 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Gold Skulltulas, gifts and Deku Scrubs: how the game gives their items (research, test build only)
+None of the three can be changed by the builder yet. Read from the game's own files:
+- **Gold Skulltula** (`Enemy_Skulltula_Gold`): its token comes from a drop table in its pack
+  (`DropTable_Token_Gold` -> `Obj_Token_Gold`), and it has the same `Drop__DropActor` instance setting as pots
+  and rocks. So the builder's map edit for rocks (add `Drop__DropActor` to the placement) may work for it too.
+- **Gifts**: most hand their item over through the shared flow `Dm_SY_GetInEvent` (entries `GetInEvent`,
+  `GetInEvent_NotTurn`, ...) with the item as its `ActorName` setting: the Skull Kids' heart pieces, the Lost
+  Woods target prize, the Deku Theater upgrades, Fado. A few cutscenes add the item directly
+  (`PouchSystemActor.EventTriggerAddOrRemovePouchContent`, `Actor`): Saria's ocarina (`Dm_Kokiri_0155`), the
+  Ocarina of Time. Songs are in cutscene flows with timelines, which `formats/evfl.py` can't read yet.
+- **New check found**: the rock-circle Kokiri (`Npc_Kokiri_008_Child`) gives a blue rupee once all the circle
+  rocks are lifted (`Event224`, after `..._LiftRock_AllBroken_Talk_Event166`). Not in the data yet.
+- **Deku Scrubs** (`Enemy_Scrub_Business`): the map placement names what it sells
+  (`ScrubBusiness_ShopItemActorName0..2`); the shared flow `Enemy_Scrub_Business_Common` matches that name and
+  calls a sell step with the item as a setting. The one-time upgrades (stick bag, nut bag, heart piece) use
+  `SimpleShopSub_Scrub_Business_OneTime` (`ActorName`, `Price`), which pays and gives through `Dm_SY_GetInEvent`.
+  The flow is shared by every scrub, so per-scrub items will need a branch per scrub.
+- Test build (`out/mods-kinds-test`, nothing in the builder): the Know-It-All House skulltula drops a Piece of
+  Heart (rock-style map edit), the rock-circle Kokiri's gift is a gold rupee, the Lost Woods stick-bag scrub
+  sells a Bomb Bag. **Confirmed in game, all three:** the skulltula dropped the Piece of Heart, the Kokiri gave
+  the gold rupee (also with the rock circle fix moving him), the scrub sold a Bomb Bag (held up, 40 rupees).
+  The scrub's lines still talk about the Deku Stick bag (its `SellerMessageId`).
+- **Builder: Gold Skulltulas and gifts.** `tools/build_mod.py` now changes:
+  - Gold Skulltulas: `Drop__DropActor` added to the placement, as for rocks (`DROP_ADDED`); the item lies on
+    the ground (`DROP_ON_GROUND`).
+  - gifts with `"gift": {"flow", "event", "item"}` in their data: the `ActorName` of that event's call of
+    `Dm_SY_GetInEvent` (checked: it is such a call and gives the expected item; read back, only those values
+    change). Gifts that add their item directly (Saria's ocarina) have no such data yet and are still refused.
+  With the test's assignments the builder writes the map and the flow byte for byte as tested.
+- New check `KF_CIRCLE_KOKIRI_GIFT` ("KF Rock Circle Kokiri Gift", kind gift, child): the Kokiri's blue rupee
+  for lifting all the circle rocks. Refused without `--fix kokiri_circle_after_dungeons` (tested only with it).
+  `KF_KNOW_IT_ALL_HOUSE_GS` randomizable "yes". `tools/build_db.py` gives a gift's original item from its data.
+  Kokiri Forest: 120 checks; db_check 0 errors, logic tests pass.
+- **Generic scrub sales line** (test build only, `out/mods-scrub-test`): a new label
+  `Enemy_Scrub_Business_NX2_Item` in `EventFlowMsg/Enemy_Event.msbt` (all 16 languages, English text; the
+  file has no attribute section, so a new label is only a label and a text): "Ah, the <item>! It's <price>
+  rupees. Wanna buy it?". The item name is the shop's item-name tag (2,3) reading
+  `Scrub_Business_TempItemName_00`, which the scrub fills from its map setting `ScrubBusiness_ShopItemActorName0`;
+  the price is the scrub lines' own tag. The stick-bag scrub: map setting -> `Item_BombBag_Small`, the flow's
+  name check (`Event315`) and its three sell calls follow, with the new line. **Confirmed in game:** "Ah, the
+  bomb bag! It's 40 rupees." and the sale worked.
+- **One test launcher.** Test builds now go into `out/mods/NX2-ZOOTR` and are started with
+  `Launch NX2-ZOOTR test.bat` (plus `Launch 100 save (unmodded).bat`); the per-test launchers were deleted.
+  `tools/build_mod.py` removes its earlier output (`<out>/<name>/romfs`) before building, so no file of an older
+  build stays in the mod. `tools/evfl_test_mod.py` no longer writes a launcher (`--longshot` removed).
+- Scrubs are not in the builder yet: the Lost Woods isn't classified (no check IDs), each scrub needs its own
+  branch in the shared flow, and the sales lines name the original item (no line names the item from a
+  variable).
+
+### Shopkeeper greeting back in, rock circle after the dungeons, Bottle shelf retest
+- `--fix kokiri_shop_full_stock` again makes the child shopkeeper greet as after the Deku Tree, now wired
+  the right way round (case 0 = yes = the "after" side). Same edit as the confirmed event flow test: the
+  file it writes is byte for byte the tested one. `tools/evfl_test_mod.py` now uses the builder's edit.
+  **Confirmed in game.**
+- New `--fix kokiri_circle_after_dungeons`: the rock circle by Mido's house as after the dungeons, at both ages.
+  - `Logic/KokiriForest_Common_Level_All_01_6aaf`: the AND node (adult, and `SageOfForest_IsBefore_Step08`)
+    that swaps the ring of 8 for 4 other rocks takes "is child" instead of the flag, so it is never true: an
+    adult sees the ring of 8 like a child. One link changed, nothing else in the file. **Confirmed in game.**
+  - `Component/AIScheduleParam/Npc_Kokiri_008_Child`: the Kokiri who tries to lift the middle rock does that
+    in his default schedule; his schedule after the Kokiri Emerald (`Get_StoneOfForest_IsCompleted_Exp`)
+    becomes the default, so he isn't on the rock from the start. **Confirmed in game** (moved).
+  - The middle rock still couldn't be lifted: it is two rocks in one place, a prop with no lift setting
+    (`Obj_LiftRock_A_02`, the one he acts out lifting) and a liftable `Obj_LiftRock_A_01`.
+    `Logic/KokiriForest_Child_Level_All_02_6960` swaps them after the Kokiri Emerald; the fix now gives both
+    fixed values (prop never, liftable rock always). **Confirmed in game:** all the circle rocks lift
+    (child), each dropping its own green rupee.
+  - Check data: the adult ring of 8 has no rule any more, the 4 other adult rocks are never there
+    (rule False, not randomizable), the middle rock is "is_child". The builder refuses an item on the adult
+    circle rocks or the middle rock without this fix. Logic tests updated.
+- Event flow tool branch (`claude/evfl-add-events-b2737c`): `example_shop_bottle` wired for 0 = yes.
+- Bottle shelf retest (test build only, `out/mods-bottle-test`, nothing in the builder). The earlier refusals
+  said nothing, as their branches were wired backwards.
+  - Test 1: `DisplayShop` sold the Bottle itself when `Shop_SelectItemName` is the shelf's name. **In game:
+    1 Empty Bottle, works, shelf empty after** (so the selection holds the shelf's name, `Shop_NX2_...`).
+    But no price question and no held-up get, as those steps were skipped.
+  - Found where the refusal is: after "I'll buy!", `Event27` sorts the item by kind and `Event77`
+    (`PouchSystemActor.EventQueryCanAddToPorchByGameData`) checks pouch room; "no" leads to the "never mind"
+    lines. Test 2: only that sorting is skipped for the bottle shelf (straight to `Event6`, where the game's
+    own pay and held-up get start). **In game: refused again** before any price question, with
+    "The empty bottle? Wait... Hold on a second." (`Shop_01_02_1`).
+  - That line is one of 3 picked at random by `NotAvailableTalk` ("Oh, wait. Actually..." is another), so
+    the earlier refusals may have come from there too. `NotAvailableTalk` is run by `SelectItem_CheckAvailable`,
+    which `NormalFlow` calls (`Event121`) **before** the price question. It sorts the item by kind; for
+    bottled items (kind 5) it asks `PouchSystemActor.EventQueryIsAnyBottleEmpty`, and with no empty bottle
+    it refuses. The Bottle is most likely sorted there. Test 3 also starts `SelectItem_CheckAvailable` with a
+    branch: the bottle shelf goes straight to its "OK" return (`Event124`), every other item to the
+    game's check (`Event318`). From "OK" to the price question are only the camera, focus and talk steps.
+    Test 2's skip after "I'll buy!" stays. **In game: still refused.**
+  - **Decision:** if bottles go on shelves, they use test 1's way (the flow sells the bottle itself: no price
+    question, no held-up get, but it works). That is `example_shop_bottle` on the event flow tool branch.
+    Whether bottles go in shops at all is left for later, so the builder still refuses a bottle on a shelf.
+
+### Why event flow edits showed nothing: yes and no were the wrong way round (branch `claude/evfl-in-game-0d5942`)
+Looked into offline (game, Longshot and its logs only read). **Confirmed in game (2026-11-17):** with the test mod, the
+ child shopkeeper greeted normally before the Deku Tree and the goodbye line was replaced. Event flow edits work.
+
+- **Likely cause: in this game's flows a yes/no question answers 0 for yes and 1 for no.** Both edits
+  assumed the opposite (1 = yes, as in Breath of the Wild). Read from the game's own flows, four ways:
+  - `DisplayShop`: "has Link 20 rupees" (`EventQueryHasRuppe`): case 0 -> "You wanna transfer 20 rupees?",
+    case 1 -> "it doesn't look like you have enough rupees";
+  - `DisplayShop`: "is child" (`EventQueryPlayerIsChild`): case 0 -> the child's Deku Shield lines, case 1 ->
+    the adult's ("They're just for kids, you know");
+  - `DisplayShop`: "selected item is `Weapon_Shield_Deku`" (`EventQueryIsGameDataString64`): case 0 -> the
+    Deku Shield lines, case 1 -> the checks for the other shields and tunics;
+  - `Npc_Kokiri_001_Shop_Child`: after buying, "has the Deku Shield" case 0 and "tutorial already given"
+    case 1 -> the Deku Shield tutorial talk, then the flag is set.
+  And the game itself: on a new file the shopkeeper says the "low on stock" lines, which are on case 1 of
+  the switch on `Meet_DekuTree_IsAfter_Step02_Exp`.
+- **What the two edits really did:**
+  - Shopkeeper greeting: both cases were sent to case 1's step, which is the "low on stock" side. So the
+    edit forced the greeting the game already gave. (The line removed from `build_mod.py` took
+    `dict(e.cases).get(1)` as the "after" side.)
+  - `DisplayShop` branches: "name matches" was wired as case 1, so a matching item went straight on to the
+    game's buy check, and a non-matching item went to the rupee test and then (having the rupees = 0) on to
+    the game's check too. The new steps could only run for an item that did NOT match while Link had fewer
+    than 5 rupees. So that test said nothing about what `Shop_SelectItemName` holds: still open.
+    The same mistake is in `tests/evfl_add_check.py` (`example_shop_bottle`) on
+    `claude/evfl-add-events-b2737c`: to fix there before any further use.
+- **The game does read our flow files.** Longshot's logs (`logs/longshot_log*.txt`) print a line each time
+  the game opens a file from the mod folder (`mods: <path> <- <mod file>`). The two test sessions with flows
+  show `Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl.zs` and `Event/EventFlow/DisplayShop.bfevfl.zs`
+  opened from our folder, like the map, table and pack files. No error or rejection lines about them.
+  Longshot also merges its own button prompt sizes into the mod's resource size table (harmless).
+- **No other copy of the flows.** Searched 14,921 files outside `Event/EventFlow` (every folder except
+  textures, models, sound, shaders, terrain, physics, animation and effects), packs opened (three levels
+  deep): no BFEVFL file anywhere else, in no pack. What names flows: `RSDB/EventSetting` (2,380 rows: an
+  event's flow file `Work/Event/EventFlow/<name>.evfc`, its entry point, its settings),
+  `RSDB/GameAnalyzedEventInfo` (2,379 rows: per event, `SubFlowList`, the other flow files it calls; a
+  custom event that calls a flow file not in its list may need its row changed: not tested),
+  the actor packs (the flow an actor starts) and the address table (2 mentions of the folder).
+- **Our written files are sound.** Both flows round-trip byte for byte. The edited files have the same
+  header fields as the game's (magic, version 0.4.0.0, byte order, alignment, file size field = real size,
+  one flowchart, relocation table at its place with its own offset) and the same `.zs` frame (single
+  segment, dictionary 1, content size present and right, no checksum). The shopkeeper file differed from
+  the game's by one byte (the case's event index).
+- **Test mod** (`tools/evfl_test_mod.py`, new; output in `out/mods-evfl-test`, launcher
+  `out/Launch evfl test.bat`, checklist `out/EVFL_TEST_CHECKLIST.md`; `out/mods` untouched). One flow,
+  `Npc_Kokiri_001_Shop_Child`, two independent edits: the greeting switch with both cases to the normal
+  greeting (the fix: case 0 is the "after" side; the Talk entry point's list is recomputed), and the three
+  goodbye lines replaced by the "not enough rupees" line (control: shows that the flow is read whatever
+  yes/no means). Plus the skippable opening, to get there fast.
+- README: the yes/no rule and where flows are named, under "Things this game does differently".
+
+### Shopkeeper greeting edit removed
+- `--fix kokiri_shop_full_stock` no longer edits the child shopkeeper's talk
+  (`Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl`): tested, it changed nothing (he still greets with
+  "low on stock" before the Deku Tree), so the mod no longer carries that file. The rest of the fix (one shop
+  set, every shelf open, the adult's own list) is unchanged and tested. No event flow file is edited by the
+  builder now; the greeting can come back once event flow edits are shown to work in game.
+
+### In-game test of the two new tools (scratch build; branches `claude/ainb-format-aa01ca`, `claude/evfl-add-events-b2737c` not merged)
+- **AINB tool: works in game.** The rock circle module (`Logic/KokiriForest_Common_Level_All_01_6aaf`)
+  with the "is adult" input taken out of its switch (node 32, `OperateAND`): a child on a new file saw the 4
+  corner rocks instead of the ring of 8, so the game ran our edited AI file.
+- **Wanted (the user, 2026-11-17):** the rock circle as it is after the dungeons, at both ages: the ring of
+  8 rocks, and the Kokiri (`Npc_Kokiri_008_Child`) away from the middle rock. Needs the circle module
+  changed so the 8 are never deleted and the 4 never created, and finding what keeps the Kokiri there.
+- **Event flow tool: the shop Bottle still can't be bought** (same "take it back" line). The new branch was
+  added to `DisplayShop` twice (selected item `Shop_NX2_Bottle_5_Once`, then `Item_Bottle`), in front of the
+  only call of the game's buy check (`NormalFlow`: sold out? -> callswitch `SelectItem_CheckAvailable`);
+  the other two callers of the take-back talk are for the Hylian Shield and the tunics only. So either the
+  selected item's name is stored as something else, or the game doesn't read our copy of `DisplayShop`.
+  Next: a test that tells the two apart.
+- **Disguised Bottle shelf** (test build): the shelf kept the Bottle's look and name, but its item row and
+  item settings said one Deku Nut (as the game's own Deku Nut shelves); `DisplayShop` got three branches
+  (shelf name and `Item_Bottle` -> give the Bottle, `Item_DekuNut` -> give the Hookshot as a marker). Result:
+  still couldn't be bought. Decided (the user, 2026-11-17): **no bottles in shops** (the builder already
+  refuses them); bottles go anywhere else.
+- **Open question, bigger than bottles:** no edit to an event flow (`.bfevfl`) has shown any effect in game
+  yet: the shopkeeper's greeting branch (`Npc_Kokiri_001_Shop_Child`), and every `DisplayShop` branch, even
+  for an item the buy code accepts. Edits to maps, tables, packs and AI files all worked. Possibly the game
+  doesn't use our edited event flows (read from elsewhere, or skipped). To find out before relying on event
+  flow edits (ground ocarina, custom events).
+### AINB: reader and writer for the game's AI and logic files (branch `claude/ainb-format-aa01ca`)
+- **New `formats/ainb.py`**: reads an `.ainb` file (magic `AIB `, version 0x408) into Python objects and
+  writes it back: commands (entry points), nodes with their fixed values, inputs, outputs, links,
+  preconditions and attachments, global parameters with their defaults and file references, embedded
+  module names, entry strings, the replacement table. Written from the game's own files: no public
+  description of this version was reachable, and it differs from what I knew of the older 0x404/0x407
+  (node bodies hold index+count pairs instead of offsets; 7 global parameter types instead of 6).
+- **Round trip: 11,707/11,707 byte-identical** (1,942 loose files in `AI`, `Logic`, `Sequence`, 9,765
+  inside packs; 5,036 different files). In `tests/roundtrip.py`; `run_tests.bat` now also covers the
+  `AI`, `Logic` and `Sequence` folders.
+- **Kept as they are, not decoded:** the expression block (EXB: small formulas some nodes use; 1,079 of
+  the 5,036 files have one) is raw bytes; the string pool is kept as read and new strings go at the end;
+  the extra words of links, parameter flags and the replacement table are numbers (the dump tool names
+  the ones understood: selector conditions, "value comes from global parameter N / expression N").
+  Not possible yet: adding or changing an expression. Adding nodes is possible in the object model but
+  not tested in game.
+- **Edit test** (`tests/edit_check.py`): changes a number (the pot respawn delay, 1200 -> 60 frames), a
+  string (a flag name, new in the pool) and removes one source of an input with several; each result
+  reads back with only those lines changed in the text dump, and writing it again gives the same bytes.
+- **New `tools/ainb_dump.py`** (read only): prints an AINB as text, from a file or from a path in the
+  romfs that may go through a pack; `--find <text>` lists where AINB files with that name are.
+- Found on the way: the `AI`, `Logic` and `Sequence` folders hold 3 BYML node definition tables
+  (`NodeDefinition/Node.Product.111.aidefn.byml`) that the BYML writer gives back smaller (not AINB;
+  same kind as the 2 known BYML system files). Not fixed here.
+
+What the three files do (analysis only, nothing changed in the builder; all from the dumps):
+
+- **Rock circle** (`Logic/KokiriForest_Common_Level_All_01_6aaf.logic.module.ainb`, 38 nodes). Two sets
+  of liftable rocks. The 8 (`Obj_LiftRock_A_01_4079`, `_4151`, `_6b1c`, `_79ff`, `_ab49`, `_b129`,
+  `_e464`, `_f107`) are always created and are deleted when "adult AND the flag
+  `SageOfForest_IsBefore_Step08`" is true. The 4 (`_1345`, `_39ec`, `_b2db`, `_f726`) are created only
+  when that same condition is true. So: child = the 8; adult while `SageOfForest_IsBefore_Step08` = the 4;
+  adult after = the 8 again. This matches what was seen in game, and names the exact flag (a step of the
+  Forest Sage's story, not "Forest Temple completed" as such). When all 8 are broken it sets
+  `KokiriForest_Npc_Kokiri_008_Child_LiftRock_AllBroken` to true (false otherwise). 8 trigger areas, one
+  per rock of the 8, watch for the player: player inside one -> `Npc_Kokiri_008_Child_AttentionFlag`
+  false, otherwise true; each area is deleted when its rock is lifted or broken, or when
+  `Get_StoneOfForest_IsCompleted_Exp` (by its name: the Kokiri Emerald is obtained) is true. The middle rock is not in this
+  module. To make the circle the same at every age, the one node to change is the "adult AND flag" node
+  (or the flag name it reads).
+- **Ground item pick-up** (`AI/PouchContent.event.root.ainb` in `Pack/AI.Global.Product.111.pack.zs`, 380
+  nodes, 60 entry points). It is the list of things an event flow can ask of or tell an item actor
+  (`EventQuery...`, `EventTrigger...`); each query answers with a number the event flow switches on.
+  - `EventTriggerAddOwnToPouch` (the push to the pouch) runs two game-code nodes at once:
+    `OneShotPouchContentPushToPouchOwnInEvent` and `OneShotActorChangeIsRespawn(false)` (the picked-up
+    object will not come back). Nothing else: what the push does (equip, count, refresh the ocarina
+    button) is inside the game's code, not in this file.
+  - `SpecialDeal` is read by `QueryPouchContentGetSpecialDeal` in two entry points with the same graph:
+    `EventQueryOwnIsMaxLifeUpPouchContent` and `EventQueryOwnIsNotPushPouchContent`. Both answer 0 ("yes")
+    when SpecialDeal is 3 and 1 ("no") for anything else. So in this file SpecialDeal 3 means "heart
+    container kind: don't put it in the pouch"; no other value is looked at here.
+  - `EventQueryGetRequestedTargetProcess`: 0 put in the pouch, 1 equip, 2 heal (also the default).
+    `EventQueryCanAddToPorchSelf` asks the pouch manager (`QueryPouchMgrIsEnablePushToPouch`, by actor
+    name): 0 can be taken, 1 cannot. `EventTriggerReserveNotPushToPouchProcess` /
+    `EventQueryIsNotPushToPouchInEvent`: an event can reserve "don't push this one".
+    `EventQueryCheckOwnPouchContentCategory`: 0 weapon, 1 bow, 2 arrow, 3 shield, 4 armour, 5 material,
+    6 important item, 7 rupee, 8 healing item, 9 head gear, 10 boots, 11 other.
+    `EventQueryCheckTagOnPouchActor`: actor tags `LetterBottle` 0, `Obj_Fire_Arrow` 1, `BiggoronSword` 2,
+    `Token_Gold` 3, other 4. `EventQueryIsAutoSavePouchContent`: save after the get scene or not.
+  - For the Fairy Ocarina that can't be played until a reload: this file gives no handle on it (the push
+    is one game-code node). The place to compare next is the event flow that calls these entry points
+    for the Ocarina of Time in the moat against the one used for our ground ocarina.
+- **Pots.** The pot's own AI (`AI/Obj_Pot.root.ainb`, in every pot, rock and grass pack, 40 nodes) only
+  decides when it breaks: thrown or fallen and then touching something, thrown and hitting an actor
+  (unless that actor has the tag `UnbreakHitPotAttack`), or damaged by a Wallmaster; each ends in
+  `OneShotDeathRequestDeath`. Other ways of breaking (a sword hit) are not in this file. Nothing in it
+  brings a pot back or remembers it. What brings a broken pot back is outside the AI:
+  - ordinary pots (`Obj_Pot_A_01`...) use the actor setting `ActorGameDataSetting/SupplyObject` and the
+    saved per-object flag found earlier (reset when the area reloads);
+  - the `..._Respawn` pots use `ActorGameDataSetting/AlwaysRespawn` and a death procedure
+    `Default_AlwaysRespawn`, and are driven by a logic module, e.g.
+    `Logic/Obj_Pot_A_05_Respawn_Prefab_1c6c.logic.module.ainb` (16 nodes): the pot is re-created
+    (`RespawnTrigger`) when all of these hold: the pot has been gone for 1200 frames, the player has a
+    bomb bag but no bombs and no Bombchus, no bomb (`Obj_Bomb`) is in the object area and the player is
+    not in the player area around it, it is not on camera, and a condition given by the map that uses
+    the module is true. A supply pot that refills when you are out of bombs. (The module also writes an
+    auto-generated saved flag when the pot dies and uses it to decide whether to create the pot.)
+  So a one-time rule for pots is not an AI change: the lead is the `SupplyObject` game data setting
+  (and the reset type of the flag), to look at with the BYML tools.
+
 ### Event flows: new steps can be added (branch `claude/evfl-add-events-b2737c`)
 - `formats/evfl.py` could change existing events; it can now add to a flowchart: events of every type
   (`add_action`, `add_switch`, `add_fork`, `add_join`, `add_subflow`, and the game's two extra types

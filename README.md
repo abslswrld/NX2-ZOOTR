@@ -16,6 +16,7 @@ no game files are included.
 | BFEVFL event flows | `formats/evfl.py` | item hand-outs, shops, cutscenes | 650/914 byte-identical; 264 not readable yet (see below). New steps can be added to a flow, not only existing ones changed (see "Adding steps to an event flow") |
 | MSBT text | `formats/msbt.py` | item names, hints, dialogue | 8,640/8,640 byte-identical |
 | RESTBL | `formats/restbl.py` | file-size table the game needs for changed files | 1/1 byte-identical |
+| AINB v0x408 (AI, logic and sequence graphs) | `formats/ainb.py` | pot respawn rules, item pick-up logic, level logic (the rock circle) | 11,707/11,707 byte-identical (2026-11-17: 1,942 loose files in `AI`, `Logic`, `Sequence` and 9,765 inside packs; 5,036 different files) |
 
 "Byte-identical" means: read the file, write it back without changes, and get exactly the same bytes.
 Whole game = `run_tests.bat` (the Event, RSDB, Mals, GameData, Pack and System folders, archives opened:
@@ -27,11 +28,18 @@ Not identical yet:
 - **2 BYML system files** (`PhiveConfig.byml`, `HeapDef.byml`) come back smaller than the originals. Not
   files the randomizer edits.
 
-`tests/edit_check.py` also changes each format (adds an event, a table row, a file, a text, a size entry)
+`tests/edit_check.py` also changes each format (adds an event, a table row, a file, a text, a size entry,
+changes a number and a string in an AI file)
 and checks the result reads back correctly. `tests/evfl_add_check.py` adds new steps to every event flow
 read and checks the read-back (see "Adding steps to an event flow").
 
-Not covered yet: AINB (AI/logic files, inside packs), BFRES models, BNTX textures (the tunic-colour
+AINB notes: the expression block (EXB) inside a file is kept as raw bytes, and the string pool is kept as
+read (new strings go at the end); see the top of `formats/ainb.py`. `tools/ainb_dump.py` prints a file as
+text. The `AI`, `Logic` and `Sequence` folders (now part of `run_tests.bat`) also hold 3 BYML node
+definition tables (`NodeDefinition/Node.Product.111.aidefn.byml`) that come back smaller, like the 2 BYML
+system files above.
+
+Not covered yet: BFRES models, BNTX textures (the tunic-colour
 module already has its own texture code), save files (needed for the tracker).
 
 ## Things this game does differently from the public documentation
@@ -42,6 +50,15 @@ module already has its own texture code), save files (needed for the tracker).
   types the documentation doesn't have. From the game's files:
   - type 5, `callswitch`: runs an entry point and branches on the value it returns (cases are 32-bit hashes);
   - type 6, `return`: ends an entry point returning a 32-bit hash value.
+- **In event flows a yes/no question answers 0 for yes and 1 for no** (the opposite of Breath of the Wild's
+  flows): a switch on `EventQueryIsGameDataBool`, `...BoolExp`, `EventQueryIsGameDataString64`,
+  `EventQueryCheckIsGet`, `EventQueryPlayerIsChild`, `EventQueryHasRuppe`... has case 0 = true, case 1 =
+  false. Read from the game's own flows (e.g. `DisplayShop`: "has 20 rupees" case 0 goes on to the
+  transfer, case 1 to "not enough rupees"; "is child" case 0 gives the child's Deku Shield lines, case 1
+  the adult's). Choice queries answer the choice's number from 0.
+- Which flow files an event may call is also listed in `RSDB/GameAnalyzedEventInfo` (`SubFlowList`, per
+  event), and `RSDB/EventSetting` names each event's flow file and entry point. Flow files exist only as
+  loose files in `Event/EventFlow` (no copies in packs).
 - The game's files list some null pointers in the event flow relocation table (empty actor action lists,
   entry point arrays, empty switch and callswitch case lists, and a flowchart's actor, event and entry
   point arrays when they are empty); the writer does the same.
@@ -128,7 +145,8 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `data/ids.json` | every permanent check ID ever issued (active or retired), the area codes and the type codes |
 | `tools/build_db.py`, `data/db/<Area>.json` | the check database of an area, built from the files above (generated: never edit it by hand) |
 | `tests/db_check.py` | checks the database and the IDs, and prints totals |
-| `tools/build_mod.py` | builds a Longshot mod folder: changes what chests, pots, freestanding items, shop shelves, liftable rocks and solid bushes give, by check ID, applies game fixes (`--fix bombs_without_bracelet`, `--fix skippable_opening`, `--fix magic_is_separate`, `--fix bombchus_without_bag`, `--fix kokiri_shop_full_stock`: one full shop per age, needed for shelves), updates the resource size table, and can write a test launcher; output in `out/` (never committed) |
+| `tools/build_mod.py` | builds a Longshot mod folder: changes what chests, pots, freestanding items, shop shelves, liftable rocks, solid bushes, Gold Skulltulas and gifts (those handed over through the shared `Dm_SY_GetInEvent` flow) give, by check ID, applies game fixes (`--fix bombs_without_bracelet`, `--fix skippable_opening`, `--fix magic_is_separate`, `--fix bombchus_without_bag`, `--fix kokiri_shop_full_stock`: one full shop per age, needed for shelves, `--fix kokiri_circle_after_dungeons`: the rock circle as after the dungeons at both ages), updates the resource size table, and can write a test launcher; output in `out/` (never committed) |
+| `tools/evfl_test_mod.py` | builds the small test mod (own folder and launcher) that shows whether event flow edits work in game: the child Kokiri shopkeeper's greeting and goodbye |
 | `tools/ground_items.py` | makes ground versions (`Obj_NX2_<item>`) of items that only exist as the model shown when received, from the game's own ground Deku Shield, so they can lie on the ground or drop from a pot and are picked up by walking into them; also held-up versions (`Item_NX2_<item>`) for chests giving items with no get-demo setup of their own (ocarinas), from the Boomerang's item actor (used by `build_mod.py`) |
 | `tools/shop_items.py` | makes shop versions (`Shop_NX2_<item>_<price>_Once`) of items for shop shelves, from the game's own Deku Shield shelf, sold once (used by `build_mod.py`) |
 
@@ -208,6 +226,6 @@ by hand: rebuilding the database updates every answer, and `tests/db_check.py` t
 search (every listed set reaches the check, every set minus any one item doesn't, and "impossible" really
 is impossible).
 
-**Classified so far:** Kokiri Forest (119 checks). `randomizable` is `"untested"` for every check that may
+**Classified so far:** Kokiri Forest (120 checks). `randomizable` is `"untested"` for every check that may
 hold an item, until changing it has been tried in game; gossip stones are `"no"`.
 

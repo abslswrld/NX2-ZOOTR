@@ -376,7 +376,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game (same method as the Know-It-All House skulltula, which worked)",
   "requirements": {
    "child": [
     [
@@ -1048,28 +1048,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked); there from the start with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) (confirmed in game 2026-11-17)",
   "requirements": {
    "child": null,
    "adult": [
     [
-     "Hookshot",
-     "MasterSword",
-     "Ocarina",
-     "SariasSong"
-    ],
-    [
-     "Hookshot",
-     "MasterSword",
-     "OcarinaOfTime",
-     "SariasSong"
+     "MasterSword"
     ]
    ]
   },
-  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: the ring of 8"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_02",
@@ -1097,28 +1088,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked); there from the start with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) (confirmed in game 2026-11-17)",
   "requirements": {
    "child": null,
    "adult": [
     [
-     "Hookshot",
-     "MasterSword",
-     "Ocarina",
-     "SariasSong"
-    ],
-    [
-     "Hookshot",
-     "MasterSword",
-     "OcarinaOfTime",
-     "SariasSong"
+     "MasterSword"
     ]
    ]
   },
-  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: the ring of 8"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_03",
@@ -1145,21 +1127,15 @@
    "source": null,
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "randomizable": "no",
+  "randomizable_note": "never there with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it): an adult sees the ring of 8 instead (confirmed in game 2026-11-17); never place an item here",
   "requirements": {
    "child": null,
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "is_adult",
+  "check_rule": "is_adult and (False)",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there before",
-  "missable": "gone once the Forest Temple is completed: never place anything required here"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: one of the 4"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_04",
@@ -1187,28 +1163,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked); there from the start with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) (confirmed in game 2026-11-17)",
   "requirements": {
    "child": null,
    "adult": [
     [
-     "Hookshot",
-     "MasterSword",
-     "Ocarina",
-     "SariasSong"
-    ],
-    [
-     "Hookshot",
-     "MasterSword",
-     "OcarinaOfTime",
-     "SariasSong"
+     "MasterSword"
     ]
    ]
   },
-  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: the ring of 8"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_05",
@@ -1236,28 +1203,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked); there from the start with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) (confirmed in game 2026-11-17)",
   "requirements": {
    "child": null,
    "adult": [
     [
-     "Hookshot",
-     "MasterSword",
-     "Ocarina",
-     "SariasSong"
-    ],
-    [
-     "Hookshot",
-     "MasterSword",
-     "OcarinaOfTime",
-     "SariasSong"
+     "MasterSword"
     ]
    ]
   },
-  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: the ring of 8"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_06",
@@ -1284,21 +1242,15 @@
    "source": null,
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "randomizable": "no",
+  "randomizable_note": "never there with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it): an adult sees the ring of 8 instead (confirmed in game 2026-11-17); never place an item here",
   "requirements": {
    "child": null,
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "is_adult",
+  "check_rule": "is_adult and (False)",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there before",
-  "missable": "gone once the Forest Temple is completed: never place anything required here"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: one of the 4"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_07",
@@ -1326,28 +1278,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked); there from the start with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) (confirmed in game 2026-11-17)",
   "requirements": {
    "child": null,
    "adult": [
     [
-     "Hookshot",
-     "MasterSword",
-     "Ocarina",
-     "SariasSong"
-    ],
-    [
-     "Hookshot",
-     "MasterSword",
-     "OcarinaOfTime",
-     "SariasSong"
+     "MasterSword"
     ]
    ]
   },
-  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: the ring of 8"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_08",
@@ -1375,28 +1318,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked); there from the start with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) (confirmed in game 2026-11-17)",
   "requirements": {
    "child": null,
    "adult": [
     [
-     "Hookshot",
-     "MasterSword",
-     "Ocarina",
-     "SariasSong"
-    ],
-    [
-     "Hookshot",
-     "MasterSword",
-     "OcarinaOfTime",
-     "SariasSong"
+     "MasterSword"
     ]
    ]
   },
-  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: the ring of 8"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_09",
@@ -1423,21 +1357,15 @@
    "source": null,
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "randomizable": "no",
+  "randomizable_note": "never there with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it): an adult sees the ring of 8 instead (confirmed in game 2026-11-17); never place an item here",
   "requirements": {
    "child": null,
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "is_adult",
+  "check_rule": "is_adult and (False)",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there before",
-  "missable": "gone once the Forest Temple is completed: never place anything required here"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: one of the 4"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_10",
@@ -1465,28 +1393,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked); there from the start with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) (confirmed in game 2026-11-17)",
   "requirements": {
    "child": null,
    "adult": [
     [
-     "Hookshot",
-     "MasterSword",
-     "Ocarina",
-     "SariasSong"
-    ],
-    [
-     "Hookshot",
-     "MasterSword",
-     "OcarinaOfTime",
-     "SariasSong"
+     "MasterSword"
     ]
    ]
   },
-  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: the ring of 8"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_11",
@@ -1514,28 +1433,19 @@
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
   "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+  "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked); there from the start with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) (confirmed in game 2026-11-17)",
   "requirements": {
    "child": null,
    "adult": [
     [
-     "Hookshot",
-     "MasterSword",
-     "Ocarina",
-     "SariasSong"
-    ],
-    [
-     "Hookshot",
-     "MasterSword",
-     "OcarinaOfTime",
-     "SariasSong"
+     "MasterSword"
     ]
    ]
   },
-  "check_rule": "is_adult and ('Forest Temple Clear')",
+  "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: the ring of 8"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_12",
@@ -1562,21 +1472,15 @@
    "source": null,
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "randomizable": "no",
+  "randomizable_note": "never there with --fix kokiri_circle_after_dungeons (the builder refuses an item here without it): an adult sees the ring of 8 instead (confirmed in game 2026-11-17); never place an item here",
   "requirements": {
    "child": null,
-   "adult": [
-    [
-     "MasterSword"
-    ]
-   ]
+   "adult": null
   },
-  "check_rule": "is_adult",
+  "check_rule": "is_adult and (False)",
   "verification_status": "not verified in game",
-  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there before",
-  "missable": "gone once the Forest Temple is completed: never place anything required here"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one: one of the 4"
  },
  {
   "unique_check_id": "KF_CIRCLE_CENTER_ROCK",
@@ -1619,22 +1523,13 @@
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
   "requirements": {
    "child": [
-    [
-     "Slingshot",
-     "open_forest"
-    ],
-    [
-     "DekuShield",
-     "KokiriSword",
-     "Slingshot"
-    ]
+    []
    ],
    "adult": null
   },
-  "check_rule": "is_child and 'Deku Tree Clear'",
+  "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "requirements_note": "the child answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "child map only; two rocks stacked here (Obj_LiftRock_A_02 and _A_01). A Kokiri (Npc_Kokiri_008_Child) is trying to lift it early on and it can't be lifted; in a 100% save he is gone and it can. Assumed condition: after the Deku Tree (the level logic checks Get_StoneOfForest_IsCompleted_Exp, the Kokiri Emerald); not tested"
+  "notes": "child map only; two rocks stacked here: Obj_LiftRock_A_02 (a prop with no lift setting, for the Kokiri Npc_Kokiri_008_Child who acts out trying to lift it) and Obj_LiftRock_A_01 (liftable). In the game a child level logic (Logic/KokiriForest_Child_Level_All_02_6960) swaps the prop for the liftable rock once the Kokiri Emerald is got (Get_StoneOfForest_IsCompleted_Exp), and the Kokiri's schedule moves him away then. With --fix kokiri_circle_after_dungeons (the builder refuses an item here without it) both happen from the start (Kokiri moved: confirmed in game 2026-11-17; the swap: confirmed in game 2026-11-17, the middle rock lifts and gives its rupee)"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_01",
@@ -2073,6 +1968,31 @@
   "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one never appears as a child"
  },
  {
+  "unique_check_id": "KF_CIRCLE_KOKIRI_GIFT",
+  "check_name": "KF Rock Circle Kokiri Gift",
+  "region": "KF Main",
+  "area": "KokiriForest",
+  "check_type": "gift",
+  "object_id": [],
+  "vanilla_contents": {
+   "value": "Obj_Rupee_Blue",
+   "source": "event flow Npc_Kokiri_008_Child, Event224",
+   "note": null
+  },
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-17 with --fix kokiri_circle_after_dungeons (tools/build_mod.py sets the ActorName of his Dm_SY_GetInEvent call): gave a gold rupee",
+  "requirements": {
+   "child": [
+    []
+   ],
+   "adult": null
+  },
+  "check_rule": "is_child",
+  "verification_status": "not verified in game",
+  "object_id_note": "no map placement (an event); its ID in the game is still to be found",
+  "notes": "the Kokiri Npc_Kokiri_008_Child gives a blue rupee once all the circle rocks (the ring of 8 and the middle rock) are lifted (after HaveTalked_Special.Npc_Kokiri_008_Child_LiftRock_AllBroken_Talk_Event166); new in the remake. Without --fix kokiri_circle_after_dungeons the middle rock can only be lifted after the Kokiri Emerald, so the builder refuses an item here without the fix"
+ },
+ {
   "unique_check_id": "KF_DEKU_TREE_GOSSIP_01",
   "check_name": "KF Deku Tree Gossip Stone Left",
   "region": "KF Outside Deku Tree",
@@ -2368,7 +2288,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game (same method as the Know-It-All House skulltula, which worked)",
   "requirements": {
    "child": null,
    "adult": [
@@ -2558,8 +2478,8 @@
    "source": "check kind (not stored in the map data)",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor, as for rocks): dropped a Piece of Heart instead of its token",
   "requirements": {
    "child": [
     [

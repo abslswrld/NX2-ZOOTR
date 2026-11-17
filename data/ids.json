@@ -886,6 +886,11 @@
    "status": "active",
    "issued": "2026-11-17",
    "check": "KF Adult Bush Behind Shop 3"
+  },
+  "KF_CIRCLE_KOKIRI_GIFT": {
+   "status": "active",
+   "issued": "2026-11-17",
+   "check": "KF Rock Circle Kokiri Gift"
   }
  }
 }
