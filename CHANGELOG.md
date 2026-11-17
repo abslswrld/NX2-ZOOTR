@@ -4,6 +4,50 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Event flows: new steps can be added (branch `claude/evfl-add-events-b2737c`)
+- `formats/evfl.py` could change existing events; it can now add to a flowchart: events of every type
+  (`add_action`, `add_switch`, `add_fork`, `add_join`, `add_subflow`, and the game's two extra types
+  `add_callswitch`, `add_return`), actors (`add_actor`), actions and queries on an existing or new actor
+  (added by name when an action or switch uses one the actor doesn't have yet), entry points
+  (`add_entry_point`), all with parameters; and `repoint(old, new)` sends every link to an old event to a
+  new one. New things go at the end of their lists, so existing indexes never move. Names must be unique
+  (events, actors by name + secondary name, entry points): a second one is refused.
+- `evfl.dumps_checked(flow)` is the writer for edited flows: checks the flow (`fc.check()`: names, every
+  index in range, a fork's join is a join, parameters the file can hold), writes it, reads it back and
+  compares every event, actor, action, query, parameter (with its type) and entry point with what was meant
+  (`evfl.differences`). `evfl.dumps` itself is unchanged.
+- Two things found in the game's files on the way:
+  - the 32-bit values of `return` events and `callswitch` cases are the FNV-1a hash of a name (`Yes`, `No`,
+    `Complete` match), so both take a name now (`evfl.return_hash`);
+  - an entry point's list is the subflow and callswitch events that can run from it (all 5,465 entry points
+    of the 650 files read). `fc.update_entry_points()` works it out again after an edit (`dumps_checked`
+    does it).
+- New test `tests/evfl_add_check.py` (in `run_tests.bat`), on the real game flows, read only:
+  - unchanged: 650/650 pass the checks and `dumps_checked` gives the game's bytes back;
+  - one event of every type, a new actor, a new action and a new query added and linked in front of the
+    first entry point: 650/650 read back as meant (old parts untouched, new parts as written);
+  - 11 kinds of mistake refused (name used twice, link to an event that isn't there, parameter too big...).
+  - Round trip unchanged: 650/914 byte-identical (`tests/roundtrip.py`, Event folder); `tests/edit_check.py`
+    passes.
+- Two worked examples kept in that test. **Examples only: not used by the builder, not tried in the game.**
+  - `example_item_get`: what an "item get" needs, read from `Dm_Kokiri_0155` (Fairy Ocarina) and
+    `GetPouchContent`: action `PouchSystemActor.EventTriggerAddOrRemovePouchContent` `{Num, IsEquipDIrect,
+    IsSetMessageTargetActorName: True, Actor, IsGetEvent: False}` (into the pouch), then subflow
+    `GetPouchContent` entry `DisplayGetByActorName` `{ActorName}` (the window: `EventTriggerSetForGetWindow`
+    + `OpenGetWindow`). Or one subflow for everything, as chests do: `GetPouchContent` entry
+    `GetPouchContentByActorName` `{ActorName}` (window, rupee counter, pouch, autosave).
+  - `example_shop_bottle`: in `DisplayShop`, a branch in front of the callswitch that runs the game's buy
+    check (`SelectItem_CheckAvailable`, in `NormalFlow`): for one selected item with enough rupees, pay
+    (`EventTriggerPayItemPriceAtShop`), give `Item_Bottle` with the two steps above, mark the shelf sold
+    (`EventTriggerAddShopItemSoldNum`, shop board message, shelf refresh), return to the shelves
+    (`Buy_ReturnStart_NoDofReset`). 10 new events, one new action name on `PouchSystemActor`, one link moved;
+    every other event, actor and entry point reads back unchanged.
+  - To find in game before using it: whether `Shop_SelectItemName` holds the shelf's name
+    (`Shop_NX2_Bottle_5_Once`) or the pouch item's (`Item_Bottle`; the game compares it with
+    `Weapon_Shield_Deku`, whose shelf is `Shop_Weapon_Shield_Deku`, so probably the item's); whether the
+    branch needs the shopkeeper's price talk first; whether the shelf empties as after a normal buy.
+- Still refused, as before: the 264 flows with timelines or entry point variables.
+
 ### Rock circle corrected (branch `rock-circle`)
 - **Correction:** the circle by Mido's house has **8** rocks as a child, not 12 (earlier notes said 12).
   The map places 12 rock objects; the level logic shows 8 to a child, and to an adult 4 before the Forest
