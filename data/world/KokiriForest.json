@@ -169,194 +169,473 @@
     "randomizable": "untested",
     "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
    },
-   "KF Rock Circle 1": {
-    "id": "KF_CIRCLE_ROCK_01",
+   "KF Child Rock Circle 1": {
+    "id": "KF_CIRCLE_CHILD_ROCK_01",
     "spot": "rock@-48.2,-28.2",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 2": {
-    "id": "KF_CIRCLE_ROCK_02",
+   "KF Adult Rock Circle 1": {
+    "id": "KF_CIRCLE_ADULT_ROCK_01",
+    "spot": "rock@-48.2,-28.2",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+    "rule": "'Forest Temple Clear'",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+   },
+   "KF Child Rock Circle 2": {
+    "id": "KF_CIRCLE_CHILD_ROCK_02",
     "spot": "rock@-47.3,-29.9",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 3": {
-    "id": "KF_CIRCLE_ROCK_03",
+   "KF Adult Rock Circle 2": {
+    "id": "KF_CIRCLE_ADULT_ROCK_02",
+    "spot": "rock@-47.3,-29.9",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+    "rule": "'Forest Temple Clear'",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+   },
+   "KF Child Rock Circle 3": {
+    "id": "KF_CIRCLE_CHILD_ROCK_03",
     "spot": "rock@-47.1,-30.4",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 4": {
-    "id": "KF_CIRCLE_ROCK_04",
+   "KF Adult Rock Circle 3": {
+    "id": "KF_CIRCLE_ADULT_ROCK_03",
+    "spot": "rock@-47.1,-30.4",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "missable": "gone once the Forest Temple is completed: never place anything required here",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before"
+   },
+   "KF Child Rock Circle 4": {
+    "id": "KF_CIRCLE_CHILD_ROCK_04",
     "spot": "rock@-45.8,-30.5",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 5": {
-    "id": "KF_CIRCLE_ROCK_05",
+   "KF Adult Rock Circle 4": {
+    "id": "KF_CIRCLE_ADULT_ROCK_04",
+    "spot": "rock@-45.8,-30.5",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+    "rule": "'Forest Temple Clear'",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+   },
+   "KF Child Rock Circle 5": {
+    "id": "KF_CIRCLE_CHILD_ROCK_05",
     "spot": "rock@-44.2,-30.1",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 6": {
-    "id": "KF_CIRCLE_ROCK_06",
+   "KF Adult Rock Circle 5": {
+    "id": "KF_CIRCLE_ADULT_ROCK_05",
+    "spot": "rock@-44.2,-30.1",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+    "rule": "'Forest Temple Clear'",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+   },
+   "KF Child Rock Circle 6": {
+    "id": "KF_CIRCLE_CHILD_ROCK_06",
     "spot": "rock@-43.8,-29.9",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 7": {
-    "id": "KF_CIRCLE_ROCK_07",
+   "KF Adult Rock Circle 6": {
+    "id": "KF_CIRCLE_ADULT_ROCK_06",
+    "spot": "rock@-43.8,-29.9",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "missable": "gone once the Forest Temple is completed: never place anything required here",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before"
+   },
+   "KF Child Rock Circle 7": {
+    "id": "KF_CIRCLE_CHILD_ROCK_07",
     "spot": "rock@-43.3,-28.2",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 8": {
-    "id": "KF_CIRCLE_ROCK_08",
+   "KF Adult Rock Circle 7": {
+    "id": "KF_CIRCLE_ADULT_ROCK_07",
+    "spot": "rock@-43.3,-28.2",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+    "rule": "'Forest Temple Clear'",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+   },
+   "KF Child Rock Circle 8": {
+    "id": "KF_CIRCLE_CHILD_ROCK_08",
     "spot": "rock@-44.1,-26.7",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 9": {
-    "id": "KF_CIRCLE_ROCK_09",
+   "KF Adult Rock Circle 8": {
+    "id": "KF_CIRCLE_ADULT_ROCK_08",
+    "spot": "rock@-44.1,-26.7",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+    "rule": "'Forest Temple Clear'",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+   },
+   "KF Child Rock Circle 9": {
+    "id": "KF_CIRCLE_CHILD_ROCK_09",
     "spot": "rock@-44.7,-26.0",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 10": {
-    "id": "KF_CIRCLE_ROCK_10",
+   "KF Adult Rock Circle 9": {
+    "id": "KF_CIRCLE_ADULT_ROCK_09",
+    "spot": "rock@-44.7,-26.0",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "missable": "gone once the Forest Temple is completed: never place anything required here",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before"
+   },
+   "KF Child Rock Circle 10": {
+    "id": "KF_CIRCLE_CHILD_ROCK_10",
     "spot": "rock@-45.7,-25.8",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 11": {
-    "id": "KF_CIRCLE_ROCK_11",
+   "KF Adult Rock Circle 10": {
+    "id": "KF_CIRCLE_ADULT_ROCK_10",
+    "spot": "rock@-45.7,-25.8",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+    "rule": "'Forest Temple Clear'",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+   },
+   "KF Child Rock Circle 11": {
+    "id": "KF_CIRCLE_CHILD_ROCK_11",
     "spot": "rock@-47.6,-26.7",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock Circle 12": {
-    "id": "KF_CIRCLE_ROCK_12",
+   "KF Adult Rock Circle 11": {
+    "id": "KF_CIRCLE_ADULT_ROCK_11",
+    "spot": "rock@-47.6,-26.7",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)",
+    "rule": "'Forest Temple Clear'",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+   },
+   "KF Child Rock Circle 12": {
+    "id": "KF_CIRCLE_CHILD_ROCK_12",
     "spot": "rock@-47.8,-26.9",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
    },
-   "KF Rock West of Midos House 1": {
-    "id": "KF_WEST_OF_MIDOS_HOUSE_ROCK_01",
+   "KF Adult Rock Circle 12": {
+    "id": "KF_CIRCLE_ADULT_ROCK_12",
+    "spot": "rock@-47.8,-26.9",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+    "missable": "gone once the Forest Temple is completed: never place anything required here",
+    "note": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before"
+   },
+   "KF Child Rock West of Midos House 1": {
+    "id": "KF_WEST_OF_MIDOS_HOUSE_CHILD_ROCK_01",
     "spot": "rock@-62.0,-39.4",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Rock West of Midos House 2": {
-    "id": "KF_WEST_OF_MIDOS_HOUSE_ROCK_02",
+   "KF Adult Rock West of Midos House 1": {
+    "id": "KF_WEST_OF_MIDOS_HOUSE_ADULT_ROCK_01",
+    "spot": "rock@-62.0,-39.4",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Rock West of Midos House 2": {
+    "id": "KF_WEST_OF_MIDOS_HOUSE_CHILD_ROCK_02",
     "spot": "rock@-63.3,-38.1",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Rock Near Know It All House 1": {
-    "id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_01",
+   "KF Adult Rock West of Midos House 2": {
+    "id": "KF_WEST_OF_MIDOS_HOUSE_ADULT_ROCK_02",
+    "spot": "rock@-63.3,-38.1",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Rock Near Know It All House 1": {
+    "id": "KF_NEAR_KNOW_IT_ALL_HOUSE_CHILD_ROCK_01",
     "spot": "rock@-62.2,-19.6",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Rock Near Know It All House 2": {
-    "id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ROCK_02",
+   "KF Adult Rock Near Know It All House 1": {
+    "id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ADULT_ROCK_01",
+    "spot": "rock@-62.2,-19.6",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Rock Near Know It All House 2": {
+    "id": "KF_NEAR_KNOW_IT_ALL_HOUSE_CHILD_ROCK_02",
     "spot": "rock@-63.3,-18.5",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Rock Behind Sarias House 1": {
-    "id": "KF_BEHIND_SARIAS_HOUSE_ROCK_01",
+   "KF Adult Rock Near Know It All House 2": {
+    "id": "KF_NEAR_KNOW_IT_ALL_HOUSE_ADULT_ROCK_02",
+    "spot": "rock@-63.3,-18.5",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Rock Behind Sarias House 1": {
+    "id": "KF_BEHIND_SARIAS_HOUSE_CHILD_ROCK_01",
     "spot": "rock@-0.8,29.5",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Rock Behind Sarias House 2": {
-    "id": "KF_BEHIND_SARIAS_HOUSE_ROCK_02",
+   "KF Adult Rock Behind Sarias House 1": {
+    "id": "KF_BEHIND_SARIAS_HOUSE_ADULT_ROCK_01",
+    "spot": "rock@-0.8,29.5",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Rock Behind Sarias House 2": {
+    "id": "KF_BEHIND_SARIAS_HOUSE_CHILD_ROCK_02",
     "spot": "rock@-2.1,31.0",
     "kind": "rock",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Bush Near Sarias House 1": {
-    "id": "KF_NEAR_SARIAS_HOUSE_BUSH_01",
+   "KF Adult Rock Behind Sarias House 2": {
+    "id": "KF_BEHIND_SARIAS_HOUSE_ADULT_ROCK_02",
+    "spot": "rock@-2.1,31.0",
+    "kind": "rock",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Bush Near Sarias House 1": {
+    "id": "KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_01",
     "spot": "bush@-4.7,8.4",
     "kind": "bush",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Bush Near Sarias House 2": {
-    "id": "KF_NEAR_SARIAS_HOUSE_BUSH_02",
+   "KF Adult Bush Near Sarias House 1": {
+    "id": "KF_NEAR_SARIAS_HOUSE_ADULT_BUSH_01",
+    "spot": "bush@-4.7,8.4",
+    "kind": "bush",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Bush Near Sarias House 2": {
+    "id": "KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_02",
     "spot": "bush@-4.4,6.0",
     "kind": "bush",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Bush Near Sarias House 3": {
-    "id": "KF_NEAR_SARIAS_HOUSE_BUSH_03",
+   "KF Adult Bush Near Sarias House 2": {
+    "id": "KF_NEAR_SARIAS_HOUSE_ADULT_BUSH_02",
+    "spot": "bush@-4.4,6.0",
+    "kind": "bush",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Bush Near Sarias House 3": {
+    "id": "KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_03",
     "spot": "bush@-3.4,7.3",
     "kind": "bush",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Bush Beside Midos House 1": {
-    "id": "KF_BESIDE_MIDOS_HOUSE_BUSH_01",
+   "KF Adult Bush Near Sarias House 3": {
+    "id": "KF_NEAR_SARIAS_HOUSE_ADULT_BUSH_03",
+    "spot": "bush@-3.4,7.3",
+    "kind": "bush",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Bush Beside Midos House 1": {
+    "id": "KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_01",
     "spot": "bush@-37.8,-39.2",
     "kind": "bush",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item"
    },
-   "KF Bush Beside Midos House 2": {
-    "id": "KF_BESIDE_MIDOS_HOUSE_BUSH_02",
+   "KF Adult Bush Beside Midos House 1": {
+    "id": "KF_BESIDE_MIDOS_HOUSE_ADULT_BUSH_01",
+    "spot": "bush@-37.8,-39.2",
+    "kind": "bush",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item"
+   },
+   "KF Child Bush Beside Midos House 2": {
+    "id": "KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_02",
     "spot": "bush@-37.3,-41.0",
     "kind": "bush",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item"
    },
-   "KF Bush Beside Midos House 3": {
-    "id": "KF_BESIDE_MIDOS_HOUSE_BUSH_03",
+   "KF Adult Bush Beside Midos House 2": {
+    "id": "KF_BESIDE_MIDOS_HOUSE_ADULT_BUSH_02",
+    "spot": "bush@-37.3,-41.0",
+    "kind": "bush",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item"
+   },
+   "KF Child Bush Beside Midos House 3": {
+    "id": "KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_03",
     "spot": "bush@-36.0,-39.3",
     "kind": "bush",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item"
    },
-   "KF Bush Behind Shop 1": {
-    "id": "KF_BEHIND_SHOP_BUSH_01",
+   "KF Adult Bush Beside Midos House 3": {
+    "id": "KF_BESIDE_MIDOS_HOUSE_ADULT_BUSH_03",
+    "spot": "bush@-36.0,-39.3",
+    "kind": "bush",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item"
+   },
+   "KF Child Bush Behind Shop 1": {
+    "id": "KF_BEHIND_SHOP_CHILD_BUSH_01",
     "spot": "bush@-9.4,-35.2",
     "kind": "bush",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Bush Behind Shop 2": {
-    "id": "KF_BEHIND_SHOP_BUSH_02",
+   "KF Adult Bush Behind Shop 1": {
+    "id": "KF_BEHIND_SHOP_ADULT_BUSH_01",
+    "spot": "bush@-9.4,-35.2",
+    "kind": "bush",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Bush Behind Shop 2": {
+    "id": "KF_BEHIND_SHOP_CHILD_BUSH_02",
     "spot": "bush@-5.9,-34.9",
     "kind": "bush",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    },
-   "KF Bush Behind Shop 3": {
-    "id": "KF_BEHIND_SHOP_BUSH_03",
+   "KF Adult Bush Behind Shop 2": {
+    "id": "KF_BEHIND_SHOP_ADULT_BUSH_02",
+    "spot": "bush@-5.9,-34.9",
+    "kind": "bush",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Child Bush Behind Shop 3": {
+    "id": "KF_BEHIND_SHOP_CHILD_BUSH_03",
     "spot": "bush@-4.5,-34.8",
     "kind": "bush",
+    "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game"
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
+   },
+   "KF Adult Bush Behind Shop 3": {
+    "id": "KF_BEHIND_SHOP_ADULT_BUSH_03",
+    "spot": "bush@-4.5,-34.8",
+    "kind": "bush",
+    "age": "adult",
+    "randomizable": "untested",
+    "randomizable_note": "optional setting (rocks and bushes); not yet changed in game (same method as the circle rocks, which worked)"
    }
   },
   "events": {

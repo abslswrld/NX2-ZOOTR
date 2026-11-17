@@ -89,7 +89,8 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):
 11 regions, 7 chests, 3 Gold Skulltulas, the stick-upgrade scrub, Saria's gift, 8 shop shelves (one check per age, like the pots: 16), 4 pots,
-24 freestanding items, 19 liftable rocks and 9 solid bushes (rocks and bushes as their own randomizer option),
+24 freestanding items, 19 liftable rocks and 9 solid bushes (rocks and bushes as their own randomizer option;
+one check per age, like the pots; the adult rock circle changes after the Forest Temple),
 all taken from the game files. The 4 gossip stones are listed too (kind "gossip"): they give no item, they're
 kept for hints. Every region is marked `"verified": false` until its
 rules have been checked in game; anything uncertain has a `note`.
@@ -137,7 +138,7 @@ digits and `_` only.
 - One ID per check (one item handed out), not per object: a check the game places several times (child
   and adult copies, the bridge chest in two maps) has one ID listing every placement; an NPC that gives two
   things has two IDs.
-- Except when the child and adult objects are separate objects that each give their item (pots: each has
+- Except when the child and adult objects are separate objects that each give their item (pots, rocks, bushes: each has
   its own "broken" memory, so one shared check could be collected once per age). Then there is one check
   per age, with `"age": "child"` or `"adult"` in its data and `CHILD`/`ADULT` in its ID and name:
   `KF_HOUSE_OF_TWINS_CHILD_POT_01`, `KF_HOUSE_OF_TWINS_ADULT_POT_01`. Such a check covers only that age's
@@ -162,6 +163,6 @@ by hand: rebuilding the database updates every answer, and `tests/db_check.py` t
 search (every listed set reaches the check, every set minus any one item doesn't, and "impossible" really
 is impossible).
 
-**Classified so far:** Kokiri Forest (92 checks). `randomizable` is `"untested"` for every check that may
+**Classified so far:** Kokiri Forest (119 checks). `randomizable` is `"untested"` for every check that may
 hold an item, until changing it has been tried in game; gossip stones are `"no"`.
 

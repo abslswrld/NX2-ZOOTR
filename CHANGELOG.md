@@ -4,6 +4,18 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Rocks and bushes: one check per age
+- Each liftable rock and solid bush in Kokiri Forest is now two checks, a child one and an adult one (like
+  the pots: separate objects per age, each giving its own item, tested in game). New IDs like
+  `KF_CIRCLE_CHILD_ROCK_01` / `KF_CIRCLE_ADULT_ROCK_01`, `KF_BEHIND_SHOP_CHILD_BUSH_01`; the 27 old IDs
+  retired. The rock in the middle of the circle stays one child-only check (`KF_CIRCLE_CENTER_ROCK`).
+  Kokiri Forest: 119 checks.
+- **Adult rock circle:** 4 rocks before the Forest Temple is completed, 8 others after (seen in game, and
+  in a 100% save). The 8 have the rule `'Forest Temple Clear'`, a new event of the Forest Temple
+  placeholder (rule for now: reaching the temple; the real one when it's mapped). The 4 are marked
+  `missable` ("gone once the Forest Temple is completed: never place anything required here"); the field
+  goes into the database (`tools/build_db.py`). Two new tests in `tests/logic_check.py`.
+
 ### In-game results of the rocks and bushes test
 - **Rocks work:** the 12 circle rocks each dropped a red rupee (20) as a child. As an adult, the 4 circle
   rocks there dropped red rupees too.

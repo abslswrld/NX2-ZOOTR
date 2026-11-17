@@ -25,6 +25,8 @@ Row fields
     check_rule           the check's own rule: only what is needed once in its region ("True" = nothing more)
     verification_status  "verified in game" or "not verified in game" (the region's "verified" flag)
     notes                the check's own note, if any
+    missable             only when the check can go away for good during the game (e.g. a rock the level
+                         removes after a dungeon): why; nothing required may be placed there
 """
 import json
 import os
@@ -110,6 +112,8 @@ def build(world, area):
                 row['object_id_note'] = 'no map placement (an event); its ID in the game is still to be found'
             if loc.get('note'):
                 row['notes'] = loc['note']
+            if loc.get('missable'):
+                row['missable'] = loc['missable']
             rows.append(row)
     return sorted(rows, key=lambda x: x['unique_check_id'])
 

@@ -1,18 +1,12 @@
-# In-game test checklist (test mod rebuilt 2026-11-17, branch `rocks-bushes`)
+# In-game test checklist
 
-**Start:** run `out\Launch NX2-ZOOTR test.bat`, then make a **new file**. Skip the opening.
-This round: **items from rocks and bushes**, all next to Mido's house.
+Nothing to test right now (branch `rocks-bushes`: rocks and bushes give items, tested; now one check per
+age, a data change only).
 
-## 1. As a child
-- [ ] **The circle of 12 small rocks** around a rock near the door of Mido's house: lift a few. Does each
-      drop a **red rupee** (20)? Can you pick it up?
-- [ ] **The rock in the middle of the circle:** does it drop the **Boomerang**? Picked up, works?
-- [ ] **The 3 bushes beside Mido's house:** cut them. Does each drop a **Piece of Heart**? Picked up, counted?
-- [ ] Leave Kokiri Forest and come back (or save and reload): do the rocks and bushes come back, and do
-      they drop the same items again? (Expected: yes, like the pots; that's the later one-time fix.)
-
-## 2. As an adult (if you can get there)
-- [ ] Do the circle rocks (no middle rock as an adult) and the 3 bushes drop the same items?
-
-## 3. Anything odd
-- [ ] Crash when lifting or cutting, items falling through the ground or flying off.
+Known, left for later (see CHANGELOG.md):
+- The rock in the middle of the circle: a Kokiri is lifting it; when it can be lifted is not known.
+- Bushes didn't come back after leaving the area; pots do. What resets them is not known.
+- A Piece of Heart on the ground needs A to pick up (the game's own).
+- A Fairy Ocarina from a chest or the ground plays only after a save and reload or a change of scene.
+- The child Kokiri shopkeeper still greets with "low on stock" before the Deku Tree.
+- Bottles can't be sold on shop shelves.
