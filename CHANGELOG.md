@@ -4,6 +4,16 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### In-game results of the special deal test
+- Ground **Bottle** with no special deal: still no hold-up ("You got an empty bottle!" with Link standing).
+  The special deal is not the cause.
+- Ground **Fairy Ocarina** (pot) with no special deal: held up, but still not playable until a reload. The
+  special deal is not the cause here either.
+- **Fairy Ocarina from Mido's chest**: playable straight away, but **invisible** when held up (the message
+  shows, Link's hands are empty). So the chest's get flow does whatever makes the ocarina playable, and the
+  ground pickup doesn't. Invisible probably because `Item_Ocarina_Fairy` has no animation file of its own
+  (its ground version needed one made, from `Item_Ocarina_Fairy_Animation`); not confirmed.
+
 ### Ground Bottle and ground ocarina: no "special deal" (to test)
 - A ground version whose item has a special deal (`SpecialDeal` in its settings: the Bottle's `Bottle`, the
   ocarinas' `Ocarina`) now sets it to "None" in its own settings, so the ground pick-up logic skips its
