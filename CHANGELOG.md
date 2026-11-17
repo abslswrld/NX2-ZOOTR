@@ -22,7 +22,8 @@ Newest first. Dates are when the work was done.
 - Side effect: the vanilla items are on sale from the start as a child too (Deku Seeds before the
   Slingshot, the Recovery Heart).
 - Test mod (shop only, plus `bombchus_without_bag`): child shelf 1 Boomerang (15), shelf 2 the game's
-  5 Bombchus, Heart shelf Empty Bottle (5); adult shelf 1 Hookshot (15).
+  5 Bombchus, Heart shelf Empty Bottle (5); adult shelf 1 Hookshot (15). The freestanding rupee in the
+  shop (`KF_SHOP_RUPEE_ITEM`) is a gold rupee (`Obj_Rupee_Gold`), to have rupees for the test.
 
 ### In-game results of the held-up ocarina, Bombchus and shop test
 - **Chest ocarina (held-up version):** now visible above Link's head, but **not playable** (the plain

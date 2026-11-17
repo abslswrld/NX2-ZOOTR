@@ -2,8 +2,9 @@
 
 **Start:** run `out\Launch NX2-ZOOTR test.bat`, then make a **new file**. Skip the opening.
 This round: **the Kokiri Shop only.** The child shop should now be the full shop straight away (no "low on
-stock" before the Deku Tree), and the adult shop has its own shelves. You'll need some rupees: about 100
-covers everything below.
+stock" before the Deku Tree), and the adult shop has its own shelves. You'll need some rupees: the rupee
+on the shop floor is now a **gold rupee** (200, for testing; a child's wallet holds 99, which covers the
+child purchases below: 15 + 5 + 75).
 
 ## 1. Kokiri Shop as a child, before the Deku Tree
 - [ ] Does the shopkeeper greet you normally (not "we're low on stock")?
