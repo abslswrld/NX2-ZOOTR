@@ -4,6 +4,15 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### In-game results of the Kokiri Shop fixes
+- **Count boards:** right. No board under single items (no "x10" under the Hookshot), "x3" under the
+  3 Bombchus, which give 3. Bought shelves stay empty.
+- **Hookshot on the shelf:** 0.3 m higher looks right, maybe a touch high: now 0.25 m.
+- **Greeting:** still "low on stock" as a child before the Deku Tree, so the branch changed in
+  `Npc_Kokiri_001_Shop_Child` is not where that line comes from. Left for later.
+- **Empty Bottle:** still cannot be bought, so the special deal (row and item settings) is not the cause
+  either.
+
 ### Kokiri Shop fixes after the first full-shop test (to test)
 - **Greeting:** the child shopkeeper's talk (`Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl`) has one
   branch on meeting the Deku Tree (before: "Mido is blocking the way, can't restock"). Part of

@@ -43,7 +43,7 @@ NO_SPECIAL_DEAL = ('Bottle',)
 SPECIAL_DEAL_NONE = 3069107721                       # hash of "None" (the item settings' SpecialDeal)
 # items the game never sells stand on the shelf in a pose not made for them: how much higher to place them
 # (metres, found in game). The Hookshot stood on end, half inside the shelf (2026-11-17).
-SHELF_LIFT = {'Item_Hookshot': 0.3}
+SHELF_LIFT = {'Item_Hookshot': 0.25}         # 0.3 tested 2026-11-17: right, a touch high
 NO_RESPAWN = '?Component/ActorGameDataSetting/NoRespawn.game__component__ActorGameDataSetting.bgyml'
 
 
