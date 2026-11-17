@@ -4,6 +4,19 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### In-game results of the rocks and bushes test
+- **Rocks work:** the 12 circle rocks each dropped a red rupee (20) as a child. As an adult, the 4 circle
+  rocks there dropped red rupees too.
+- **The rock in the middle of the circle** can't be lifted as a child: a Kokiri is trying to lift it (an
+  NPC scene). Maybe it can be lifted later in the game; to look at before it becomes a check.
+- **Bushes work:** the 3 bushes beside Mido's house each dropped a Piece of Heart, as a child and again as
+  an adult. The Piece of Heart needs A to pick up (the game's own ground Piece of Heart does; may be
+  changed later).
+- **Separate objects per age:** the adult rocks and bushes gave their items again after the child ones, so
+  like the pots, rocks and bushes need one check per age.
+- **Respawn:** after going to the Lost Woods and back, the bushes had **not** come back (pots do come back
+  when the area reloads). What makes them come back is not known yet.
+
 ### Rocks and bushes in the builder (branch `rocks-bushes`, to test)
 - Liftable rocks (`Obj_LiftRock_*`) and solid bushes (`Obj_Plant_Grass_*`) can be given an item: the builder
   adds `Drop__DropActor` to them (in Kokiri Forest none has a drop set; the game itself sets it on some
