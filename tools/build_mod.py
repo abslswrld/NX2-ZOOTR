@@ -11,6 +11,10 @@ written back compressed with the same dictionary as the original, and the resour
 gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, for Longshot's HOS_MODS.
 
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
+    kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
+                             Deku Tree (the "low on stock" set is removed, every shelf is open from the
+                             start), and the adult shopkeeper gets a shop list of its own; needed to change
+                             shop shelves (each shelf's item, sold once, goes into the shopkeeper's list)
     bombchus_without_bag     Bombchus get a capacity of their own (BOMBCHU_MAX, as in the original game) and
                              no longer need the bomb bag: in the remake their maximum is the bomb bag's, so
                              without one it is 0; bomb bags stop raising and refilling them
@@ -315,6 +319,94 @@ def remove_entry(data, keys, expected):
     return new
 
 
+# Kokiri Shop with one set of shelves per age (--fix kokiri_shop_full_stock). What a shop sells is decided by
+# its shopkeeper: its shop list (ShopParam GoodsList) has one entry per shelf, in ShopItemIndex order (the
+# Recovery Heart, with no index, is 0), naming the shelf actor sold (its price), a release flag and a stock
+# (-1 unlimited, 1 once). The child map has two sets of shopkeeper, shelves and boards: before meeting the
+# Deku Tree (the "low on stock" shopkeeper, its own short list, two "sold out" boards) and after; the adult
+# shopkeeper has no list of its own and uses the child one (a copy of the same file in its pack).
+SHOP_FLAG = 'Meet_DekuTree_IsAfter_Step02_Exp'
+SHOP_MAP = 'Banc/KokiriForest/KokiriForest_Child_Static.bcett.byml'
+SHOP_KEEPERS = {'child': 'Npc_Kokiri_001_Shop_Child', 'adult': 'Npc_Kokiri_001_Shop_Adult'}
+SHOP_LIST = 'Component/ShopParam/Npc_Kokiri_001_Shop_Child.game__component__ShopParam.bgyml'
+SHOP_LIST_ADULT = 'Component/ShopParam/Npc_Kokiri_001_Shop_Adult.game__component__ShopParam.bgyml'
+SHOP_STOCK_ONCE = 1
+
+
+def _is_shop_actor(actor):
+    return actor['Gyaml'].startswith(('Shop_', 'Npc_Kokiri_001_Shop'))
+
+
+def shop_full_stock_map(data):
+    """child map: the shop set placed before meeting the Deku Tree is removed and the set placed after it is
+    always there. Returns (new data, removed hashes, hashes now always there)."""
+    doc = byml.loads(data)
+    keep, removed, always = [], set(), set()
+    for act in doc.root['Actors']:
+        pres = act.get('Presence')
+        if _is_shop_actor(act) and pres is not None and pres.get('FlagName') == SHOP_FLAG:
+            h = str(int(act['Hash']))
+            if pres.get('IsNegation'):
+                removed.add(h)
+                continue
+            act = type(act)(act)                      # own copy (shared nodes)
+            del act['Presence']
+            always.add(h)
+        keep.append(act)
+    if not removed or not always:
+        raise SystemExit('kokiri_shop_full_stock: the two shop sets were not found as expected')
+    for act in keep:                                  # nothing left may point at a removed object
+        for link in act.get('Links') or []:
+            if str(int(link['Dst'])) in removed:
+                raise SystemExit('kokiri_shop_full_stock: %s links to a removed shop object' % act['Gyaml'])
+    doc.root = type(doc.root)(doc.root)
+    doc.root['Actors'] = keep
+    new = byml.dumps(doc)
+    want = []
+    for act in byml.loads(data).root['Actors']:
+        h = str(int(act['Hash']))
+        if h in removed:
+            continue
+        want.append({k: v for k, v in act.items() if not (h in always and k == 'Presence')})
+    if [dict(x) for x in byml.loads(new).root['Actors']] != want:
+        raise SystemExit('read-back: %s differs from what was intended' % SHOP_MAP)
+    return new, removed, always
+
+
+def open_shop_list(data, goods):
+    """a shop list (ShopParam) with every shelf open from the start (no release flag); goods {shelf index:
+    shelf actor} replaces what those shelves sell, sold once"""
+    doc = byml.loads(data)
+    root = type(doc.root)(doc.root)
+    entries = list(root['GoodsList'])
+    if goods and max(goods) >= len(entries):
+        raise SystemExit('shop list has %d shelves, shelf %d asked for' % (len(entries), max(goods)))
+    stock_type = next((type(e['StockNum']) for e in entries if 'StockNum' in e), int)
+    new_entries = []
+    for i, e in enumerate(entries):
+        e = type(e)(e)
+        if 'Release' in e:
+            r = type(e['Release'])(e['Release'])
+            r['IsCheckReleaseGameData'] = False
+            r['ReleaseGameData'] = type(r['ReleaseGameData'])('')
+            e['Release'] = r
+        if i in goods:
+            e['Actor'] = type(e['Actor'])('Work/Actor/%s.engine__actor__ActorParam.gyml' % goods[i])
+            e['StockNum'] = stock_type(SHOP_STOCK_ONCE)
+        new_entries.append(e)
+    root['GoodsList'] = new_entries
+    doc.root = root
+    new = byml.dumps(doc)
+    back = byml.loads(new).root['GoodsList']
+    for i, e in enumerate(back):
+        if 'Release' in e and e['Release']['IsCheckReleaseGameData']:
+            raise SystemExit('read-back: shop shelf %d still has a release flag' % i)
+        if i in goods and (not e['Actor'].endswith('/%s.engine__actor__ActorParam.gyml' % goods[i])
+                           or int(e['StockNum']) != SHOP_STOCK_ONCE):
+            raise SystemExit('read-back: shop shelf %d differs from what was intended' % i)
+    return new
+
+
 class Output:
     """writes changed files into the mod folder and keeps the resource size table up to date"""
 
@@ -409,7 +501,7 @@ def main(argv):
     ap.add_argument('--name', default='NX2-ZOOTR')
     ap.add_argument('--longshot', help='Longshot folder: also write a launcher .bat next to the mods folder')
     ap.add_argument('--fix', action='append', default=[],
-                    choices=sorted(set(FIXES) | set(FILE_FIXES) | set(TABLE_FIXES)),
+                    choices=sorted(set(FIXES) | set(FILE_FIXES) | set(TABLE_FIXES) | {'kokiri_shop_full_stock'}),
                     help='a game fix (see FIXES, FILE_FIXES, TABLE_FIXES)')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
@@ -420,7 +512,16 @@ def main(argv):
     dicts = zstd.Dictionaries.from_pack(open(os.path.join(a.romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
     out = Output(a.romfs, os.path.join(a.out, a.name, 'romfs'), dicts)
 
+    shop_fix = 'kokiri_shop_full_stock' in a.fix
+    shop_removed = set()
     for name in a.fix:
+        if name == 'kokiri_shop_full_stock':
+            src, old = out.read(SHOP_MAP)
+            new, shop_removed, always = shop_full_stock_map(old)
+            out.write(SHOP_MAP, src, old, new)
+            print('fix %-28s %s: %d shop objects removed (before the Deku Tree), %d always there'
+                  % (name, SHOP_MAP, len(shop_removed), len(always)))
+            continue
         if name in TABLE_FIXES:
             path, fn = TABLE_FIXES[name]
             src, old = out.read(path)
@@ -476,7 +577,31 @@ def main(argv):
         price = shop_items.price_of(table_rows, shelf_actor)
         return shops.setdefault((item, price), shop_items.shop_name(item, price, once=True))
 
-    for path, changes in sorted(plan(world, assignments, on_ground, in_chest, on_shelf).items()):
+    planned = plan(world, assignments, on_ground, in_chest, on_shelf)
+    # shelves: which shelf (ShopItemIndex; the Heart has none: 0) and age each placement is, for the lists
+    shelf_of = {p['hash']: (p['ages'], int(p.get('params', {}).get('ShopItemIndex', 0)))
+                for spots in world.checks.values() for sp in spots.values() if sp['kind'] == 'shop'
+                for p in sp['placements']}
+    goods = {'child': {}, 'adult': {}}
+    for path in list(planned):
+        for h, (cid, item, _, kind) in list(planned[path].items()):
+            if kind != 'shop':
+                continue
+            if not shop_fix:
+                raise SystemExit('%s: shop shelves need --fix kokiri_shop_full_stock' % cid)
+            if h in shop_removed:
+                del planned[path][h]
+                print('%-18s placement %s: removed by kokiri_shop_full_stock (before the Deku Tree)' % (cid, h))
+                continue
+            ages, idx = shelf_of[h]
+            for age in ages:
+                if goods[age].get(idx, item) != item:
+                    raise SystemExit('%s: shelf %d (%s) given two items' % (cid, idx, age))
+                goods[age][idx] = item
+        if not planned[path]:
+            del planned[path]
+
+    for path, changes in sorted(planned.items()):
         src, old = out.read(path)
         new, found, _ = patch_file(old, {h: v for h, v in changes.items()})
         for h, (cid, item, expected_old, kind) in changes.items():
@@ -504,6 +629,44 @@ def main(argv):
             if act != want:
                 raise SystemExit('read-back: actor %s (%s) differs from what was intended' % (h, act['Gyaml']))
         out.write(path, src, old, new)
+
+    if shop_fix:
+        # the child shopkeeper's list (also copied in the adult shopkeeper's pack: kept identical), and a list
+        # of the adult shopkeeper's own
+        child_pack = ground_items.pack_path(SHOP_KEEPERS['child'])
+        child_list = sarc.Sarc.read(plain(child_pack)).files[SHOP_LIST]
+        new_child = open_shop_list(child_list, goods['child'])
+        new_adult = open_shop_list(child_list, goods['adult'])
+        for keeper in ('child', 'adult'):
+            pack_path = ground_items.pack_path(SHOP_KEEPERS[keeper])
+            src, old = out.read(pack_path)
+            arc = sarc.Sarc.read(old)
+            if arc.files[SHOP_LIST] != child_list:
+                raise SystemExit('%s: its copy of the child shop list differs' % SHOP_KEEPERS[keeper])
+            arc.files[SHOP_LIST] = new_child
+            out.size(SHOP_LIST, len(child_list), len(new_child))
+            if keeper == 'adult':
+                ap = ground_items.ap_path(SHOP_KEEPERS['adult'])
+                adoc = byml.loads(arc.files[ap])
+                adoc.root = type(adoc.root)(adoc.root)
+                comp = type(adoc.root.get('Components', {}))(adoc.root.get('Components', {}))
+                if 'ShopRef' in comp:
+                    raise SystemExit('%s already has a shop list of its own' % SHOP_KEEPERS['adult'])
+                comp['ShopRef'] = '?' + SHOP_LIST_ADULT
+                adoc.root['Components'] = comp
+                new_ap = byml.dumps(adoc)
+                out.size(ap, len(arc.files[ap]), len(new_ap))
+                arc.files[ap] = new_ap
+                arc.files[SHOP_LIST_ADULT] = new_adult
+                arc.align[SHOP_LIST_ADULT] = arc.align.get(SHOP_LIST, 8)
+                out.add(SHOP_LIST_ADULT, len(new_adult), SHOP_LIST, len(child_list))
+            new_pack = arc.write()
+            back = sarc.Sarc.read(new_pack)
+            if set(back.files) != set(arc.files) or any(back.files[k] != v for k, v in arc.files.items()):
+                raise SystemExit('read-back: %s differs from what was intended' % pack_path)
+            out.write(pack_path, src, old, new_pack)
+            print('shop list %-36s %s' % (SHOP_KEEPERS[keeper], ', '.join(
+                'shelf %d: %s' % (i, n) for i, n in sorted(goods[keeper].items())) or 'all shelves open'))
 
     new_rows = {}
     for (item, version), name in sorted(grounds.items()):

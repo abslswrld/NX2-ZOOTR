@@ -4,6 +4,26 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Kokiri Shop: one full shop per age (to test)
+- New `--fix kokiri_shop_full_stock` (needed to change shop shelves):
+  - Child map: the shop set placed before meeting the Deku Tree (the "low on stock" shopkeeper
+    `Npc_Kokiri_001_Shop_Child_ShortStock`, its 8 shelves, 2 "sold out" boards and a bundle board: 12
+    objects) is removed, and the set placed after it is always there (its `Presence` removed). Nothing
+    else links to the removed objects (checked by the build).
+  - The child shopkeeper's list: every shelf open from the start (release flags off).
+  - The adult shopkeeper gets a list of its own (`Npc_Kokiri_001_Shop_Adult` ShopParam, its actor's
+    `ShopRef`), same shelves, all open. The copy of the child list in its pack is kept identical to the
+    child shopkeeper's.
+  - A changed shelf: the map's shelf actor shows the item, and the shopkeeper's list entry names the same
+    actor (what is sold, and its price), with stock 1 (sold once, as the game's "low on stock" list).
+    Shop versions also keep `NoRespawn`.
+- The data keeps both child placements of each shelf (as in the game files); with the fix on, the builder
+  skips the ones the fix removes.
+- Side effect: the vanilla items are on sale from the start as a child too (Deku Seeds before the
+  Slingshot, the Recovery Heart).
+- Test mod (shop only, plus `bombchus_without_bag`): child shelf 1 Boomerang (15), shelf 2 the game's
+  5 Bombchus, Heart shelf Empty Bottle (5); adult shelf 1 Hookshot (15).
+
 ### In-game results of the held-up ocarina, Bombchus and shop test
 - **Chest ocarina (held-up version):** now visible above Link's head, but **not playable** (the plain
   `Item_Ocarina_Fairy` from the same chest was playable). So naming the item (`PouchActor`) is not enough:
