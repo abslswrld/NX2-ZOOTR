@@ -105,6 +105,8 @@ def price_of(read_table_rows, shop_actor):
 # Bottle three ways (special deal removed, PouchActor removed, bottle button slot removed), each time the
 # shopkeeper takes it back. The game never sells a bottle: its bottle shelves (Shop_Bottle_*, special deal
 # NotPushToPouch) pour their contents into a bottle Link already owns.
+# A flow branch that sells the bottle itself works (no price question, no held-up get; tested 2026-11-17,
+# see CHANGELOG and example_shop_bottle on the event flow tool branch). Not used until bottles in shops are decided.
 REFUSED_SPECIAL_DEALS = ('Bottle',)
 
 
