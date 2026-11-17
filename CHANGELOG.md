@@ -4,6 +4,14 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Ground Bottle and ground ocarina: no "special deal" (to test)
+- A ground version whose item has a special deal (`SpecialDeal` in its settings: the Bottle's `Bottle`, the
+  ocarinas' `Ocarina`) now sets it to "None" in its own settings, so the ground pick-up logic skips its
+  special steps. The item table row keeps the special deal. Only the ground Bottle and ground Fairy Ocarina
+  change; the other ground items had none.
+- Test mod adds a **Fairy Ocarina in Mido's chest** (`KF_MIDO_CHEST_01`): is a chest ocarina playable
+  straight away? (Tells whether the bug is only in the ground pickup.)
+
 ### In-game results of the automatic pickup test
 - Passed: every ground item is picked up by walking into it. The game loads on the updated Longshot.
 - Bug: the **Bottle** is picked up without Link holding it above his head (the other items have that).
