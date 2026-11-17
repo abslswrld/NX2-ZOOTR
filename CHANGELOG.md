@@ -17,6 +17,16 @@ Newest first. Dates are when the work was done.
   the other two callers of the take-back talk are for the Hylian Shield and the tunics only. So either the
   selected item's name is stored as something else, or the game doesn't read our copy of `DisplayShop`.
   Next: a test that tells the two apart.
+- **Disguised Bottle shelf** (test build): the shelf kept the Bottle's look and name, but its item row and
+  item settings said one Deku Nut (as the game's own Deku Nut shelves); `DisplayShop` got three branches
+  (shelf name and `Item_Bottle` -> give the Bottle, `Item_DekuNut` -> give the Hookshot as a marker). Result:
+  still couldn't be bought. Decided (the user, 2026-11-17): **no bottles in shops** (the builder already
+  refuses them); bottles go anywhere else.
+- **Open question, bigger than bottles:** no edit to an event flow (`.bfevfl`) has shown any effect in game
+  yet: the shopkeeper's greeting branch (`Npc_Kokiri_001_Shop_Child`), and every `DisplayShop` branch, even
+  for an item the buy code accepts. Edits to maps, tables, packs and AI files all worked. Possibly the game
+  doesn't use our edited event flows (read from elsewhere, or skipped). To find out before relying on event
+  flow edits (ground ocarina, custom events).
 
 ### Rock circle corrected (branch `rock-circle`)
 - **Correction:** the circle by Mido's house has **8** rocks as a child, not 12 (earlier notes said 12).
