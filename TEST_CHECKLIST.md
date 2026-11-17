@@ -1,12 +1,10 @@
-# In-game test checklist
+# In-game test checklist (test mod rebuilt 2026-11-17, branch `rock-circle`)
 
-Nothing to test right now (branch `rocks-bushes`: rocks and bushes give items, tested; now one check per
-age, a data change only).
+**Start:** run `out\Launch NX2-ZOOTR test.bat`, then make a **new file**. Skip the opening. Child only.
+This round: **which 8 rocks of the circle by Mido's house a child sees.** The map has 12 rock objects
+there; the 8 we think a child sees drop a **red rupee** (20), the 4 we think never appear drop a **gold
+rupee** (200).
 
-Known, left for later (see CHANGELOG.md):
-- The rock in the middle of the circle: a Kokiri is lifting it; when it can be lifted is not known.
-- Bushes didn't come back after leaving the area; pots do. What resets them is not known.
-- A Piece of Heart on the ground needs A to pick up (the game's own).
-- A Fairy Ocarina from a chest or the ground plays only after a save and reload or a change of scene.
-- The child Kokiri shopkeeper still greets with "low on stock" before the Deku Tree.
-- Bottles can't be sold on shop shelves.
+- [ ] Lift all 8 rocks of the circle. Do they **all give red rupees**? (Any gold rupee means our guess is
+      wrong: note roughly where that rock was, e.g. "top left".)
+- [ ] Still 8 rocks, laid out as in your screenshot (no extra rocks appearing)?

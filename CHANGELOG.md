@@ -18,6 +18,9 @@ Newest first. Dates are when the work was done.
   rocks' conditions are in the logic instead. Changing the circle's own logic module would need our own AI
   file editor.
 - Two logic tests added (`tests/logic_check.py`).
+- Why those 4: in the map, the level logic's group of 8 lies in a ring 2-2.7 m around the middle rock (as in
+  a child screenshot), the group of 4 at the diagonals (as in the adult one), each ~0.3 m from one of the 8.
+  To confirm in game (test mod): the 8 child rocks of the ring drop a red rupee, the 4 others a gold rupee.
 
 ### Rocks and bushes: one check per age
 - Each liftable rock and solid bush in Kokiri Forest is now two checks, a child one and an adult one (like
