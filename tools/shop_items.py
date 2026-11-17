@@ -39,6 +39,11 @@ PRICE_TEMPLATE = 'Shop_DekuNutBundle_01'      # its price table: the shop base's
 PREFIX = 'Shop_NX2_'
 ITEM_REFS = ('ActorNameRef', 'AnimationRef', 'ModelInfoRef', 'PouchContentRef')
 ROW_FROM_ITEM = ('ActorName', 'FmdbName', 'ModelAabbMax', 'ModelAabbMin', 'ModelProjectName')
+NO_SPECIAL_DEAL = ('Bottle',)
+SPECIAL_DEAL_NONE = 3069107721                       # hash of "None" (the item settings' SpecialDeal)
+# items the game never sells stand on the shelf in a pose not made for them: how much higher to place them
+# (metres, found in game). The Hookshot stood on end, half inside the shelf (2026-11-17).
+SHELF_LIFT = {'Item_Hookshot': 0.3}
 NO_RESPAWN = '?Component/ActorGameDataSetting/NoRespawn.game__component__ActorGameDataSetting.bgyml'
 
 
@@ -174,6 +179,9 @@ def build(item, price, read_pack, read_table_rows, once=False):
     pdoc.root = type(pdoc.root)()
     pdoc.root['$parent'] = 'Work/' + _ref_path(ic['PouchContentRef'])[:-len('.bgyml')] + '.gyml'
     pdoc.root['PouchActor'] = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
+    if read_table_rows and any(r['__RowId'] == item and r.get('PouchSpecialDeal') in NO_SPECIAL_DEAL
+                               for r in read_table_rows('PouchActorInfo')):
+        pdoc.root['SpecialDeal'] = byml.UInt(SPECIAL_DEAL_NONE)   # see the PouchActorInfo row below
     new_inner[pouch_param_path(name)] = (byml.dumps(pdoc), tpp)
     comp['PouchContentRef'] = '?' + pouch_param_path(name)
     if once:
@@ -229,6 +237,11 @@ def build(item, price, read_pack, read_table_rows, once=False):
     pa = type(tables['PouchActorInfo'][item])(tables['PouchActorInfo'][item])
     pa['BuyingPrice'] = type(tp['BuyingPrice'])(price)
     pa['SellingPrice'] = tp['SellingPrice']
+    # the shop sorts what is selected by kind; an item with the "Bottle" special deal counts as bottled goods
+    # (potions, fish), sold only into an empty bottle: the Empty Bottle itself could not be bought
+    # (2026-11-17). The shelf row drops it; the item that goes into the pouch (PouchActor) keeps its own.
+    if pa.get('PouchSpecialDeal') in NO_SPECIAL_DEAL:
+        pa['PouchSpecialDeal'] = type(pa['PouchSpecialDeal'])('None')
     pa['__RowId'] = name
     rows = {'ActorInfo': ai, 'GameActorInfo': ga, 'PouchActorInfo': pa}
 

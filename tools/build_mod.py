@@ -13,7 +13,8 @@ gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, f
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
                              Deku Tree (the "low on stock" set is removed, every shelf is open from the
-                             start), and the adult shopkeeper gets a shop list of its own; needed to change
+                             start, the shopkeeper greets as after the Deku Tree), and the adult
+                             shopkeeper gets a shop list of its own; needed to change
                              shop shelves (each shelf's item, sold once, goes into the shopkeeper's list)
     bombchus_without_bag     Bombchus get a capacity of their own (BOMBCHU_MAX, as in the original game) and
                              no longer need the bomb bag: in the remake their maximum is the bomb bag's, so
@@ -41,7 +42,7 @@ sys.path.insert(0, ROOT)
 
 import ground_items  # noqa: E402
 import shop_items  # noqa: E402
-from formats import zstd, byml, restbl, sarc  # noqa: E402
+from formats import zstd, byml, restbl, sarc, evfl  # noqa: E402
 from logic.world import World  # noqa: E402
 
 RESTBL_PATH = os.path.join('System', 'Resource', 'ResourceSizeTable.Product.111.Nin_Ounce_NVN2.rsizetable.zs')
@@ -331,6 +332,31 @@ SHOP_KEEPERS = {'child': 'Npc_Kokiri_001_Shop_Child', 'adult': 'Npc_Kokiri_001_S
 SHOP_LIST = 'Component/ShopParam/Npc_Kokiri_001_Shop_Child.game__component__ShopParam.bgyml'
 SHOP_LIST_ADULT = 'Component/ShopParam/Npc_Kokiri_001_Shop_Adult.game__component__ShopParam.bgyml'
 SHOP_STOCK_ONCE = 1
+SHOP_FLOW = 'Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl'   # the child shopkeeper's talk
+
+
+def shop_greeting(data):
+    """the child shopkeeper's talk: its one branch on meeting the Deku Tree (before: Mido blocks the way, low
+    on stock) always takes the "after" side"""
+    ef = evfl.loads(data)
+    hits = [i for i, e in enumerate(ef.flowchart.events)
+            if e.type == 'switch' and isinstance(e.params, dict) and e.params.get('GameDataName') == SHOP_FLAG]
+    if len(hits) != 1:
+        raise SystemExit('%s: %d branches on %s, expected 1' % (SHOP_FLOW, len(hits), SHOP_FLAG))
+    e = ef.flowchart.events[hits[0]]
+    after = dict(e.cases).get(1)
+    if after is None or sorted(v for v, _ in e.cases) != [0, 1]:
+        raise SystemExit('%s: branch on %s not as expected: %r' % (SHOP_FLOW, SHOP_FLAG, e.cases))
+    e.cases = [(0, after), (1, after)]
+    new = evfl.dumps(ef)
+    back, orig = evfl.loads(new).flowchart.events, evfl.loads(data).flowchart.events
+    for i, (b, o) in enumerate(zip(back, orig)):
+        want = dict(vars(o), cases=[(0, after), (1, after)]) if i == hits[0] else vars(o)
+        if vars(b) != want:
+            raise SystemExit('read-back: %s event %d differs from what was intended' % (SHOP_FLOW, i))
+    if len(back) != len(orig):
+        raise SystemExit('read-back: %s event count changed' % SHOP_FLOW)
+    return new
 
 
 def _is_shop_actor(actor):
@@ -371,6 +397,102 @@ def shop_full_stock_map(data):
     if [dict(x) for x in byml.loads(new).root['Actors']] != want:
         raise SystemExit('read-back: %s differs from what was intended' % SHOP_MAP)
     return new, removed, always
+
+
+SHOP_BOARD = 'Shop_Board_Bundle_%02d'                 # count boards: 03 05 08 10 15 20 30 50 in the game
+
+
+def shop_boards(data, shelves, board_exists):
+    """count boards ("x5", separate objects a shelf links to, made for its original bundle) for changed
+    shelves: shelves {shelf hash: number of items it now sells}. A single item gets no board (the board and
+    every link to it removed); a bundle gets the board with its own count (board_exists(name)), or none if
+    the game has no such board. Returns (new data, [what changed])."""
+    doc = byml.loads(data)
+    acts = doc.root['Actors']
+    by_hash = {str(int(a['Hash'])): a for a in acts}
+    linked_from = {}
+    for a in acts:
+        for link in a.get('Links') or []:
+            linked_from.setdefault(str(int(link['Dst'])), []).append(a)
+    remove, rename, done = set(), {}, []
+    for sh, count in shelves.items():
+        for link in by_hash[sh].get('Links') or []:
+            b = str(int(link['Dst']))
+            board = by_hash.get(b)
+            if board is None or not board['Gyaml'].startswith('Shop_Board_Bundle_'):
+                continue
+            shelf_links = [a for a in linked_from[b] if a['Gyaml'].startswith('Shop_') and str(int(a['Hash'])) != sh]
+            if shelf_links:
+                raise SystemExit('count board %s is shared with another shelf' % b)
+            want = SHOP_BOARD % count if count > 1 and board_exists(SHOP_BOARD % count) else None
+            if want is None:
+                remove.add(b)
+                done.append('%s board %s removed' % (by_hash[sh]['Gyaml'], board['Gyaml']))
+            elif want != board['Gyaml']:
+                rename[b] = want
+                done.append('%s board %s -> %s' % (by_hash[sh]['Gyaml'], board['Gyaml'], want))
+    new_acts = []
+    for a in acts:
+        h = str(int(a['Hash']))
+        if h in remove:
+            continue
+        links = a.get('Links') or []
+        if h in rename or any(str(int(l['Dst'])) in remove for l in links):
+            a = type(a)(a)
+            if h in rename:
+                a['Gyaml'] = type(a['Gyaml'])(rename[h])
+            if any(str(int(l['Dst'])) in remove for l in links):
+                a['Links'] = [l for l in links if str(int(l['Dst'])) not in remove]
+        new_acts.append(a)
+    doc.root = type(doc.root)(doc.root)
+    doc.root['Actors'] = new_acts
+    new = byml.dumps(doc)
+    want = []
+    for a in byml.loads(data).root['Actors']:
+        h = str(int(a['Hash']))
+        if h in remove:
+            continue
+        a = dict(a)
+        if h in rename:
+            a['Gyaml'] = rename[h]
+        if 'Links' in a:
+            a['Links'] = [l for l in a['Links'] if str(int(l['Dst'])) not in remove]
+        want.append(a)
+    if [dict(x) for x in byml.loads(new).root['Actors']] != want:
+        raise SystemExit('read-back: count boards differ from what was intended')
+    return new, done
+
+
+def lift_shelves(data, lifts):
+    """raise shelf actors: lifts {hash: metres}; returns new data"""
+    doc = byml.loads(data)
+    acts = list(doc.root['Actors'])
+    for i, act in enumerate(acts):
+        h = str(int(act['Hash']))
+        if h in lifts:
+            act = type(act)(act)
+            t = list(act['Translate'])
+            t[1] = type(t[1])(float(t[1]) + lifts[h])
+            act['Translate'] = t
+            acts[i] = act
+    doc.root = type(doc.root)(doc.root)
+    doc.root['Actors'] = acts
+    new = byml.dumps(doc)
+    for o, n in zip(byml.loads(data).root['Actors'], byml.loads(new).root['Actors']):
+        h = str(int(o['Hash']))
+        want = dict(o)
+        if h in lifts:
+            want['Translate'] = [o['Translate'][0], float(o['Translate'][1]) + lifts[h], o['Translate'][2]]
+        got = dict(n)
+        if h in lifts:
+            got['Translate'] = [float(x) for x in n['Translate']]
+            want['Translate'] = [float(x) for x in want['Translate']]
+            if any(abs(a - b) > 1e-4 for a, b in zip(got['Translate'], want['Translate'])):
+                raise SystemExit('read-back: shelf %s not lifted as intended' % h)
+            got['Translate'] = want['Translate']
+        if got != want:
+            raise SystemExit('read-back: actor %s differs from what was intended' % h)
+    return new
 
 
 def open_shop_list(data, goods):
@@ -521,6 +643,9 @@ def main(argv):
             out.write(SHOP_MAP, src, old, new)
             print('fix %-28s %s: %d shop objects removed (before the Deku Tree), %d always there'
                   % (name, SHOP_MAP, len(shop_removed), len(always)))
+            src, old = out.read(SHOP_FLOW)
+            out.write(SHOP_FLOW, src, old, shop_greeting(old))
+            print('fix %-28s %s: greeting always as after the Deku Tree' % (name, SHOP_FLOW))
             continue
         if name in TABLE_FIXES:
             path, fn = TABLE_FIXES[name]
@@ -567,6 +692,7 @@ def main(argv):
     # shelves: a game shelf actor (Shop_...) is used as it is; any other item gets a shop version at the price
     # of what the shelf sold, sold once (tools/shop_items.py)
     shops = {}                                         # (item, price) -> name
+    shelf_lift = {}                                    # shop version name -> metres higher on the shelf
     table_rows = lambda t: byml.loads(plain(ground_items.table_path(t))).root  # noqa: E731
 
     def on_shelf(item, shelf_actor):
@@ -575,7 +701,10 @@ def main(argv):
         if not shop_items.can_sell(plain, item):
             raise SystemExit('%s: cannot be put on a shop shelf' % item)
         price = shop_items.price_of(table_rows, shelf_actor)
-        return shops.setdefault((item, price), shop_items.shop_name(item, price, once=True))
+        name = shops.setdefault((item, price), shop_items.shop_name(item, price, once=True))
+        if item in shop_items.SHELF_LIFT:
+            shelf_lift[name] = shop_items.SHELF_LIFT[item]
+        return name
 
     planned = plan(world, assignments, on_ground, in_chest, on_shelf)
     # shelves: which shelf (ShopItemIndex; the Heart has none: 0) and age each placement is, for the lists
@@ -629,6 +758,32 @@ def main(argv):
             if act != want:
                 raise SystemExit('read-back: actor %s (%s) differs from what was intended' % (h, act['Gyaml']))
         out.write(path, src, old, new)
+
+    # count boards of changed shelves: none for a single item, the right count for a bundle
+    pouch_rows = {r['__RowId']: r for r in table_rows('PouchActorInfo')}
+
+    def bundle_count(actor):
+        if actor.startswith(shop_items.PREFIX):
+            return 1                                   # shop versions sell one item
+        return int(pouch_rows[actor].get('BundleActorNum', 1))
+
+    for path, changes in sorted(planned.items()):
+        shelves = {h: bundle_count(v[1]) for h, v in changes.items() if v[3] == 'shop'}
+        if not shelves:
+            continue
+        src, old = out.read(path)
+        new, done = shop_boards(old, shelves, lambda n: os.path.exists(
+            os.path.join(a.romfs, *ground_items.pack_path(n).split('/')) + '.zs'))
+        if done:
+            out.write(path, src, old, new)
+            for d in done:
+                print('%-18s %s: %s' % ('count board', path.split('/')[-1], d))
+        lifts = {h: shelf_lift[v[1]] for h, v in changes.items() if v[3] == 'shop' and v[1] in shelf_lift}
+        if lifts:
+            src, old = out.read(path)
+            out.write(path, src, old, lift_shelves(old, lifts))
+            for h in lifts:
+                print('%-18s %s: %s %.2f m higher' % ('shelf lift', path.split('/')[-1], changes[h][1], lifts[h]))
 
     if shop_fix:
         # the child shopkeeper's list (also copied in the adult shopkeeper's pack: kept identical), and a list

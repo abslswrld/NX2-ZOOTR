@@ -4,6 +4,24 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Kokiri Shop fixes after the first full-shop test (to test)
+- **Greeting:** the child shopkeeper's talk (`Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl`) has one
+  branch on meeting the Deku Tree (before: "Mido is blocking the way, can't restock"). Part of
+  `kokiri_shop_full_stock` now: both sides of that branch go to the "after" greeting. The file is read and
+  written by our event flow writer (byte-identical round trip checked).
+- **Count boards ("x5"):** the builder now handles the boards of changed shelves: a single item gets none
+  (the board and the links to it are removed), a bundle gets the board with its own count when the game
+  has one (03 05 08 10 15 20 30 50), e.g. 3 Bombchus on the Deku Nuts 10 shelf: "x10" -> "x3".
+- **Empty Bottle not for sale:** the shop flow (`DisplayShop`) sorts the selected item by kind; the
+  "bottled goods" kind (potions, fish) is only sold when an empty bottle is free. The Empty Bottle's
+  "Bottle" special deal most likely puts it in that kind. The shop version of an item with the "Bottle"
+  special deal now has none (item table row and item settings); what goes into the pouch is still
+  `Item_Bottle` (`PouchActor`).
+- **Hookshot inside the shelf:** shelves stand an item in a pose made for it (the Deku Stick's long side,
+  Z, stands up); the game never sells the Hookshot, and it stood on end, half inside the shelf. Items like
+  that are placed higher (`SHELF_LIFT` in `tools/shop_items.py`, Hookshot 0.3 m to start, to tune).
+- Test mod adds 3 Bombchus (the game's shelf, 45 rupees) on the Deku Nuts 10 shelf (child).
+
 ### In-game results of the full Kokiri Shop test
 - Child: all 8 shelves are there before the Deku Tree. The **Boomerang** can be bought and works. The
   **5 Bombchus** can be bought without a bomb bag and work. The game's own items can still be bought again
