@@ -4,6 +4,21 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Rock circle corrected (branch `rock-circle`)
+- **Correction:** the circle by Mido's house has **8** rocks as a child, not 12 (earlier notes said 12).
+  The map places 12 rock objects; the level logic shows 8 to a child, and to an adult 4 before the Forest
+  Temple and the 8 others after (seen in game and in a 100% save). Assumed: the child's 8 are the same as
+  the adult's 8 after the Forest Temple, so `KF_CIRCLE_CHILD_ROCK_03`, `_06`, `_09`, `_12` never appear: rule
+  `False`, `randomizable: no`.
+- **The middle rock** (`KF_CIRCLE_CENTER_ROCK`): in a 100% save the Kokiri lifting it is gone and it can be
+  lifted. Rule now `is_child and 'Deku Tree Clear'` (assumed: the level logic checks the Kokiri Emerald flag;
+  not tested at which point exactly).
+- Not done (decided 2026-11-17): setting the Deku Tree or Forest Temple story flags at the start to change
+  the rocks. They drive much more (the Deku Tree's death, Saria, Mido, the Forest Sage's story); the
+  rocks' conditions are in the logic instead. Changing the circle's own logic module would need our own AI
+  file editor.
+- Two logic tests added (`tests/logic_check.py`).
+
 ### Rocks and bushes: one check per age
 - Each liftable rock and solid bush in Kokiri Forest is now two checks, a child one and an adult one (like
   the pots: separate objects per age, each giving its own item, tested in game). New IDs like

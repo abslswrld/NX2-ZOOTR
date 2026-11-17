@@ -45,7 +45,10 @@ expect('adult without hookshot: no House of Twins Skulltula', ['MasterSword'], {
 expect('Kokiri Sword chest is child-only (crawlspace)', ['MasterSword'], {}, age_of={'KF Kokiri Sword Chest': ['child']})
 
 expect('adult rock circle: 8 of its rocks only after the Forest Temple', ['MasterSword'], {},
-       not_want=['KF Adult Rock Circle 1'], age_of={'KF Adult Rock Circle 3': ['adult'], 'KF Child Rock Circle 1': ['child']})
+       not_want=['KF Adult Rock Circle 1', 'KF Child Rock Circle 3'],
+       age_of={'KF Adult Rock Circle 3': ['adult'], 'KF Child Rock Circle 1': ['child']})
+expect('middle rock of the circle: only after the Deku Tree', ['KokiriSword', 'DekuShield'], {'open_forest': False},
+       not_want=['KF Rock Circle Center'])
 expect('adult rock circle after the Forest Temple', ['MasterSword', 'Ocarina', 'SariasSong', 'Hookshot'], {},
        age_of={'KF Adult Rock Circle 1': ['adult']})
 expect('pots and shop shelves are one check per age (separate objects per age)', ['MasterSword'], {},

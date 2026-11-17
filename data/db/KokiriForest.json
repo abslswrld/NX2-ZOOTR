@@ -1069,7 +1069,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_02",
@@ -1118,7 +1118,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_03",
@@ -1158,7 +1158,7 @@
   "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there before",
   "missable": "gone once the Forest Temple is completed: never place anything required here"
  },
  {
@@ -1208,7 +1208,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_05",
@@ -1257,7 +1257,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_06",
@@ -1297,7 +1297,7 @@
   "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there before",
   "missable": "gone once the Forest Temple is completed: never place anything required here"
  },
  {
@@ -1347,7 +1347,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_08",
@@ -1396,7 +1396,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_09",
@@ -1436,7 +1436,7 @@
   "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there before",
   "missable": "gone once the Forest Temple is completed: never place anything required here"
  },
  {
@@ -1486,7 +1486,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_11",
@@ -1535,7 +1535,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one only after (seen in a 100% save)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_12",
@@ -1575,7 +1575,7 @@
   "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); this one is there before",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there before",
   "missable": "gone once the Forest Temple is completed: never place anything required here"
  },
  {
@@ -1619,13 +1619,22 @@
   "randomizable_note": "optional setting (rocks and bushes); not yet changed in game",
   "requirements": {
    "child": [
-    []
+    [
+     "Slingshot",
+     "open_forest"
+    ],
+    [
+     "DekuShield",
+     "KokiriSword",
+     "Slingshot"
+    ]
    ],
    "adult": null
   },
-  "check_rule": "is_child",
+  "check_rule": "is_child and 'Deku Tree Clear'",
   "verification_status": "not verified in game",
-  "notes": "child map only; two rocks stacked here (Obj_LiftRock_A_02 and _A_01): check in game what lifting it does"
+  "requirements_note": "the child answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "child map only; two rocks stacked here (Obj_LiftRock_A_02 and _A_01). A Kokiri (Npc_Kokiri_008_Child) is trying to lift it early on and it can't be lifted; in a 100% save he is gone and it can. Assumed condition: after the Deku Tree (the level logic checks Get_StoneOfForest_IsCompleted_Exp, the Kokiri Emerald); not tested"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_01",
@@ -1662,7 +1671,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_02",
@@ -1699,7 +1708,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_03",
@@ -1726,17 +1735,15 @@
    "source": null,
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "randomizable": "no",
+  "randomizable_note": "never there as a child (level logic)",
   "requirements": {
-   "child": [
-    []
-   ],
+   "child": null,
    "adult": null
   },
-  "check_rule": "is_child",
+  "check_rule": "is_child and (False)",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one never appears as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_04",
@@ -1773,7 +1780,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_05",
@@ -1810,7 +1817,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_06",
@@ -1837,17 +1844,15 @@
    "source": null,
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "randomizable": "no",
+  "randomizable_note": "never there as a child (level logic)",
   "requirements": {
-   "child": [
-    []
-   ],
+   "child": null,
    "adult": null
   },
-  "check_rule": "is_child",
+  "check_rule": "is_child and (False)",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one never appears as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_07",
@@ -1884,7 +1889,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_08",
@@ -1921,7 +1926,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_09",
@@ -1948,17 +1953,15 @@
    "source": null,
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "randomizable": "no",
+  "randomizable_note": "never there as a child (level logic)",
   "requirements": {
-   "child": [
-    []
-   ],
+   "child": null,
    "adult": null
   },
-  "check_rule": "is_child",
+  "check_rule": "is_child and (False)",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one never appears as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_10",
@@ -1995,7 +1998,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_11",
@@ -2032,7 +2035,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_12",
@@ -2059,17 +2062,15 @@
    "source": null,
    "note": "probably a random drop (rupees, hearts...), not confirmed in game; no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "optional setting (rocks and bushes); changed in game on 2026-11-17 (tools/build_mod.py adds Drop__DropActor): gave its item",
+  "randomizable": "no",
+  "randomizable_note": "never there as a child (level logic)",
   "requirements": {
-   "child": [
-    []
-   ],
+   "child": null,
    "adult": null
   },
-  "check_rule": "is_child",
+  "check_rule": "is_child and (False)",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): as an adult, 4 rocks before the Forest Temple is completed, 8 others after (checked in game); as a child all 12 are there (checked before the Deku Tree)"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; assumed: the child's 8 are the adult's 8); this one never appears as a child"
  },
  {
   "unique_check_id": "KF_DEKU_TREE_GOSSIP_01",
