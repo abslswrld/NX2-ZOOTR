@@ -691,21 +691,20 @@ def main(argv):
 
     # shelves: a game shelf actor (Shop_...) is used as it is; any other item gets a shop version at the price
     # of what the shelf sold, sold once (tools/shop_items.py)
-    shops = {}                                         # (item, price, test variant) -> name
+    shops = {}                                         # (item, price) -> name
     shelf_lift = {}                                    # shop version name -> metres higher on the shelf
     table_rows = lambda t: byml.loads(plain(ground_items.table_path(t))).root  # noqa: E731
 
     def on_shelf(item, shelf_actor):
         if item.startswith('Shop_'):
             return item
-        item, _, variant = item.partition('~')        # test-only variants, see shop_items.VARIANTS
         if not shop_items.can_sell(plain, item):
             raise SystemExit('%s: cannot be put on a shop shelf' % item)
         why = shop_items.refusal(item, table_rows)
         if why:
             raise SystemExit('%s cannot be put on a shop shelf: %s' % (item, why))
         price = shop_items.price_of(table_rows, shelf_actor)
-        name = shops.setdefault((item, price, variant), shop_items.shop_name(item, price, once=True, variant=variant))
+        name = shops.setdefault((item, price), shop_items.shop_name(item, price, once=True))
         if item in shop_items.SHELF_LIFT:
             shelf_lift[name] = shop_items.SHELF_LIFT[item]
         return name
@@ -851,10 +850,10 @@ def main(argv):
         for t, row in rows.items():
             new_rows.setdefault(t, []).append(row)
         print('%-6s version %-22s for %s (%d bytes)' % (version, name, item, len(pack)))
-    for (item, price, variant), name in sorted(shops.items()):
+    for (item, price), name in sorted(shops.items()):
         tpl_pack_path = ground_items.pack_path(shop_items.TEMPLATE)
         tpl_pack = plain(tpl_pack_path)
-        got, pack, new_inner, rows = shop_items.build(item, price, plain, table_rows, once=True, variant=variant)
+        got, pack, new_inner, rows = shop_items.build(item, price, plain, table_rows, once=True)
         assert got == name
         path = ground_items.pack_path(name)
         out.write_new(path, pack, like=tpl_pack_path)

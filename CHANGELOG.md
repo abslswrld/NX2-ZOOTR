@@ -4,6 +4,13 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Tidy before merging `ocarina-chus-shop`
+- Removed the test-only Empty Bottle shelf variants and the shop Bottle's special-deal workaround (bottles
+  never reach a shelf now). Results stay above.
+- Kept as it is for now (decided 2026-11-17): a chest giving the Fairy Ocarina gives the held-up version
+  (`Item_NX2_Ocarina_Fairy`): visible when held up, playable after a save and reload or a change of
+  scene, not straight away. The pot / ground ocarina behaves the same.
+
 ### No bottles on shop shelves (for now)
 - The builder refuses any item with the "Bottle" special deal on a shop shelf (the Empty Bottle, potions,
   fish, Ruto's letter... `REFUSED_SPECIAL_DEALS` / `refusal()` in `tools/shop_items.py`), with a message
