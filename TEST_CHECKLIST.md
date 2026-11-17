@@ -3,7 +3,6 @@
 Nothing to test right now (branch `rock-circle`: the child rock circle is confirmed).
 
 Known, left for later (see CHANGELOG.md):
-- The rock circle as an adult after the Forest Temple: assumed to be the same 8 rocks as a child.
 - The middle rock of the circle: assumed liftable after the Deku Tree (free in a 100% save).
 - Bushes didn't come back after leaving the area; pots do. What resets them is not known.
 - A Piece of Heart on the ground needs A to pick up (the game's own).

@@ -1069,7 +1069,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_02",
@@ -1118,7 +1118,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_03",
@@ -1158,7 +1158,7 @@
   "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there before",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there before",
   "missable": "gone once the Forest Temple is completed: never place anything required here"
  },
  {
@@ -1208,7 +1208,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_05",
@@ -1257,7 +1257,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_06",
@@ -1297,7 +1297,7 @@
   "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there before",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there before",
   "missable": "gone once the Forest Temple is completed: never place anything required here"
  },
  {
@@ -1347,7 +1347,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_08",
@@ -1396,7 +1396,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_09",
@@ -1436,7 +1436,7 @@
   "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there before",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there before",
   "missable": "gone once the Forest Temple is completed: never place anything required here"
  },
  {
@@ -1486,7 +1486,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_11",
@@ -1535,7 +1535,7 @@
   "check_rule": "is_adult and ('Forest Temple Clear')",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one only after"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one only after"
  },
  {
   "unique_check_id": "KF_CIRCLE_ADULT_ROCK_12",
@@ -1575,7 +1575,7 @@
   "check_rule": "is_adult",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there before",
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there before",
   "missable": "gone once the Forest Temple is completed: never place anything required here"
  },
  {
@@ -1671,7 +1671,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_02",
@@ -1708,7 +1708,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_03",
@@ -1743,7 +1743,7 @@
   },
   "check_rule": "is_child and (False)",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one never appears as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one never appears as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_04",
@@ -1780,7 +1780,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_05",
@@ -1817,7 +1817,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_06",
@@ -1852,7 +1852,7 @@
   },
   "check_rule": "is_child and (False)",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one never appears as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one never appears as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_07",
@@ -1889,7 +1889,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_08",
@@ -1926,7 +1926,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_09",
@@ -1961,7 +1961,7 @@
   },
   "check_rule": "is_child and (False)",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one never appears as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one never appears as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_10",
@@ -1998,7 +1998,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_11",
@@ -2035,7 +2035,7 @@
   },
   "check_rule": "is_child",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one is there as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one is there as a child"
  },
  {
   "unique_check_id": "KF_CIRCLE_CHILD_ROCK_12",
@@ -2070,7 +2070,7 @@
   },
   "check_rule": "is_child and (False)",
   "verification_status": "not verified in game",
-  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; assumed: the adult's 8 after the Forest Temple are the same ring); this one never appears as a child"
+  "notes": "the circle is run by a level logic module (Logic/KokiriForest_Common_Level_All_01_6aaf): the map places 12 rocks, the game shows 8 to a child, and to an adult 4 before the Forest Temple is completed and the 8 others after (seen in game and in a 100% save; the child's 8 confirmed in game 2026-11-17: the ring, every one of them dropped its test item; the adult's 8 after the Forest Temple seen in game 2026-11-17 in a 100% save: the same ring of 8, evenly spaced, with a Kokiri in the middle); this one never appears as a child"
  },
  {
   "unique_check_id": "KF_DEKU_TREE_GOSSIP_01",
