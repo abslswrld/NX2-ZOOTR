@@ -4,6 +4,12 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### No bottles on shop shelves (for now)
+- The builder refuses any item with the "Bottle" special deal on a shop shelf (the Empty Bottle, potions,
+  fish, Ruto's letter... `REFUSED_SPECIAL_DEALS` / `refusal()` in `tools/shop_items.py`), with a message
+  saying why and where it can go instead (chest, pot, ground, NPC). The game's own bottle shelves
+  (`Shop_Bottle_*`, special deal `NotPushToPouch`: poured into a bottle Link owns) are still allowed.
+
 ### In-game results of the Empty Bottle variants
 - Neither variant can be bought: for both, the shopkeeper goes through his "on second thought" lines.
   With the special deal, the item settings' `PouchActor` and the row's bottle slot each ruled out, the

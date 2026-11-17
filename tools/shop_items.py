@@ -108,6 +108,24 @@ def price_of(read_table_rows, shop_actor):
     return int(rows[shop_actor]['BuyingPrice'])
 
 
+# Items a shelf can't sell (for now): bottles. Every bottle item (empty, potions, fish, Ruto's letter...) has
+# the "Bottle" special deal; the game's buy code refuses them on a shelf: tested 2026-11-17 with the Empty
+# Bottle three ways (special deal removed, PouchActor removed, bottle button slot removed), each time the
+# shopkeeper takes it back. The game never sells a bottle: its bottle shelves (Shop_Bottle_*, special deal
+# NotPushToPouch) pour their contents into a bottle Link already owns.
+REFUSED_SPECIAL_DEALS = ('Bottle',)
+
+
+def refusal(item, read_table_rows):
+    """why `item` can't be sold on a shelf, or None"""
+    for r in read_table_rows('PouchActorInfo'):
+        if r['__RowId'] == item and r.get('PouchSpecialDeal') in REFUSED_SPECIAL_DEALS:
+            return ("a bottle (special deal %s): the game's buy code refuses bottles on a shelf (tested "
+                    '2026-11-17); put it in a chest, a pot, on the ground or with an NPC instead'
+                    % r['PouchSpecialDeal'])
+    return None
+
+
 def can_sell(read_pack, item):
     try:
         files = sarc.Sarc.read(read_pack(pack_path(item))).files

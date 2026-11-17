@@ -701,6 +701,9 @@ def main(argv):
         item, _, variant = item.partition('~')        # test-only variants, see shop_items.VARIANTS
         if not shop_items.can_sell(plain, item):
             raise SystemExit('%s: cannot be put on a shop shelf' % item)
+        why = shop_items.refusal(item, table_rows)
+        if why:
+            raise SystemExit('%s cannot be put on a shop shelf: %s' % (item, why))
         price = shop_items.price_of(table_rows, shelf_actor)
         name = shops.setdefault((item, price, variant), shop_items.shop_name(item, price, once=True, variant=variant))
         if item in shop_items.SHELF_LIFT:
