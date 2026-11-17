@@ -16,7 +16,15 @@ Newest first. Dates are when the work was done.
   like the pots, rocks and bushes need one check per age.
 - **Adult circle rocks:** only 4 are there as an adult (screenshot), though the adult map places all 12 at
   the same spots as the child ones, the same way (same rock, no `Presence`, nothing linked to them; some
-  are only ~0.3 m apart). Cause unknown (to find out).
+  are only ~0.3 m apart). The unmodded game shows 4 too.
+- Found: the circle is run by a level logic module (`Logic/KokiriForest_Common_Level_All_01_6aaf`, the map's
+  `AiGroups` entry referencing the 12 rocks and 8 trigger areas). From its text: it creates and deletes
+  rocks (`Logic_Create` / `Logic_Delete`) in two sets (8 and 4), checks the age and story flags
+  (`Get_StoneOfForest_IsCompleted_Exp`, `SageOfForest_IsBefore_Step08`), and sets
+  `KokiriForest_Npc_Kokiri_008_Child_LiftRock_AllBroken` when all are broken: it belongs to the scene of
+  the Kokiri lifting the middle rock (`Npc_Kokiri_008_Child`). As an adult (in our test) only the set of 4
+  is there: `KF_CIRCLE_ROCK_03`, `_06`, `_09`, `_12`. The exact conditions need an AI file reader (not
+  built yet): the other 8 may appear as an adult at another point of the story.
 - **Respawn:** after going to the Lost Woods and back, the bushes had **not** come back (pots do come back
   when the area reloads). What makes them come back is not known yet.
 
