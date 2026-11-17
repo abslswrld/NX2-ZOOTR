@@ -4,6 +4,21 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### In-game results of the held-up ocarina, Bombchus and shop test
+- **Chest ocarina (held-up version):** now visible above Link's head, but **not playable** (the plain
+  `Item_Ocarina_Fairy` from the same chest was playable). So naming the item (`PouchActor`) is not enough:
+  what goes into the pouch is still our own actor, and only the real `Item_Ocarina_Fairy` is playable.
+- **Pot ocarina (ground version, with `PouchActor`):** picked up and held up, still not playable until a
+  reload. `PouchActor` did not fix it.
+- **Bombchus without a bomb bag:** work. They go into the item menu (not 0/0) and can be used.
+- **Kokiri Shop, child before the Deku Tree:** only 3 items show (Bombchus x5 on shelf 2, Deku Shield, Deku
+  Stick); the other slots show only a sign. No Boomerang. The Bombchus cost **20** rupees, not the 75 of the
+  game's 5-Bombchu shelf; buying them works.
+- **Kokiri Shop, adult:** the same 3 slots show (Deku Nuts x5, Deku Shield, Deku Stick); the others say
+  "Coming Soon". No Hookshot.
+- So: the price comes from the shop slot, not from the shelf actor, and our shop versions don't appear at
+  all (to look at).
+
 ### Held-up ocarina, Bombchus without a bomb bag, shop shelves (branch `ocarina-chus-shop`, to test)
 - **What goes into the pouch:** every game ground item and shelf that stands for another item names it in its
   item settings (`PouchActor`: ground bomb `Item_Bomb`, ground Deku Shield and its shelf `Weapon_Shield_Deku`,
