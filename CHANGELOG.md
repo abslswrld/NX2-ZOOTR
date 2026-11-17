@@ -4,6 +4,49 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Shopkeeper greeting back in, rock circle after the dungeons, Bottle shelf retest
+- `--fix kokiri_shop_full_stock` again makes the child shopkeeper greet as after the Deku Tree, now wired
+  the right way round (case 0 = yes = the "after" side). Same edit as the confirmed event flow test: the
+  file it writes is byte for byte the tested one. `tools/evfl_test_mod.py` now uses the builder's edit.
+  **Confirmed in game.**
+- New `--fix kokiri_circle_after_dungeons`: the rock circle by Mido's house as after the dungeons, at both ages.
+  - `Logic/KokiriForest_Common_Level_All_01_6aaf`: the AND node (adult, and `SageOfForest_IsBefore_Step08`)
+    that swaps the ring of 8 for 4 other rocks takes "is child" instead of the flag, so it is never true: an
+    adult sees the ring of 8 like a child. One link changed, nothing else in the file. **Confirmed in game.**
+  - `Component/AIScheduleParam/Npc_Kokiri_008_Child`: the Kokiri who tries to lift the middle rock does that
+    in his default schedule; his schedule after the Kokiri Emerald (`Get_StoneOfForest_IsCompleted_Exp`)
+    becomes the default, so he isn't on the rock from the start. **Confirmed in game** (moved).
+  - The middle rock still couldn't be lifted: it is two rocks in one place, a prop with no lift setting
+    (`Obj_LiftRock_A_02`, the one he acts out lifting) and a liftable `Obj_LiftRock_A_01`.
+    `Logic/KokiriForest_Child_Level_All_02_6960` swaps them after the Kokiri Emerald; the fix now gives both
+    fixed values (prop never, liftable rock always). **Confirmed in game:** all the circle rocks lift
+    (child), each dropping its own green rupee.
+  - Check data: the adult ring of 8 has no rule any more, the 4 other adult rocks are never there
+    (rule False, not randomizable), the middle rock is "is_child". The builder refuses an item on the adult
+    circle rocks or the middle rock without this fix. Logic tests updated.
+- Event flow tool branch (`claude/evfl-add-events-b2737c`): `example_shop_bottle` wired for 0 = yes.
+- Bottle shelf retest (test build only, `out/mods-bottle-test`, nothing in the builder). The earlier refusals
+  said nothing, as their branches were wired backwards.
+  - Test 1: `DisplayShop` sold the Bottle itself when `Shop_SelectItemName` is the shelf's name. **In game:
+    1 Empty Bottle, works, shelf empty after** (so the selection holds the shelf's name, `Shop_NX2_...`).
+    But no price question and no held-up get, as those steps were skipped.
+  - Found where the refusal is: after "I'll buy!", `Event27` sorts the item by kind and `Event77`
+    (`PouchSystemActor.EventQueryCanAddToPorchByGameData`) checks pouch room; "no" leads to the "never mind"
+    lines. Test 2: only that sorting is skipped for the bottle shelf (straight to `Event6`, where the game's
+    own pay and held-up get start). **In game: refused again** before any price question, with
+    "The empty bottle? Wait... Hold on a second." (`Shop_01_02_1`).
+  - That line is one of 3 picked at random by `NotAvailableTalk` ("Oh, wait. Actually..." is another), so
+    the earlier refusals may have come from there too. `NotAvailableTalk` is run by `SelectItem_CheckAvailable`,
+    which `NormalFlow` calls (`Event121`) **before** the price question. It sorts the item by kind; for
+    bottled items (kind 5) it asks `PouchSystemActor.EventQueryIsAnyBottleEmpty`, and with no empty bottle
+    it refuses. The Bottle is most likely sorted there. Test 3 also starts `SelectItem_CheckAvailable` with a
+    branch: the bottle shelf goes straight to its "OK" return (`Event124`), every other item to the
+    game's check (`Event318`). From "OK" to the price question are only the camera, focus and talk steps.
+    Test 2's skip after "I'll buy!" stays. **In game: still refused.**
+  - **Decision:** if bottles go on shelves, they use test 1's way (the flow sells the bottle itself: no price
+    question, no held-up get, but it works). That is `example_shop_bottle` on the event flow tool branch.
+    Whether bottles go in shops at all is left for later, so the builder still refuses a bottle on a shelf.
+
 ### Why event flow edits showed nothing: yes and no were the wrong way round (branch `claude/evfl-in-game-0d5942`)
 Looked into offline (game, Longshot and its logs only read). **Confirmed in game (2026-11-17):** with the test mod, the
  child shopkeeper greeted normally before the Deku Tree and the goodbye line was replaced. Event flow edits work.

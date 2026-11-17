@@ -14,7 +14,8 @@ gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, f
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
                              Deku Tree (the "low on stock" set is removed, every shelf is open from the
-                             start), and the adult shopkeeper gets a shop list of its own; needed to change
+                             start, the child shopkeeper greets as after the Deku Tree), and the adult
+                             shopkeeper gets a shop list of its own; needed to change
                              shop shelves (each shelf's item, sold once, goes into the shopkeeper's list)
     bombchus_without_bag     Bombchus get a capacity of their own (BOMBCHU_MAX, as in the original game) and
                              no longer need the bomb bag: in the remake their maximum is the bomb bag's, so
@@ -22,6 +23,12 @@ Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     bombs_without_bracelet   bombs from the bomb bag can be held without the Goron Bracelet: the bomb's lift
                              grade becomes the "no upgrade" grade of rocks, bushes, pots and Bombchus (bomb
                              flowers have their own copy of the setting and still need the bracelet)
+    kokiri_circle_after_dungeons
+                             the rock circle by Mido's house as after the dungeons, at both ages: an adult sees
+                             the same ring of 8 rocks as a child (as after the Forest Temple; before, an adult
+                             saw 4 other rocks), and the Kokiri (Npc_Kokiri_008_Child) no longer stands on the
+                             middle rock trying to lift it, which can be lifted (as after the Kokiri Emerald);
+                             needed for items on the adult circle rocks and the middle rock
     magic_is_separate        magic items (Lens of Truth, Din's Fire, Farore's Wind, Nayru's Love, magic arrows)
                              no longer give the magic meter; only the Great Fairy's blessings do
                              (Item_FairyBless_MP: magic, Item_FairyBless_MPDouble: double magic)
@@ -42,7 +49,7 @@ sys.path.insert(0, ROOT)
 
 import ground_items  # noqa: E402
 import shop_items  # noqa: E402
-from formats import zstd, byml, restbl, sarc  # noqa: E402
+from formats import zstd, byml, restbl, sarc, evfl, ainb  # noqa: E402
 from logic.world import World  # noqa: E402
 
 RESTBL_PATH = os.path.join('System', 'Resource', 'ResourceSizeTable.Product.111.Nin_Ounce_NVN2.rsizetable.zs')
@@ -312,6 +319,103 @@ TABLE_FIXES = {
 }
 
 
+# The rock circle by Mido's house (--fix kokiri_circle_after_dungeons). Its level logic module shows the ring of
+# 8 rocks, and to an adult before the Forest Temple 4 other rocks instead: one AND node (adult, and the flag
+# SageOfForest_IsBefore_Step08) deletes the 8 and creates the 4. Its flag input becomes "is child": an adult
+# is never a child, so the AND is never true and both ages get the 8. The Kokiri who tries to lift the middle
+# rock does so in his default schedule; after the Kokiri Emerald (Get_StoneOfForest_IsCompleted_Exp) his
+# schedule sends him elsewhere. That schedule becomes his default. The middle rock is two rocks in one place:
+# a prop with no lift setting (Obj_LiftRock_A_02, the one he acts out lifting) and a liftable one; a child
+# level logic swaps the prop for the liftable rock after the Kokiri Emerald. Both get fixed values: prop
+# never there, liftable rock always there.
+CIRCLE_MIDDLE = 'Logic/KokiriForest_Child_Level_All_02_6960.logic.module.ainb'
+CIRCLE_MIDDLE_ROCKS = {'Obj_LiftRock_A_02_2143': False, 'Obj_LiftRock_A_01_0de2': True}   # instance -> there
+CIRCLE_NEEDS_FIX = ('KF_CIRCLE_ADULT_ROCK_', 'KF_CIRCLE_CENTER_ROCK')
+CIRCLE_LOGIC = 'Logic/KokiriForest_Common_Level_All_01_6aaf.logic.module.ainb'
+CIRCLE_FLAG = 'SageOfForest_IsBefore_Step08'
+CIRCLE_KOKIRI = 'Component/AIScheduleParam/Npc_Kokiri_008_Child.game__component__AIScheduleParam.bgyml'
+CIRCLE_KOKIRI_FLAG = 'Get_StoneOfForest_IsCompleted_Exp'
+
+
+def circle_logic(data):
+    """the AND node's flag input becomes the "is child" output of the same age node"""
+    a = ainb.Ainb.read(data)
+    hits = []
+    for i, n in enumerate(a.nodes):
+        if n.name != 'OperateAND' or not n.inputs['bool'] or n.inputs['bool'][0].sources is None:
+            continue
+        src = n.inputs['bool'][0].sources
+        names = [a.nodes[s[0]].name for s in src]
+        if names == ['HoldIsChildhoodOrAdulthood', 'HoldGameDataGetBoolSimple'] and                 a.nodes[src[1][0]].inputs['string'][0].value == CIRCLE_FLAG:
+            hits.append(i)
+    if len(hits) != 1:
+        raise SystemExit('%s: %d AND nodes on age and %s, expected 1' % (CIRCLE_LOGIC, len(hits), CIRCLE_FLAG))
+    inp = a.nodes[hits[0]].inputs['bool'][0]
+    age, (flag_node, _, flags) = inp.sources[0], inp.sources[1]
+    outs = [o.name for o in a.nodes[age[0]].outputs['bool']]
+    if outs != ['Adulthood', 'Childhood'] or age[1] != 0:
+        raise SystemExit('%s: age node not as expected: %r' % (CIRCLE_LOGIC, outs))
+    inp.sources = [age, (age[0], outs.index('Childhood'), flags)]
+    new = a.write()
+    b = ainb.Ainb.read(new)
+    if b.nodes[hits[0]].inputs['bool'][0].sources != inp.sources or len(new) != len(data)             or sum(x != y for x, y in zip(new, data)) > 4 or b.write() != new:
+        raise SystemExit('read-back: %s differs from what was intended' % CIRCLE_LOGIC)
+    return new, 'node %d (%s): source %d (%s) -> %d.Childhood' % (hits[0], a.nodes[hits[0]].name, flag_node,
+                                                                 CIRCLE_FLAG, age[0])
+
+
+def circle_middle(data):
+    """the middle rock's two actors: created / deleted by fixed values instead of by the Kokiri Emerald"""
+    a = ainb.Ainb.read(data)
+    done = []
+    for n in a.nodes:
+        if n.name != 'ActorLogicLiftableActor':
+            continue
+        inst = next(x.value for x in n.immediates['string'] if x.name == 'InstanceName')
+        if inst not in CIRCLE_MIDDLE_ROCKS:
+            continue
+        there = CIRCLE_MIDDLE_ROCKS[inst]
+        flag = [x for x in n.inputs['bool'] if x.name in ('Logic_Create', 'Logic_Delete')]
+        if len(flag) != 2 or any(x.node < 0 or x.sources is not None for x in flag) or                 {a.nodes[x.node].name for x in flag} != {'OperateAND'}:
+            raise SystemExit('%s: %s not as expected' % (CIRCLE_MIDDLE, inst))
+        for x in flag:
+            x.node, x.param, x.flags = -1, 0, 0x1800000         # as the game's own fixed inputs
+            x.value = there if x.name == 'Logic_Create' else not there
+        n.links[0] = [l for l in n.links[0] if l.name not in ('Logic_Create', 'Logic_Delete')]
+        n.preconditions = []
+        done.append(inst)
+    if sorted(done) != sorted(CIRCLE_MIDDLE_ROCKS):
+        raise SystemExit('%s: middle rocks found: %r' % (CIRCLE_MIDDLE, done))
+    new = ainb.Ainb.read(a.write()).write()
+    b = ainb.Ainb.read(new)
+    for n in b.nodes:
+        inst = next((x.value for x in n.immediates['string'] if x.name == 'InstanceName'), None)
+        if inst in CIRCLE_MIDDLE_ROCKS:
+            got = {x.name: (x.node, x.value) for x in n.inputs['bool']}
+            if got['Logic_Create'] != (-1, CIRCLE_MIDDLE_ROCKS[inst]) or                     got['Logic_Delete'] != (-1, not CIRCLE_MIDDLE_ROCKS[inst]) or n.links[0] or n.preconditions:
+                raise SystemExit('read-back: %s differs from what was intended' % CIRCLE_MIDDLE)
+    return new
+
+
+def circle_kokiri(data):
+    """the Kokiri's schedule after the Kokiri Emerald becomes his default one"""
+    doc = byml.loads(data)
+    hits = [c for c in doc.root['ConditionalSchedule'] if c.get('ConditionFlag') == CIRCLE_KOKIRI_FLAG]
+    if len(hits) != 1 or 'Act_Lift_Rock' not in repr(doc.root['DefaultSchedule']):
+        raise SystemExit('%s: schedule not as expected' % CIRCLE_KOKIRI)
+    after = {k: v for k, v in hits[0].items() if k != 'ConditionFlag'}
+    if sorted(after) != sorted(doc.root['DefaultSchedule']):
+        raise SystemExit('%s: the schedules have different keys' % CIRCLE_KOKIRI)
+    doc.root['DefaultSchedule'] = after
+    new = byml.dumps(doc)
+    want = byml.loads(data).root
+    want['DefaultSchedule'] = {k: v for k, v in want['ConditionalSchedule'][doc.root['ConditionalSchedule'].index(
+        hits[0])].items() if k != 'ConditionFlag'}
+    if byml.loads(new).root != want:
+        raise SystemExit('read-back: %s differs from what was intended' % CIRCLE_KOKIRI)
+    return new
+
+
 def remove_entry(data, keys, expected):
     """remove one entry (found by its path of keys) from a BYML file; checks its current value first and that
     nothing else changed"""
@@ -346,6 +450,71 @@ SHOP_KEEPERS = {'child': 'Npc_Kokiri_001_Shop_Child', 'adult': 'Npc_Kokiri_001_S
 SHOP_LIST = 'Component/ShopParam/Npc_Kokiri_001_Shop_Child.game__component__ShopParam.bgyml'
 SHOP_LIST_ADULT = 'Component/ShopParam/Npc_Kokiri_001_Shop_Adult.game__component__ShopParam.bgyml'
 SHOP_STOCK_ONCE = 1
+SHOP_FLOW = 'Event/EventFlow/Npc_Kokiri_001_Shop_Child.bfevfl'   # the child shopkeeper's talk
+SHOP_GREETING = 'Npc_Kokiri_001_Shop_Child_Talk_Arrival'          # the switch that picks the normal greeting
+FLOW_YES, FLOW_NO = 0, 1      # what a yes/no query answers in this game's event flows (0 = yes)
+
+
+def _flow_links(e):
+    return [x for x in [e.next, e.join] + [ev for _, ev in e.cases] + list(e.forks) if x is not None]
+
+
+def flow_reachable(fc, start):
+    seen, todo = [], [start]
+    while todo:
+        i = todo.pop(0)
+        if i not in seen:
+            seen.append(i)
+            todo += _flow_links(fc.events[i])
+    return seen
+
+
+def flow_drop_unreached_subflows(fc):
+    """each entry point lists the subflow / callswitch steps that can run from it: drop those no longer
+    reached; returns lines saying what changed"""
+    said = []
+    for ep in fc.entry_points:
+        can = flow_reachable(fc, ep.main)
+        keep = [i for i in ep.subflows if i in can]
+        if keep != ep.subflows:
+            said.append('entry point %s: list %r -> %r' % (ep.name, ep.subflows, keep))
+            ep.subflows = keep
+    return said
+
+
+def shop_greeting_edit(fc):
+    """the child shopkeeper's talk (flowchart, edited in place): its one switch on meeting the Deku Tree takes
+    the "after" side's normal greeting in both cases (case 1, NO, was the "low on stock / Mido" side). Skips
+    only the "lost your Deku Shield?" hand-out between the switch and the greeting. Confirmed in game
+    2026-11-17 (tools/evfl_test_mod.py). Returns lines saying what changed."""
+    hits = [i for i, e in enumerate(fc.events)
+            if e.type == 'switch' and isinstance(e.params, dict) and e.params.get('GameDataName') == SHOP_FLAG]
+    if len(hits) != 1:
+        raise SystemExit('%s: %d switches on %s, expected 1' % (SHOP_FLOW, len(hits), SHOP_FLAG))
+    sw = fc.events[hits[0]]
+    cases = dict(sw.cases)
+    if sorted(cases) != [FLOW_YES, FLOW_NO]:
+        raise SystemExit('%s: switch on %s: cases %r not as expected' % (SHOP_FLOW, SHOP_FLAG, sw.cases))
+    hand_out = fc.events[cases[FLOW_YES]]
+    if hand_out.type != 'callswitch' or hand_out.entry != 'present_DekuSheld':
+        raise SystemExit('%s: the "after" side is not the Deku Shield hand-out' % SHOP_FLOW)
+    greet = [ev for _, ev in hand_out.cases
+             if fc.events[ev].type == 'switch' and (fc.events[ev].params or {}).get('GameDataName') == SHOP_GREETING]
+    if len(greet) != 1:
+        raise SystemExit('%s: normal greeting not found after the hand-out' % SHOP_FLOW)
+    said = ['greeting: switch %s (%s) cases %r -> both %d' % (sw.name, SHOP_FLAG, sorted(cases.items()), greet[0])]
+    sw.cases = [(FLOW_YES, greet[0]), (FLOW_NO, greet[0])]
+    return said + flow_drop_unreached_subflows(fc)
+
+
+def flow_write_checked(ef):
+    """write an edited event flow and read it back: must be the same flow as intended"""
+    fc = ef.flowchart
+    new = evfl.dumps(ef)
+    back = evfl.loads(new).flowchart
+    if [vars(e) for e in back.events] != [vars(e) for e in fc.events]             or [vars(p) for p in back.entry_points] != [vars(p) for p in fc.entry_points]             or [vars(x) for x in back.actors] != [vars(x) for x in fc.actors]:
+        raise SystemExit('read-back of an edited event flow differs from what was intended')
+    return new
 
 
 def _is_shop_actor(actor):
@@ -612,7 +781,8 @@ def main(argv):
     ap.add_argument('--name', default='NX2-ZOOTR')
     ap.add_argument('--longshot', help='Longshot folder: also write a launcher .bat next to the mods folder')
     ap.add_argument('--fix', action='append', default=[],
-                    choices=sorted(set(FIXES) | set(FILE_FIXES) | set(TABLE_FIXES) | {'kokiri_shop_full_stock'}),
+                    choices=sorted(set(FIXES) | set(FILE_FIXES) | set(TABLE_FIXES)
+                                   | {'kokiri_shop_full_stock', 'kokiri_circle_after_dungeons'}),
                     help='a game fix (see FIXES, FILE_FIXES, TABLE_FIXES)')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
@@ -624,6 +794,9 @@ def main(argv):
     out = Output(a.romfs, os.path.join(a.out, a.name, 'romfs'), dicts)
 
     shop_fix = 'kokiri_shop_full_stock' in a.fix
+    for cid, _ in assignments:
+        if cid.startswith(CIRCLE_NEEDS_FIX) and 'kokiri_circle_after_dungeons' not in a.fix:
+            raise SystemExit('%s: needs --fix kokiri_circle_after_dungeons' % cid)
     shop_removed = set()
     for name in a.fix:
         if name == 'kokiri_shop_full_stock':
@@ -632,6 +805,23 @@ def main(argv):
             out.write(SHOP_MAP, src, old, new)
             print('fix %-28s %s: %d shop objects removed (before the Deku Tree), %d always there'
                   % (name, SHOP_MAP, len(shop_removed), len(always)))
+            src, old = out.read(SHOP_FLOW)
+            ef = evfl.loads(old)
+            shop_greeting_edit(ef.flowchart)
+            out.write(SHOP_FLOW, src, old, flow_write_checked(ef))
+            print('fix %-28s %s: greeting always as after the Deku Tree' % (name, SHOP_FLOW))
+            continue
+        if name == 'kokiri_circle_after_dungeons':
+            src, old = out.read(CIRCLE_LOGIC)
+            new, said = circle_logic(old)
+            out.write(CIRCLE_LOGIC, src, old, new)
+            print('fix %-28s %s: %s' % (name, CIRCLE_LOGIC, said))
+            src, old = out.read(CIRCLE_KOKIRI)
+            out.write(CIRCLE_KOKIRI, src, old, circle_kokiri(old))
+            print('fix %-28s %s: schedule after the Kokiri Emerald is the default' % (name, CIRCLE_KOKIRI))
+            src, old = out.read(CIRCLE_MIDDLE)
+            out.write(CIRCLE_MIDDLE, src, old, circle_middle(old))
+            print('fix %-28s %s: middle rock: prop never, liftable rock always' % (name, CIRCLE_MIDDLE))
             continue
         if name in TABLE_FIXES:
             path, fn = TABLE_FIXES[name]
