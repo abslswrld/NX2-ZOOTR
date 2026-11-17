@@ -49,6 +49,15 @@ module already has its own texture code), save files (needed for the tracker).
   types the documentation doesn't have. From the game's files:
   - type 5, `callswitch`: runs an entry point and branches on the value it returns (cases are 32-bit hashes);
   - type 6, `return`: ends an entry point returning a 32-bit hash value.
+- **In event flows a yes/no question answers 0 for yes and 1 for no** (the opposite of Breath of the Wild's
+  flows): a switch on `EventQueryIsGameDataBool`, `...BoolExp`, `EventQueryIsGameDataString64`,
+  `EventQueryCheckIsGet`, `EventQueryPlayerIsChild`, `EventQueryHasRuppe`... has case 0 = true, case 1 =
+  false. Read from the game's own flows (e.g. `DisplayShop`: "has 20 rupees" case 0 goes on to the
+  transfer, case 1 to "not enough rupees"; "is child" case 0 gives the child's Deku Shield lines, case 1
+  the adult's). Choice queries answer the choice's number from 0.
+- Which flow files an event may call is also listed in `RSDB/GameAnalyzedEventInfo` (`SubFlowList`, per
+  event), and `RSDB/EventSetting` names each event's flow file and entry point. Flow files exist only as
+  loose files in `Event/EventFlow` (no copies in packs).
 - The game's files list some null pointers in the event flow relocation table (empty actor action lists,
   entry point arrays, empty switch and callswitch case lists, and a flowchart's actor, event and entry
   point arrays when they are empty); the writer does the same.
@@ -92,6 +101,7 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `tools/build_db.py`, `data/db/<Area>.json` | the check database of an area, built from the files above (generated: never edit it by hand) |
 | `tests/db_check.py` | checks the database and the IDs, and prints totals |
 | `tools/build_mod.py` | builds a Longshot mod folder: changes what chests, pots, freestanding items, shop shelves, liftable rocks and solid bushes give, by check ID, applies game fixes (`--fix bombs_without_bracelet`, `--fix skippable_opening`, `--fix magic_is_separate`, `--fix bombchus_without_bag`, `--fix kokiri_shop_full_stock`: one full shop per age, needed for shelves), updates the resource size table, and can write a test launcher; output in `out/` (never committed) |
+| `tools/evfl_test_mod.py` | builds the small test mod (own folder and launcher) that shows whether event flow edits work in game: the child Kokiri shopkeeper's greeting and goodbye |
 | `tools/ground_items.py` | makes ground versions (`Obj_NX2_<item>`) of items that only exist as the model shown when received, from the game's own ground Deku Shield, so they can lie on the ground or drop from a pot and are picked up by walking into them; also held-up versions (`Item_NX2_<item>`) for chests giving items with no get-demo setup of their own (ocarinas), from the Boomerang's item actor (used by `build_mod.py`) |
 | `tools/shop_items.py` | makes shop versions (`Shop_NX2_<item>_<price>_Once`) of items for shop shelves, from the game's own Deku Shield shelf, sold once (used by `build_mod.py`) |
 
