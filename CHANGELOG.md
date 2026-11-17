@@ -21,6 +21,9 @@ Newest first. Dates are when the work was done.
 - Why those 4: in the map, the level logic's group of 8 lies in a ring 2-2.7 m around the middle rock (as in
   a child screenshot), the group of 4 at the diagonals (as in the adult one), each ~0.3 m from one of the 8.
   To confirm in game (test mod): the 8 child rocks of the ring drop a red rupee, the 4 others a gold rupee.
+- **Confirmed in game:** all 8 rocks a child sees gave red rupees, so the child's 8 are the ring and
+  `KF_CIRCLE_CHILD_ROCK_03`, `_06`, `_09`, `_12` are rightly marked as never there. Still assumed: the adult's
+  8 after the Forest Temple are the same ring.
 
 ### Rocks and bushes: one check per age
 - Each liftable rock and solid bush in Kokiri Forest is now two checks, a child one and an adult one (like
