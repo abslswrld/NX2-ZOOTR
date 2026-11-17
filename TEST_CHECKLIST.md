@@ -1,8 +1,9 @@
-# In-game test checklist (test mod built 2026-11-16, branch `ground-items`)
+# In-game test checklist (test mod rebuilt 2026-11-16 evening, branch `ground-items`)
 
 **Start:** run `out\Launch NX2-ZOOTR test.bat`, then make a **new file**. Skip the opening.
-This round: **ground versions of items** (new objects made from the game's own ground ocarina). They are
-new to the game, so a crash or an invisible object is possible: note exactly where it happens.
+This round: **ground versions of items, second try.** Last time every item appeared but had an invisible
+box around it, so Link couldn't take it. They are now made from the game's ground Deku Shield, which has
+the normal pick-up collision. Same items, same places, no glow.
 
 ## 0. Does it load?
 - [ ] The game reaches Kokiri Forest without crashing. (If it crashes when entering the forest or a house,

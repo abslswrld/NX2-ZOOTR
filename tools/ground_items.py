@@ -5,20 +5,25 @@ Found in the game's files:
 - `Item_<x>` actors (parent `Item_EventObject_Base`) are only the model held up when an item is received
   (chests, NPCs). They have no pick-up collision: placed on the ground, Link can't take them.
 - Ground items are `Obj_` actors (parent `Obj_Item_Base`). Only 24 exist (rupees, hearts, ammunition, the
-  Piece of Heart, small keys, shields...). One of them is a major item: `Obj_Ocarina_Time`, the Ocarina of
-  Time in the castle moat. It is a thin wrapper around `Item_Ocarina_Time`: its own pack holds the ground
-  parts (`Obj_Item_Base`, physics, pick-up event), and the item's model, animation and item settings
-  (`PouchContentParam`) are copies of the item's own files. Its table rows: `ActorInfo` with the item's
-  model and `ActorName: Item_Ocarina_Time` (what the game shows and stores), `GameActorInfo` (ground object
-  physics layer), `PouchActorInfo` (the item row).
+  Piece of Heart, small keys, shields...). `Obj_Shield_Deku`, the Deku Shield lying on the ground, is a
+  single equipment item built as a thin wrapper around the item: its own pack holds the ground parts
+  (`Obj_Item_Base`, a body that only touches the ground, a pick-up sensor: `DropItem` / `Item_Pouch_Tgt`,
+  layer `SmallObject`), and the item's model, animation and item settings (`PouchContentParam`) are copies
+  of the item's own files. Its table rows: `ActorInfo` with the item's model and
+  `ActorName: Weapon_Shield_Deku` (what the game shows and stores), `GameActorInfo` (small object layer),
+  `PouchActorInfo` (the item row).
+- Not the ground Ocarina of Time (`Obj_Ocarina_Time`, castle moat; the first template, 2026-11-16): its
+  physics is the generic solid box (`ObjectDefault` -> `Box`, layer `GroundObject`) with no pick-up sensor.
+  Tested in game: Link bumps into an invisible box around the item (and climbs it), and can't take it.
 
-A ground version of item X is built the same way, from the game's own files only: the ground ocarina's pack
-with the ocarina's model, animation and item settings replaced by X's (with the files they inherit from,
-when X's pack has them), an actor parameter file of its own, and the three table rows taken from the
-ocarina's (ground parts) and X's (model, name, item row). The name is `Obj_NX2_<X without "Item_">`.
+A ground version of item X is built the same way, from the game's own files only: the ground shield's pack
+with the shield's model, animation, item settings and shield-only settings (equipment table, hookshot hold
+position, effect link) taken out and X's model, animation and item settings put in (with the files they
+inherit from, when X's pack has them), an actor parameter file of its own, and the three table rows taken
+from the shield's (ground parts) and X's (model, name, item row). The name is `Obj_NX2_<X without "Item_">`.
 
-No glow: the ground ocarina has no effect link (the Gold Skulltula token's glow comes from its own
-`ELinkRef`, user `Obj_Token_Gold`). One could be added later by pointing `ELinkRef` at an existing effect.
+No glow and no effects: the shield's effect link (only its burning effect) is left out, and its row's
+`ELinkUserName` removed. Its sound link stays.
 """
 import copy
 import os
@@ -28,11 +33,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 from formats import sarc, byml  # noqa: E402
 
-TEMPLATE = 'Obj_Ocarina_Time'
-TEMPLATE_ITEM = 'Item_Ocarina_Time'
+TEMPLATE = 'Obj_Shield_Deku'
+TEMPLATE_ITEM = 'Weapon_Shield_Deku'
 PREFIX = 'Obj_NX2_'
-# the components that make the item what it is; everything else comes from the ground ocarina
+# the components that make the item what it is; everything else comes from the ground shield
 ITEM_REFS = ('ActorNameRef', 'AnimationRef', 'ModelInfoRef', 'PouchContentRef')
+# the ground shield's own settings, left out (the item base's are used): price table (equipment), hookshot
+# hold position, effect link
+TEMPLATE_ONLY = ('GameParameterTableRef', 'LiftableRef', 'ELinkRef')
 ROW_FROM_ITEM = ('ActorName', 'FmdbName', 'ModelAabbMax', 'ModelAabbMin', 'ModelProjectName')
 TABLES = ('ActorInfo', 'GameActorInfo', 'PouchActorInfo')
 
@@ -66,6 +74,40 @@ def _parent_path(doc_root):
     if p.startswith('Work/'):
         p = p[5:]
     return p[:-5] + '.bgyml' if p.endswith('.gyml') else p
+
+
+def _refs(root):
+    """paths a settings file points at, as stored in a pack ('?X.bgyml' values and '$parent')"""
+    out = []
+
+    def walk(v):
+        if isinstance(v, dict):
+            for k, x in v.items():
+                if k == '$parent' and isinstance(x, str):
+                    p = x[5:] if x.startswith('Work/') else x
+                    out.append(p[:-5] + '.bgyml' if p.endswith('.gyml') else p)
+                else:
+                    walk(x)
+        elif isinstance(v, list):
+            for x in v:
+                walk(x)
+        elif isinstance(v, str) and v.startswith('?'):
+            out.append(v[1:])
+    walk(root)
+    return out
+
+
+def _reach(files, start):
+    """start and every file of the pack it points at, directly or through other files"""
+    seen, todo = set(), [start]
+    while todo:
+        p = todo.pop()
+        if p in seen or p not in files:
+            continue
+        seen.add(p)
+        if p.endswith('.bgyml'):
+            todo.extend(_refs(byml.loads(files[p]).root))
+    return seen
 
 
 def kind_of(read_pack, item):
@@ -104,13 +146,20 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False):
     if missing:
         raise SystemExit('%s: no %s in its actor parameters: no ground version' % (item, ', '.join(missing)))
 
-    files = dict(tpl.files)
-    del files[ap_path(TEMPLATE)]
-    # the ground ocarina's own item files out, the item's in (with the files they inherit from, when the item's
-    # pack has them: the bomb bag's settings inherit from KeyItemDefault, in its pack)
-    for r in ITEM_REFS + ('GameParameterTableRef',):
+    # the ground shield's own item files and shield-only files out (with the files only they point at), the
+    # item's in (with the files they inherit from, when the item's pack has them: the bomb bag's settings
+    # inherit from KeyItemDefault, in its pack)
+    out_refs = ITEM_REFS + TEMPLATE_ONLY
+    drop = set()
+    for r in out_refs:
         if r in tc:
-            files.pop(_ref_path(tc[r]), None)
+            drop |= _reach(tpl.files, _ref_path(tc[r]))
+    keep = _reach(tpl.files, _parent_path(tpl_ap.root))      # the item base (Obj_Item_Base) and what it uses
+    for r, v in tc.items():
+        if r not in out_refs and isinstance(v, str) and v.startswith('?'):
+            keep |= _reach(tpl.files, _ref_path(v))
+    files = {p: d for p, d in tpl.files.items() if p not in drop or p in keep}
+    del files[ap_path(TEMPLATE)]
     for r in ITEM_REFS:
         if r not in ic:
             continue
@@ -130,8 +179,8 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False):
         else:
             comp.pop(r, None)
     if 'AnimationRef' not in ic and model_exists(item + '_Animation'):
-        # as the ground ocarina has one for Item_Ocarina_Time (whose own actor has none): the same file with
-        # the item's animation project
+        # as the ground ocarina has one for Item_Ocarina_Time (whose own actor has none): the ground shield's
+        # file with the item's animation project
         tdoc = byml.loads(tpl.files[_ref_path(tc['AnimationRef'])])
         res = [dict(x) for x in tdoc.root['AnimationResources']]
         swapped = [dict(x, ModelProjectName=item + '_Animation') if x['ModelProjectName'] == TEMPLATE_ITEM + '_Animation'
@@ -142,12 +191,13 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False):
         tdoc.root['AnimationResources'] = swapped
         files[anim_param_path(name)] = byml.dumps(tdoc)
         comp['AnimationRef'] = '?' + anim_param_path(name)
-    comp.pop('GameParameterTableRef', None)         # as Obj_Item_Base (the ocarina's only set a menu style)
+    for r in TEMPLATE_ONLY:                         # as Obj_Item_Base
+        comp.pop(r, None)
     doc = copy.copy(tpl_ap)
     doc.root = type(tpl_ap.root)(tpl_ap.root)
     doc.root['Components'] = comp
     files[ap_path(name)] = byml.dumps(doc)
-    out = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))      # the ocarina pack's own layout settings
+    out = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))      # the shield pack's own layout settings
     out.files = files
     out.align = {p: (tpl.align.get(p) or itm.align.get(p) or 8) for p in files}
     pack = out.write()
@@ -170,12 +220,13 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False):
         ai['AnimationResources'] = anim
     else:
         ai.pop('AnimationResources', None)
-    # memory: the item's own needs plus what the ground parts add (as measured on the ocarina), and margin
+    # memory: the item's own needs plus what the ground parts add (as measured on the shield), and margin
     extra = int(ai_t['InstanceHeapSize']) - int(ai_ti['InstanceHeapSize'])
     ai['InstanceHeapSize'] = type(ai_t['InstanceHeapSize'])(
         max(int(ai_t['InstanceHeapSize']), int(ai_i['InstanceHeapSize']) + extra) + 16384)
     ai['PreActorRenderInfoHeapSize'] = type(ai_t['PreActorRenderInfoHeapSize'])(
         max(int(ai_t['PreActorRenderInfoHeapSize']), int(ai_i.get('PreActorRenderInfoHeapSize', 0)) + 1024))
+    ai.pop('ELinkUserName', None)                   # no effects (the shield's effect link is left out)
     ai['__RowId'] = name
     rows['ActorInfo'] = ai
     ga = type(tables['GameActorInfo'][TEMPLATE])(tables['GameActorInfo'][TEMPLATE])

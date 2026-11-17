@@ -4,6 +4,24 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-16
 
+### Ground items rebuilt from the ground Deku Shield (to test)
+- `tools/ground_items.py` now copies the game's ground Deku Shield (`Obj_Shield_Deku`) instead of the ground
+  ocarina. It is a single equipment item lying on the ground, with the pick-up collision of ordinary ground
+  items: a body that only touches the ground (`DropItem`, `HitOnlyGroundAndObject`), a pick-up sensor
+  (`Item_Pouch_Tgt`, `SensorHitGetObject`), layer `SmallObject`.
+- The shield's own settings are left out: its model, animation and item settings (replaced by the item's),
+  its equipment table, its hookshot hold position and its effect link (only its burning effect; the row's
+  `ELinkUserName` is removed too). No glow, no effects. Its sound link stays.
+- Same test mod as before (same items, same places), rebuilt.
+
+### In-game results of the ground items test
+- The game loaded, and every ground item appeared in the right place (Bomb Bag, Boomerang in the water,
+  Bottle in the shop, Fairy Ocarina from the child pot, Hookshot from the adult pot).
+- None could be picked up: an invisible box around each item kept Link away, and he could climb onto it.
+- Found: the ground ocarina used as the template has the generic solid box for physics (`ObjectDefault` ->
+  `Box`, layer `GroundObject`) and no pick-up sensor, unlike every ground item that works. Fixed above.
+- Bombchus not tested (no Bomb Bag). Wanted: Bombchus usable without a bomb bag (to look at separately).
+
 ### Ground versions of items (branch `ground-items`, to test)
 - New `tools/ground_items.py`: makes a ground version of an item that only exists as the model shown when an
   item is received (`Item_...`), so it can lie on the ground or drop from a pot. Built like the game's own
@@ -17,8 +35,7 @@ Newest first. Dates are when the work was done.
   the headroom of a similar game file), add rows to tables, and edit a file twice in one build (the size
   entry is always worked out from the original file).
 - Found: the Gold Skulltula token's glow comes from its effect link (`ELinkRef`, user `Obj_Token_Gold`); the
-  ground ocarina has none, so our ground items don't glow. A glow could be added later by pointing
-  `ELinkRef` at an existing effect.
+  ground ocarina has none, so our ground items don't glow (no glow wanted).
 - The French randomizer (OOT26RandoBeta) was read for how it handles pots, at the user's request; facts
   credited to its author: shuffled pots behave like Gold Skulltulas (death no longer sets the pot's flag,
   the pot's AI hands its flag to the drop, picking the drop up sets it), and real items drop as clones of
