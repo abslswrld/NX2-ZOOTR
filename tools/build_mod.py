@@ -3,15 +3,20 @@
     python tools/build_mod.py --romfs "<romfs>" --out out\\mods --name NX2-ZOOTR KF_MIDO_CHEST_01=Item_Boomerang ...
 
 Supported: chests and pots (their item is their Drop__DropActor in the map file; rocks, bushes and Gold
-Skulltulas get one added: a skulltula then drops the item instead of its token), freestanding items
+Skulltulas get one added: a skulltula then drops the item instead of its token, as a version of the item built
+from the token, which is what marks the skulltula done when picked up: gs_drop, tools/ground_items.py),
+freestanding items
 (the actor type itself is the item: it is replaced), gifts that hand their item over through the shared
 event flow Dm_SY_GetInEvent (the item is that call's ActorName; the check's data names the flow, the event and
-the item, "gift": {...}), songs (the song cutscene, "song": {...} in the data, only fades in and hands over
+the item, "gift": {...}; an item Link can't hold up in that event, such as an ocarina or a song, is given with
+the "You got ..." window instead: gift_edit), songs (the song cutscene, "song": {...} in the data, only fades in and hands over
 the item: song_skip), Deku Scrubs that sell one thing once (the upgrade scrubs: their map setting
 ScrubBusiness_ShopItemActorName0 becomes the item, and the shared flow Enemy_Scrub_Business_Common gets one new
 branch per item, selling it at the scrub's original price with a new generic line that names the item; see
 scrub_flow_edit) and shop shelves (the shelf actor is replaced by a shop
-version of the item, tools/shop_items.py, at the shelf's original price, sold once). For
+version of the item, tools/shop_items.py, at the shelf's original price, sold once: the shelf takes over the
+saved flag of a shop object the build removes, shelf_flag_map_edit, and the shop version's own AI sets that
+flag when the shopkeeper says "sold out", so the shelf is not placed again: shop_items.sold_for_good_ai). For
 each check every placement is changed (child and adult copies, copies in other maps; a check made for one
 age, "age" in its data, only has that age's), the map files are
 written back compressed with the same dictionary as the original, and the resource size table (RESTBL)
@@ -46,6 +51,7 @@ The game's own files are only read. The output contains modified game files: it 
 or shared (out/ is ignored by git).
 """
 import argparse
+import collections
 import os
 import shutil
 import struct
@@ -140,11 +146,11 @@ def _right_actor(kind, actor):
 
 
 def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: item,
-         on_shelf=lambda item, shelf_actor: item):
+         on_shelf=lambda item, shelf_actor: item, gs_drop=lambda item: item):
     """{map file path in romfs: {placement hash: (check id, new item, old item, kind)}}.
     on_ground(item): the actor to use where the item lies on the ground (freestanding items, pot drops);
     in_chest(item): the actor a chest gives (and shows held up); on_shelf(item, actor now on the shelf): the
-    shelf actor that sells the item"""
+    shelf actor that sells the item; gs_drop(item): the actor a Gold Skulltula drops"""
     files = {}
     for cid, item_given in assignments:
         r, name, loc = find_check(world, cid)
@@ -157,7 +163,9 @@ def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: 
             spot = world.checks[scene][spot_id]
             if spot['kind'] not in SUPPORTED:
                 raise SystemExit('%s is a %s: only %s supported yet' % (cid, spot['kind'], ', '.join(sorted(SUPPORTED))))
-            if spot['kind'] in DROP_ON_GROUND:
+            if spot['kind'] == 'skulltula':
+                item = gs_drop(item_given)
+            elif spot['kind'] in DROP_ON_GROUND:
                 item = on_ground(item_given)
             elif spot['kind'] == 'chest':
                 item = in_chest(item_given)
@@ -177,6 +185,75 @@ def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: 
 
 
 GIFT_FLOW = 'Dm_SY_GetInEvent'                    # the shared flow most gifts hand their item over with
+# Dm_SY_GetInEvent shows the item in Link's hands: it makes the item's actor (Player_Event.
+# EventCreateShowItemFromActorFileName) and plays its animation command Rotate_GetDemo, waiting for the end
+# (EventIgnitionShowItem). An actor without that command (ocarinas, songs, the small bags, stones, medallions:
+# ground_items.can_hold_up) never ends it: the Fairy Ocarina froze the game there, as the seed bag did from a
+# scrub (seen in game). Such an item is given the way the game's own cutscenes give ocarinas and songs: the
+# "You got ..." window and the item, nothing held up (GetPouchContent, as song_skip; every event that may run
+# Dm_SY_GetInEvent may also run GetPouchContent: direct_get_allowed).
+DIRECT_GET = ('GetPouchContent', 'GetPouchContentByActorName')
+EVENT_INFO = 'RSDB/GameAnalyzedEventInfo.Product.111.rstbl.byml'
+# After changing Link's inventory behind his back (the Dream world's boss fights), the game's own flows wait one
+# frame, run UISystemActor.EventTriggerSyncPlayerEquipmentAndPouch and wait for Link's equipment
+# (Player_Event.EventWaitCreationFinishedEquipment): Npc_Dream, DreamBossStage, SubEvent_AllBossBattle. The
+# ocarina in Link's hands is equipment: one added to the inventory by our own get was only playable after a
+# reload (seen in game with the chest and pot versions). The same three steps follow an ocarina we give in a
+# flow (items whose PouchSpecialDeal is Ocarina), copied from SubEvent_AllBossBattle with their actors.
+SYNC_FLOW = 'Event/EventFlow/SubEvent_AllBossBattle.bfevfl'
+SYNC_ACTION = 'EventTriggerSyncPlayerEquipmentAndPouch'
+SYNC_DEAL = 'Ocarina'
+
+
+def _action_name(fc, e):
+    return fc.actors[e.actor].actions[e.action] if e.type == 'action' else None
+
+
+def sync_template(fc):
+    """the three steps (one frame's wait, sync, wait for the equipment) as SubEvent_AllBossBattle has them:
+    [(actor, action name, parameters)]"""
+    for i, e in enumerate(fc.events):
+        if _action_name(fc, e) != SYNC_ACTION or e.next is None:
+            continue
+        after = fc.events[e.next]
+        before = [b for b in fc.events if b.next == i and _action_name(fc, b) == 'EventWait'
+                  and isinstance(b.params, dict) and b.params.get('Frames') == 1]
+        if before and _action_name(fc, after) == 'EventWaitCreationFinishedEquipment':
+            return [(fc.actors[x.actor], _action_name(fc, x), x.params) for x in (before[0], e, after)]
+    raise SystemExit('%s: wait, %s, wait for the equipment not found as expected (game files differ from what '
+                     'this was made for)' % (SYNC_FLOW, SYNC_ACTION))
+
+
+def flow_copy_actor(fc, actor):
+    """index in `fc` of the actor with this name (and no secondary name); added as the other flow has it when
+    `fc` has none"""
+    for i, a in enumerate(fc.actors):
+        if a.name == actor.name and not a.secondary:
+            return i
+    if actor.secondary or actor.argument or actor.entry_point is not None:
+        raise SystemExit('actor %s of the flow copied from is not a plain one' % actor.name)
+    return fc.add_actor(actor.name, params=evfl.Params(actor.params) if actor.params is not None else None,
+                        cut=actor.cut)
+
+
+def sync_steps(fc, template, next=None):
+    """adds the sync steps (sync_template) in front of event `next`; returns the first one's index"""
+    for actor, action, params in reversed(template):
+        next = fc.add_action(flow_copy_actor(fc, actor), action,
+                             evfl.Params(params) if params is not None else None, next=next)
+    return next
+
+
+def direct_get_allowed(rows):
+    """RSDB/GameAnalyzedEventInfo lists for each event the other flow files it may run (SubFlowList). A flow
+    not in an event's list didn't run (Dm_SY_GetInEvent called from a song cutscene gave nothing: seen in game;
+    Dm_MelodyGet_Saria lists GetPouchContent, not Dm_SY_GetInEvent). Dm_SY_GetInEvent itself runs
+    GetPouchContent, so every event listing the one must list the other: checked here."""
+    listing = [r for r in rows if GIFT_FLOW in [str(x) for x in r.get('SubFlowList', [])]]
+    bad = [r['__RowId'] for r in listing if DIRECT_GET[0] not in [str(x) for x in r['SubFlowList']]]
+    if not listing or bad:
+        raise SystemExit('%s: %d events list %s; without %s: %s (game files differ from what this was made for)'
+                         % (EVENT_INFO, len(listing), GIFT_FLOW, DIRECT_GET[0], ', '.join(bad[:5]) or '-'))
 
 
 def plan_gifts(world, assignments):
@@ -220,12 +297,13 @@ def plan_songs(world, assignments):
     return out
 
 
-def song_skip(fc, cid, item, song):
+def song_skip(fc, cid, item, song, sync=None):
     """the song cutscene (Dm_MelodyGet_*) is still started as before, so the game records it as played (that
     is what keeps its trigger from coming back, e.g. SacredForestMeadow_Child_Prefab_bbc3: "Dm_MelodyGet_Saria"
     not played), but its first entry point now only fades in, hands over the item the way the cutscene hands
     over the song (GetPouchContent<GetPouchContentByActorName>: "You got ..." window, then the item; plus what the
-    item needs, SCRUB_COMPANIONS) and ends: no lesson, no song. Returns lines saying what was changed."""
+    item needs, SCRUB_COMPANIONS) and ends: no lesson, no song. sync: the sync steps (sync_template) to run
+    after the get, for an ocarina. Returns lines saying what was changed."""
     gives = [e for e in fc.events if e.type == 'subflow' and e.flowchart == 'GetPouchContent'
              and isinstance(e.params, dict) and e.params.get('ActorName') == song]
     if len(gives) != 1:
@@ -239,7 +317,7 @@ def song_skip(fc, cid, item, song):
         raise SystemExit('%s: no fade-in found in the cutscene' % cid)
     params = evfl.Params(fade.params)
     params['IsWaitEnd'] = True
-    nxt = None
+    nxt = sync_steps(fc, sync) if sync else None
     for companion in reversed(SCRUB_COMPANIONS.get(item, [])):
         nxt = fc.add_action('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent',
                             evfl.Params(Num=1, Actor=companion, IsGetEvent=False,
@@ -253,9 +331,15 @@ def song_skip(fc, cid, item, song):
             % (cid, item, fc.events[first].name, was)]
 
 
-def gift_edit(fc, events):
-    """set the item of each gift event (a call of Dm_SY_GetInEvent); returns lines saying what was changed"""
-    said = []
+def gift_edit(fc, events, direct=(), sync=None):
+    """set the item of each gift event (a call of Dm_SY_GetInEvent). An item in `direct` (Link can't hold it up
+    in that event: ground_items.can_hold_up) is given by a call of GetPouchContent<GetPouchContentByActorName>
+    in its place (the "You got ..." window and the item, as the game's cutscenes give ocarinas and songs);
+    sync {item: sync steps (sync_template)}: steps to run after it (an ocarina). Returns (lines saying what was
+    changed, {event name: (flow file called, entry point, parameters, name of the next event)} as intended,
+    names of the new events)."""
+    said, want = [], {}
+    first_new = len(fc.events)
     by_name = {e.name: e for e in fc.events}
     for ev, (cid, item, old) in sorted(events.items()):
         e = by_name.get(ev)
@@ -265,9 +349,22 @@ def gift_edit(fc, events):
             raise SystemExit('%s: event %s is not a call of %s' % (cid, ev, GIFT_FLOW))
         if e.params.get('ActorName') != old:
             raise SystemExit('%s: event %s gives %r, the data says %s' % (cid, ev, e.params.get('ActorName'), old))
-        e.params['ActorName'] = item
-        said.append('%-18s %s: %s -> %s' % (cid, ev, old, item))
-    return said
+        if item not in direct:
+            e.params['ActorName'] = item
+            said.append('%-18s %s: %s -> %s' % (cid, ev, old, item))
+        else:
+            was = '%s<%s>' % (e.flowchart, e.entry)
+            e.flowchart, e.entry = DIRECT_GET
+            e.params = evfl.Params(ActorName=item)
+            steps = (sync or {}).get(item)
+            if steps:
+                e.next = sync_steps(fc, steps, e.next)
+            said.append('%-18s %s: %s -> %s, given with the get window (%s<%s> instead of %s: Link can\'t hold '
+                        'it up)%s' % (cid, ev, old, item, DIRECT_GET[0], DIRECT_GET[1], was,
+                                      ', then Link\'s equipment is brought in line (%s)' % fc.events[e.next].name
+                                      if steps else ''))
+        want[ev] = (e.flowchart, e.entry, dict(e.params), None if e.next is None else fc.events[e.next].name)
+    return said, want, [x.name for x in fc.events[first_new:]]
 
 
 # Deku Scrubs. When Link talks to one, the game copies its map setting ScrubBusiness_ShopItemActorName0 into
@@ -305,7 +402,7 @@ SCRUB_LINE = (_msg_tag(3, 0, b'\x0f\x00\x00') + 'Ah, the ' + _msg_tag(0, 3, b'\x
 
 # what an item needs to be usable, given with it when a scrub sells it (silently, after a successful buy: held up
 # alone the seed bag froze the game). The slingshot sold alone came with no seed bag: 0/0 seeds (seen in game).
-SCRUB_COMPANIONS = {'Item_Range_SlingShot': ['Item_BulletBag_Small']}
+SCRUB_COMPANIONS = {'Item_Range_SlingShot': ['Item_BulletBag_Small'], 'Item_Range_Bow': ['Item_Quiver_Small']}
 SEED_BAG = 'Item_BulletBag_Small'
 SEED_SELL = 'SimpleShopSub_Scrub_Business_Seed_Consume'
 SCRUB_NOBAG_LABEL = 'Enemy_Scrub_Business_NX2_NoSeedBag'
@@ -347,6 +444,12 @@ def seed_bag_guard(fc):
         said.append('seed sale %s (%s): refused without the seed bag (new check %s)'
                     % (by[i].name, by[i].params.get('Actor'), by[sw].name))
     return said
+
+
+# the small seed bag and quiver are never given alone: they come with the slingshot and the bow (a scrub selling
+# the small seed bag alone froze the game, seen in game). Placed alone, they become their weapon (main), and the
+# bag comes with it (a chest's slingshot brings 30 seeds by itself; scrubs add it, SCRUB_COMPANIONS).
+FAMILY_ALIASES = {'Item_BulletBag_Small': 'Item_Range_SlingShot', 'Item_Quiver_Small': 'Item_Range_Bow'}
 
 
 def plan_scrubs(world, assignments):
@@ -411,8 +514,9 @@ SCRUB_PRICE_KEYS = {SCRUB_SELL: 'ActorName', SEED_SELL: 'Actor',
 SCRUB_ONE_TIME_TALK = 'Enemy_Scrub_Business_DekuStickPouch_01'   # its call of the root: the greetings to copy
 
 
-def scrub_flow_edit(fc, sales):
+def scrub_flow_edit(fc, sales, direct=(), sync=None):
     """sales: [(check id, new item, [(talk event, original item)])]. Every changed scrub sells its item once.
+    direct: the items Link can't hold up (ground_items.can_hold_up); sync {item: sync steps}: see point 3.
     1. In front of the first item comparison of SimpleShopRoot_Enemy_Scrub_Business_Pouch, one branch per item:
            Scrub_Business_TempItemName_00 == item?   yes (0) -> SimpleShopSub_Scrub_Business_OneTime with the
                                                                 item, the scrub's price, the generic line (and
@@ -424,6 +528,16 @@ def scrub_flow_edit(fc, sales):
        the map setting into Scrub_Business_TempItemName_00), then
            Scrub_Business_TempItemName_00 == item?   yes (0) -> the root, so the branch above
                                                      no  (1) -> the game's talk, as before
+    3. The one-time sale pays and hands over inside Dm_SY_GetInEvent<GetInEvent_NotTurn_2DShop> (the price
+       taken, then the item held up). For an item Link can't hold up (the seed bag froze the game there), in
+       front of that call:
+           Scrub_Business_TempItemName_00 == item?   yes (0) -> the price taken the same way
+                                                                (EventTriggerAddGameDataIntToRupee,
+                                                                EventWaitStableNumDisplay), the item given with
+                                                                the get window (GetPouchContent), for an
+                                                                ocarina the sync steps, then on as after the
+                                                                game's call
+                                                     no  (1) -> the game's call
     The price is what the game's own calls ask for the scrub's original item (the first copy's). Returns lines
     saying what was changed."""
     eps = {p.name: p.main for p in fc.entry_points}
@@ -486,6 +600,35 @@ def scrub_flow_edit(fc, sales):
         head = sw
         said.append('%s sells %s at %s rupees, once (new branch %s)%s' % (cid, item, price, fc.events[sw].name,
                     ', with %s' % ', '.join(extra) if extra else ''))
+    hard = sorted(i for i in prices if i in direct)
+    if hard:
+        shown = [i for i in flow_reachable(fc, eps[SCRUB_SELL]) if by[i].type == 'subflow'
+                 and by[i].flowchart == GIFT_FLOW]
+        if len(shown) != 1 or by[shown[0]].entry != 'GetInEvent_NotTurn_2DShop' \
+                or not isinstance(by[shown[0]].params, dict) \
+                or by[shown[0]].params.get('PriceGameData') != 'SimpleShop_Price' \
+                or by[shown[0]].params.get('ActorName') != 'ActorName':
+            raise SystemExit('%s: its pay-and-get call of %s not found as expected' % (SCRUB_SELL, GIFT_FLOW))
+        get = first = shown[0]
+        for item in hard:
+            nxt = by[get].next
+            steps = (sync or {}).get(item)
+            if steps:
+                nxt = sync_steps(fc, steps, nxt)
+            give = fc.add_subflow(DIRECT_GET[0], DIRECT_GET[1], evfl.Params(ActorName=item), next=nxt)
+            # as the first two steps of GetInEvent_NotTurn_2DShop (its PriceGameData is SimpleShop_Price here)
+            settle = fc.add_action('UISystemActor', 'EventWaitStableNumDisplay', evfl.Params(IsWaitEnd=True),
+                                   next=give)
+            pay = fc.add_action('PouchSystemActor', 'EventTriggerAddGameDataIntToRupee',
+                                evfl.Params(IsSignInverse=True, GameDataName='SimpleShop_Price'), next=settle)
+            sw = fc.add_switch('GameDataActor', 'EventQueryIsGameDataString64', [(0, pay), (1, first)],
+                               evfl.Params(GameDataName=SCRUB_VAR, Index=-1, Value=item))
+            if fc.repoint(first, sw, keep=(sw,)) < 1:
+                raise SystemExit('%s: nothing led to its call of %s' % (SCRUB_SELL, GIFT_FLOW))
+            first = sw
+            said.append('%s: Link can\'t hold it up: paid and given with the get window (new check %s in %s)%s'
+                        % (item, by[sw].name, SCRUB_SELL,
+                           ', then Link\'s equipment is brought in line' if steps else ''))
     if repeat:
         write = next(i for i in flow_reachable(fc, root) if by[i].type == 'action'
                      and fc.actors[by[i].actor].actions[by[i].action] == 'EventScrubBusinessWriteGameDataBancItemName')
@@ -609,6 +752,46 @@ def patch_pack(pack_data, inner, key, expected, value):
     if byml.loads(back.files[inner]).root != want:
         raise SystemExit('read-back: %s differs from what was intended' % inner)
     return new_pack, (len(old_inner), len(new_inner))
+
+
+# Songs as items: their actors (Item_Melody_*) borrow the rupee model (Obj_Rupee), so a song held up, on a
+# shelf or on the ground showed a green rupee (seen in game). The game has no note model; they take Sheik's
+# harp instead (model project Item_Harp_Sheik, as the cutscene actor Dm_Item_Sheik_Harp has it; the user's
+# choice): the song's model settings and its ActorInfo row (model, size, the larger of the two heaps).
+SONG_PREFIX = 'Item_Melody_'
+HARP_ACTOR, HARP_MODEL = 'Dm_Item_Sheik_Harp', 'Item_Harp_Sheik'
+ACTOR_INFO = 'RSDB/ActorInfo.Product.111.rstbl.byml'
+
+
+def song_harp_rows(data, songs):
+    """ActorInfo rows of `songs` take the harp's model, size and (the larger) heaps; read back"""
+    doc = byml.loads(data)
+    rows = {str(r['__RowId']): r for r in doc.root}
+    harp = rows.get(HARP_ACTOR)
+    if harp is None or harp.get('ModelProjectName') != HARP_MODEL:
+        raise SystemExit('%s: no %s row with the model %s' % (ACTOR_INFO, HARP_ACTOR, HARP_MODEL))
+    want = {}
+    for i, r in enumerate(doc.root):
+        name = str(r['__RowId'])
+        if name not in songs:
+            continue
+        if r.get('ModelProjectName') != 'Obj_Rupee':
+            raise SystemExit('%s: %s has the model %r, expected Obj_Rupee' % (ACTOR_INFO, name, r.get('ModelProjectName')))
+        new = type(r)(r)
+        for k in ('FmdbName', 'ModelProjectName', 'ModelAabbMax', 'ModelAabbMin'):
+            new[k] = harp[k]
+        for k in ('InstanceHeapSize', 'PreActorRenderInfoHeapSize'):
+            new[k] = type(r[k])(max(int(r[k]), int(harp[k])))
+        doc.root[i] = new
+        want[name] = dict(new)
+    if set(want) != set(songs):
+        raise SystemExit('%s: rows not found: %s' % (ACTOR_INFO, ', '.join(sorted(set(songs) - set(want)))))
+    out = byml.dumps(doc)
+    back = {str(r['__RowId']): r for r in byml.loads(out).root}
+    before = {str(r['__RowId']): r for r in byml.loads(data).root}
+    if set(back) != set(before) or any(back[n] != (want.get(n) or before[n]) for n in back):
+        raise SystemExit('read-back: %s differs from what was intended' % ACTOR_INFO)
+    return out
 
 
 MAGIC_BLESSINGS = ('Item_FairyBless_MP', 'Pouch_FairyBless_MP', 'Item_FairyBless_MPDouble', 'Pouch_FairyBless_MPDouble')
@@ -940,7 +1123,7 @@ def shop_boards(data, shelves, board_exists):
     """count boards ("x5", separate objects a shelf links to, made for its original bundle) for changed
     shelves: shelves {shelf hash: number of items it now sells}. A single item gets no board (the board and
     every link to it removed); a bundle gets the board with its own count (board_exists(name)), or none if
-    the game has no such board. Returns (new data, [what changed])."""
+    the game has no such board. Returns (new data, [what changed], {shelf hash: hash of its removed board})."""
     doc = byml.loads(data)
     acts = doc.root['Actors']
     by_hash = {str(int(a['Hash'])): a for a in acts}
@@ -948,7 +1131,7 @@ def shop_boards(data, shelves, board_exists):
     for a in acts:
         for link in a.get('Links') or []:
             linked_from.setdefault(str(int(link['Dst'])), []).append(a)
-    remove, rename, done = set(), {}, []
+    remove, rename, done, board_of = set(), {}, [], {}
     for sh, count in shelves.items():
         for link in by_hash[sh].get('Links') or []:
             b = str(int(link['Dst']))
@@ -961,6 +1144,7 @@ def shop_boards(data, shelves, board_exists):
             want = SHOP_BOARD % count if count > 1 and board_exists(SHOP_BOARD % count) else None
             if want is None:
                 remove.add(b)
+                board_of[sh] = b
                 done.append('%s board %s removed' % (by_hash[sh]['Gyaml'], board['Gyaml']))
             elif want != board['Gyaml']:
                 rename[b] = want
@@ -994,7 +1178,148 @@ def shop_boards(data, shelves, board_exists):
         want.append(a)
     if [dict(x) for x in byml.loads(new).root['Actors']] != want:
         raise SystemExit('read-back: count boards differ from what was intended')
-    return new, done
+    return new, done, board_of
+
+
+# Shelves sold once. How the game remembers that a map object is gone: GameData/GameDataList has one saved flag
+# per map placement that can be (Bool64bitKey: the key is the placement's hash), made for the placements of
+# actors whose ActorGameDataSetting asks for one, with a reset type that follows that setting:
+#     NoRespawn (heart pieces, Gold Skulltulas, silver rupee tokens...)   24: never reset
+#     BancReset (fairies, scrubs' leaves, the shops' boards and their bottle, bomb, Bombchu, tunic and mask
+#                shelves)                                                 25: until the area is left
+#     SupplyObject (pots, rocks, grass) 88, BancResetNoItemWarp (enemies, Business Scrubs) 280
+#     AlwaysRespawn (every other shelf, the Kokiri Shop's included): no flag at all.
+# The game has no shelf that stays sold for good by itself (the Happy Mask Shop's are released by named flags).
+# Our shop versions ask for NoRespawn, but their placements were made for AlwaysRespawn shelves: no flag, so the
+# shelf was back after a reload (seen in game). A flag can't be added without changing the layout of the save
+# file, so a changed shelf takes over the flag of a shop object this build removes anyway: its own count board
+# ("x5"), else a board of the shop set removed by kokiri_shop_full_stock. The shelf's placement gets that
+# object's hash (with every link to it), and the flag's reset type becomes NoRespawn's. The child and the adult
+# copy of one shelf share one flag, as the game's own objects that exist at both ages share one hash (a chest,
+# a hole cover in Kokiri Forest).
+# Who sets the flag (2026-11-17, in game: with the flag alone the bought shelves were still back after a
+# reload): not the game. A bought shelf doesn't die, its AI only hides its model while the shopkeeper counts it
+# as sold, and that count starts again with every visit. A placement's flag is set by a death marked
+# IsSetRespawnFlagToFalse or by the AI node OneShotActorChangeIsRespawn; the shop versions have an AI of their
+# own that runs that node when the shopkeeper says "sold out" (shop_items.sold_for_good_ai). A NoRespawn
+# placement whose flag is set is not made again: the shelf stays empty, which the game's shops allow (the
+# Market potion shop's bug shelf is placed later than its shopkeeper).
+GAME_DATA = 'GameData/GameDataList.Product.110.byml'
+FLAG_KEPT, FLAG_UNTIL_LEFT = 24, 25
+
+
+def placement_flags(data):
+    """{placement hash: reset type} of the saved per-placement flags"""
+    return {str(int(e['Hash'])): int(e['ResetTypeValue']) for e in byml.loads(data).root['Data']['Bool64bitKey']}
+
+
+def keep_flags(data, hashes):
+    """the per-placement flags with these hashes are never reset (reset type 24, as NoRespawn placements');
+    read back: nothing else changes. Returns (new data, {hash: reset type it had})."""
+    doc = byml.loads(data)
+    root = type(doc.root)(doc.root)
+    table = type(root['Data'])(root['Data'])
+    flags = list(table['Bool64bitKey'])
+    was = {}
+    for i, e in enumerate(flags):
+        h = str(int(e['Hash']))
+        if h not in hashes:
+            continue
+        was[h] = int(e['ResetTypeValue'])
+        if was[h] not in (FLAG_KEPT, FLAG_UNTIL_LEFT):
+            raise SystemExit('%s: flag %s has reset type %d, expected %d or %d'
+                             % (GAME_DATA, h, was[h], FLAG_KEPT, FLAG_UNTIL_LEFT))
+        e = type(e)(e)                                # own copy (shared nodes)
+        e['ResetTypeValue'] = type(e['ResetTypeValue'])(FLAG_KEPT)
+        flags[i] = e
+    if set(was) != set(hashes):
+        raise SystemExit('%s: flags not found: %s' % (GAME_DATA, ', '.join(sorted(set(hashes) - set(was)))))
+    table['Bool64bitKey'] = flags
+    root['Data'] = table
+    doc.root = root
+    new = byml.dumps(doc)
+    before, after = byml.loads(data).root, byml.loads(new).root
+    if list(before) != list(after) or list(before['Data']) != list(after['Data']) \
+            or any(after[k] != before[k] for k in before if k != 'Data') \
+            or any(after['Data'][k] != before['Data'][k] for k in before['Data'] if k != 'Bool64bitKey') \
+            or len(after['Data']['Bool64bitKey']) != len(before['Data']['Bool64bitKey']):
+        raise SystemExit('read-back: %s differs from what was intended' % GAME_DATA)
+    for o, n in zip(before['Data']['Bool64bitKey'], after['Data']['Bool64bitKey']):
+        want = dict(o)
+        if str(int(o['Hash'])) in hashes:
+            want['ResetTypeValue'] = FLAG_KEPT
+        if dict(n) != want:
+            raise SystemExit('read-back: flag %d of %s differs from what was intended' % (int(o['Hash']), GAME_DATA))
+    return new, was
+
+
+def _swap_hashes(v, table, count):
+    """a copy of a map value with the 64-bit hashes in `table` {old: new} replaced (count: how many of each)"""
+    if isinstance(v, dict):
+        new = [(k, _swap_hashes(x, table, count)) for k, x in v.items()]
+        if all(x is y for (_, x), y in zip(new, v.values())):
+            return v
+        out = type(v)(v)
+        for k, x in new:
+            out[k] = x
+        return out
+    if isinstance(v, list):
+        new = [_swap_hashes(x, table, count) for x in v]
+        return v if all(x is y for x, y in zip(new, v)) else type(v)(new)
+    if isinstance(v, byml.UInt64) and int(v) in table:
+        count[int(v)] += 1
+        return type(v)(table[int(v)])
+    return v
+
+
+GROUP_LISTS = ('FarDeleteGroups', 'SimultaneousGroups')   # lists of placement hashes at the top of a map file
+
+
+def _take_over(root, table):
+    """a copy of a map's contents where each placement in `table` {its hash: the hash it takes over} has the
+    new hash wherever it is mentioned. The object that had that hash is gone from the map (removed by this
+    build), but the map's group lists still name it: those stale mentions go first, or the shelf would be in
+    that object's group as well as its own. Returns (new contents, {old hash: mentions changed})."""
+    gone = set(table.values())
+    root = type(root)(root)
+    for key in GROUP_LISTS:
+        if key in root:
+            root[key] = [g if not any(int(h) in gone for h in g) else type(g)(h for h in g if int(h) not in gone)
+                         for g in root[key]]
+    left = collections.Counter()
+    _swap_hashes(root, {h: h for h in gone}, left)
+    if left:
+        raise SystemExit('hash %s (to be taken over by a shelf) is still used in this map'
+                         % ', '.join(str(h) for h in sorted(left)))
+    count = collections.Counter()
+    return _swap_hashes(root, table, count), count
+
+
+def shelf_flag_map_edit(data, moves):
+    """moves {placement hash: hash it takes over}: the placement's Hash and every mention of it in the map (its
+    physics placement ID, the shopkeeper's link to the shelf, the shelf's own links, the group lists) change;
+    the hash taken over must be gone from this map (but for stale mentions in the group lists, dropped). Read
+    back: nothing else changes. Returns (new data, {old hash: mentions changed})."""
+    table = {int(k): int(v) for k, v in moves.items()}
+    if len(set(table.values())) != len(table):
+        raise SystemExit('two shelves of one map would take over the same flag')
+    doc = byml.loads(data)
+    here = collections.Counter(int(a['Hash']) for a in doc.root['Actors'])
+    for old, new in table.items():
+        if here[old] != 1:
+            raise SystemExit('placement %d is %d times in the map, expected once' % (old, here[old]))
+        if here[new]:
+            raise SystemExit('hash %d (to be taken over by shelf %d) is still a placement of this map' % (new, old))
+    doc.root, count = _take_over(doc.root, table)
+    out = byml.dumps(doc)
+    if any(struct.pack('<Q', old) in out for old in table):
+        raise SystemExit('read-back: a replaced hash is still in the map')
+    want, _ = _take_over(byml.loads(data).root, table)
+    back = byml.loads(out).root
+    if back != want or collections.Counter(int(a['Hash']) for a in back['Actors']) != collections.Counter(
+            table.get(h, h) for h in here.elements()):
+        raise SystemExit('read-back: the map differs from what was intended')
+    return out, {str(k): count[k] for k in table}
 
 
 def lift_shelves(data, lifts):
@@ -1165,6 +1490,12 @@ def main(argv):
     if not a.assign and not a.fix:
         ap.error('nothing to do: give CHECK_ID=Item assignments and/or --fix')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
+    # a small seed bag or quiver placed alone means its weapon: the check shows and gives the slingshot / bow,
+    # and the small bag comes with it (the user's rule: never the bag first)
+    for k, (cid, item) in enumerate(assignments):
+        if item in FAMILY_ALIASES:
+            print('%-18s %s placed: gives %s with it instead (the weapon first)' % (cid, item, FAMILY_ALIASES[item]))
+            assignments[k] = (cid, FAMILY_ALIASES[item])
     world = World()
     dicts = zstd.Dictionaries.from_pack(open(os.path.join(a.romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
     mod_romfs = os.path.join(a.out, a.name, 'romfs')
@@ -1225,9 +1556,25 @@ def main(argv):
         out.size(inner, old_inner, new_inner)
         print('fix %-28s %s: %s %d -> %d' % (name, pack, key, expected, value))
 
+    # songs show Sheik's harp (before any ground, shelf or token version copies their model)
+    songs = sorted({item for _, item in assignments if item.startswith(SONG_PREFIX)})
+    if songs:
+        for song in songs:
+            pack = ground_items.pack_path(song)
+            inner = 'Component/ModelInfo/%s.engine__component__ModelInfo.bgyml' % song
+            for key in ('FmdbName', 'ModelProjectName'):
+                src, old = out.read(pack)
+                new, (old_inner, new_inner) = patch_pack(old, inner, key, 'Obj_Rupee', HARP_MODEL)
+                out.write(pack, src, old, new)
+                out.size(inner, old_inner, new_inner)
+        src, old = out.read(ACTOR_INFO)
+        out.write(ACTOR_INFO, src, old, song_harp_rows(old, set(songs)))
+        print('%-18s %s: model %s (Sheik\'s harp) instead of the rupee' % ('songs', ', '.join(songs), HARP_MODEL))
+
     # items that lie on the ground (freestanding, pot drops) and only exist as the model shown when received
     # get a ground version; items a chest gives that have no get-demo settings (ocarinas: Link's instrument)
-    # get a held-up version (tools/ground_items.py)
+    # get a held-up version; what a Gold Skulltula drops is a version built from its token, which marks the
+    # skulltula done when picked up (tools/ground_items.py)
     grounds = {}                                       # (item, version) -> name
 
     def plain(path):
@@ -1245,6 +1592,31 @@ def main(argv):
         if ground_items.kind_of(plain, item) == 'equipment':
             return grounds.setdefault((item, 'held'), ground_items.ground_name(item, 'held'))
         return item
+
+    def gs_drop(item):
+        if item == ground_items.TOKEN:
+            return item                                # its own token
+        if ground_items.kind_of(plain, item) in ('ground', 'item', 'equipment'):
+            return grounds.setdefault((item, 'token'), ground_items.ground_name(item, 'token'))
+        raise SystemExit('%s: not something a Gold Skulltula can drop (no version of it can be made from the '
+                         'token)' % item)
+
+    def get_plan(items):
+        """how gifts, scrubs and song cutscenes give these items: (the items Link can't hold up in
+        Dm_SY_GetInEvent: given with the get window, {ocarina: the sync steps to run after its get})"""
+        deals = {r['__RowId']: r.get('PouchSpecialDeal') for r in byml.loads(plain(
+            ground_items.table_path('PouchActorInfo'))).root}
+        for item in items:
+            if item not in deals:
+                raise SystemExit('%s has no row in PouchActorInfo: not an item' % item)
+        direct = {item for item in items if not ground_items.can_hold_up(plain, item)}
+        if direct:
+            direct_get_allowed(byml.loads(plain(EVENT_INFO)).root)
+        sync = {}
+        if any(deals[item] == SYNC_DEAL for item in items):
+            steps = sync_template(evfl.loads(plain(SYNC_FLOW)).flowchart)
+            sync = {item: steps for item in items if deals[item] == SYNC_DEAL}
+        return direct, sync
 
     # shelves: a game shelf actor (Shop_...) is used as it is; any other item gets a shop version at the price
     # of what the shelf sold, sold once (tools/shop_items.py)
@@ -1266,7 +1638,7 @@ def main(argv):
             shelf_lift[name] = shop_items.SHELF_LIFT[item]
         return name
 
-    planned = plan(world, assignments, on_ground, in_chest, on_shelf)
+    planned = plan(world, assignments, on_ground, in_chest, on_shelf, gs_drop)
     # shelves: which shelf (ShopItemIndex; the Heart has none: 0) and age each placement is, for the lists
     shelf_of = {p['hash']: (p['ages'], int(p.get('params', {}).get('ShopItemIndex', 0)))
                 for spots in world.checks.values() for sp in spots.values() if sp['kind'] == 'shop'
@@ -1323,25 +1695,50 @@ def main(argv):
     for path, (cid, item, song) in sorted(plan_songs(world, assignments).items()):
         src, old = out.read(path)
         ef = evfl.loads(old)
-        said = song_skip(ef.flowchart, cid, item, song)
+        said = song_skip(ef.flowchart, cid, item, song, get_plan([item])[1].get(item))
         out.write(path, src, old, flow_write_checked(ef))
         for line in said:
             print(line, '(%s)' % path.split('/')[-1])
 
-    # gifts: the item of their call of Dm_SY_GetInEvent (read back: only those values change)
+    # gifts: the item of their call of Dm_SY_GetInEvent, or for an item Link can't hold up a call of
+    # GetPouchContent in its place (read back, worked out again from the original: only the gift events change,
+    # as intended; the only new events are the sync steps after an ocarina)
     for path, events in sorted(plan_gifts(world, assignments).items()):
         src, old = out.read(path)
         ef = evfl.loads(old)
-        said = gift_edit(ef.flowchart, events)
+        direct, sync = get_plan(sorted({item for _, item, _ in events.values()}))
+        said, intended, added = gift_edit(ef.flowchart, events, direct, sync)
         new = flow_write_checked(ef)
-        back = {e.name: e for e in evfl.loads(new).flowchart.events}
-        orig = {e.name: e for e in evfl.loads(old).flowchart.events}
-        for name, e in back.items():
-            want = dict(orig[name].params) if isinstance(orig[name].params, dict) else orig[name].params
+        back_fc, orig_fc = evfl.loads(new).flowchart, evfl.loads(old).flowchart
+        back = {e.name: e for e in back_fc.events}
+        orig = {e.name: e for e in orig_fc.events}
+
+        def call(fc, e):
+            return (e.flowchart, e.entry, dict(e.params) if isinstance(e.params, dict) else e.params,
+                    None if e.next is None else fc.events[e.next].name)
+
+        if set(back) != set(orig) | set(added) or set(orig) & set(added) \
+                or any(back[n].type != 'action' for n in added):
+            raise SystemExit('read-back: %s: events differ from what was intended' % path)
+        for name, o in orig.items():
+            e, want = back[name], call(orig_fc, o)
             if name in events:
-                want['ActorName'] = events[name][1]
-            got = dict(e.params) if isinstance(e.params, dict) else e.params
-            if got != want or e.type != orig[name].type:
+                item = events[name][1]
+                if item in direct:
+                    after = e                          # the sync steps, if any, lead to what followed the gift
+                    for _ in range(len(sync.get(item, ()))):
+                        after = back_fc.events[after.next]
+                        if after.name not in added:
+                            raise SystemExit('read-back: %s %s: sync steps not as intended' % (path, name))
+                    want = (DIRECT_GET[0], DIRECT_GET[1], {'ActorName': item},
+                            want[3] if not sync.get(item) else back_fc.events[e.next].name)
+                    if call(back_fc, after)[3] != call(orig_fc, o)[3]:
+                        raise SystemExit('read-back: %s %s does not lead on as the gift did' % (path, name))
+                else:
+                    want = (want[0], want[1], dict(want[2], ActorName=item), want[3])
+                if intended[name] != want:
+                    raise SystemExit('read-back: %s %s was not edited as intended' % (path, name))
+            if call(back_fc, e) != want or e.type != o.type or e.cases != o.cases or e.forks != o.forks:
                 raise SystemExit('read-back: %s %s differs from what was intended' % (path, name))
         out.write(path, src, old, new)
         for line in said:
@@ -1363,7 +1760,9 @@ def main(argv):
                 print('%-18s %s: scrub %s sells %s instead of %s' % (cid, path.split('/')[-1], h, item, was))
         src, old = out.read(SCRUB_FLOW)
         ef = evfl.loads(old)
-        said = scrub_flow_edit(ef.flowchart, [(c, i, [(t, w) for _, _, t, w in rows]) for c, i, rows in scrubs]) if scrubs else []
+        direct, sync = get_plan(sorted({i for _, i, _ in scrubs}))
+        said = scrub_flow_edit(ef.flowchart, [(c, i, [(t, w) for _, _, t, w in rows]) for c, i, rows in scrubs],
+                               direct, sync) if scrubs else []
         lines = {SCRUB_LABEL: SCRUB_LINE} if scrubs else {}
         if guard:
             said += seed_bag_guard(ef.flowchart)
@@ -1383,13 +1782,15 @@ def main(argv):
             return 1                                   # shop versions sell one item
         return int(pouch_rows[actor].get('BundleActorNum', 1))
 
+    removed_boards = {}                                # (map path, shelf hash) -> its removed count board
     for path, changes in sorted(planned.items()):
         shelves = {h: bundle_count(v[1]) for h, v in changes.items() if v[3] == 'shop'}
         if not shelves:
             continue
         src, old = out.read(path)
-        new, done = shop_boards(old, shelves, lambda n: os.path.exists(
+        new, done, board_of = shop_boards(old, shelves, lambda n: os.path.exists(
             os.path.join(a.romfs, *ground_items.pack_path(n).split('/')) + '.zs'))
+        removed_boards.update({(path, sh): b for sh, b in board_of.items()})
         if done:
             out.write(path, src, old, new)
             for d in done:
@@ -1400,6 +1801,46 @@ def main(argv):
             out.write(path, src, old, lift_shelves(old, lifts))
             for h in lifts:
                 print('%-18s %s: %s %.2f m higher' % ('shelf lift', path.split('/')[-1], changes[h][1], lifts[h]))
+
+    # shelves sold once stay sold: each takes over the saved flag of a shop object this build removed (see
+    # GAME_DATA); the shop version's AI sets it when the shelf is sold. Last of the map edits: everything above
+    # finds the shelves by their own hashes.
+    once = {}                                          # check id -> [(map path, shelf hash)]
+    for path, changes in sorted(planned.items()):
+        for h, (cid, item, _, kind) in sorted(changes.items()):
+            if kind == 'shop' and item.startswith(shop_items.PREFIX):
+                once.setdefault(cid, []).append((path, h))
+    if once:
+        src_g, old_g = out.read(GAME_DATA)
+        flags = placement_flags(old_g)
+        free = lambda h: flags.get(h) in (FLAG_KEPT, FLAG_UNTIL_LEFT)   # noqa: E731
+        pool = sorted(h for h in shop_removed if free(h))
+        moves, kept = {}, {}
+        for cid, places in sorted(once.items()):
+            if len({p for p, _ in places}) != len(places):
+                raise SystemExit('%s: two shelves in one map: they can\'t share one saved flag' % cid)
+            own = sorted(removed_boards[x] for x in places if free(removed_boards.get(x)))
+            donor = own[0] if own else pool.pop(0) if pool else None
+            if donor is None:
+                print('  NOTE: %s: no saved flag is free for this shelf (no count board of its own, no removed '
+                      'shop object left): it will be on sale again after the area is reloaded' % cid)
+                continue
+            for p, h in places:
+                moves.setdefault(p, {})[h] = donor
+            kept[donor] = cid
+        for path, mv in sorted(moves.items()):
+            src, old = out.read(path)
+            new, mentions = shelf_flag_map_edit(old, mv)
+            out.write(path, src, old, new)
+            for h, donor in sorted(mv.items()):
+                print('%-18s %s: shelf %s is now placement %s (%d mentions changed): the saved flag of a removed '
+                      'shop board' % (planned[path][h][0], path.split('/')[-1], h, donor, mentions[h]))
+        if kept:
+            new_g, was = keep_flags(old_g, set(kept))
+            out.write(GAME_DATA, src_g, old_g, new_g)
+            for donor, cid in sorted(kept.items(), key=lambda x: x[1]):
+                print('%-18s %s: flag %s reset type %d -> %d (never reset: set by the shelf when sold, it stays sold)'
+                      % (cid, GAME_DATA.split('/')[-1], donor, was[donor], FLAG_KEPT))
 
     if shop_fix:
         # the child shopkeeper's list (also copied in the adult shopkeeper's pack: kept identical), and a list
@@ -1462,7 +1903,11 @@ def main(argv):
                 raise SystemExit('%s: %s has no resource size entry' % (name, inner))
         for t, row in rows.items():
             new_rows.setdefault(t, []).append(row)
-        print('%-6s version %-22s for %s (%d bytes)' % (version, name, item, len(pack)))
+        print('%-6s version %-22s for %s (%d bytes)%s' % (version, name, item, len(pack), {
+            'token': ': dropped by a Gold Skulltula, marks it done when picked up (the token\'s AI and blackboard), '
+                     'spins as the token does (the token\'s animation settings start %s)' % ground_items.SPIN
+        }.get(version, '')))
+    shop_shared = {}                                   # new files that are the same in every shop version
     for (item, price), name in sorted(shops.items()):
         tpl_pack_path = ground_items.pack_path(shop_items.TEMPLATE)
         tpl_pack = plain(tpl_pack_path)
@@ -1475,13 +1920,21 @@ def main(argv):
         for actor in (shop_items.TEMPLATE, shop_items.PRICE_TEMPLATE):
             like_files.update(sarc.Sarc.read(plain(ground_items.pack_path(actor))).files)
         for inner, (data, like) in new_inner.items():
+            if inner in shop_shared:                   # the same file in every shop version's pack (their AI)
+                if shop_shared[inner] != data:
+                    raise SystemExit('%s: %s differs from the one in another shop version' % (name, inner))
+                continue
+            if not inner.split('/')[-1].startswith(name + '.'):
+                shop_shared[inner] = data
             out.add(inner, len(data), like, len(like_files[like]))
         for inner in sarc.Sarc.read(pack).files:
             if out.table.get(inner) is None:
                 raise SystemExit('%s: %s has no resource size entry' % (name, inner))
         for t, row in rows.items():
             new_rows.setdefault(t, []).append(row)
-        print('shop   version %-22s for %s, %d rupees, sold once (%d bytes)' % (name, item, price, len(pack)))
+        print('shop   version %-22s for %s, %d rupees, sold once (%d bytes); its AI %s marks the shelf\'s '
+              'placement as not to be made again once sold and never shows the model again'
+              % (name, item, price, len(pack), shop_items.ONCE_AI))
     for t, rws in sorted(new_rows.items()):
         path = ground_items.table_path(t)
         src, old = out.read(path)

@@ -13,7 +13,51 @@ Found in the game's files:
 - Where a shelf is placed, the map names the actor (`Gyaml`) and its shelf number (`ShopItemIndex`); the shelf
   is changed by changing the actor, the shelf number stays.
 - Shelf items come back after they are bought (`ActorGameDataSetting: AlwaysRespawn`). The game also has
-  `NoRespawn` (used by the silver rupee tokens): `once=True` uses it, to try "sold once" (untested).
+  `NoRespawn` (used by the silver rupee tokens): `once=True` uses it. In game (2026-11-17) the shelf emptied
+  when bought but was back after the area was reloaded: a `NoRespawn` object is remembered through the saved
+  flag of its map placement (`GameData/GameDataList`, `Bool64bitKey`), and the placements of `AlwaysRespawn`
+  shelves have none. The builder gives a changed shelf's placement the flag of a shop board it removes
+  (`tools/build_mod.py`, `GAME_DATA`).
+- With that flag the bought shelves were still back after a reload (in game, 2026-11-17), because nothing ever
+  sets it. How a sold shelf works in the game's files:
+  - "Sold" is the shopkeeper's count for this visit only: the shop talk (`DisplayShop`) adds one to the sold
+    number (`EventTriggerAddShopItemSoldNum`) and the shopkeeper compares it with the list's `StockNum`. A
+    list entry can also name a flag that makes it sold out (`Release`: `IsCheckSoldOutGameData`,
+    `SoldOutGameData`; the blue fire shelf `IsGet.Item_Bottle_BlueFire`, the Market's first bomb shelf
+    `Get_StoneOfFire_IsCompleted_Exp`), but that takes a named flag (a plain one, or a formula over named
+    ones, `BoolExp`), and a placement's flag has no name.
+  - The shelf actor never dies when it is bought. Its AI (`Shop_Item_Base.root`) asks the shopkeeper
+    (`QueryShopItemIsSoldOut`, through the `ForSale` link and its `ShopItemIndex`) and only hides its model
+    (`OneShotGameModelControllerSetVisible`), and tells a linked "sold out" board
+    (`OneShotShopItemSendSoldOutMessage`; `Shop_Board_SoldOut`, linked from the stock-of-one shelves).
+  - A placement's flag is set when the actor dies of a reason marked `IsSetRespawnFlagToFalse` (picked up,
+    life depleted...: `System/CombinationDataTableData/*DeathReasonProcedures`), or by the AI node
+    `OneShotActorChangeIsRespawn` (Bool false): what an item taken through an event does before it deletes
+    itself (`PouchContent.event.root`, next to `OneShotPouchContentPushToPouchOwnInEvent`), and red ice, spider
+    webs and falling floors in their own AI. A `NoRespawn` placement whose flag is set is not made again.
+  - A shop can run with a shelf missing: the Market potion shop's bug shelf is only placed once
+    `Market_Item_Bottle_TutorialEvent_Shop_Bottle_Insect_Appeared` is set, the shopkeeper always.
+  So a shop version sold once gets an AI of its own (`Shop_NX2_Once.root`, `sold_for_good_ai`): the shelf's AI
+  with one addition: where it hides its model because the shopkeeper says "sold out", it also runs
+  `OneShotActorChangeIsRespawn` (false). After a reload the shelf is not placed: an empty shelf (to test).
+  That the shopkeeper refused to sell the Giant's Knife and the Hover Boots again is most likely the game's
+  buy check (Link already has them), not a memory of the sale.
+- In game (2026-11-17) a sold shop version stayed away after a reload, but in the same visit its model was
+  back on the shelf (not buyable). Found in the files:
+  - The shelf AI has no memory: its one selector on `QueryShopItemIsSoldOut` hides the model on "sold out"
+    and shows it again (`OneShotGameModelControllerSetVisible` true) whenever the answer is "not sold out";
+    it is asked again in every state (idle, after every message of the shop talk).
+  - The sold count is not kept for good: it is saved game data, `Shop_SoldNum.<shopkeeper>.<shelf number>`
+    (the shopkeeper's `EventTriggerAddShopItemSoldNum` and `EventQueryCheckIsSoldOutSelectItem`, in
+    `NpcCommon.event.root`), with a reset type of its own (2) that only one other value has, a schedule flag
+    for the Sun's Song (`GraveYard_Hylia_030_AISchedule_For_SongOfSun`): the shops restock, most likely when
+    the time of day changes. Once the count is back at 0 the shelf shows its model again; the flag the shop
+    version set only matters when the area is loaded.
+  - A model is shown from the start without any AI saying so (the Piece of Heart's AI has no such node).
+  So in the shop versions' AI the "not sold out" side of that selector does nothing (the file's own
+  `OneshotDoNothing`; the "sold out" board's AI has the same selector side) instead of showing the model:
+  once hidden as sold, nothing in its AI shows it on the shelf again. The held-up model of the buy scene is
+  shown by another node (the "get demo start" message), before the sale is counted.
 - Shelves of single items name the item that goes into the pouch in their item settings (`PouchActor`: the
   Deku Shield shelf `Weapon_Shield_Deku`, the Bombchu shelves `Item_Bombchu`). A shop version has item
   settings of its own doing the same: the item's settings as parent, `PouchActor` the item.
@@ -26,13 +70,16 @@ them), the shop base's price files, and two small files of its own (price table 
 The text shown when Link looks at the item uses the item's own name; the shop description
 (`<name>_ShopCaption` in the messages) exists only for items the game sells, so other items may show none.
 """
+import copy
+import hashlib
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-from formats import sarc, byml  # noqa: E402
-from ground_items import pack_path, ap_path, table_path, TABLES, _ref_path, pouch_param_path  # noqa: E402,F401
+from formats import sarc, byml, ainb  # noqa: E402
+from ground_items import (pack_path, ap_path, table_path, TABLES, _ref_path, pouch_param_path,  # noqa: E402,F401
+                          resolved_components)
 
 TEMPLATE = 'Shop_Weapon_Shield_Deku'
 PRICE_TEMPLATE = 'Shop_DekuNutBundle_01'      # its price table: the shop base's, with its own price
@@ -43,6 +90,17 @@ ROW_FROM_ITEM = ('ActorName', 'FmdbName', 'ModelAabbMax', 'ModelAabbMin', 'Model
 # (metres, found in game). The Hookshot stood on end, half inside the shelf (2026-11-17).
 SHELF_LIFT = {'Item_Hookshot': 0.25}         # 0.3 tested 2026-11-17: right, a touch high
 NO_RESPAWN = '?Component/ActorGameDataSetting/NoRespawn.game__component__ActorGameDataSetting.bgyml'
+# sold once, for good: the AI of the shop versions (the shelf's own with one addition, sold_for_good_ai)
+BASE_AI = 'Shop_Item_Base'                    # the AI of every shelf
+ONCE_AI = 'Shop_NX2_Once'
+AI_PACK = 'Pack/AI.Global.Product.111.pack'
+PICKUP_AI = 'AI/PouchContent.event.root.ainb'   # an item taken through an event: where the node is copied from
+SOLD_QUERY = 'QueryShopItemIsSoldOut'
+SHOW_NODE = 'OneShotGameModelControllerSetVisible'
+GONE_NODE = 'OneShotActorChangeIsRespawn'
+IDLE_NODE = 'OneshotDoNothing'                # what the "not sold out" side leads to in the shop versions
+BOOL_SELECTOR, SIMULTANEOUS = 7, 3            # node types (formats/ainb.py NODE_TYPES)
+FLOW = 2                                      # link type: flow to child nodes
 
 
 def shop_name(item, price, once=False):
@@ -56,6 +114,152 @@ def gpt_path(actor):
 
 def price_path(actor):
     return 'GameParameter/PriceParam/%s.game__pouchcontent__PriceParam.bgyml' % actor
+
+
+def ai_path(name):
+    return 'AI/%s.root.ainb' % name
+
+
+def ai_info_path(name):
+    return 'AI/AIInfo/%s.engine__actor__AIInfo.bgyml' % name
+
+
+def _node_state(n):
+    """everything a node holds, to compare two nodes"""
+    return (n.type, n.name, n.flags, n.name_hash, bytes(n.guid), n.exb_count, n.exb_size, list(n.attachments),
+            list(n.preconditions),
+            [[sorted(vars(p).items()) for p in getattr(n, kind)[t]]
+             for kind in ('immediates', 'inputs', 'outputs') for t in ainb.PARAM_TYPES],
+            [[(l.node, l.name, tuple(l.extra)) for l in links] for links in n.links])
+
+
+def _doc_state(doc):
+    """everything an AI file holds around its nodes"""
+    return ([(c.name, bytes(c.guid), c.left, c.right) for c in doc.commands],
+            {t: [sorted(vars(g).items()) for g in doc.globals[t]] for t in ainb.GLOBAL_TYPES},
+            list(doc.global_files), len(doc.attachments), list(doc.resident), bytes(doc.exb), list(doc.modules),
+            list(doc.entry_strings), tuple(doc.hashes), tuple(doc.replace_head), list(doc.replacements),
+            doc.output_count, doc.category, doc.category_id, doc.version)
+
+
+def sold_for_good_ai(base, pickup, name=ONCE_AI):
+    """the shelf AI (`base`: Shop_Item_Base.root) under the name `name`, with two changes: where the shelf hides
+    its model because the shopkeeper answers "sold out", it also marks its placement as not to be made again;
+    and where it showed its model because the answer is "not sold out", it does nothing.
+
+    Found in the shelf AI: one selector on QueryShopItemIsSoldOut (asked of the shopkeeper through the ForSale
+    link, with the shelf's ShopItemIndex) leads to OneShotGameModelControllerSetVisible false (sold out) or
+    true; every state of the shelf goes through it (on entering, while idle, after each message of the shop
+    talk). The addition: its "sold out" side becomes "both at once" (Element_Simultaneous, a copy of one of
+    the file's own) of the same hide node and OneShotActorChangeIsRespawn with Bool false, copied from the AI of
+    an item taken through an event (`pickup`: PouchContent.event.root, where it runs next to the node that puts
+    the item in the pouch). Both new nodes are added after the file's own, so no node number changes.
+    The second change (in game 2026-11-17: a sold shelf's model was back in the same visit): the selector's
+    "not sold out" side led to OneShotGameModelControllerSetVisible true, which showed a sold shelf again as
+    soon as the shopkeeper's sold count was reset (saved game data that the game resets, see the top of this
+    file). It now leads to the file's own OneshotDoNothing (one link changed, no node added): the model is
+    shown from the start anyway, and the model held up in the buy scene is shown by another node (the "get
+    demo start" message, checked here: it doesn't go through the selector).
+    Read back: every node of the shelf AI is as it was but for the selector's two links."""
+    doc = ainb.loads(base)
+    if doc.filename != BASE_AI + '.root':
+        raise SystemExit('%s: not the shelf AI expected (%s)' % (ai_path(BASE_AI), doc.filename))
+    n0 = len(doc.nodes)
+
+    def shows(i, visible):
+        n = doc.nodes[i]
+        return n.name == SHOW_NODE and [(x.name, x.value, x.node) for x in n.inputs['bool']] == [
+            ('IsVisible', visible, -1)]
+
+    hits = []
+    for i, n in enumerate(doc.nodes):
+        if n.type != BOOL_SELECTOR:
+            continue
+        inp = n.inputs['bool']
+        if len(inp) != 1 or inp[0].node < 0 or doc.nodes[inp[0].node].name != SOLD_QUERY:
+            continue
+        flow = {l.name: l for l in n.links[FLOW]}
+        if set(flow) != {'True', 'False'} or len(n.links[FLOW]) != 2 \
+                or not shows(flow['True'].node, False) or not shows(flow['False'].node, True):
+            raise SystemExit('%s: the "sold out" selector (node %d) is not as expected' % (ai_path(BASE_AI), i))
+        hits.append((i, flow['True'], flow['False']))
+    if len(hits) != 1:
+        raise SystemExit('%s: %d "sold out" selectors, expected 1' % (ai_path(BASE_AI), len(hits)))
+    sel, link, show_link = hits[0]
+    hide, show = link.node, show_link.node
+
+    # "not sold out" leads to a node that does nothing: the file's own, plain (no values but its own switch,
+    # no links). The shown state never depended on that side alone: the "get demo start" message shows the
+    # held-up model through a node of its own, which must not be the one given up here.
+    idle = [i for i, n in enumerate(doc.nodes) if n.name == IDLE_NODE and not n.preconditions
+            and not n.attachments and not any(n.links)
+            and not any(n.inputs[t] or n.outputs[t] for t in ainb.PARAM_TYPES)
+            and [(t, x.name, x.value) for t in ainb.PARAM_TYPES for x in n.immediates[t]]
+            == [('bool', 'ExecuteEveryFrame', False)]]
+    if len(idle) != 1:
+        raise SystemExit('%s: %d plain %s nodes, expected 1' % (ai_path(BASE_AI), len(idle), IDLE_NODE))
+    idle = idle[0]
+    users = [i for i, n in enumerate(doc.nodes) for l in n.links[FLOW] if l.node == show]
+    if users != [sel]:
+        raise SystemExit('%s: the "show the model" node %d of the "sold out" selector is also used elsewhere'
+                         % (ai_path(BASE_AI), show))
+    others = [l.node for n in doc.nodes for l in n.links[FLOW] if l.node != show and shows(l.node, True)]
+    if len(set(others)) != 1:
+        raise SystemExit('%s: %d other "show the model" nodes, expected 1 (the held-up model of the buy scene)'
+                         % (ai_path(BASE_AI), len(set(others))))
+
+    both = next((n for n in doc.nodes if n.type == SIMULTANEOUS and n.flags == 0 and not n.preconditions
+                 and not n.attachments and not any(n.inputs[t] or n.outputs[t] for t in ainb.PARAM_TYPES)
+                 and all(l.name == '' and not l.extra for l in n.links[FLOW])
+                 and not any(links for t, links in enumerate(n.links) if t != FLOW)), None)
+    if both is None:
+        raise SystemExit('%s: no plain Element_Simultaneous to copy' % ai_path(BASE_AI))
+    gone = [n for n in ainb.loads(pickup).nodes if n.name == GONE_NODE]
+    if not gone or any([(x.name, x.value, x.node) for x in n.inputs['bool']] != [('Bool', False, -1)]
+                       or n.preconditions or n.attachments or any(n.links)
+                       or any(n.outputs[t] for t in ainb.PARAM_TYPES)
+                       or any(n.inputs[t] for t in ainb.PARAM_TYPES if t != 'bool') for n in gone):
+        raise SystemExit('%s: %s not found as expected' % (PICKUP_AI, GONE_NODE))
+
+    def new_node(template, what):
+        n = copy.deepcopy(template)
+        n.guid = hashlib.md5(('NX2-ZOOTR %s %s' % (name, what)).encode()).digest()
+        n.precondition_slot = None
+        if any(bytes(x.guid) == n.guid for x in doc.nodes):
+            raise SystemExit('%s: node id already used' % name)
+        return n
+
+    mark = new_node(gone[0], 'gone')
+    wrap = new_node(both, 'both')
+    wrap.links[FLOW] = [ainb.Link(hide, ''), ainb.Link(n0 + 1, '')]
+    doc.nodes += [wrap, mark]
+    link.node = n0
+    show_link.node = idle
+    doc.filename = name + '.root'
+    new = doc.write()
+
+    back, orig = ainb.loads(new), ainb.loads(base)
+    if back.write() != new or back.filename != name + '.root' or len(back.nodes) != n0 + 2 \
+            or _doc_state(back) != _doc_state(orig):
+        raise SystemExit('read-back: %s differs from what was intended' % ai_path(name))
+    for i, (o, b) in enumerate(zip(orig.nodes, back.nodes)):
+        if i == sel:
+            for l in o.links[FLOW]:
+                if l.name == 'True':
+                    l.node = n0
+                elif l.name == 'False':
+                    l.node = idle
+        if _node_state(o) != _node_state(b):
+            raise SystemExit('read-back: node %d of %s differs from what was intended' % (i, ai_path(name)))
+    b_wrap, b_mark = back.nodes[n0], back.nodes[n0 + 1]
+    if _node_state(b_mark) != _node_state(mark) or _node_state(b_wrap) != _node_state(wrap) \
+            or [(l.node, l.name) for l in b_wrap.links[FLOW]] != [(hide, ''), (n0 + 1, '')] \
+            or b_mark.name != GONE_NODE or [(x.name, x.value) for x in b_mark.inputs['bool']] != [('Bool', False)]:
+        raise SystemExit('read-back: the new nodes of %s differ from what was intended' % ai_path(name))
+    b_flow = {l.name: l.node for l in back.nodes[sel].links[FLOW]}
+    if b_flow != {'True': n0, 'False': idle} or back.nodes[idle].name != IDLE_NODE             or any(l.node == show for n in back.nodes for l in n.links[FLOW]):
+        raise SystemExit('read-back: the "sold out" selector of %s differs from what was intended' % ai_path(name))
+    return new
 
 
 def _refs(root):
@@ -201,6 +405,21 @@ def build(item, price, read_pack, read_table_rows, once=False):
     comp['PouchContentRef'] = '?' + pouch_param_path(name)
     if once:
         comp['ActorGameDataSetting'] = NO_RESPAWN
+        # an AI of its own, which marks the placement as not to be made again once sold (sold_for_good_ai),
+        # with the file that names it, as every actor with an AI of its own has in its pack
+        base_info = ai_info_path(BASE_AI)
+        if resolved_components(tpl.files, TEMPLATE).get('AIInfoRef') != '?' + base_info \
+                or base_info not in tpl.files or ai_path(BASE_AI) not in tpl.files:
+            raise SystemExit('%s: its AI is not %s as expected' % (TEMPLATE, BASE_AI))
+        idoc = byml.loads(tpl.files[base_info])
+        if dict(idoc.root) != {'RootAIRef': 'Work/AI/Root/%s.root.ain' % BASE_AI}:
+            raise SystemExit('%s not as expected' % base_info)
+        idoc.root = type(idoc.root)(idoc.root)
+        idoc.root['RootAIRef'] = type(idoc.root['RootAIRef'])('Work/AI/Root/%s.root.ain' % ONCE_AI)
+        pickup = sarc.Sarc.read(read_pack(AI_PACK)).files[PICKUP_AI]
+        new_inner[ai_info_path(ONCE_AI)] = (byml.dumps(idoc), base_info)
+        new_inner[ai_path(ONCE_AI)] = (sold_for_good_ai(tpl.files[ai_path(BASE_AI)], pickup), ai_path(BASE_AI))
+        comp['AIInfoRef'] = '?' + ai_info_path(ONCE_AI)
     doc = byml.loads(tpl.files[ap_path(TEMPLATE)])
     doc.root = type(doc.root)(doc.root)
     doc.root['Components'] = comp
@@ -220,6 +439,9 @@ def build(item, price, read_pack, read_table_rows, once=False):
     out = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))
     out.files = files
     out.align = {p: (tpl.align.get(p) or itm.align.get(p) or base.align.get(p) or 8) for p in files}
+    for p in (ai_path(ONCE_AI), ai_info_path(ONCE_AI)):          # placed in the pack as the files they come from
+        if p in new_inner:
+            out.align[p] = tpl.align.get(new_inner[p][1]) or 8
     pack = out.write()
 
     tables = {t: {r['__RowId']: r for r in read_table_rows(t)} for t in TABLES}
@@ -262,4 +484,11 @@ def build(item, price, read_pack, read_table_rows, once=False):
         raise SystemExit('read-back: actor parameters of %s differ' % name)
     if int(byml.loads(back.files[price_path(name)]).root['BuyingPrice']) != price:
         raise SystemExit('read-back: price of %s differs' % name)
+    if once:
+        got = resolved_components(back.files, name)
+        if got.get('AIInfoRef') != '?' + ai_info_path(ONCE_AI) or got.get('ActorGameDataSetting') != NO_RESPAWN \
+                or byml.loads(back.files[ai_info_path(ONCE_AI)]).root['RootAIRef'] \
+                != 'Work/AI/Root/%s.root.ain' % ONCE_AI \
+                or ainb.loads(back.files[ai_path(ONCE_AI)]).filename != ONCE_AI + '.root':
+            raise SystemExit('read-back: the sold-once AI of %s differs' % name)
     return name, pack, new_inner, rows

@@ -4,6 +4,330 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### In-game result: bought shelf items vanish
+- **Confirmed in game:** the Giant's Knife, Hover Boots and Song of Storms disappeared from their shelves right
+  after buying and stayed gone (shop screen, leaving and coming back, day/night change, reload).
+
+### A sold shelf's model no longer comes back in the same visit (not yet tested in game)
+- **Bug (in game):** a bought changed shelf stayed empty after a reload, but in the same visit its model was
+  back on the shelf (not buyable).
+- **Found in the game's files:**
+  - The shelf AI (`Shop_Item_Base.root`, and our copy `Shop_NX2_Once.root`) has no memory. Its one selector
+    on `QueryShopItemIsSoldOut` hides the model on "sold out" and **shows it again** on "not sold out"
+    (`OneShotGameModelControllerSetVisible` true), and it is asked in every state: idle, and after every
+    message of the shop talk but "hide" and "get demo start" (message numbers matched with the shopkeeper's
+    `NpcCommon.event.root`: focus, select, hide, get demo start / end, show, put in pouch).
+  - The sold count is saved game data, not the shopkeeper's memory: `Shop_SoldNum.<shopkeeper>.<shelf 0-7>`
+    (`EventTriggerAddShopItemSoldNum` adds 1; `EventQueryCheckIsSoldOutSelectItem` compares it with the
+    list's `StockNum`). In `GameData/GameDataList` those 104 numbers (13 shopkeepers x 8) are saved and have
+    a reset type of their own, 2, that only one other value has: `GraveYard_Hylia_030_AISchedule_For_SongOfSun`.
+    So the game restocks its shops by itself, most likely when the time of day changes (a guess from that
+    one name; the earlier test build had the Sun's Song in a chest). `DisplayShop` has no "refresh shelves" step and
+    `EventTriggerInitializeBuyShop` only clears the selected shelf.
+  - So: once the count is back at 0 the shelf shows its model again. The flag our shop version set
+    (`OneShotActorChangeIsRespawn`) only matters when the area is loaded; the shopkeeper's refusal is the buy
+    check (Link already has the item). The game's own stock-of-one shelves (the "low on stock" Kokiri Shop)
+    are meant to come back the same way.
+- **Fix** (`shop_items.sold_for_good_ai`, one more link changed in `Shop_NX2_Once.root`): the selector's
+  "not sold out" side leads to the file's own `OneshotDoNothing` instead of the "show" node (the "sold out"
+  board's AI has the same selector side). No node added. A model is shown from the start without any AI
+  saying so (the Piece of Heart's AI has no such node), and the model held up in the buy scene is shown by
+  another node ("get demo start", sent before the sale is counted): checked by the builder. Once hidden as
+  sold, nothing in the shelf's AI shows it again. Read back: the selector's two links, nothing else.
+- **Guessed:** when the game resets the count (it was not seen happening), and that the shelf's query reads
+  that same count (it is in the game's code, not in a file); that nothing outside the AI shows
+  the model (then this would not be enough); that the "show" node left without a link is harmless.
+- **Limit:** the hidden shelf can still be pointed at in the buy screen. After a restock the shopkeeper would
+  offer it again: refused for an item Link can hold once, but an item he can hold several of could be bought
+  again from the empty shelf until the area is reloaded (then the shelf is gone for good).
+- **To test:** buy the Giant's Knife, the Hover Boots and the Song of Storms: each is on its shelf before,
+  held up in the buy scene, and gone at once after; still gone after leaving the buy screen, after walking
+  out of the shop and back in, after day / night changes (Sun's Song) while staying in the forest, and after
+  a reload. The other shelves sell as before.
+
+### In-game results of the kept fixes
+- **Sold shelves stay empty after a reload** (Giant's Knife, Hover Boots, Song of Storms): confirmed. But in the
+  same visit, after buying, the item's model is shown again (not buyable). Wanted: the model gone at once after
+  buying and never back.
+- Confirmed: Sun's Song from a chest and Song of Storms on a shelf as the harp, Saria's Song as a harp on the
+  ground, the slingshot from a chest with 30 seeds, the ocarina gift, the skulltula's heart piece spinning.
+- The bridge scrub wasn't tested. Rule from the user: never place the same item twice (that build had the
+  slingshot in a chest and at the scrub).
+
+### Progressive upgrades taken out again
+- The progressive-upgrade work below (the shared get `GetPouchContent<GetPouchContent>` choosing the level, the
+  chest flows `Dm_SY_Treasurebox` / `Dm_SY_TreasureboxSmall` handing over owned levels, the waits, the scrub
+  level choice, chests holding the first level, the refusals on the ground / shelves / skulltulas) is **removed**
+  from `tools/build_mod.py`: those rounds piled untested changes onto the game's shared flows (the user's call).
+  The game's own get and chest flows are no longer in the mod. Kept: the slingshot first (`FAMILY_ALIASES`: a
+  small seed bag or quiver placed alone becomes its weapon, the bag comes with it; scrubs add it,
+  `SCRUB_COMPANIONS`), the ocarina gift, sold shelves vanishing, the skulltula's item spinning, the harp model.
+- To redo later, one piece at a time, each tested alone (chests first). What was learned stays below: the
+  pouch query `EventQueryIsExistInPouch`, the `Armor_*` / `Weapon_*` inventory names, the game reading written
+  data a frame or two later (wait after writing), chests showing only the window for an owned item.
+
+### Progressive gets mixed up items: the game reads written data a frame later
+- **In game (combined test):** the chests gave items depending on the order they were opened (the slingshot
+  chest, holding up the slingshot, said "You got a giant's wallet!"), the rock-circle Kokiri gave a giant's
+  wallet and no ocarina, and a chest held up the biggest bomb bag while giving the first one.
+- **Cause:** the shared get wrote the item name into `Scrub_Business_TempItemName_02` and compared it at once;
+  a value written into the game data is read back only a frame or two later, so it compared the **previous**
+  item's name. The game's own flows wait after writing (`Enemy_Scrub_Business_Seed`: String64 -> `EventWait` 1
+  frame -> use; `MelodyGet_Sun_SubEvent`: flag -> `EventWait` 2 frames -> read). (The user's French randomizer
+  notes the same and waits there too; read only.) Now a wait of 2 frames (`WRITE_WAIT_FRAMES`) after every
+  name written: in the shared get and in the scrub branch (the level written for its line).
+- **Chests and owned items:** a chest whose item Link already owns only shows the window and adds nothing
+  (`Dm_SY_Treasurebox` Event25 / `Dm_SY_TreasureboxSmall` Event17: `EventQueryCanAddToPorch` case 2 ->
+  `GetPouchContent<DisplayGetByActorName>`). A chest now holds its family's **first** level (the slingshot, as
+  the user wants shown, not a bag), and for a level of a placed family case 2 goes to the hand-over too, where
+  the shared get gives the next level (`chest_owned_edit`, same write + wait + compare). The first chest of a
+  family holds up the right model; later ones hold up the first level's model while the window names the level
+  given.
+- **Harp songs:** shown on the shelf and held up as the harp; it doesn't spin held up and clips Link's face a
+  little (the harp's model is centred, the rupee's sat on its base). Not fixed yet.
+- Rebuilt; not yet tested in game.
+
+### In-game results of the first bug fixes, and the slingshot first
+- **Ocarina gift: fixed.** The rock-circle Kokiri gave the Fairy Ocarina with the window, no freeze, and it
+  played straight away (not held up: it has no held-up animation).
+- **Scrub selling the small seed bag alone: froze again** (sound and world running, no control). It should never
+  be given alone: the slingshot comes with its bag, then the bigger bag, then the biggest (the user's rule). A
+  small seed bag or quiver placed alone now becomes its weapon at the start of the build (`FAMILY_ALIASES`): the
+  check shows and gives the slingshot / bow, the small bag comes with it (`SCRUB_COMPANIONS` now also gives the
+  bow its small quiver at scrubs). Not yet tested in game.
+- **Changed shelves after a reload:** the Giant's Knife and Hover Boots were back on their shelves, but the
+  shopkeeper refused to sell them again. Wanted: sold out for good, the item not shown. (Fixed again below.)
+- **Gold Skulltula:** the Piece of Heart dropped and was taken without pressing A; once collected the
+  skulltula stayed gone; left lying, the skulltula came back with its item. Correct. But the heart piece didn't
+  spin. (Fixed below.)
+
+### Sold shelves stay empty, Gold Skulltula drops spin (branch `claude/item-fixes`; not yet tested in game)
+Two bugs seen in game on 2026-11-17 with the fixes below. Both are in the builder (`tools/shop_items.py`,
+`tools/ground_items.py`, a few lines of `tools/build_mod.py`); nothing here has been tried in game yet.
+
+**1. Bought changed shelves were back after a reload (but could not be bought again).**
+- What "sold" is in the game's files:
+  - The shop talk (`DisplayShop`) adds one to the shopkeeper's sold number
+    (`EventTriggerAddShopItemSoldNum`), which the shopkeeper compares with the list's `StockNum`
+    (`EventQueryCheckIsSoldOutSelectItem`). That count lives for one visit: nothing saves it.
+  - The shelf actor never dies. Its AI (`Shop_Item_Base.root`, in every shelf's pack) asks the shopkeeper
+    through its `ForSale` link and its shelf number (`QueryShopItemIsSoldOut`) and hides or shows its model
+    (`OneShotGameModelControllerSetVisible`); it also tells a linked "sold out" board
+    (`OneShotShopItemSendSoldOutMessage`). `Shop_Board_SoldOut` boards are placed by hand in the maps and
+    linked from the shelves that can sell out (the two stock-of-one shelves of the "low on stock" Kokiri
+    Shop, the masks, the blue fire, the Market's first bomb shelf).
+  - A list entry can name a flag that makes it sold out (`Release`: `IsCheckSoldOutGameData`,
+    `SoldOutGameData`: `IsGet.Item_Bottle_BlueFire`, `Get_StoneOfFire_IsCompleted_Exp`). It takes a named
+    flag (a plain one, or a formula `BoolExp`, whose steps only read named flags, numbers and lists); the
+    flag of a map placement (`Bool64bitKey`) has no name, and the `IsGet.` flags are one per item (under its
+    inventory name: `IsGet.Weapon_Sword_Giant`, `IsGet.Armor_Adult_HoverBoot`), not one per shelf: they
+    would count an item found anywhere else, and a second Piece of Heart on a shelf would be sold out
+    from the start. Not used.
+- Cause: the flag the shelf took over (previous fix) is never set. A placement's flag is set when its actor
+  dies of a reason marked `IsSetRespawnFlagToFalse` (`System/CombinationDataTableData/*DeathReasonProcedures`:
+  picked up, life depleted, burned...), or by the AI node `OneShotActorChangeIsRespawn` with Bool false. A
+  bought shelf does neither, so after a reload it was placed again, and the shopkeeper's count was back at 0.
+  That the shopkeeper would not sell the Giant's Knife and the Hover Boots a second time is most likely the
+  game's buy check (`EventQueryCheckBuyResult`: Link already has them), not a memory of the sale: an item Link
+  can hold several of could probably have been bought again.
+- Fix: shop versions (`Shop_NX2_*_Once`) get an AI of their own, `Shop_NX2_Once.root`
+  (`shop_items.sold_for_good_ai`): the shelf's AI with one addition. Its one selector on "sold out" led to
+  "hide the model"; it now leads to both at once (`Element_Simultaneous`, copied from the file) of the same
+  hide node and `OneShotActorChangeIsRespawn` (false), copied from the AI of an item taken through an event
+  (`PouchContent.event.root` in `Pack/AI.Global`, where it runs next to the node that puts the item in the
+  pouch; red ice, spider webs and falling floors use it in their own AI). The two new nodes come after the
+  file's 54, so no node number changes. The pack also gets the small file naming that AI (`AI/AIInfo/
+  Shop_NX2_Once`), and the actor's `AIInfoRef` points at it. The game's own shelves keep their AI.
+  - Result expected: buying sets the placement's flag (reset type 24 since the previous fix: never reset),
+    and a `NoRespawn` placement whose flag is set is not made again: after a reload the shelf is **empty**,
+    for good, at both ages. No "sold out" board: the game shows one only where a board is placed and linked,
+    and with the shelf not placed nothing would tell the board.
+  - A shop with a shelf missing is something the game does itself: the Market potion shop's bug shelf is
+    only placed once `Market_Item_Bottle_TutorialEvent_Shop_Bottle_Insect_Appeared` is set, its shopkeeper
+    always (the mask shelves likewise).
+  - Read back: every node of the shelf AI is as it was but for that one link; the two files are the same in
+    every shop version's pack (one resource size entry each).
+- Limits, unchanged: a shelf for which no flag is free (the printed NOTE) still comes back; a game shelf
+  actor (`Shop_...`) put on another shelf is as the game made it.
+- To test: buy the Giant's Knife (`KF_KOKIRI_CHILD_SHOP_08`) and the Hover Boots (`KF_KOKIRI_CHILD_SHOP_02`),
+  leave the shop and come back, and again after saving and restarting: both shelves empty, the cursor skips
+  them or stays usable, the other six shelves sell as before. Also on a new visit before buying: both items
+  are on their shelves (the shelf must not mark itself sold when it is made).
+- Uncertain until tested: that the game runs an AI file under a new name from the actor's pack (every game
+  actor with an AI of its own has it there, but all our earlier AI edits changed existing files); that the
+  two numbers at the end of an AI file (`hashes`, kept as they were) are not checked against its contents;
+  that the shopkeeper never answers "sold out" for a shelf that is just being made (it would mark an unsold
+  shelf); how the buy screen's cursor treats the empty place.
+
+**2. The Piece of Heart dropped by a Gold Skulltula did not spin.**
+- Cause, from the game's files: items on the ground are spun by their AI. The ground items' AI
+  (`DropItem.root`) and the Piece of Heart's own (`Obj_Heart_Piece.root`) play the animation command
+  `Rotate_Obj` (`OneShotASPlay`) whenever nothing is playing, and their animation settings (`ASInfo`:
+  `Item_Obj`) start nothing by themselves (`AutoPlayASName` empty). The token's AI (`Item_Token_Gold.root`)
+  plays nothing: the token spins because its own settings (`ASInfo`: `Obj_Token_Gold`) start `Rotate_Obj` by
+  themselves; they are `Item_Obj` in every other value. A Gold Skulltula drop has the token's AI (it is what
+  marks the skulltula done) but was given the item's or the ground shield's `Item_Obj`: nothing ever started
+  the spin.
+- Fix (`ground_items.build`, version `token`): a drop keeps the token's `ASInfo`, and takes only the animation
+  file (`ASRef`) from the item when it is a ground item whose file knows `Rotate_Obj` (Piece of Heart:
+  `AS/Obj_Heart_Piece`; rupees: `AS/Item_Rupee_Green`), else from the ground shield (`AS/Item_Common`). Not
+  the token's own file: its spin uses an animation of the token's model (`Rotate_Obj_St`). The `Rotate_Obj`
+  animation itself is in `Item_Common_Animation`, which the items' animation settings list. Everything that
+  worked is as it was (the token's AI, blackboard, death settings, physics; picked up by walking into it).
+- To test: `KF_KNOW_IT_ALL_HOUSE_GS=Obj_Heart_Piece`: the dropped Piece of Heart spins; it is still taken by
+  walking into it, the skulltula stays gone once it is taken and is back with its item when it isn't.
+- Uncertain: how the spin looks on items that only exist as the model held up (Boomerang...): they get the
+  same command from `AS/Item_Common` (every item on the ground spins with it), not tried.
+- Test build: `KF_KOKIRI_CHILD_SHOP_08=Item_Sword_Giant KF_KOKIRI_CHILD_SHOP_02=Item_HoverBoot
+  KF_KNOW_IT_ALL_HOUSE_GS=Obj_Heart_Piece` with the usual fixes and the gold rupee; `tests/logic_check.py`
+  and `tests/db_check.py` pass.
+
+### Progressive upgrades (branch `claude/item-fixes`)
+- A check given any level of an upgrade family now gives the **next level Link doesn't have** (never skipping
+  one). Families, from the game's tables: wallet 500 -> 1000 (200 is the start), bomb bag 20 -> 30 -> 40,
+  slingshot -> seed bag 40 -> 50, bow -> quiver 40 -> 50 (the small bag and quiver come with the weapon), stick
+  bag 20 -> 30, nut bag 30 -> 40, Goron Bracelet -> Silver -> Gold Gauntlets, Silver -> Gold Scale, Hookshot ->
+  Longshot, Magic -> Double Magic, Fairy Ocarina -> Ocarina of Time (`PROGRESSIVE` in `tools/build_mod.py`).
+- How: the level is chosen with the game's own "is it in the pouch?" query
+  (`PouchSystemActor.EventQueryIsExistInPouch`, 0 = yes, as in `DisplayShop`), from the top level down. The
+  idea of asking the pouch comes from the user's progression fix for the French randomizer (read only).
+  The inventory name differs for some items: the gauntlets are kept as `Armor_Child_Gauntlet_Goron` /
+  `Armor_Adult_Gauntlet_*`, the bow and slingshot as `Weapon_Range_*` (only those have `IsGet.` flags).
+  - Chests, NPC gifts and song skips all end in `GetPouchContent<GetPouchContent>`: its first step now keeps
+    the item name (`Scrub_Business_TempItemName_02`, an unsaved text game data only written when a scrub's talk
+    starts) and, for a level of a family (or a chest's held-up version of one), gives the chosen level with a
+    copy of the entry's own window and add steps (`progressive_get_edit`). Ocarinas get the sync steps.
+  - Scrubs choose the level in their own branch and set `Scrub_Business_TempItemName_00` to it, so the
+    generic line names the level actually sold.
+  - Items on the ground, on shelves and dropped by Gold Skulltulas are given by the game's own code (no flow to
+    choose the level): progressive items are refused there for now.
+- A chest's held-up model / the gift's held-up model still shows the level placed, the window names the level
+  given. Not yet tested in game.
+- **Songs show Sheik's harp** (the user's choice) instead of the green rupee: the song items borrow the rupee
+  model (`Obj_Rupee`) and the game has no note model. For every song placed, its model settings (`ModelInfo`
+  in its pack) and its `RSDB/ActorInfo` row (model, size, the larger heaps) take those of the cutscene harp
+  `Dm_Item_Sheik_Harp` (model `Item_Harp_Sheik`), before any ground, shelf or token version copies the model
+  (checked: the versions have the harp too). Not yet tested in game.
+
+### Fixes for the three bugs of the item type test (branch `claude/item-fixes`; not yet tested in game)
+All three are in the builder (`tools/build_mod.py`, `tools/ground_items.py`); nothing here has been tried in
+game yet.
+
+**1. Ocarina gift froze the game (gifts and scrubs).**
+- Cause, from the game's files: the shared get event `Dm_SY_GetInEvent` shows the item in Link's hands. It makes
+  the item's own actor (`Player_Event.EventCreateShowItemFromActorFileName`) and plays its animation command
+  `Rotate_GetDemo`, waiting for it to end (`EventIgnitionShowItem`: `IsAsPlay`, `IsWaitEnd`). All 40 actors the
+  game's own flows give through that event have an animation file (`ASRef`, a loose `AS/*.asb`) that knows that
+  command. The ocarinas (Link's instrument, no `ASRef` at all), the songs, the small seed, stick and nut bags
+  and the small quiver (no `ASRef`), the three stones (`AS/Dummy`) and the six medallions (`AS/DemoDummy`) don't:
+  the wait never ends. That is the freeze with the Fairy Ocarina, and the earlier one with the seed bag from a
+  scrub (`Item_BulletBag_Small`: no `ASRef`). Chests never run that event, which is why a chest ocarina only
+  showed nothing.
+- Also found: why a song cutscene calling `Dm_SY_GetInEvent` gave nothing (2026-11-17, song skip).
+  `RSDB/GameAnalyzedEventInfo` lists for each event the flow files it may run (`SubFlowList`); `Dm_MelodyGet_Saria`
+  lists `GetPouchContent` but not `Dm_SY_GetInEvent`. All 113 events that list `Dm_SY_GetInEvent` also list
+  `GetPouchContent` (the first runs the second).
+- Fix: `ground_items.can_hold_up(item)` reads the item's animation file for `Rotate_GetDemo`. An item without
+  it is given the way the game's cutscenes give ocarinas and songs: `GetPouchContent<GetPouchContentByActorName>`
+  (the "You got ..." window and the item, nothing held up; what the song skip already uses, confirmed in game
+  there).
+  - Gifts (`gift_edit`): the gift's call of `Dm_SY_GetInEvent` becomes that call. Items Link can hold up are
+    edited as before (same bytes as before for the gold rupee gift).
+  - Scrubs (`scrub_flow_edit`, point 3): the one-time sale pays and hands over inside
+    `Dm_SY_GetInEvent<GetInEvent_NotTurn_2DShop>`. In front of that call, one new check per such item
+    (`Scrub_Business_TempItemName_00 == item`): the price is taken the same way
+    (`EventTriggerAddGameDataIntToRupee` on `SimpleShop_Price`, `EventWaitStableNumDisplay`), the item given with
+    the get window, then on as after the game's call.
+  - The builder checks the `SubFlowList` rule above before using the window (`direct_get_allowed`).
+- Playable straight away: after an ocarina (items whose `PouchSpecialDeal` is `Ocarina`) given in a flow, the
+  three steps the game runs after changing Link's inventory behind his back (Dream world boss fights:
+  `SubEvent_AllBossBattle`, `DreamBossStage`, `Npc_Dream`): one frame's wait,
+  `UISystemActor.EventTriggerSyncPlayerEquipmentAndPouch`, `Player_Event.EventWaitCreationFinishedEquipment`.
+  Copied from `SubEvent_AllBossBattle` with their actors (`sync_template`, `sync_steps`); also after an ocarina
+  given by a song cutscene. Not done for chest and ground ocarinas (their get is not an event flow of ours).
+- To test: the rock-circle Kokiri gives the Fairy Ocarina (window, no freeze, playable at once); a scrub selling
+  an item of that kind (seed bag, a song, an ocarina): price taken once, item given, scrub leaves.
+
+**2. Changed shop shelves came back after a reload.**
+- How the game remembers that a map object is gone: `GameData/GameDataList` has one saved flag per map
+  placement that can be gone (`Bool64bitKey`, keyed by the placement's hash). Which placements have one, and its
+  reset type, follow the actor's `ActorGameDataSetting`: `NoRespawn` 24 (never reset: heart pieces, Gold
+  Skulltulas, silver rupee tokens), `BancReset` 25 (fairies, scrub leaves, the shops' boards and their bottle,
+  bomb, Bombchu, tunic and mask shelves), `SupplyObject` 88 (pots, rocks, grass), `BancResetNoItemWarp` 280
+  (enemies, Business Scrubs), `AlwaysRespawn`: no flag (every other shelf, all of the Kokiri Shop's). The setting
+  files themselves are not in the game's files (only their names). The game has no shelf that stays sold for good
+  by itself: its stock-of-one shelves are `AlwaysRespawn` (the "low on stock" nuts and stick) or released by named
+  flags (masks).
+- Cause: our shop versions ask for `NoRespawn`, but the shelf placements have no flag in the list, so nothing
+  was saved. A flag can't be added without changing the save file's layout (every flag has a place in it).
+- Fix (`shelf_flag_map_edit`, `keep_flags`, and the step after the count boards in `main`): a changed shelf takes over the flag
+  of a shop object the build removes anyway: its own count board ("x5"), else one of the boards of the "before
+  the Deku Tree" shop set that `kokiri_shop_full_stock` removes. The shelf's placement gets that board's hash
+  (its `Hash`, its physics placement ID, the shopkeeper's two links to it, the map's group lists; stale mentions
+  of the removed board in those lists are dropped first), and the flag's reset type in `GameDataList` goes from
+  25 to 24. One byte per shelf changes in `GameDataList`; its size and the save layout stay the same. The
+  shelf hashes appear nowhere else in the Kokiri Forest maps, the shared map resources or `Logic` (checked).
+- Limits: only shop versions (`Shop_NX2_*_Once`); a game shelf actor put on another shelf is still
+  `AlwaysRespawn`. A shelf with no count board of its own needs a board from the removed set: the Kokiri Shop
+  has 3 of those and 6 shelves without boards (3 per age), so with more than 3 of them changed the rest get a
+  printed NOTE and still come back. (10 "sold out" boards that only exist before the Deku Tree are in the two
+  Dynamic maps and could be removed for more flags: not done, the shop fix is tested as it is.)
+- Uncertain until tested: that buying sets the shelf's flag at all (the game's own flagged shelves suggest it),
+  and that the reset type in the list alone decides when a flag is reset.
+- Seen on the way, not changed: the Business Scrubs' flags are type 280, the same as ordinary enemies. A scrub
+  made one-time by the builder "stayed gone" in the 2026-11-17 test; if that was checked without leaving the
+  area, it may be worth checking again after leaving it.
+
+**3. A Gold Skulltula dropping an item came back after a reload.**
+- How the game marks a skulltula done: not when it dies, but when its token is picked up, and the token does
+  it. Dying only sets an unsaved flag, `IsGoldSkullDead.IsGoldSkullDead_<placement hash>` (100 of them, reset
+  type 25, not in the save; set by `Enemy_Skulltula_Gold.action.root`). The skulltula's saved flag is the one of
+  its placement (`NoRespawn`, type 24). Its AI (`Enemy_Skulltula_Gold.utility.root`) hands that flag's hash to
+  whatever it drops (`QueryBlackboardOverwriteParamAddNoRespawnGmdHash`, key `GoldTokenGmdHash`, through
+  `OneShotDropSetOverWriteParam`). The token (`Obj_Token_Gold`) has that key in its blackboard and its own AI
+  (`Item_Token_Gold.root`): when it dies of reason 10 (picked up) it runs `OneShotGoldTokenDeadAfter`.
+- Cause: the item dropped instead (the item itself or its ground version) has neither the key nor that AI.
+- Fix: what a Gold Skulltula drops is now a version of the item built from the token itself
+  (`Obj_NX2_GS_<item>`, version `token` in `tools/ground_items.py`; `gs_drop` in the builder): the token's pack
+  with its AI, blackboard, death settings, physics and lock-on kept, and the token's name, model, animation and
+  item settings replaced by the item's. Animation settings are the ground shield's, as for every ground version
+  (the token's make the token's model spin), or the item's own when it is a ground item already (Piece of
+  Heart, rupees); no effect link; the base's lift settings. Its own token (`Obj_Token_Gold`) is left as it is.
+- To test: the Know-It-All House skulltula drops the Piece of Heart, it can be picked up, and after leaving and
+  reloading the skulltula is gone. Also that a skulltula killed but whose item was not taken is back after a
+  reload (as the game does with tokens), and how the item hangs where the skulltula died (token physics).
+- Uncertain: that the hash is handed over when the drop comes from `Drop__DropActor` rather than the drop
+  table, and what else `OneShotGoldTokenDeadAfter` does (game code).
+
+### In-game test: item types (20 kinds of item on Kokiri Forest checks; test build only)
+Placed by a planning agent with the builder as it is (no code changed). Results:
+- **Mido's chests** (left to right: Boss Key `Item_Dungeon_BossKey`, Sun's Song `Item_Melody_SunSong`, Map
+  `Item_Dungeon_Map`, adult wallet `Item_Wallet_Medium`): all given correctly. The song shows a **green rupee**
+  as its model when held up ("You learned the Sun's Song!").
+- **Shelves** (Giant's Knife `Item_Sword_Giant`, Hover Boots `Item_HoverBoot`, Kokiri Emerald
+  `Item_Stone_Forest`, Song of Storms `Item_Melody_StormSong`): all bought and in the menus; the shop does not
+  refuse a song (unlike a bottle). The song shows the green rupee on the shelf; the sword and the boots need
+  repositioning on the shelf. **After reloading the area the changed shelves were back** (the "sold once" shop
+  versions are not remembered).
+- **Ground items** (heart container, small key, Goron Tunic, Hylian Shield): all worked. The small key's
+  count stayed 0 (no keyed door here): keys, maps, compasses and boss keys will have to be bound to their
+  dungeon.
+- **Rocks and bushes**: all dropped the right item (token, Goron Bracelet, magic blessing; compass, bottle);
+  the bracelet and the blessing lie too low (half in the ground). Rocks and bushes did not come back.
+- **Gold Skulltula** (Know-It-All House) dropped Saria's Song (green rupee model), but **came back after a
+  reload**: with an item instead of its token it must still count as done.
+- **Gift**: the rock-circle Kokiri giving `Item_Ocarina_Fairy` (`Dm_SY_GetInEvent`) **froze the game
+  completely**.
+- **Scrub**: the bigger bomb bag (`Item_BombBag_Medium`) worked. But progressive items must never skip a level
+  (the wallet and bomb bag were given as the second level directly).
+- **Songs** all played (with the ocarina from Saria; the gift one froze).
+- Item tables (notes from the planning agent): one generic map, compass, boss key and small key for every
+  dungeon (`Item_Dungeon_*`, `Obj_Dungeon_SmallKey`; Gerudo Fortress keys have their own actors); some dungeon
+  chests have special opening events (`BottomOfTheWell_GetCompass`, `ForesetTemple_GetBossKey`, the boots
+  chests). Bigger wallets and bags have no ground model (`no PouchContentRef`): chests, gifts, scrubs only.
+  Wallets 200/500/1000; bags fill up when received (`IsItemStockMaxIfGet`). Rewards (`Item_Stone_*`,
+  `Item_Medal_*`) are plain key items.
+
 ### Songs: an item instead of the song, without the lesson (branch `claude/song-skip`)
 - How Saria's Song is started: an `EventRequestActor` in the child Sacred Forest Meadow map requests
   `SacredForestMeadow_Field_MelodyGet_Saria` (flow `SacredForestMeadow`): fade out, then
