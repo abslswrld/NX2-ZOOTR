@@ -73,9 +73,23 @@ is a ground item whose file knows `Rotate_Obj` (Piece of Heart: `AS/Obj_Heart_Pi
 shield (`AS/Item_Common`); not the token's own file, whose spin uses an animation of the token's model
 (`Rotate_Obj_St`, in `Obj_Token_Gold_Animation`). The `Rotate_Obj` animation itself is in
 `Item_Common_Animation`, which the items' animation settings list.
+
+How high an item lies on the ground (2026-11-17: the Goron Bracelet and the magic blessing dropped by rocks lay
+half in the ground). Found in the game's files (skeletal animations, `Model/*.anim.bfres`): the spin `Rotate_Obj`
+(`Item_Common_Animation`) lifts the bone `Root` by 0.05 and the bone `Skl_Root` by 0.18, but every item's own
+animation project has a pose `Pose_Common` that sets `Skl_Root` (size, turn, height) and takes its place: items
+made to lie on the ground lift themselves there (the Bottle by 0.114, the Deku Shield by 0.238; the Bottle's lowest
+point is then 0.05 above the ground). The bracelet's pose lifts it by -0.01 (and makes it 2.1 times bigger), the
+magic blessing's sets nothing (0): their models are centred on their origin, so half of each was below the ground.
+Their ground versions (and Gold Skulltula drops) get a copy of the item's animation project, renamed (`Item` ->
+`NX2G`, same length) with only the pose's height of `Skl_Root` changed, so the lowest point of the model (its box,
+`ModelAabbMin/Max`, sized and turned by the pose) is 0.05 above the ground, as the Bottle's. Only the items seen
+too low are listed (GROUND_LIFT); the item itself (chests, shelves) keeps the game's animation.
 """
 import copy
+import math
 import os
+import struct
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -217,6 +231,109 @@ def resolved_components(files, actor):
 
 GET_DEMO = b'Rotate_GetDemo'
 
+# items whose own pose leaves them half in the ground (seen in game, 2026-11-17); the magic blessings share one
+# animation project
+GROUND_LIFT = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP')
+GROUND_POSE, POSE_BONE = 'Pose_Common', 'Skl_Root'
+SPIN_ROOT_LIFT = 0.05                        # Rotate_Obj's lift of the bone Root
+GROUND_GAP = 0.05                            # the lowest point above the ground, as the Bottle's
+COMMON_ANIM = 'Item_Common_Animation'
+
+
+def model_path(project):
+    return 'Model/%s.anim.bfres' % project
+
+
+def lifted_project(project):
+    """the name of the lifted copy of an item's animation project (same length)"""
+    if not project.startswith('Item'):
+        raise SystemExit('%s: no lifted name for it (expected Item...)' % project)
+    return 'NX2G' + project[4:]
+
+
+def _str_at(data, off):
+    n = struct.unpack_from('<H', data, off)[0]
+    return data[off + 2:off + 2 + n].decode('ascii')
+
+
+def pose_bone(data, anim, bone):
+    """(offset of the bone animation, flags, base offset) of `bone` in skeletal animation `anim` (FSKA sections:
+    name at +8, bone animations at +0x28, bone count at +0x4c; a bone animation is 0x38 bytes: name, curves,
+    base values, flags at +0x28; base values: scale 3 floats, rotation 4, translation 3, each only when its flag
+    0x8 / 0x10 / 0x20 is set)"""
+    i = 0
+    while True:
+        i = data.find(b'FSKA', i + 1)
+        if i < 0:
+            raise SystemExit('animation %s not found' % anim)
+        if _str_at(data, struct.unpack_from('<Q', data, i + 8)[0]) != anim:
+            continue
+        bones = struct.unpack_from('<Q', data, i + 0x28)[0]
+        for b in range(struct.unpack_from('<H', data, i + 0x4c)[0]):
+            o = bones + 0x38 * b
+            name, _, base = struct.unpack_from('<QQQ', data, o)
+            if _str_at(data, name) == bone:
+                return o, struct.unpack_from('<I', data, o + 0x28)[0], base
+        raise SystemExit('animation %s: no bone %s' % (anim, bone))
+
+
+def _pose(data, base, flags):
+    """(scale, rotation (x, y, z radians), offset of the translation) of a bone animation's base values"""
+    p, scale, rot = base, 1.0, (0.0, 0.0, 0.0)
+    if flags & 8:
+        scale = struct.unpack_from('<f', data, p)[0]
+        p += 12
+    if flags & 0x10:
+        rot = struct.unpack_from('<3f', data, p)
+        p += 16
+    if not flags & 0x20:
+        raise SystemExit('pose has no height to change')
+    return scale, rot, p
+
+
+def lowest_point(aabb_min, aabb_max, scale, rot):
+    """the lowest Y of a model's box, sized and turned (X, then Y, then Z) by a pose"""
+    rx, ry, rz = rot
+    low = None
+    for x0 in (aabb_min['X'], aabb_max['X']):
+        for y0 in (aabb_min['Y'], aabb_max['Y']):
+            for z0 in (aabb_min['Z'], aabb_max['Z']):
+                x, y, z = x0, y0, z0
+                y, z = y * math.cos(rx) - z * math.sin(rx), y * math.sin(rx) + z * math.cos(rx)
+                x, z = x * math.cos(ry) + z * math.sin(ry), -x * math.sin(ry) + z * math.cos(ry)
+                x, y = x * math.cos(rz) - y * math.sin(rz), x * math.sin(rz) + y * math.cos(rz)
+                low = y * scale if low is None else min(low, y * scale)
+    return low
+
+
+def lifted_animation(data, project, aabb_min, aabb_max):
+    """the item's animation project renamed (lifted_project) with the ground pose's height of Skl_Root set so the
+    model's lowest point is GROUND_GAP above the ground; returns (new data, old height, new height)"""
+    o, flags, base = pose_bone(data, GROUND_POSE, POSE_BONE)
+    scale, rot, t = _pose(data, base, flags)
+    old = struct.unpack_from('<f', data, t + 4)[0]
+    if flags & 0x8000000:                     # "no translation": the stored height was not used
+        old = 0.0
+    new_h = GROUND_GAP - SPIN_ROOT_LIFT - lowest_point(aabb_min, aabb_max, scale, rot)
+    if new_h <= old:
+        raise SystemExit('%s: its pose already lifts it enough (%.3f, needed %.3f)' % (project, old, new_h))
+    raw = (project + '.anim').encode('ascii')
+    pat = struct.pack('<H', len(raw)) + raw + b'\0'
+    k = data.find(pat)
+    if k < 0 or data.find(pat, k + 1) >= 0:
+        raise SystemExit('%s: its name is not in the file once' % project)
+    out = bytearray(data)
+    out[k + 2:k + 2 + len(raw)] = (lifted_project(project) + '.anim').encode('ascii')
+    struct.pack_into('<I', out, o + 0x28, flags & ~0x8000000)
+    struct.pack_into('<f', out, t + 4, new_h)
+    out = bytes(out)
+    if len(out) != len(data) or sum(a != b for a, b in zip(out, data)) > 4 + 4 + 4:
+        raise SystemExit('%s: more than the name, the flag and the height changed' % project)
+    o2, f2, b2 = pose_bone(out, GROUND_POSE, POSE_BONE)
+    if abs(struct.unpack_from('<f', out, _pose(out, b2, f2)[2] + 4)[0] - new_h) > 1e-6 or f2 & 0x8000000:
+        raise SystemExit('read-back: %s lifted pose' % project)
+    return out, old, new_h
+
 
 def can_hold_up(read, item):
     """whether Link can hold `item` up in the shared get event (Dm_SY_GetInEvent). That event makes the actor
@@ -253,7 +370,8 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
     """the ground version (version='ground') or held-up version (version='held') of `item`.
     read_pack(path) -> decompressed pack; read_table_rows(table) -> list of rows; model_exists(project name)
     -> whether Model/<project>.anim.bfres exists (items with no animation file of their own: ocarinas).
-    Returns (name, pack data, {inner path: data} of files new to the game, {table: new row})."""
+    Returns (name, pack data, {inner path: data} of files new to the game, {table: new row}, {loose file new to
+    the game: (data, the game file it is a copy of, old height, new height)}: a lifted animation, GROUND_LIFT)."""
     TEMPLATE, TEMPLATE_ITEM, _, TEMPLATE_ONLY, auto_get, tpl_anim = VERSIONS[version]
     name = ground_name(item, version)
     tpl = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))
@@ -318,6 +436,23 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         tdoc.root = type(tdoc.root)(tdoc.root)
         tdoc.root['AnimationResources'] = swapped
         files[anim_param_path(name)] = byml.dumps(tdoc)
+        comp['AnimationRef'] = '?' + anim_param_path(name)
+    loose = {}
+    if item in GROUND_LIFT and version in ('ground', 'token'):
+        # lies too low: its own animation project replaced by a lifted copy (see the notes at the top)
+        adoc = byml.loads(files[_ref_path(comp['AnimationRef'])])
+        res = [dict(x) for x in adoc.root['AnimationResources']]
+        own = [x['ModelProjectName'] for x in res if x['ModelProjectName'] != COMMON_ANIM]
+        if len(own) != 1:
+            raise SystemExit('%s: animation projects %r, expected %s and one of its own' % (item, res, COMMON_ANIM))
+        row = {r['__RowId']: r for r in read_table_rows('ActorInfo')}[item]
+        data, old_h, new_h = lifted_animation(read_pack(model_path(own[0])), own[0], row['ModelAabbMin'],
+                                              row['ModelAabbMax'])
+        loose[model_path(lifted_project(own[0]))] = (data, model_path(own[0]), old_h, new_h)
+        adoc.root = type(adoc.root)(adoc.root)
+        adoc.root['AnimationResources'] = [dict(x, ModelProjectName=lifted_project(x['ModelProjectName']))
+                                           if x['ModelProjectName'] == own[0] else x for x in res]
+        files[anim_param_path(name)] = byml.dumps(adoc)
         comp['AnimationRef'] = '?' + anim_param_path(name)
     # picked up by walking into it: item settings of its own (the item's as parent, DefaultAutoGet on), as
     # the ground shield's own settings over AutoPickShield
@@ -423,7 +558,7 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
     want_ap = dict(tpl_ap.root, Components=dict(comp))
     if byml.loads(back.files[ap_path(name)]).root != want_ap:
         raise SystemExit('read-back: actor parameters of %s differ' % name)
-    return name, pack, new_inner, rows
+    return name, pack, new_inner, rows, loose
 
 
 def add_rows(data, new_rows):
