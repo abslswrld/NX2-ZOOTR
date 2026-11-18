@@ -4,6 +4,82 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Harp cloth in the song's colour (branch `claude/harp-colors`)
+- New `tools/harp_colors.py`: the harp model (one material, one colour texture
+  `Tex/Mt_Harp_Sheik_Item_Harp_Sheik_Alb.bntx`, BC1 sRGB 768 x 768, 10 mip levels, frame and cloth together)
+  gets one variant per coloured song: the model file copied with three names changed to same-length names (model
+  `Item_HrpX_Sheik`, file, colour texture; nothing else moves), and the colour texture copied, renamed, and its
+  navy cloth recoloured on each BC1 block's two end colours (hue 190-275 degrees, saturated -> the song's hue and
+  saturation, brightness scaled); a block whose end-colour order flips is swapped and its indices remapped. Each
+  new name is checked in its file's dictionary. The approach is the user's own, from their earlier project
+  (read only).
+- The builder makes the variant for each placed song in `harp_colors.SONG_COLORS` (new files
+  `Model/Item_Harp_Sheik.Item_HrpX_Sheik.bfres`, `Tex/Mt_Harp_Sheik_Item_HrpX_Sheik_Alb.bntx`, with size-table
+  entries) and points the song's model settings and ActorInfo row at it.
+- First test: Saria's Song with a provisional green (5,972 blocks recoloured), the Sun's Song plain. The 12
+  songbook colours are still to be read (the song icons are ASTC in `UI/Layout2Archive/Common...bntx`; installing
+  a decoder wasn't allowed: the user's screenshot instead).
+- **In game:** the green harp worked (green cloth, gold frame unchanged); the plain harp stayed navy. Held up,
+  the harp still sat low into Link's head and didn't spin.
+- **The songbook colours** (from the user's songbook screenshot: the average of each icon's most coloured
+  pixels): the six songs with white icons (Zelda's Lullaby, Epona's Song, Saria's Song, Sun's Song, Song of Time,
+  Song of Storms) share one white harp, as the user asked (cream, 244/240/214); the warp songs take their icon's
+  colour: Minuet green, Bolero red, Serenade blue, Requiem orange, Nocturne purple, Prelude yellow. One variant
+  per colour (letter W, G, R, B, O, P, Y), shared by the songs of that colour. A light colour is darkened just
+  enough that the cloth keeps its shading (the cloth's brightest 1 % stays at most full brightness).
+- **Spin and height** (found in the game's files; details in `tools/harp_colors.py`): items held up spin
+  through three components the songs lack (`ASInfoRef` Item_GetDemo, `ASRef` AS/Item_Common, `AnimationRef`).
+  The command `Rotate_GetDemo` (`Item_Common_Animation`) turns the bone `Root` and lifts the bone `Skl_Root` by
+  0.18; the harp has both bones but is 0.50 tall, centred. The songs now get the three components (the
+  Boomerang's settings file, an animation list of their own), with an animation project of their own: a copy
+  of `Item_Common_Animation` named `Item_HarpNX_Animation`, whose three lifts (held up, on the ground, still)
+  are 0.31 instead of 0.18. Gifts and song cutscenes still give songs with the get window (unchanged).
+- Test build: Mido's four chests and the Kokiri Sword chest hold five songs (white, green, red, purple, blue).
+  logic_check: 0 failed; db_check: 0 errors. Not yet tested in game.
+- **In game (2026-11-18): crash** right after the first cutscene, when Kokiri Forest loads. Longshot's log: the
+  five song packs load, then the game crashes creating an actor (`Actor/Item_Melod...` in the crash registers),
+  before any harp model loads. The packs themselves matched the Boomerang's. The difference was in their
+  ActorInfo rows: every item that spins lists its animation projects there (`AnimationResources`) and reserves
+  more memory (the Boomerang 114,848 bytes, the songs 68,848). The songs' rows now list `Item_HarpNX_Animation`
+  and take at least the Boomerang's heaps (instance 114,848, render info 29,192). The ground and shelf fix
+  branches already set their rows' lists from the item's own animation settings. Rebuilt, not yet tested in game.
+- **In game: the same crash** (same place, same registers), so the rows were not the cause. The crash is a write
+  through a null pointer (fault at the guest address 0) while creating the song, before its model or animation
+  file is asked for. The cause found in the files: `AS/Item_Common` plays the item's resting pose `Pose_Common`,
+  which comes from the item's own animation project (the one listed after Item_Common_Animation). All 297 items
+  that list Item_Common_Animation have one; the songs listed only the harp's spin. The songs now also list Din's
+  Fire's project (`Item_DinFire_Animation`, used as it is: only `Pose_Common`, leaving `Root` and `Skl_Root` as
+  they are; Farore's Wind and Nayru's Love use it too), in their animation list and their rows. Uncertain: if the
+  pose sets the height of `Skl_Root` itself, the harp's lift (0.31) is lost and it sits as before. Not yet tested.
+- **In game: the same crash a third time.** As the user asked, the spin is off (`harp_colors.SPIN = False`; its
+  code is kept): the songs are built as before the spin, with only the five colours (no animation components,
+  files or row changes). Test build: the same five songs. Not yet tested in game.
+- **In game (2026-11-18): no crash**; the colours work (Serenade blue, Bolero red seen held up, the gold frame
+  unchanged). So the crash came from the spin. Held up, the harp still clips into Link's head a little.
+- **The spin again, with the game's own animation.** Without a spin animation the harp doesn't even get the
+  game's lift of held-up items. What differed from what the game does: the harp listed a renamed copy of
+  `Item_Common_Animation` (`Item_HarpNX_Animation`, for a higher lift). Every crash had that copy, and items with
+  a single unrenamed project work, so the copy is the likely cause (the resting-pose theory was wrong: an item
+  doesn't need `Pose_Common`). The songs now list the game's `Item_Common_Animation` alone, unchanged
+  (`harp_colors.SPIN_PROJECTS`), in their animation list and rows; no new animation file, no Din's Fire pose. The
+  three components and the heaps (the Boomerang's) as before. The lift is the game's 0.18; if the harp still
+  clips, more height has to come another way than a renamed animation. Not yet tested in game.
+- **In game: the same crash a fourth time**, so not the renamed copy either. **Cause found in the game's code**
+  (`.longshot_exefs/main`, loaded at 0x80020000; read with a small decoder in the scratchpad): the crash is in the
+  code that loads an actor's settings file and merges its `Components` with its parent's
+  (`Item_EventObject_Base`). It puts the keys in a table whose room is allocated first, from the memory given for
+  that file. If that allocation fails, the table has no room, and the first key is written through a null pointer
+  (`str x8, [x19]` with x19 = 0 at 0x80688f50). That memory comes from the file's size table entry. The songs'
+  settings file grew from 484 to 732 bytes (3 components added) and the builder added only those 248 bytes to its
+  entry (5,800 -> 6,048). A game file of exactly the same shape (`Item_BombBundle_Small`: 732 bytes, the same 6
+  components, the same parent) has 6,168: loading takes more memory per component than the component's bytes.
+  Every spin build had this, so the rows, the pose and the renamed copy were never the cause. Fix: a size entry
+  can now be given a floor (`Output.size(..., floor=)`); the songs' settings file gets at least the Boomerang's
+  entry (6,344, 7 components). Lesson for later: adding entries to a game file can need more size table room than
+  the bytes it grew (compare with a game file of the same shape).
+- **In game (2026-11-18): works.** No crash; held up, the harps spin and sit clear above Link's head (the game's
+  own lift is enough: no higher lift needed); colours right (Saria white, Bolero red, Serenade blue seen).
+
 ### In-game result: bought shelf items vanish
 - **Confirmed in game:** the Giant's Knife, Hover Boots and Song of Storms disappeared from their shelves right
   after buying and stayed gone (shop screen, leaving and coming back, day/night change, reload).

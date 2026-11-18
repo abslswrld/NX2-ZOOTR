@@ -62,6 +62,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
 import ground_items  # noqa: E402
+import harp_colors  # noqa: E402
 import shop_items  # noqa: E402
 from formats import zstd, byml, restbl, sarc, evfl, ainb, msbt  # noqa: E402
 from logic.world import World  # noqa: E402
@@ -760,16 +761,25 @@ def patch_pack(pack_data, inner, key, expected, value):
 # choice): the song's model settings and its ActorInfo row (model, size, the larger of the two heaps).
 SONG_PREFIX = 'Item_Melody_'
 HARP_ACTOR, HARP_MODEL = 'Dm_Item_Sheik_Harp', 'Item_Harp_Sheik'
+# the item whose animation components the songs take for the spin (harp_colors); its row also gives them the
+# animation list and the heaps such an item needs (2026-11-18: without them the game crashed creating the songs)
+SPIN_LIKE = 'Item_Boomerang'
 ACTOR_INFO = 'RSDB/ActorInfo.Product.111.rstbl.byml'
 
 
-def song_harp_rows(data, songs):
-    """ActorInfo rows of `songs` take the harp's model, size and (the larger) heaps; read back"""
+def song_harp_rows(data, songs, models=None, anim_projects=()):
+    """ActorInfo rows of `songs` take the harp's model, size and (the larger) heaps; models {song: model name}:
+    a song with a harp variant of its own (tools/harp_colors.py) takes that model name; anim_projects: the songs'
+    animation projects (the spin, the resting pose), listed in their rows as SPIN_LIKE lists its own, with the
+    heaps at least SPIN_LIKE's; read back"""
     doc = byml.loads(data)
     rows = {str(r['__RowId']): r for r in doc.root}
     harp = rows.get(HARP_ACTOR)
     if harp is None or harp.get('ModelProjectName') != HARP_MODEL:
         raise SystemExit('%s: no %s row with the model %s' % (ACTOR_INFO, HARP_ACTOR, HARP_MODEL))
+    like = rows.get(SPIN_LIKE)
+    if anim_projects and (like is None or not like.get('AnimationResources')):
+        raise SystemExit('%s: no %s row with an animation list' % (ACTOR_INFO, SPIN_LIKE))
     want = {}
     for i, r in enumerate(doc.root):
         name = str(r['__RowId'])
@@ -780,8 +790,20 @@ def song_harp_rows(data, songs):
         new = type(r)(r)
         for k in ('FmdbName', 'ModelProjectName', 'ModelAabbMax', 'ModelAabbMin'):
             new[k] = harp[k]
+        if name in (models or {}):
+            new['FmdbName'] = type(harp['FmdbName'])(models[name])
         for k in ('InstanceHeapSize', 'PreActorRenderInfoHeapSize'):
-            new[k] = type(r[k])(max(int(r[k]), int(harp[k])))
+            new[k] = type(r[k])(max(int(r[k]), int(harp[k]), int(like[k]) if anim_projects else 0))
+        if anim_projects:
+            if 'AnimationResources' in r:
+                raise SystemExit('%s: %s already has an animation list' % (ACTOR_INFO, name))
+            res = like['AnimationResources']
+            entries = []
+            for project in anim_projects:
+                entry = type(res[0])(res[0])
+                entry['ModelProjectName'] = type(res[0]['ModelProjectName'])(project)
+                entries.append(entry)
+            new['AnimationResources'] = type(res)(entries)
         doc.root[i] = new
         want[name] = dict(new)
     if set(want) != set(songs):
@@ -795,6 +817,60 @@ def song_harp_rows(data, songs):
 
 
 MAGIC_BLESSINGS = ('Item_FairyBless_MP', 'Pouch_FairyBless_MP', 'Item_FairyBless_MPDouble', 'Pouch_FairyBless_MPDouble')
+
+
+def song_spin_files(boomerang_pack):
+    """the files a song's pack gets for the spin (harp_colors): the Boomerang's animation settings file (ASInfo
+    Item_GetDemo) as it is, and an animation list of the songs' own (from the Boomerang's: only
+    harp_colors.SPIN_PROJECTS, the game's Item_Common_Animation)"""
+    files = sarc.Sarc.read(boomerang_pack).files
+    doc = byml.loads(files[harp_colors.ANIM_PARAM_LIKE])
+    res = doc.root['AnimationResources']
+    if [str(r['ModelProjectName']) for r in res][:1] != [harp_colors.ANIM_PROJECT]:
+        raise SystemExit('%s: animations %r, expected %s first' % (harp_colors.ANIM_PARAM_LIKE, res,
+                                                                    harp_colors.ANIM_PROJECT))
+    first = res[0]
+    res[:] = []
+    for project in harp_colors.SPIN_PROJECTS:
+        entry = type(first)(first)
+        entry['ModelProjectName'] = type(first['ModelProjectName'])(project)
+        res.append(entry)
+    out = byml.dumps(doc)
+    if [str(r['ModelProjectName']) for r in byml.loads(out).root['AnimationResources']] != list(
+            harp_colors.SPIN_PROJECTS):
+        raise SystemExit('read-back: the animation list of the songs')
+    return {harp_colors.AS_INFO: files[harp_colors.AS_INFO], harp_colors.ANIM_PARAM: out}
+
+
+def song_spin_pack(pack_data, song, spin):
+    """a song's pack with the animation components (ASInfoRef, ASRef, AnimationRef) and their files (spin:
+    song_spin_files); returns (new pack, (actor file, old size, new size)); read back"""
+    archive = sarc.Sarc.read(pack_data)
+    inner = 'Actor/%s.engine__actor__ActorParam.bgyml' % song
+    if inner not in archive.files or set(spin) & set(archive.files):
+        raise SystemExit('%s: pack not as expected (no %s, or the spin files already there)' % (song, inner))
+    old_inner = archive.files[inner]
+    doc = byml.loads(old_inner)
+    comps = doc.root['Components']
+    add = {'ASInfoRef': '?' + harp_colors.AS_INFO, 'ASRef': '?' + harp_colors.AS_REF,
+           'AnimationRef': '?' + harp_colors.ANIM_PARAM}
+    if set(add) & set(comps):
+        raise SystemExit('%s: already has %s' % (song, sorted(set(add) & set(comps))))
+    kind = type(comps['ModelInfoRef'])
+    for k, v in add.items():
+        comps[k] = kind(v)
+    new_inner = byml.dumps(doc)
+    archive.files[inner] = new_inner
+    archive.files.update(spin)
+    new_pack = archive.write()
+    back, before = sarc.Sarc.read(new_pack).files, sarc.Sarc.read(pack_data).files
+    if set(back) != set(before) | set(spin) or any(back[n] != before[n] for n in before if n != inner) or             any(back[n] != spin[n] for n in spin):
+        raise SystemExit('read-back: %s pack' % song)
+    want = byml.loads(old_inner).root
+    want['Components'].update(add)
+    if byml.loads(back[inner]).root != want:
+        raise SystemExit('read-back: %s differs from what was intended' % inner)
+    return new_pack, (inner, len(old_inner), len(new_inner))
 
 
 def magic_is_separate(data):
@@ -1410,15 +1486,17 @@ class Output:
         src = open(os.path.join(self.romfs, *(path + '.zs').split('/')), 'rb').read()
         return src, zstd.decompress(src, self.dicts)
 
-    def size(self, path, old_len, new_len):
-        """keep the entry's headroom over the original file and add only what the file grew (never shrink)"""
+    def size(self, path, old_len, new_len, floor=0):
+        """keep the entry's headroom over the original file and add only what the file grew (never shrink); floor:
+        the entry is at least this (a game file like the new one: loading a file takes more memory than its bytes,
+        and more per entry it holds, so adding entries can need more than what the file grew)"""
         if path in self.sizes:
             old_len, _, entry, _ = self.sizes[path]
         else:
             entry = self.table.get(path)
             if entry is None:
                 raise SystemExit('%s is not in the resource size table' % path)
-        self.table.set(path, entry + max(0, new_len - old_len))
+        self.table.set(path, max(entry + max(0, new_len - old_len), floor))
         self.sizes[path] = (old_len, new_len, entry, self.table.get(path))
 
     def add(self, path, new_len, like, like_len):
@@ -1559,16 +1637,56 @@ def main(argv):
     # songs show Sheik's harp (before any ground, shelf or token version copies their model)
     songs = sorted({item for _, item in assignments if item.startswith(SONG_PREFIX)})
     if songs:
+        # each colour the songs use (harp_colors.SONG_COLORS) gets a harp variant: a model copy and a recoloured
+        # copy of its colour texture, new files next to the original harp's; songs of one colour share it
+        models = {}
+        for tag in sorted({harp_colors.SONG_COLORS[song] for song in songs if song in harp_colors.SONG_COLORS}):
+            src, old = out.read(harp_colors.MODEL)
+            new = harp_colors.model_variant(old, tag)
+            out.write_new(harp_colors.model_path(tag), new, harp_colors.MODEL)
+            out.add(harp_colors.model_path(tag), len(new), harp_colors.MODEL, len(old))
+            src, old = out.read(harp_colors.ALB)
+            new, changed = harp_colors.texture_variant(old, tag, harp_colors.COLORS[tag])
+            out.write_new(harp_colors.alb_path(tag), new, harp_colors.ALB)
+            out.add(harp_colors.alb_path(tag), len(new), harp_colors.ALB, len(old))
+            users = [song for song in songs if harp_colors.SONG_COLORS.get(song) == tag]
+            for song in users:
+                models[song] = harp_colors.variant_name(tag)
+            print('%-18s %s: harp %s, cloth %s (%d texture blocks recoloured)'
+                  % ('songs', ', '.join(users), harp_colors.variant_name(tag), harp_colors.COLORS[tag], changed))
+        # held up, the harp spins and is lifted above the hands (harp_colors): its own animation project, and the
+        # animation components the Boomerang has; off (harp_colors.SPIN)
+        if harp_colors.SPIN:
+            boomerang = out.read(ground_items.pack_path('Item_Boomerang'))[1]
+            spin = song_spin_files(boomerang)
+            spin_floor = out.table.get('Actor/%s.engine__actor__ActorParam.bgyml' % SPIN_LIKE)
+            if spin_floor is None:
+                raise SystemExit('%s: no size entry for its actor file' % SPIN_LIKE)
+            out.add(harp_colors.ANIM_PARAM, len(spin[harp_colors.ANIM_PARAM]), harp_colors.ANIM_PARAM_LIKE,
+                    len(sarc.Sarc.read(boomerang).files[harp_colors.ANIM_PARAM_LIKE]))
         for song in songs:
             pack = ground_items.pack_path(song)
             inner = 'Component/ModelInfo/%s.engine__component__ModelInfo.bgyml' % song
             for key in ('FmdbName', 'ModelProjectName'):
                 src, old = out.read(pack)
-                new, (old_inner, new_inner) = patch_pack(old, inner, key, 'Obj_Rupee', HARP_MODEL)
+                value = models.get(song, HARP_MODEL) if key == 'FmdbName' else HARP_MODEL
+                new, (old_inner, new_inner) = patch_pack(old, inner, key, 'Obj_Rupee', value)
                 out.write(pack, src, old, new)
                 out.size(inner, old_inner, new_inner)
+            if harp_colors.SPIN:
+                src, old = out.read(pack)
+                new, (inner, old_inner, new_inner) = song_spin_pack(old, song, spin)
+                out.write(pack, src, old, new)
+                # at least the size entry of SPIN_LIKE's actor file (2026-11-18: with only the growth added, the
+                # game crashed creating the songs: its table of the actor's components could not be allocated)
+                out.size(inner, old_inner, new_inner, floor=spin_floor)
+        if harp_colors.SPIN:
+            print('%-18s %s: spin and lift when held up (animations %s)'
+                  % ('songs', ', '.join(songs), ', '.join(harp_colors.SPIN_PROJECTS)))
         src, old = out.read(ACTOR_INFO)
-        out.write(ACTOR_INFO, src, old, song_harp_rows(old, set(songs)))
+        out.write(ACTOR_INFO, src, old, song_harp_rows(
+            old, set(songs), models,
+            harp_colors.SPIN_PROJECTS if harp_colors.SPIN else ()))
         print('%-18s %s: model %s (Sheik\'s harp) instead of the rupee' % ('songs', ', '.join(songs), HARP_MODEL))
 
     # items that lie on the ground (freestanding, pot drops) and only exist as the model shown when received
