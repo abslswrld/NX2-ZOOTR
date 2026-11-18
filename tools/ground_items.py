@@ -47,6 +47,32 @@ Ocarina showed nothing (2026-11-16), though the ocarina could be played. A held-
 way as a ground version, from the Boomerang's item actor (`Item_Boomerang`) instead of the ground shield:
 the Boomerang's own model, animation, item settings and boomerang settings out, the item's in, and item
 settings of its own naming the item (`PouchActor`). Only for items that are not item event actors already.
+
+Gold Skulltula drops (`Obj_NX2_GS_<x>`, to test): what a Gold Skulltula drops instead of its token. Found in
+the game's files (2026-11-17): a Gold Skulltula is not marked done when it dies but when its token is picked
+up, and it is the token that does it. The skulltula's own AI (`Enemy_Skulltula_Gold.utility.root`) hands its
+drop the saved flag of its map placement (`QueryBlackboardOverwriteParamAddNoRespawnGmdHash`, key
+`GoldTokenGmdHash`, through `OneShotDropSetOverWriteParam`); the token (`Obj_Token_Gold`) has that key in its
+blackboard (`Item_Token_Gold` parameter table) and its own AI (`Item_Token_Gold.root`: when it dies of reason
+10, picked up, it runs `OneShotGoldTokenDeadAfter`). Dying only sets the skulltula's unsaved flag
+`IsGoldSkullDead.IsGoldSkullDead_<placement hash>` (gone until the area is left). Any other item dropped has
+neither the key nor that AI, so the skulltula came back after a reload (seen in game). A Gold Skulltula drop
+is therefore built from the token itself: the token's pack (its AI, blackboard, death settings, physics,
+lock-on) with the token's name, model, animation and item settings out and the item's in; no effect link, the
+base's lift settings (the token's name a bone of the token's model).
+
+The spin of a Gold Skulltula drop (2026-11-17: the dropped Piece of Heart lay still). Every item on the ground
+spins through its AI: the ground items' AI (`DropItem.root`, and the Piece of Heart's own `Obj_Heart_Piece.root`)
+plays the animation command `Rotate_Obj` (`OneShotASPlay`) when nothing is playing, and their animation
+settings (`ASInfo`: `Item_Obj`) start nothing by themselves (`AutoPlayASName` empty). The token's AI
+(`Item_Token_Gold.root`) plays nothing: the token spins because its own animation settings (`ASInfo`:
+`Obj_Token_Gold`) start `Rotate_Obj` by themselves (`AutoPlayASName`); they are `Item_Obj` in every other
+value. A drop has the token's AI, so with the item's or the shield's `Item_Obj` nothing ever started the spin.
+A drop therefore keeps the token's `ASInfo`, and takes only the animation file (`ASRef`) from the item when it
+is a ground item whose file knows `Rotate_Obj` (Piece of Heart: `AS/Obj_Heart_Piece`), else from the ground
+shield (`AS/Item_Common`); not the token's own file, whose spin uses an animation of the token's model
+(`Rotate_Obj_St`, in `Obj_Token_Gold_Animation`). The `Rotate_Obj` animation itself is in
+`Item_Common_Animation`, which the items' animation settings list.
 """
 import copy
 import os
@@ -65,11 +91,25 @@ ITEM_REFS = ('ActorNameRef', 'AnimationRef', 'ModelInfoRef', 'PouchContentRef')
 # hold position, effect link
 TEMPLATE_ONLY = ('GameParameterTableRef', 'LiftableRef', 'ELinkRef')
 # kind of version -> (template actor, the item the template stands for, name prefix, template-only settings left
-# out, picked up by walking into it)
+# out, picked up by walking into it, the template's own animation project)
 VERSIONS = {
-    'ground': (TEMPLATE, TEMPLATE_ITEM, PREFIX, TEMPLATE_ONLY, True),
-    'held': ('Item_Boomerang', 'Item_Boomerang', 'Item_NX2_', ('GameParameterTableRef',), False),
+    'ground': (TEMPLATE, TEMPLATE_ITEM, PREFIX, TEMPLATE_ONLY, True, TEMPLATE_ITEM + '_Animation'),
+    'held': ('Item_Boomerang', 'Item_Boomerang', 'Item_NX2_', ('GameParameterTableRef',), False,
+             'Item_Boomerang_Animation'),
+    # what a Gold Skulltula drops: the token with the item's name, model, animation and item settings
+    'token': ('Obj_Token_Gold', 'Item_Token_Gold', 'Obj_NX2_GS_', ('LiftableRef', 'ELinkRef'), True,
+              'Obj_Token_Gold_Animation'),
 }
+TOKEN = 'Obj_Token_Gold'
+# what marks the skulltula done when its drop is picked up: checked to be in a 'token' version (build)
+TOKEN_KEEPS = {
+    'AIInfoRef': '?AI/AIInfo/Item_Token_Gold.engine__actor__AIInfo.bgyml',
+    'BlackboardRef': '?Component/Blackboard/BlackboardInfo/Item_Token_Gold.engine__component__BlackboardInfo.bgyml',
+    'DeathRef': '?Component/DeathParam/Item_Token_Gold.game__component__DeathParam.bgyml'}
+TOKEN_FILES = ('AI/Item_Token_Gold.root.ainb',
+               'Component/Blackboard/BlackboardParamTable/Item_Token_Gold.engine__component__BlackboardParamTable.bgyml')
+TOKEN_KEY = 'GoldTokenGmdHash'                # the blackboard key the skulltula's flag is handed over in
+SPIN = 'Rotate_Obj'                           # the animation command of an item spinning on the ground
 ROW_FROM_ITEM = ('ActorName', 'FmdbName', 'ModelAabbMax', 'ModelAabbMin', 'ModelProjectName')
 TABLES = ('ActorInfo', 'GameActorInfo', 'PouchActorInfo')
 
@@ -92,10 +132,10 @@ def ground_name(item, version='ground'):
 
 def template_of(name):
     """the template actor a version (by its name) was built from"""
-    for tpl, _, prefix, _, _ in VERSIONS.values():
-        if name.startswith(prefix):
-            return tpl
-    raise KeyError(name)
+    hits = [(len(v[2]), v[0]) for v in VERSIONS.values() if name.startswith(v[2])]
+    if not hits:
+        raise KeyError(name)
+    return max(hits)[1]                               # the longest prefix: Obj_NX2_GS_ before Obj_NX2_
 
 
 def _ref_path(ref):
@@ -164,6 +204,43 @@ def kind_of(read_pack, item):
     return None
 
 
+def resolved_components(files, actor):
+    """an actor's components with those of the actors it inherits from ($parent), as far as its pack has them"""
+    comp, p = {}, ap_path(actor)
+    while p and p in files:
+        root = byml.loads(files[p]).root
+        for k, v in root.get('Components', {}).items():
+            comp.setdefault(k, v)
+        p = _parent_path(root)
+    return comp
+
+
+GET_DEMO = b'Rotate_GetDemo'
+
+
+def can_hold_up(read, item):
+    """whether Link can hold `item` up in the shared get event (Dm_SY_GetInEvent). That event makes the actor
+    itself as the item shown in Link's hands (Player_Event.EventCreateShowItemFromActorFileName) and plays its
+    animation command Rotate_GetDemo, waiting for it to end (EventIgnitionShowItem: IsAsPlay, IsWaitEnd). All 40
+    actors the game's own flows give that way have an animation file (ASRef, a loose AS/*.asb file) that knows
+    that command; the ocarinas (Link's instrument), the songs, the small bags, the stones and the medallions
+    have no animation file or one without it, so the wait never ends (the Fairy Ocarina and the seed bag froze
+    the game there). read(path) -> file contents (FileNotFoundError when it isn't there)."""
+    try:
+        files = sarc.Sarc.read(read(pack_path(item))).files
+    except FileNotFoundError:
+        raise SystemExit('%s: no such actor (no %s)' % (item, pack_path(item)))
+    ref = resolved_components(files, item).get('ASRef')
+    if not ref:
+        return False
+    path = _ref_path(ref)
+    try:
+        data = files[path] if path in files else read(path)
+    except FileNotFoundError:
+        return False
+    return GET_DEMO in data
+
+
 def pouch_param_path(actor):
     return 'Component/PouchContentParam/%s.game__component__PouchContentParam.bgyml' % actor
 
@@ -177,13 +254,22 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
     read_pack(path) -> decompressed pack; read_table_rows(table) -> list of rows; model_exists(project name)
     -> whether Model/<project>.anim.bfres exists (items with no animation file of their own: ocarinas).
     Returns (name, pack data, {inner path: data} of files new to the game, {table: new row})."""
-    TEMPLATE, TEMPLATE_ITEM, _, TEMPLATE_ONLY, auto_get = VERSIONS[version]
+    TEMPLATE, TEMPLATE_ITEM, _, TEMPLATE_ONLY, auto_get, tpl_anim = VERSIONS[version]
     name = ground_name(item, version)
     tpl = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))
     itm = sarc.Sarc.read(read_pack(pack_path(item)))
     tpl_ap = byml.loads(tpl.files[ap_path(TEMPLATE)])
     itm_ap = byml.loads(itm.files[ap_path(item)]).root
     tc, ic = tpl_ap.root['Components'], itm_ap['Components']
+    if version == 'token':
+        # ground items may inherit their parts (the blue rupee from the green one)
+        ic = resolved_components(itm.files, item)
+        for r, v in TOKEN_KEEPS.items():
+            if tc.get(r) != v or _ref_path(v) not in tpl.files:
+                raise SystemExit('%s: %s is %r, expected %s (game files differ from what this was made for)'
+                                 % (TEMPLATE, r, tc.get(r), v))
+        if any(p not in tpl.files for p in TOKEN_FILES) or TOKEN_KEY.encode() not in tpl.files[TOKEN_FILES[1]]:
+            raise SystemExit('%s: its AI or its %s blackboard key not found as expected' % (TEMPLATE, TOKEN_KEY))
     missing = [r for r in ITEM_REFS if r not in ic and r != 'AnimationRef']
     if missing:
         raise SystemExit('%s: no %s in its actor parameters: no ground version' % (item, ', '.join(missing)))
@@ -225,7 +311,7 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         # file with the item's animation project
         tdoc = byml.loads(tpl.files[_ref_path(tc['AnimationRef'])])
         res = [dict(x) for x in tdoc.root['AnimationResources']]
-        swapped = [dict(x, ModelProjectName=item + '_Animation') if x['ModelProjectName'] == TEMPLATE_ITEM + '_Animation'
+        swapped = [dict(x, ModelProjectName=item + '_Animation') if x['ModelProjectName'] == tpl_anim
                    else x for x in res]
         if swapped == res:
             raise SystemExit('template animation file not as expected')
@@ -240,13 +326,50 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
     pdoc.root['$parent'] = 'Work/' + _ref_path(ic['PouchContentRef'])[:-len('.bgyml')] + '.gyml'
     if auto_get:
         pdoc.root['DefaultAutoGet'] = True
-    pdoc.root['PouchActor'] = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
+    stands_for, pp = None, _ref_path(ic['PouchContentRef'])
+    while pp and pp in itm.files and stands_for is None:   # a ground item may name another item already
+        proot = byml.loads(itm.files[pp]).root
+        stands_for, pp = proot.get('PouchActor') or None, _parent_path(proot)
+    if not (version == 'token' and stands_for and kind_of(read_pack, item) == 'ground'):
+        pdoc.root['PouchActor'] = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
     files[pouch_param_path(name)] = byml.dumps(pdoc)
     comp['PouchContentRef'] = '?' + pouch_param_path(name)
     if _parent_path(byml.loads(files[pouch_param_path(name)]).root) != _ref_path(ic['PouchContentRef']):
         raise SystemExit('read-back: item settings parent of %s' % name)
     for r in TEMPLATE_ONLY:                         # as Obj_Item_Base
         comp.pop(r, None)
+    if version == 'token':
+        # the spin: the token's AI plays no animation, its animation settings (ASInfo) start Rotate_Obj by
+        # themselves; ground items are spun by their AI instead (DropItem / Obj_Heart_Piece: OneShotASPlay
+        # Rotate_Obj) and their settings start nothing. So the token's settings stay, and only the animation
+        # file comes from the item (a ground item whose file knows the command: the Piece of Heart), else from
+        # the ground shield (Item_Common); the token's own file spins with an animation of the token's model
+        info = _ref_path(tc['ASInfoRef'])
+        if info not in files or byml.loads(files[info]).root.get('AutoPlayASName') != SPIN:
+            raise SystemExit('%s: its animation settings (%s) do not start %s by themselves as expected'
+                             % (TEMPLATE, info, SPIN))
+
+        def knows_spin(pack, ref):
+            path = _ref_path(ref)
+            try:
+                return SPIN.encode() in (pack.files[path] if path in pack.files else read_pack(path))
+            except FileNotFoundError:
+                return False
+
+        sc = ic
+        if 'ASRef' not in ic or kind_of(read_pack, item) != 'ground' or not knows_spin(itm, ic['ASRef']):
+            src = sarc.Sarc.read(read_pack(pack_path(VERSIONS['ground'][0])))
+            sc = resolved_components(src.files, VERSIONS['ground'][0])
+            if 'ASRef' not in sc or not knows_spin(src, sc['ASRef']):
+                raise SystemExit('%s: its animation file does not know %s as expected' % (VERSIONS['ground'][0], SPIN))
+        comp['ASRef'] = sc['ASRef']
+        if comp['ASRef'] == tc['ASRef'] or comp.get('ASInfoRef') != tc['ASInfoRef']:
+            raise SystemExit('%s: animation settings not as intended' % name)
+        for r, v in TOKEN_KEEPS.items():
+            if comp.get(r) != v or _ref_path(v) not in files:
+                raise SystemExit("%s: lost the token's %s" % (name, r))
+        if any(p not in files for p in TOKEN_FILES):
+            raise SystemExit("%s: lost the token's AI or blackboard table" % name)
     doc = copy.copy(tpl_ap)
     doc.root = type(tpl_ap.root)(tpl_ap.root)
     doc.root['Components'] = comp
