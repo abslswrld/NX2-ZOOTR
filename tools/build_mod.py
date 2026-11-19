@@ -22,6 +22,14 @@ age, "age" in its data, only has that age's), the map files are
 written back compressed with the same dictionary as the original, and the resource size table (RESTBL)
 gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, for Longshot's HOS_MODS.
 
+Checking chests: the game has a small chest that looks in Link's inventory (Obj_TBox_A_06, see CHECKING_CHEST).
+One of the game's own that gets an item becomes the ordinary small chest, so it always gives the placed item.
+Progressive pair (opt-in, a test for now): CHECK_ID=First>Second on a small chest makes it a checking chest that
+gives First while Link doesn't have First, else Second; only the pairs in PROGRESSIVE_PAIRS are accepted:
+
+    python tools/build_mod.py ... "KF_MIDO_CHEST_01=Item_Scale_Silver>Item_Scale_Gold"
+(quoted: > is the shell's redirection otherwise)
+
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
                              Deku Tree (the "low on stock" set is removed, every shelf is open from the
@@ -91,6 +99,22 @@ CHEST_EVENTS = {
                                              '(found in game: the sword came with any item; removed and '
                                              'retested 2026-11-16: slingshot only, no sword)'),
     'KokiriForest_TreasureBox_NaviChatOff': ('keep', 'Mido\'s chests: tested in game with four other items, harmless'),
+}
+# The game's checking chest (Obj_TBox_A_06, 9 placements) is the ordinary small chest (its settings file has
+# $parent Obj_TBox_A_01: same model, animation, physics and opening event) with its own AI, a second held actor
+# (SubContent) and three more map settings: it gives Drop__DropActor while Link doesn't have Drop__CheckActor,
+# else Drop__DropActor_Substitute (Graveyard: no Hylian Shield -> the shield, else a red rupee). Its AI makes
+# both items when the chest is made and asks the inventory each time it is run (QueryGetPouchContentNumByActorName,
+# not "only on enter"), handing the chosen holder to the shared chest module that requests the opening event.
+CHECKING_CHEST = {'Obj_TBox_A_01': 'Obj_TBox_A_06', 'Obj_TBox_A_01_NoBake': 'Obj_TBox_A_06_NoBake'}
+PLAIN_CHEST = {v: k for k, v in CHECKING_CHEST.items()}
+CHECK_SETTINGS = ('Drop__CheckActor', 'Drop__DropActor_Substitute', 'Drop__CheckCondition')
+# Progressive pairs (opt-in, CHECK_ID=First>Second on a small chest): the chest becomes the game's checking
+# chest: First while Link doesn't have First, else Second. Two chests with the same pair give First then Second
+# in either opening order. Only pairs listed here are accepted: each family is added once seen working in game
+# (the chest's inventory question must know the family's name; three-level families can't be done this way).
+PROGRESSIVE_PAIRS = {
+    ('Item_Scale_Silver', 'Item_Scale_Gold'),      # step 1: not yet tested in game
 }
 # name -> (BYML file, path of keys to the entry to remove, value it must have now)
 FILE_FIXES = {
@@ -685,10 +709,14 @@ def scrub_messages(out, romfs, lines):
         out.write(path, src, old, new)
 
 
-def patch_file(data, changes):
+def patch_file(data, changes, checking=None):
     """change what the actors with these hashes give: chests and pots through their Drop__DropActor (chests'
     special opening events handled by CHEST_EVENTS), freestanding items by their actor type (Gyaml);
+    checking: {hash: (item to look for, item given when Link has it)}: that small chest becomes the game's
+    checking chest (CHECKING_CHEST). A game checking chest that is not in `checking` becomes the ordinary chest
+    (PLAIN_CHEST) without its check settings, so it always gives the placed item;
     returns (new data, {hash: old item}, {hash: new Dynamic as intended})"""
+    checking = checking or {}
     doc = byml.loads(data)
     found, intended = {}, {}
     for a in doc.root.get('Actors', []):
@@ -699,6 +727,14 @@ def patch_file(data, changes):
             continue
         if h in changes:
             dyn = a.get('Dynamic')
+            if h in checking and a['Gyaml'] not in CHECKING_CHEST and a['Gyaml'] not in PLAIN_CHEST:
+                raise SystemExit('%s: placement %s is a %s: only the small chest (%s) has a checking version'
+                                 % (changes[h][0], h, a['Gyaml'], ', '.join(sorted(CHECKING_CHEST))))
+            if a['Gyaml'] in PLAIN_CHEST and (dyn is None or 'Drop__DropActor' not in dyn):
+                # a game checking chest with nothing set as its first item (Gerudo Training Ground: a green
+                # rupee by default): set like any chest's
+                dyn = type(dyn)(dyn) if dyn is not None else {}
+                dyn['Drop__DropActor'] = None             # nothing set: found below as None
             if changes[h][3] in DROP_ADDED and (dyn is None or 'Drop__DropActor' not in dyn):
                 if dyn is not None and 'Drop__DropTable' in dyn:
                     raise SystemExit('actor %s (%s) drops from a drop table (%s): not supported yet'
@@ -720,6 +756,15 @@ def patch_file(data, changes):
                                      'decide what to do with it first' % (changes[h][0], h, event))
                 if what[0] == 'remove':
                     del dyn['GetEventName']
+            if h in checking:
+                a['Gyaml'] = CHECKING_CHEST.get(a['Gyaml'], a['Gyaml'])
+                for k in CHECK_SETTINGS:
+                    dyn.pop(k, None)
+                dyn['Drop__CheckActor'], dyn['Drop__DropActor_Substitute'] = checking[h]
+            elif a['Gyaml'] in PLAIN_CHEST:
+                a['Gyaml'] = PLAIN_CHEST[a['Gyaml']]
+                for k in CHECK_SETTINGS:
+                    dyn.pop(k, None)
             a['Dynamic'] = dyn
             intended[h] = dict(dyn)
     missing = set(changes) - set(found)
@@ -1466,6 +1511,15 @@ def open_shop_list(data, goods):
     return new
 
 
+MAP_SUFFIX = '.bcett.byml'
+
+
+def map_entry(length):
+    """the size table entry the game has for a map file (Banc/.../*.bcett.byml) of this many bytes: the length
+    rounded up to 32, plus 264 (true of every map in the game)"""
+    return (length + 31) // 32 * 32 + 264
+
+
 class Output:
     """writes changed files into the mod folder and keeps the resource size table up to date"""
 
@@ -1588,6 +1642,17 @@ def main(argv):
     if not a.assign and not a.fix:
         ap.error('nothing to do: give CHECK_ID=Item assignments and/or --fix')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
+    # CHECK_ID=First>Second: a progressive pair in a small chest (PROGRESSIVE_PAIRS): planned as First, the
+    # chest made a checking chest further down
+    steps = {}                                         # check id -> (first, second)
+    for k, (cid, item) in enumerate(assignments):
+        if '>' in item:
+            pair = tuple(item.split('>'))
+            if pair not in PROGRESSIVE_PAIRS:
+                raise SystemExit('%s: %s is not a progressive pair the builder knows (%s)' % (cid, item, ', '.join(
+                    '>'.join(x) for x in sorted(PROGRESSIVE_PAIRS))))
+            steps[cid] = pair
+            assignments[k] = (cid, pair[0])
     # a small seed bag or quiver placed alone means its weapon: the check shows and gives the slingshot / bow,
     # and the small bag comes with it (the user's rule: never the bag first)
     for k, (cid, item) in enumerate(assignments):
@@ -1800,9 +1865,18 @@ def main(argv):
         if not planned[path]:
             del planned[path]
 
+    # progressive pairs: only in chests (the chest itself chooses; nothing else can yet)
+    stepped = {cid for changes in planned.values() for cid, _, _, kind in changes.values() if kind == 'chest'}
+    for cid in sorted(set(steps) - stepped):
+        raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest' % cid)
+
     for path, changes in sorted(planned.items()):
         src, old = out.read(path)
-        new, found, _ = patch_file(old, {h: v for h, v in changes.items()})
+        # (item to look for in the inventory: the item's own name; item given when Link has it: as a chest
+        # gives it)
+        checking = {h: (steps[cid][0], in_chest(steps[cid][1])) for h, (cid, _, _, kind) in changes.items()
+                    if cid in steps}
+        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking)
         for h, (cid, item, expected_old, kind) in changes.items():
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
@@ -1824,6 +1898,21 @@ def main(argv):
                 if ev is not None and changes[h][1] != found[h] and CHEST_EVENTS[ev][0] == 'remove':
                     del dyn['GetEventName']
                     print('%-18s   special opening event %s removed' % (changes[h][0], ev))
+                was = want['Gyaml']
+                if h in checking or was in PLAIN_CHEST:
+                    # the chest's check settings: a progressive pair's, or none left (an ordinary chest)
+                    dyn = {k: v for k, v in dyn.items() if k not in CHECK_SETTINGS}
+                    if h in checking:
+                        want['Gyaml'] = CHECKING_CHEST.get(was, was)
+                        dyn.update(Drop__CheckActor=checking[h][0], Drop__DropActor_Substitute=checking[h][1])
+                        print('%-18s   %s -> %s: gives %s while Link has no %s, then %s'
+                              % (changes[h][0], was, want['Gyaml'], changes[h][1], checking[h][0], checking[h][1]))
+                    else:
+                        want['Gyaml'] = PLAIN_CHEST[was]
+                        print('%-18s   %s -> %s: a checking chest of the game made an ordinary chest (its check '
+                              'for %s removed: it always gives the placed item)'
+                              % (changes[h][0], was, want['Gyaml'],
+                                 (before[h].get('Dynamic') or {}).get('Drop__CheckActor')))
                 want['Dynamic'] = dyn
             if act != want:
                 raise SystemExit('read-back: actor %s (%s) differs from what was intended' % (h, act['Gyaml']))

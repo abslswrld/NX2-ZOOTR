@@ -17,6 +17,9 @@ echo.
 echo === Event flow add check ===
 %PY% tests\evfl_add_check.py "%ROMFS%"
 echo.
+echo === Checking chest check ===
+%PY% tests\chest_check.py "%ROMFS%"
+echo.
 echo === Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence) ===
 %PY% tests\roundtrip.py "%ROMFS%" Event RSDB Mals GameData Pack System AI Logic Sequence --report report.txt
 echo.
