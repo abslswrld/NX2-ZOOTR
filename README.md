@@ -149,6 +149,8 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `tools/evfl_test_mod.py` | builds the small test mod (own folder and launcher) that shows whether event flow edits work in game: the child Kokiri shopkeeper's greeting and goodbye |
 | `tools/ground_items.py` | makes ground versions (`Obj_NX2_<item>`) of items that only exist as the model shown when received, from the game's own ground Deku Shield, so they can lie on the ground or drop from a pot and are picked up by walking into them; also held-up versions (`Item_NX2_<item>`) for chests giving items with no get-demo setup of their own (ocarinas), from the Boomerang's item actor (used by `build_mod.py`) |
 | `tools/shop_items.py` | makes shop versions (`Shop_NX2_<item>_<price>_Once`) of items for shop shelves, from the game's own Deku Shield shelf, sold once (used by `build_mod.py`) |
+| `tools/sizes.py` | what a file's entry in the resource size table has to be, from its contents: the rules per kind of file, fitted on the game's own files (used by `build_mod.py` for every file it changes or adds) |
+| `tests/size_check.py` | checks those rules against the entry of every game file they cover (reads every pack: several minutes; not part of `run_tests.bat`) |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):
 11 regions, 7 chests, 3 Gold Skulltulas, the stick-upgrade scrub, Saria's gift, 8 shop shelves (one check per age, like the pots: 16), 4 pots,

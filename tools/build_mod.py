@@ -64,6 +64,7 @@ sys.path.insert(0, ROOT)
 import ground_items  # noqa: E402
 import harp_colors  # noqa: E402
 import shop_items  # noqa: E402
+import sizes  # noqa: E402
 from formats import zstd, byml, restbl, sarc, evfl, ainb, msbt  # noqa: E402
 from logic.world import World  # noqa: E402
 
@@ -728,7 +729,8 @@ def patch_file(data, changes):
 
 
 def patch_pack(pack_data, inner, key, expected, value):
-    """change one top-level value of a BYML file inside an actor pack; returns (new pack data, inner sizes)"""
+    """change one top-level value of a BYML file inside an actor pack; returns (new pack data, (the inner file
+    before, after))"""
     archive = sarc.Sarc.read(pack_data)
     if inner not in archive.files:
         raise SystemExit('%s not found in the pack' % inner)
@@ -752,7 +754,7 @@ def patch_pack(pack_data, inner, key, expected, value):
     want = dict(byml.loads(old_inner).root, **{key: value})
     if byml.loads(back.files[inner]).root != want:
         raise SystemExit('read-back: %s differs from what was intended' % inner)
-    return new_pack, (len(old_inner), len(new_inner))
+    return new_pack, (old_inner, new_inner)
 
 
 # Songs as items: their actors (Item_Melody_*) borrow the rupee model (Obj_Rupee), so a song held up, on a
@@ -844,7 +846,7 @@ def song_spin_files(boomerang_pack):
 
 def song_spin_pack(pack_data, song, spin):
     """a song's pack with the animation components (ASInfoRef, ASRef, AnimationRef) and their files (spin:
-    song_spin_files); returns (new pack, (actor file, old size, new size)); read back"""
+    song_spin_files); returns (new pack, (actor file's path, its contents before, after)); read back"""
     archive = sarc.Sarc.read(pack_data)
     inner = 'Actor/%s.engine__actor__ActorParam.bgyml' % song
     if inner not in archive.files or set(spin) & set(archive.files):
@@ -870,7 +872,7 @@ def song_spin_pack(pack_data, song, spin):
     want['Components'].update(add)
     if byml.loads(back[inner]).root != want:
         raise SystemExit('read-back: %s differs from what was intended' % inner)
-    return new_pack, (inner, len(old_inner), len(new_inner))
+    return new_pack, (inner, old_inner, new_inner)
 
 
 def magic_is_separate(data):
@@ -1472,6 +1474,7 @@ class Output:
         self.rraw = open(os.path.join(romfs, RESTBL_PATH), 'rb').read()
         self.table = restbl.Restbl.read(zstd.decompress(self.rraw, dicts))
         self.sizes = {}          # path -> (original length, new length, original entry, new entry)
+        self.orig = {}           # path -> the game's file (what its original entry was made for)
         self.written = {}        # path -> (file as stored in the game, contents written): edited twice = read back
 
     def read(self, path):
@@ -1486,28 +1489,45 @@ class Output:
         src = open(os.path.join(self.romfs, *(path + '.zs').split('/')), 'rb').read()
         return src, zstd.decompress(src, self.dicts)
 
-    def size(self, path, old_len, new_len, floor=0):
-        """keep the entry's headroom over the original file and add only what the file grew (never shrink); floor:
-        the entry is at least this (a game file like the new one: loading a file takes more memory than its bytes,
-        and more per entry it holds, so adding entries can need more than what the file grew)"""
+    def size(self, path, old, new, floor=0):
+        """the entry of a changed game file; old, new: its contents before and after. At least: the entry's
+        headroom over the original file plus what the file grew (never shrink); what the contents need by the
+        rules of tools/sizes.py (loading a file takes more memory than its bytes, and a parameter file more per
+        element of its lists and tables: adding elements needs more than what the file grew); and `floor`.
+        A length instead of contents is accepted too: then only the growth counts."""
+        new_len = new if isinstance(new, int) else len(new)
         if path in self.sizes:
             old_len, _, entry, _ = self.sizes[path]
         else:
             entry = self.table.get(path)
             if entry is None:
                 raise SystemExit('%s is not in the resource size table' % path)
-        self.table.set(path, max(entry + max(0, new_len - old_len), floor))
+            old_len = old if isinstance(old, int) else len(old)
+            self.orig[path] = None if isinstance(old, int) else old
+        need = entry + max(0, new_len - old_len)
+        if not isinstance(new, int) and self.orig[path] is not None:
+            try:
+                need = max(need, sizes.entry(path, new, entry, self.orig[path]))
+            except sizes.Unknown as e:
+                raise SystemExit('size table: %s' % e)
+        self.table.set(path, max(need, floor))
         self.sizes[path] = (old_len, new_len, entry, self.table.get(path))
 
-    def add(self, path, new_len, like, like_len):
-        """entry for a file new to the game: the headroom of a similar game file (`like`, `like_len` bytes)"""
+    def add(self, path, new, like, like_data):
+        """entry for a file new to the game (contents `new`): the headroom of a similar game file (`like`,
+        contents `like_data`), and at least what the contents need by the rules of tools/sizes.py (the new file
+        may hold more elements than the similar one)"""
         if self.table.get(path) is not None:
             raise SystemExit('%s is already in the resource size table' % path)
         e = self.table.get(like)
         if e is None:
             raise SystemExit('%s is not in the resource size table' % like)
-        self.table.set(path, e - like_len + new_len)
-        self.sizes[path] = (0, new_len, 0, self.table.get(path))
+        try:
+            need = max(e - len(like_data) + len(new), sizes.entry(path, new, e, like_data))
+        except sizes.Unknown as x:
+            raise SystemExit('size table: %s' % x)
+        self.table.set(path, need)
+        self.sizes[path] = (0, len(new), 0, self.table.get(path))
 
     def write_new(self, path, data, like):
         """write a file new to the game, compressed like the game file `like`"""
@@ -1528,7 +1548,7 @@ class Output:
             dest = os.path.join(self.mod_romfs, *path.split('/'))
             os.makedirs(os.path.dirname(dest), exist_ok=True)
             open(dest, 'wb').write(new)
-            self.size(path, len(old), len(new))
+            self.size(path, old, new)
             return
         did = zstd.frame_dict_id(src)
         comp = zstd.compress(new, level=16, dictionary=self.dicts.get(did) if did else None)
@@ -1537,7 +1557,7 @@ class Output:
         dest = os.path.join(self.mod_romfs, *(path + '.zs').split('/'))
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         open(dest, 'wb').write(comp)
-        self.size(path, len(old), len(new))
+        self.size(path, old, new)
 
     def finish(self):
         for path, (o, n, e, e2) in sorted(self.sizes.items()):
@@ -1644,11 +1664,11 @@ def main(argv):
             src, old = out.read(harp_colors.MODEL)
             new = harp_colors.model_variant(old, tag)
             out.write_new(harp_colors.model_path(tag), new, harp_colors.MODEL)
-            out.add(harp_colors.model_path(tag), len(new), harp_colors.MODEL, len(old))
+            out.add(harp_colors.model_path(tag), new, harp_colors.MODEL, old)
             src, old = out.read(harp_colors.ALB)
             new, changed = harp_colors.texture_variant(old, tag, harp_colors.COLORS[tag])
             out.write_new(harp_colors.alb_path(tag), new, harp_colors.ALB)
-            out.add(harp_colors.alb_path(tag), len(new), harp_colors.ALB, len(old))
+            out.add(harp_colors.alb_path(tag), new, harp_colors.ALB, old)
             users = [song for song in songs if harp_colors.SONG_COLORS.get(song) == tag]
             for song in users:
                 models[song] = harp_colors.variant_name(tag)
@@ -1662,8 +1682,8 @@ def main(argv):
             spin_floor = out.table.get('Actor/%s.engine__actor__ActorParam.bgyml' % SPIN_LIKE)
             if spin_floor is None:
                 raise SystemExit('%s: no size entry for its actor file' % SPIN_LIKE)
-            out.add(harp_colors.ANIM_PARAM, len(spin[harp_colors.ANIM_PARAM]), harp_colors.ANIM_PARAM_LIKE,
-                    len(sarc.Sarc.read(boomerang).files[harp_colors.ANIM_PARAM_LIKE]))
+            out.add(harp_colors.ANIM_PARAM, spin[harp_colors.ANIM_PARAM], harp_colors.ANIM_PARAM_LIKE,
+                    sarc.Sarc.read(boomerang).files[harp_colors.ANIM_PARAM_LIKE])
         for song in songs:
             pack = ground_items.pack_path(song)
             inner = 'Component/ModelInfo/%s.engine__component__ModelInfo.bgyml' % song
@@ -1974,7 +1994,7 @@ def main(argv):
             if arc.files[SHOP_LIST] != child_list:
                 raise SystemExit('%s: its copy of the child shop list differs' % SHOP_KEEPERS[keeper])
             arc.files[SHOP_LIST] = new_child
-            out.size(SHOP_LIST, len(child_list), len(new_child))
+            out.size(SHOP_LIST, child_list, new_child)
             if keeper == 'adult':
                 ap = ground_items.ap_path(SHOP_KEEPERS['adult'])
                 adoc = byml.loads(arc.files[ap])
@@ -1985,11 +2005,11 @@ def main(argv):
                 comp['ShopRef'] = '?' + SHOP_LIST_ADULT
                 adoc.root['Components'] = comp
                 new_ap = byml.dumps(adoc)
-                out.size(ap, len(arc.files[ap]), len(new_ap))
+                out.size(ap, arc.files[ap], new_ap)
                 arc.files[ap] = new_ap
                 arc.files[SHOP_LIST_ADULT] = new_adult
                 arc.align[SHOP_LIST_ADULT] = arc.align.get(SHOP_LIST, 8)
-                out.add(SHOP_LIST_ADULT, len(new_adult), SHOP_LIST, len(child_list))
+                out.add(SHOP_LIST_ADULT, new_adult, SHOP_LIST, child_list)
             new_pack = arc.write()
             back = sarc.Sarc.read(new_pack)
             if set(back.files) != set(arc.files) or any(back.files[k] != v for k, v in arc.files.items()):
@@ -2010,13 +2030,13 @@ def main(argv):
         assert got == name
         path = ground_items.pack_path(name)
         out.write_new(path, pack, like=tpl_pack_path)
-        out.add(path, len(pack), tpl_pack_path, len(tpl_pack))
+        out.add(path, pack, tpl_pack_path, tpl_pack)
         tpl_files = sarc.Sarc.read(tpl_pack).files
         for inner, data in new_inner.items():
             like = (ground_items.anim_param_path(tpl_name) if 'AnimationParam' in inner
                     else ground_items.pouch_param_path(tpl_name) if 'PouchContentParam' in inner
                     else ground_items.ap_path(tpl_name))
-            out.add(inner, len(data), like, len(tpl_files[like]))
+            out.add(inner, data, like, tpl_files[like])
         for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
             if out.table.get(inner) is None:
                 raise SystemExit('%s: %s has no resource size entry' % (name, inner))
@@ -2027,7 +2047,7 @@ def main(argv):
                 continue
             loose_done.add(path)
             out.write_new(path, data, like)
-            out.add(path, len(data), like, len(plain(like)))
+            out.add(path, data, like, plain(like))
             print('%-6s %s: lies %.3f higher on the ground (pose height %.3f -> %.3f, %s)'
                   % (version, item, new_h - old_h, old_h, new_h, path))
         print('%-6s version %-22s for %s (%d bytes)%s' % (version, name, item, len(pack), {
@@ -2042,7 +2062,7 @@ def main(argv):
         assert got == name
         path = ground_items.pack_path(name)
         out.write_new(path, pack, like=tpl_pack_path)
-        out.add(path, len(pack), tpl_pack_path, len(tpl_pack))
+        out.add(path, pack, tpl_pack_path, tpl_pack)
         like_files = {}
         for actor in (shop_items.TEMPLATE, shop_items.PRICE_TEMPLATE):
             like_files.update(sarc.Sarc.read(plain(ground_items.pack_path(actor))).files)
@@ -2053,7 +2073,7 @@ def main(argv):
                 continue
             if not inner.split('/')[-1].startswith(name + '.'):
                 shop_shared[inner] = data
-            out.add(inner, len(data), like, len(like_files[like]))
+            out.add(inner, data, like, like_files[like])
         for inner in sarc.Sarc.read(pack).files:
             if out.table.get(inner) is None:
                 raise SystemExit('%s: %s has no resource size entry' % (name, inner))
