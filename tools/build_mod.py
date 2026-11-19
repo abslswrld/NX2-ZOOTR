@@ -30,6 +30,10 @@ gives First while Link doesn't have First, else Second; only the pairs in PROGRE
     python tools/build_mod.py ... "KF_MIDO_CHEST_01=Item_Scale_Silver>Item_Scale_Gold"
 (quoted: > is the shell's redirection otherwise). The pairs: Silver > Gold Scale, Hookshot > Longshot, Fairy
 Ocarina > Ocarina of Time.
+The same on a freestanding item (to test in game): the placement becomes First's turning item
+(tools/turn_items.py): a ground item of First that, once Link owns First, drops Second's in its place and removes
+itself; Second's removes itself once Link owns Second. Two freestanding items with the same pair give First then
+Second in either order. Not on shelves, pots, rocks, bushes or Gold Skulltulas yet.
 
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
@@ -74,6 +78,7 @@ import ground_items  # noqa: E402
 import harp_colors  # noqa: E402
 import shop_items  # noqa: E402
 import sizes  # noqa: E402
+import turn_items  # noqa: E402
 from formats import zstd, byml, restbl, sarc, evfl, ainb, msbt  # noqa: E402
 from logic.world import World  # noqa: E402
 
@@ -129,6 +134,52 @@ PROGRESSIVE_PAIRS = {
     # Ocarina of Time itself teaches nothing: the Song of Time is an item of the moat cutscene (Dm_MelodyGet_Time)
     ('Item_Ocarina_Fairy', 'Item_Ocarina_Time'),   # in game 2026-11-19: works
 }
+
+
+# Where a progressive pair can be placed: a small chest (the checking chest) or a freestanding item (a turning
+# item, tools/turn_items.py). Not yet: shelves (the shop version has no such AI), pots, rocks, bushes and Gold
+# Skulltulas (a drop: to do after freestanding items are seen working), gifts, songs and scrubs (events).
+PAIR_KINDS = ('chest', 'freestanding')
+# Two turning items of one family must not lie where Link can touch both at once: the second could be picked up
+# in the frame the first's scene ends, before it has turned (it would give the first level again). Metres,
+# between their map positions.
+TURN_MIN_DISTANCE = 2.0
+
+
+def pair_kind(world, cid):
+    """the kind of check a progressive pair is placed on ('chest' or 'freestanding'); stops the build for any
+    other kind, or when the check's placements are not all of one kind"""
+    r, name, loc = find_check(world, cid)
+    kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
+    if len(kinds) != 1 or not kinds <= set(PAIR_KINDS):
+        raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest or on a freestanding '
+                         'item (this check: %s)' % (cid, ', '.join(sorted(kinds)) or 'an event, no map placement'))
+    return kinds.pop()
+
+
+def turn_spacing(world, turning):
+    """stops the build when two turning items of one family lie within TURN_MIN_DISTANCE of each other;
+    turning: {check id: family}. Returns [(check id, check id, metres)] for the pairs of one family and scene"""
+    spots = []
+    for cid, family in sorted(turning.items()):
+        r, name, loc = find_check(world, cid)
+        for scene, spot_id in world.spots_of(r, loc):
+            pos = world.checks[scene][spot_id].get('pos')
+            if pos is None:
+                raise SystemExit('%s: no position in the data for %s: the distance to the other items of its '
+                                 'family cannot be checked' % (cid, spot_id))
+            spots.append((cid, family, scene, pos))
+    out = []
+    for i, (cid, family, scene, pos) in enumerate(spots):
+        for cid2, family2, scene2, pos2 in spots[i + 1:]:
+            if family2 != family or scene2 != scene or cid2 == cid:
+                continue
+            d = sum((a - b) ** 2 for a, b in zip(pos, pos2)) ** 0.5
+            if d < TURN_MIN_DISTANCE:
+                raise SystemExit('%s and %s: two items of one progressive family %.1f m apart (at least %.1f m: '
+                                 'Link could touch both at once)' % (cid, cid2, d, TURN_MIN_DISTANCE))
+            out.append((cid, cid2, d))
+    return out
 
 
 def pair_check(pair, in_chest=lambda item: item):
@@ -1664,24 +1715,32 @@ def main(argv):
     if not a.assign and not a.fix:
         ap.error('nothing to do: give CHECK_ID=Item assignments and/or --fix')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
-    # CHECK_ID=First>Second: a progressive pair in a small chest (PROGRESSIVE_PAIRS): planned as First, the
-    # chest made a checking chest further down
-    steps = {}                                         # check id -> (first, second)
+    # CHECK_ID=First>Second: a progressive pair (PROGRESSIVE_PAIRS). In a small chest: planned as First, the
+    # chest made a checking chest further down. On a freestanding item: planned as First's turning item
+    # (tools/turn_items.py). Nowhere else yet (pair_kind).
+    steps = {}                                         # check id -> (first, second): chests
+    turning = {}                                       # check id -> (first, second): freestanding items
+    world = World()
     for k, (cid, item) in enumerate(assignments):
         if '>' in item:
             pair = tuple(item.split('>'))
             if pair not in PROGRESSIVE_PAIRS:
                 raise SystemExit('%s: %s is not a progressive pair the builder knows (%s)' % (cid, item, ', '.join(
                     '>'.join(x) for x in sorted(PROGRESSIVE_PAIRS))))
-            steps[cid] = pair
-            assignments[k] = (cid, pair[0])
+            if pair_kind(world, cid) == 'chest':
+                steps[cid] = pair
+                assignments[k] = (cid, pair[0])
+            else:
+                turning[cid] = pair
+                assignments[k] = (cid, turn_items.turn_name(pair[0]))
+    for cid, cid2, d in turn_spacing(world, turning):
+        print('%-18s and %s: the same progressive family, %.1f m apart' % (cid, cid2, d))
     # a small seed bag or quiver placed alone means its weapon: the check shows and gives the slingshot / bow,
     # and the small bag comes with it (the user's rule: never the bag first)
     for k, (cid, item) in enumerate(assignments):
         if item in FAMILY_ALIASES:
             print('%-18s %s placed: gives %s with it instead (the weapon first)' % (cid, item, FAMILY_ALIASES[item]))
             assignments[k] = (cid, FAMILY_ALIASES[item])
-    world = World()
     dicts = zstd.Dictionaries.from_pack(open(os.path.join(a.romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
     mod_romfs = os.path.join(a.out, a.name, 'romfs')
     if os.path.isdir(mod_romfs):
@@ -1806,6 +1865,8 @@ def main(argv):
         return out.read(path)[1]
 
     def on_ground(item):
+        if item.startswith(turn_items.PREFIX):
+            return item                                # a turning item (a progressive pair): built further down
         kind = ground_items.kind_of(plain, item)
         if kind == 'ground':
             return item
@@ -1887,10 +1948,17 @@ def main(argv):
         if not planned[path]:
             del planned[path]
 
-    # progressive pairs: only in chests (the chest itself chooses; nothing else can yet)
+    # progressive pairs: in chests (the chest itself chooses) and on freestanding items (a turning item), as
+    # sorted out above (pair_kind); checked again on what was planned
     stepped = {cid for changes in planned.values() for cid, _, _, kind in changes.values() if kind == 'chest'}
     for cid in sorted(set(steps) - stepped):
-        raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest' % cid)
+        raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest or on a freestanding '
+                         'item' % cid)
+    for changes in planned.values():
+        for cid, item, _, kind in changes.values():
+            if (cid in turning) != item.startswith(turn_items.PREFIX) or (cid in turning and kind != 'freestanding'):
+                raise SystemExit('%s: a turning item (%s) planned on a %s: only freestanding items yet'
+                                 % (cid, item, kind))
 
     for path, changes in sorted(planned.items()):
         src, old = out.read(path)
@@ -1903,6 +1971,9 @@ def main(argv):
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
             print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item))
+            if cid in turning:
+                print('%-18s   a turning item: %s on the ground while Link has no %s, then %s'
+                      % (cid, turning[cid][0], turning[cid][0], turning[cid][1]))
         # read back: only the changed values differ (worked out again here from the original, not from
         # what patch_file did)
         before = {str(int(x['Hash'])): x for x in byml.loads(old).root['Actors']}
@@ -2165,6 +2236,42 @@ def main(argv):
             'token': ': dropped by a Gold Skulltula, marks it done when picked up (the token\'s AI and blackboard), '
                      'spins as the token does (the token\'s animation settings start %s)' % ground_items.SPIN
         }.get(version, '')))
+    # turning items: every level of each family placed on a freestanding item (tools/turn_items.py)
+    for family in sorted(set(turning.values())):
+        for level, item in enumerate(family):
+            got, pack, new_inner, rows, loose = turn_items.build(
+                family, level, plain, table_rows,
+                lambda project: os.path.exists(os.path.join(a.romfs, 'Model', project + '.anim.bfres.zs')))
+            name = turn_items.turn_name(item)
+            assert got == name
+            tpl_pack_path = ground_items.pack_path(ground_items.template_of(name))
+            path = ground_items.pack_path(name)
+            out.write_new(path, pack, like=tpl_pack_path)
+            out.add(path, pack, tpl_pack_path, plain(tpl_pack_path))
+            like_files = dict(sarc.Sarc.read(plain(turn_items.AI_PACK)).files)
+            for actor in (ground_items.template_of(name), turn_items.DROP_TEMPLATE):
+                like_files.update(sarc.Sarc.read(plain(ground_items.pack_path(actor))).files)
+            for inner, (data, like) in new_inner.items():
+                out.add(inner, data, like, like_files[like])
+            for inner in sarc.Sarc.read(pack).files:      # every file of the pack has a size entry
+                if out.table.get(inner) is None:
+                    raise SystemExit('%s: %s has no resource size entry' % (name, inner))
+            for t, row in rows.items():
+                new_rows.setdefault(t, []).append(row)
+            for path, (data, like, old_h, new_h) in sorted(loose.items()):
+                if path in loose_done:
+                    continue
+                loose_done.add(path)
+                out.write_new(path, data, like)
+                out.add(path, data, like, plain(like))
+                print('%-6s %s: lies %.3f higher on the ground (pose height %.3f -> %.3f, %s)'
+                      % ('turn', item, new_h - old_h, old_h, new_h, path))
+            what = turn_items.describe(sarc.Sarc.read(pack).files[shop_items.ai_path(turn_items.ai_name(item))])
+            print('turn   version %-22s for %s (%d bytes); its AI %s (%d nodes more than %s): %s'
+                  % (name, item, len(pack), turn_items.ai_name(item), what['new'], turn_items.BASE_AI,
+                     'once Link owns %s it drops %s and deletes itself'
+                     % (item, turn_items.turn_name(family[level + 1])) if what['drops']
+                     else 'once Link owns %s it deletes itself' % item))
     shop_shared = {}                                   # new files that are the same in every shop version
     for (item, price), name in sorted(shops.items()):
         tpl_pack_path = ground_items.pack_path(shop_items.TEMPLATE)

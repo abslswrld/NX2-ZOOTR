@@ -85,6 +85,17 @@ Their ground versions (and Gold Skulltula drops) get a copy of the item's animat
 `NX2G`, same length) with only the pose's height of `Skl_Root` changed, so the lowest point of the model (its box,
 `ModelAabbMin/Max`, sized and turned by the pose) is 0.05 above the ground, as the Bottle's. Only the items seen
 too low are listed (GROUND_LIFT); the item itself (chests, shelves) keeps the game's animation.
+
+The Silver and Gold Scales (2026-11-19: both lay partly in the ground as turning items). Each has its own model and
+animation project. Their models are built standing above their origin (vertices 0.038 .. 0.433 and 0.027 .. 0.433)
+with `Skl_Root` at 0.2226; `Pose_Common` puts `Skl_Root` at -0.0074 instead (size one, no turn). A pose replaces
+the bone's place in the model, so the pose centres the scale on its point: lowest vertex -0.192 (Silver), -0.203
+(Gold). Their box in `ActorInfo` is the model as built (lowest 0.038, 0.027), not the model in the bone: from it
+the scales would seem to stand above the ground already. So their lift is measured from the model's vertices and
+skeleton (tools/item_pose.py): the vertices taken into the bone, sized and turned by the pose. The bracelet and
+the magic blessing stay on the box (GROUND_LIFT_BOX), as tested in game: for the magic both ways give 0.285; the
+bracelet's turned box is larger than the turned model (0.130; by its vertices 0.106), so it lies 0.074 above the
+ground, not 0.05.
 """
 import copy
 import math
@@ -95,6 +106,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 from formats import sarc, byml  # noqa: E402
+import item_pose  # noqa: E402
 
 TEMPLATE = 'Obj_Shield_Deku'
 TEMPLATE_ITEM = 'Weapon_Shield_Deku'
@@ -113,6 +125,9 @@ VERSIONS = {
     # what a Gold Skulltula drops: the token with the item's name, model, animation and item settings
     'token': ('Obj_Token_Gold', 'Item_Token_Gold', 'Obj_NX2_GS_', ('LiftableRef', 'ELinkRef'), True,
               'Obj_Token_Gold_Animation'),
+    # a level of a progressive family on the ground: the ground version under another name, which
+    # tools/turn_items.py gives an AI of its own (and a drop part)
+    'turn': (TEMPLATE, TEMPLATE_ITEM, 'Obj_NX2P_', TEMPLATE_ONLY, True, TEMPLATE_ITEM + '_Animation'),
 }
 TOKEN = 'Obj_Token_Gold'
 # what marks the skulltula done when its drop is picked up: checked to be in a 'token' version (build)
@@ -231,9 +246,12 @@ def resolved_components(files, actor):
 
 GET_DEMO = b'Rotate_GetDemo'
 
-# items whose own pose leaves them half in the ground (seen in game, 2026-11-17); the magic blessings share one
-# animation project
-GROUND_LIFT = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP')
+# items whose own pose leaves them half in the ground (seen in game, 2026-11-17; the scales 2026-11-19); the magic
+# blessings share one animation project
+GROUND_LIFT = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP', 'Item_Scale_Silver', 'Item_Scale_Gold')
+# measured with the box of ActorInfo (their models are built in the bone, so the box is right for them), as
+# tested in game; the others with the model's vertices (tools/item_pose.py)
+GROUND_LIFT_BOX = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP')
 GROUND_POSE, POSE_BONE = 'Pose_Common', 'Skl_Root'
 SPIN_ROOT_LIFT = 0.05                        # Rotate_Obj's lift of the bone Root
 GROUND_GAP = 0.05                            # the lowest point above the ground, as the Bottle's
@@ -306,15 +324,35 @@ def lowest_point(aabb_min, aabb_max, scale, rot):
     return low
 
 
-def lifted_animation(data, project, aabb_min, aabb_max):
+def box_low(data, aabb_min, aabb_max):
+    """the lowest point of a model's box (ActorInfo) in the ground pose at height 0"""
+    _, flags, base = pose_bone(data, GROUND_POSE, POSE_BONE)
+    scale, rot, _ = _pose(data, base, flags)
+    return lowest_point(aabb_min, aabb_max, scale, rot)
+
+
+def vertex_low(data, model, height=0.0):
+    """the lowest vertex of a model (its file) in the ground pose (of the animation project `data`) with
+    Skl_Root at `height` (None: the pose's own): the vertices taken into the bone, then sized, turned and placed
+    by the pose (tools/item_pose.py)"""
+    pose = item_pose.read_pose(data, GROUND_POSE, POSE_BONE)
+    if item_pose.read_pose(data, GROUND_POSE, item_pose.ROOT)['flags'] != item_pose.STILL:
+        raise SystemExit('the ground pose moves the bone %s' % item_pose.ROOT)
+    points, bind, _ = item_pose.model_points(model, POSE_BONE)
+    move = pose['move'] if height is None else (pose['move'][0], height, pose['move'][2])
+    return item_pose.extent(points, bind, pose['scale'], pose['rot'], move)[0][1]
+
+
+def lifted_animation(data, project, low):
     """the item's animation project renamed (lifted_project) with the ground pose's height of Skl_Root set so the
-    model's lowest point is GROUND_GAP above the ground; returns (new data, old height, new height)"""
+    model's lowest point is GROUND_GAP above the ground; `low`: the model's lowest point in that pose at height 0
+    (box_low, vertex_low); returns (new data, old height, new height)"""
     o, flags, base = pose_bone(data, GROUND_POSE, POSE_BONE)
     scale, rot, t = _pose(data, base, flags)
     old = struct.unpack_from('<f', data, t + 4)[0]
     if flags & 0x8000000:                     # "no translation": the stored height was not used
         old = 0.0
-    new_h = GROUND_GAP - SPIN_ROOT_LIFT - lowest_point(aabb_min, aabb_max, scale, rot)
+    new_h = GROUND_GAP - SPIN_ROOT_LIFT - low
     if new_h <= old:
         raise SystemExit('%s: its pose already lifts it enough (%.3f, needed %.3f)' % (project, old, new_h))
     raw = (project + '.anim').encode('ascii')
@@ -367,7 +405,8 @@ def anim_param_path(actor):
 
 
 def build(item, read_pack, read_table_rows, model_exists=lambda project: False, version='ground'):
-    """the ground version (version='ground') or held-up version (version='held') of `item`.
+    """the ground version (version='ground'; 'turn': the same under the turning items' name, see
+    tools/turn_items.py) or held-up version (version='held') of `item`.
     read_pack(path) -> decompressed pack; read_table_rows(table) -> list of rows; model_exists(project name)
     -> whether Model/<project>.anim.bfres exists (items with no animation file of their own: ocarinas).
     Returns (name, pack data, {inner path: data} of files new to the game, {table: new row}, {loose file new to
@@ -438,7 +477,7 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         files[anim_param_path(name)] = byml.dumps(tdoc)
         comp['AnimationRef'] = '?' + anim_param_path(name)
     loose = {}
-    if item in GROUND_LIFT and version in ('ground', 'token'):
+    if item in GROUND_LIFT and version in ('ground', 'token', 'turn'):
         # lies too low: its own animation project replaced by a lifted copy (see the notes at the top)
         adoc = byml.loads(files[_ref_path(comp['AnimationRef'])])
         res = [dict(x) for x in adoc.root['AnimationResources']]
@@ -446,8 +485,14 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         if len(own) != 1:
             raise SystemExit('%s: animation projects %r, expected %s and one of its own' % (item, res, COMMON_ANIM))
         row = {r['__RowId']: r for r in read_table_rows('ActorInfo')}[item]
-        data, old_h, new_h = lifted_animation(read_pack(model_path(own[0])), own[0], row['ModelAabbMin'],
-                                              row['ModelAabbMax'])
+        src = read_pack(model_path(own[0]))
+        if item in GROUND_LIFT_BOX:
+            data, old_h, new_h = lifted_animation(src, own[0], box_low(src, row['ModelAabbMin'], row['ModelAabbMax']))
+        else:
+            model = read_pack('Model/%s.%s.bfres' % (row['ModelProjectName'], row['FmdbName']))
+            data, old_h, new_h = lifted_animation(src, own[0], vertex_low(src, model))
+            if abs(vertex_low(data, model, None) + SPIN_ROOT_LIFT - GROUND_GAP) > 1e-5:
+                raise SystemExit('read-back: %s does not lie %.2f above the ground' % (item, GROUND_GAP))
         loose[model_path(lifted_project(own[0]))] = (data, model_path(own[0]), old_h, new_h)
         adoc.root = type(adoc.root)(adoc.root)
         adoc.root['AnimationResources'] = [dict(x, ModelProjectName=lifted_project(x['ModelProjectName']))
