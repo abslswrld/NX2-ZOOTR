@@ -2,6 +2,56 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-18
+
+### Size table entries from the file's contents (branch `claude/size-floors`)
+- **What was found.** The crash of the songs' spin (below) was one case of a general fault: the builder gave a
+  changed file its old entry plus what it grew in bytes, and a new file the headroom of a similar game file.
+  The game's entries are not made that way. Fitted on the game's own files (every loose file and every file
+  inside the 8,384 packs; `size32` is the size rounded up to 32):
+  - `.bfevfl`, `.baev`: size32 + 272 (914 and 916 files, all exact); `.pack` and `Mals/*.sarc`: size32 + 312
+    (8,384 and 16, all exact); `.bntx` in `Tex/`: size32 + 264 (20,667, all exact);
+  - `.byml` (maps, RSDB tables, GameData): size32 + 264, `Sound/*.casset.byml` + 520 (1,814 of 1,816 exact; two
+    have more: `RSDB/ActorInfo` + 2,800, `Effect/static...vsetb.byml` + 3,872). The number of rows or actors
+    does not count;
+  - `.ainb`: size32 + 376, and with an expression block + 16 + four times its number of signatures rounded up
+    to 8 (5,036 files, all exact). The number of nodes does not count;
+  - `.bgyml`: size32 + a constant per type + a cost per element of each list and per entry of each table with
+    free keys; the members of a struct cost nothing. Actor files (`ActorParam`): 5,144 + 48 per component
+    (8,374 files, all exact); `GameParameterTable` and `EventSettingComponentList`: 5,128 + 48 per component;
+    `AnimationParam`: 5,096 + 88 per animation resource; `ModelInfo`: 5,192 + 80 per variation animation + 104
+    per sub-model; `BlackboardInfo`: 5,096 + 8 per table; `AIInfo` 5,088, `PouchContentParam` 5,216,
+    `PriceParam` 5,064 (constants). 532 of the 691 types have one constant for all their files;
+  - message files (`.msbt`) have no entry of their own (only their archive); `.bfres`, `.asb` and the others
+    were not fitted (the builder only copies them at the same size).
+- **The fix.** New `tools/sizes.py` holds these rules. `Output.size` and `Output.add` (`tools/build_mod.py`)
+  now take the files' contents and give the largest of: what they gave before, the rule for the new contents,
+  the headroom of the original (or similar) file counted in steps of 32, and `floor` (kept; the songs' spin
+  still passes the Boomerang's entry). Every call site passes contents (`patch_pack` and `song_spin_pack`
+  return them). A `.bgyml` of a type without a rule keeps its headroom as long as none of its lists or tables
+  has more elements than the game file it comes from; if one has, the build stops and names it (a rule has to
+  be added). For `AIScheduleParam` and `ShopParam`, whose tables are all structs (the game's files with the
+  same lists all have the same headroom: 502 and 11 files), only the lists have to stay.
+- **Entries that were too small** (two test builds, 141 and 146 changed files; before -> now):
+  - by a component or more: the adult shopkeeper's actor file, which gains `ShopRef`
+    (`Actor/Npc_Kokiri_001_Shop_Adult...ActorParam.bgyml`, 5,584 -> 5,624), and every shop version's actor
+    file, which has one component more than the shelf it is made from (`Actor/Shop_NX2_*_Once`, e.g.
+    7,248 -> 7,304; 44 to 72 short). The songs' actor files, 120 short before the floor, need 6,168 by the
+    rule (the floor gives 6,344);
+  - by less than 32 (the rounding): the new item settings of every ground, token and shop version
+    (`PouchContentParam`, 4 to 24 short), their packs and actor files (4 to 24), `Shop_NX2_Once`'s AI and its
+    info (5 and 4), the songs' animation list (12), the six message archives the scrub lines grow (16), the
+    song packs (8), `Npc_Kokiri_008_Child.bfevfl` (16), `RSDB/ActorInfo` (4), a shop version's
+    `GameParameterTable` (16).
+  Ground and shop versions have worked in game with those entries, so a few bytes short does not always crash;
+  where the limit lies is not known.
+- New `tests/size_check.py` checks the rules against every game file they cover (several minutes, not in
+  `run_tests.bat`): OK. Both test builds: no entry below its rule, none smaller than the game's, no entry
+  changed for a file the mod doesn't hold. edit_check, evfl_add_check, logic_check, db_check: as before
+  (0 failed). Not yet tested in game.
+- **In game (2026-11-18, evening; combined test with the shelf rework and the progressive chests):** no crash,
+  everything works as before.
+
 ## 2026-11-17
 
 ### Goron Bracelet and magic blessing no longer half in the ground (branch `claude/ground-heights`)
