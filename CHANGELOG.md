@@ -52,6 +52,52 @@ Newest first. Dates are when the work was done.
 - **In game (2026-11-18, evening; combined test with the shelf rework and the progressive chests):** no crash,
   everything works as before.
 
+### Progressive upgrades, step 1: the game's checking chest (branch `claude/progressive-chests`)
+- Background: an upgrade family must never skip a level and one item must never be on two checks. The first
+  attempt decided inside the shared get flow and was rolled back. The game has a chest that decides by itself:
+  the checking chest `Obj_TBox_A_06` (9 placements: Graveyard at both ages, Dodongo's Cavern twice, Spirit Temple,
+  Bottom of the Well, Gerudo Training Ground three times). Its map placement names `Drop__CheckActor` (the item
+  to look for in Link's inventory), `Drop__DropActor` (given without it) and `Drop__DropActor_Substitute` (given
+  with it). No event flow is involved.
+- What the files say about it: its settings file has the ordinary small chest as parent (`Obj_TBox_A_01`) and
+  replaces three parts: the AI, the held actors (a second slot `SubContent`) and the drop settings table (the
+  three settings above and `Drop__CheckCondition`, default true). Model, animation, physics and opening event
+  are the small chest's, so it looks and opens like Mido's chests (which are `Obj_TBox_A_01`). Its AI makes both
+  items when the chest is made (an empty setting becomes a green rupee) and asks the inventory
+  (`QueryGetPouchContentNumByActorName`, not marked "only on enter") for the slot it hands to the shared chest
+  module; an empty `Drop__CheckActor` asks for the default drop `Obj_Rupee_Green`.
+- **Leftover fixed:** the builder changed `Drop__DropActor` on a game checking chest and left the other two
+  settings (shown on Dodongo's Cavern: `Item_Boomerang` placed, `Drop__CheckActor: TBox_Shield_Deku` and
+  `Drop__DropActor_Substitute: TBox_Rupee_Blue` still there, so with a Deku Shield the chest would give the blue
+  rupee; the Training Ground chest that sets no first item stopped the build). A game checking chest that gets
+  an item now becomes the ordinary chest (`Obj_TBox_A_06` -> `Obj_TBox_A_01`, `_NoBake` likewise) and its
+  check settings are removed: the result is a placement shaped like the game's other small chests (the same
+  settings 35 + 51 + 13 times in the game's maps), rather than a checking chest with empty settings, which the
+  game never has. None of the nine is in the three areas with check IDs yet, so no build so far was affected.
+- **Progressive pair (opt-in):** `CHECK_ID=First>Second` on a small chest makes it a checking chest: `First`
+  while Link doesn't have `First`, else `Second`. Two chests with the same pair give `First` then `Second` in
+  either opening order. Only pairs in `PROGRESSIVE_PAIRS` are accepted (now: `Item_Scale_Silver>Item_Scale_Gold`);
+  refused on a big chest and on anything that isn't a chest. The names are the scales' own item names: the game's
+  chests check `TBox_Shield_Deku` and `Item_Range_Bow`, which are the actors the chest gives (their settings name
+  the inventory item), and the scales are their own inventory items (the game's flows ask for `Item_Scale_Silver`).
+  The chest's own opening event setting stays.
+- **Map size entries:** all 160 map files have the entry "length rounded up to 32, plus 264", whatever they
+  hold. A changed map now gets at least that for its new length (`map_entry`), in every build (adding only the
+  bytes it grew can fall short by up to 31).
+- Test build (`KF_MIDO_CHEST_01` and `_02` = `Item_Scale_Silver>Item_Scale_Gold`, with all six fixes): both
+  placements at both ages read back as `Obj_TBox_A_06` with the three settings and
+  `GetEventName: KokiriForest_TreasureBox_NaviChatOff`; the other two Mido chests and all other actors unchanged;
+  `KokiriForest_Child_Dynamic` 510,884 -> 510,992 bytes, entry 511,176 -> 511,284 (rule: 511,272);
+  `KokiriForest_Adult_Dynamic` 516,036 -> 516,144, entry 516,328 -> 516,436 (rule: 516,424). No pack, table or
+  flow is added for it.
+- New `tests/chest_check.py` (in `run_tests.bat`): the map size rule, the nine checking chests given an item,
+  the pair in Mido's chests, the refusal on a big chest. logic_check: 0 failed; db_check: 0 errors.
+- Open: whether the chest chooses when opened or when the room loads (the files suggest when opened), and
+  whether the Gold Scale after the Silver sets the deeper dive. **Not yet tested in game.**
+- **In game (2026-11-18, evening; combined test with the shelf rework and the size rules):** the user: apart from
+  the Giant's Knife's height, "everything else seems to work as intended" (the checklist had both opening orders
+  and the Gold Scale's dive).
+
 ## 2026-11-17
 
 ### Goron Bracelet and magic blessing no longer half in the ground (branch `claude/ground-heights`)
