@@ -191,6 +191,102 @@ Newest first. Dates are when the work was done.
 - **In game (2026-11-18): works.** No crash; held up, the harps spin and sit clear above Link's head (the game's
   own lift is enough: no higher lift needed); colours right (Saria white, Bolero red, Serenade blue seen).
 
+### Giant's Knife and Hover Boots placed to fit their shelves (branch `claude/shelf-positions`, not yet tested in game)
+- **Bug (in game):** on the Kokiri Shop's shelves the Giant's Knife and the Hover Boots "need repositioning".
+- **Found in the game's files** (new `tools/item_pose.py`): a shelf shows an item in its own pose `Pose_Common`
+  (size, turn and height of the bone `Skl_Root`). The Giant's Knife's pose stands it 1.36 m tall, centred on
+  the shelf point: through its shelf and into the one above (shelves are 0.65 m apart, items 0.5 m apart). The
+  Hover Boots' pose lifts them 0.72 m above it.
+- **Fix:** their shop versions (`SHELF_POSE` in `tools/shop_items.py`) get a posed copy of the item's animation
+  project (`NX2Son_Sword_Biggoron_Animation`, `NX2Sr_Adult_HoverBoot_Animation`: same-length names), made
+  smaller when taller than 0.5 m and lifted so the model's box starts 0.08 above the shelf point (about where the
+  Hookshot's box starts with its tuned lift). Giant's Knife: size 0.8 -> 0.295 (about 0.45 m long), height
+  0 -> 0.334; Hover Boots: height 0.716 -> 0.08. The turn stays the game's; chests and the items themselves keep
+  the game's animation. Check build: both files read back as intended.
+- `tools/item_pose.py` reads poses the same way as the ground-height fix (branch `claude/ground-heights`, in
+  `tools/ground_items.py`); when both are merged, the ground fix should use `item_pose` too.
+- **In game (2026-11-18): not right.** The knife on the shelf was much too small and too high (the user: it
+  should be only slightly smaller than its default); the Hover Boots were invisible on their shelf. Bought and
+  held up, the knife was invisible (it wasn't before) and the boots were inside Link.
+- **Why (found in the files):** both items' own animation projects hold only `Pose_Common`, and the game uses
+  it for the shelf, for holding up and for the ground. Items that look different on a shelf have a `Pose_Shop`
+  too (the bomb, the Deku Stick). So the posed copy also changed how the bought item is held up: the boots'
+  0.716 lift was right held up, and the knife held up became tiny and off to one side.
+
+### Shelf fix reworked: only the shelf changes (2026-11-18, branch `claude/shelf-positions`, not yet tested in game)
+- **Found in the game's files:**
+  - Which pose an item shows is in `AS/Item_Common.root.asb`: each state lists the poses it tries, in order. On
+    a shelf (`Rotate_Shop`, what the shelf AI plays): `Pose_Shop`, `Pose_Stoped`, `Pose_Common`, `Pose_GetDemo`.
+    Held up (`Rotate_GetDemo`): `Pose_GetDemo`, `Pose_Common`. During the shop talk (`Rotate_Stoped`):
+    `Pose_Stoped`, `Pose_Shop`, `Pose_Common`, `Pose_GetDemo`. The spins have such lists too, and they are
+    needed: no animation project has a `Rotate_Shop` or a `Pose_Stoped`.
+  - Six projects have a `Pose_Shop` (bomb, Deku Stick, Deku Seeds, arrow, arrow bundle, Hylian Shield). It is
+    always their `Pose_Common` times one number (0.5 to 1.15), which makes them at most about 0.5 m tall.
+  - Measured on the models' vertices: in `Pose_Common` and `Pose_Shop` an item stands on the point it is placed
+    at (lowest vertex -0.03 to +0.03), in `Pose_GetDemo` it is centred on it. The Giant's Knife, Hover Boots
+    and Hookshot have only a centred `Pose_Common`: on a shelf their lower half is inside it. The Hookshot's
+    lift tuned in game (0.25) puts its lowest vertex exactly 0.000 above the shelf point.
+  - The first fix measured wrongly. It turned the item's box from `ActorInfo`, but for the knife that box is
+    the model already posed; and a pose replaces the bone's place in the model instead of adding to it (the
+    boots' bone sits at 0.906 in the model, so their pose 0.716 lowers them). The order of the angles (X, Y,
+    Z) was right. In its own pose the knife lies nearly flat: 1.53 m wide, 0.50 m tall, 0.56 m deep, from 0.26
+    under the shelf point to 0.24 above. The boots are 0.44 x 0.40 x 0.43 m, from 0.19 under it to 0.21 above.
+- **Fix, Giant's Knife** (`SHELF_POSE` in `tools/shop_items.py`): its shop version's animation project is a
+  copy of the game's `Item_DekuSeed_Animation` (exactly `Pose_Common`, `Pose_GetDemo`, `Pose_Shop` for the bones
+  `Root` and `Skl_Root`, all the knife's model has) named `NX2S_Sword_Giant_______` (same length). `Pose_Common`
+  and `Pose_GetDemo` are the knife's own `Pose_Common`, byte for byte (size 0.8, turn -1.9315 / 0.4259 /
+  -1.4437, place 0.012 / 0 / 0): held up it is as in the game. `Pose_Shop` is that pose times 0.8 (size 0.64,
+  the same turn), lifted 0.2093 so its lowest vertex is on the shelf point: 1.22 m wide, 0.40 m tall, 0.45 m
+  deep. Nothing in the file moves; its size entry is the Deku Seeds project's (8232).
+- **Fix, Hover Boots:** no game project with a `Pose_Shop` has their bones (their pose sets 18: legs, wings), so
+  they keep their own animation and their shelf is placed 0.19 m higher in the map, as the Hookshot's
+  (`SHELF_LIFT`): lowest vertex on the shelf point, default size, held up as in the game.
+- `tools/item_pose.py` now reads a model's vertices and bones and works out where a pose puts them.
+- Check build (knife on the Kokiri Shop's heart shelf, boots on shelf 2): the new project reads back with the
+  three poses as above and differs from the Deku Seeds project only in its name and the three poses' values;
+  the boots' pack names their own animation project; their shelf is 0.19 higher.
+- **Not known:** at 0.64 the knife is wider than a shelf slot (items are 0.5 m apart), so its ends reach into the
+  slots next to it. A shop item is also in its `Pose_Shop` while the shop talk has it (looked at, chosen).
+- **In game (2026-11-18, evening; combined test with the size rules and the progressive chests):** works, except
+  that the Giant's Knife held up by child Link is a little too high (it floats well above his hands). The knife
+  on its shelf, the Hover Boots on theirs, the boots held up and the empty shelves after buying: as intended.
+- **The bought Giant's Knife held up 0.11 m lower: tried and taken out again.**
+  - **Found in the game's files:** the get scene (`Dm_SY_GetInEvent`, entry `Item_Position`) shows the item with
+    `EventIgnitionShowItem`, `ItemPos` (0, 0, 0): at a point the game's code works out. No file has that point
+    (`GameParameter/GetDemoParam` is empty, the player's settings have nothing for it). It follows Link's age:
+    where Link shows an item to someone (`ShowItem`), the offsets from that point for child and adult, taken
+    from the raised hand (bone `Weapon_L` in `Evt_ShowItem` and `Evt_ShowItem_Failure`), put it 0.60 m higher for
+    adult Link both times, and in the get pose (`Demo_Get_Child_Loop`, `Demo_Get_Adult_Loop`: one hand raised) that
+    hand is 0.59 m higher for adult Link (1.17 and 1.76 m). So an item is the same height above the raised hand
+    at both ages. Worked out, not read: the point is about 1.4 to 1.5 m up for child Link (the cameras of the
+    scene show up to 1.83 m there).
+  - Every held-up pose is centred on that point, whoever gets the item (Kokiri Sword -0.25 .. +0.25, Bow -0.42 ..
+    +0.50, Megaton Hammer -0.29 .. +0.42, Hover Boots -0.19 .. +0.21); the game tunes no height for an age. The
+    Fishing Rod, the game's other long item for both ages, hangs lower (-0.55 .. +0.22).
+  - The knife's pose is not too high for a child in particular: it lays the knife's 1.68 m nearly flat (15
+    degrees), its middle on the point, the hilt 0.37 to 0.77 m out to one side. Over the hand (within 0.2 m of the
+    upright line through the point) its underside is 0.143 under the point, where the Kokiri Sword, the Hookshot
+    and the Poacher's Saw reach 0.25 under it: it floats 0.11 higher above the hand than they do, at both ages.
+    Next to child Link (1.17 m tall) that shows more; the game's own two scenes for it (Medigoron, Biggoron)
+    also pull the camera back (2.24 m away instead of 1.75 to 2.05).
+  - **Fix** (`HELD_LOWER` in `tools/shop_items.py`, `shelf_copy` in `tools/item_pose.py`): in the shop version's
+    project `NX2S_Sword_Giant_______`, `Pose_GetDemo` is placed 0.11 lower: place 0.012 / 0 / 0 -> 0.012 / -0.11 /
+    0, size 0.8 and the turn as the game's. `Pose_Common` stays the knife's own, byte for byte; `Pose_Shop` is
+    unchanged. Held up the knife is now -0.372 .. +0.129 from the point, its underside over the hand 0.253 under
+    it (as the Kokiri Sword's), the hilt 0.21 to 0.32 under it out to the side. The same for adult Link.
+  - Check build (knife on the first Kokiri Shop shelf of both ages): the project reads back with `Pose_GetDemo`
+    differing from `Pose_Common` in the height only (4 bytes), same length as the Deku Seeds project, size entry
+    8232 as before.
+  - **Not known:** whether 0.11 is enough to the eye (one number, `HELD_LOWER`), and whether the hilt, now about
+    level with the raised hand as it turns, comes near Link's head.
+  - **Not covered:** a Giant's Knife from a chest, a gift, the ground or a Gold Skulltula is held up through the
+    item itself (`Item_Sword_Giant`) with the game's `Weapon_Sword_Biggoron_Animation` (only `Pose_Common`; the
+    Biggoron's Sword and the game's own `Shop_Sword_Giant` use it too): still at the game's height.
+  - **In game (2026-11-19):** still felt a bit high to the user, who preferred the game's own height ("it was
+    just the shelves that were wrong"). The build before (2026-11-18, evening) already held it exactly as the game
+    does: its `Pose_GetDemo` was the knife's `Pose_Common` byte for byte (read back from the built file). So
+    `HELD_LOWER` is now empty: held up, the knife is the game's again; only its shelf pose differs.
+
 ### In-game result: bought shelf items vanish
 - **Confirmed in game:** the Giant's Knife, Hover Boots and Song of Storms disappeared from their shelves right
   after buying and stayed gone (shop screen, leaving and coming back, day/night change, reload).
