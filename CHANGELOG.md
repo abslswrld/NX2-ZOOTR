@@ -2,6 +2,88 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-19
+
+### Progressive upgrades, step 2: Hookshot > Longshot, Fairy Ocarina > Ocarina of Time (branch `claude/progressive-pairs`)
+- Two more two-level pairs for the game's checking chest (`CHECK_ID=First>Second` on a small chest, step 1
+  below): `Item_Hookshot>Item_Longshot` and `Item_Ocarina_Fairy>Item_Ocarina_Time`.
+- **The names** (all from the game's files):
+  - the game's own chests give `Item_Hookshot` (Dampe's goal chest, `Graveyard_Adult_Static`) and
+    `Item_Longshot` (Water Temple); its flows ask the inventory about the same names
+    (`EventQueryIsExistInPouch`: `MiniGame_DampeRace`, `Npc_Gerudo_004`, `Npc_Gerudo_009`), and about
+    `Item_Ocarina_Fairy` (`Npc_Kokiri_005_Child`, `Npc_Kokiri_007_Child`);
+  - the inventory is saved under an item's own name: `GameData/GameDataList` has `IsGet.<name>` and
+    `PouchData.<name>.StockNum` for `Item_Hookshot`, `Item_Longshot`, `Item_Ocarina_Fairy`, `Item_Ocarina_Time`
+    and both scales (names found by their hash, MurmurHash3). Each level has its own pair;
+  - the names the game's own checking chests look for (`TBox_Shield_Deku`, `TBox_Shield_Hylian`,
+    `Item_Range_Bow`) have no saved entry: they are the actor the chest gives, and the inventory question finds
+    the item that actor stands for (`ActorName` in `RSDB/ActorInfo`: `Weapon_Shield_Deku`, `Weapon_Range_Bow`;
+    the shield's item settings also name it, `PouchActor`). A flow does the same with the ground Ocarina of
+    Time (`Dm_MelodyGet_Epona` asks for `Obj_Ocarina_Time`, which stands for `Item_Ocarina_Time`). So a
+    check may name the item itself (the scales in step 1, seen working) or an actor that stands for it.
+- **Does the inventory keep the first item?**
+  - the inventory screen's table (`UI/Pouch/PouchTable`) has **one slot** for the hookshots
+    (`ItemArray[7]`: `Item_Longshot`, then `Item_Hookshot`) and one for the scales (`CollectArray[7]`: Gold, then
+    Silver); the ocarinas have two entries (`OcarinaArray[0]` Fairy, `[1]` Time). The same table marks the
+    Hookshot and the Longshot **adult only** (`IsUsableAdult`), the Fairy Ocarina child only, the Ocarina of
+    Time and the scales both ages;
+  - whether the Hookshot leaves the inventory when the Longshot comes is not in a file. The game's flows ask
+    "Longshot? if not, Hookshot?" for the same answer (`MiniGame_DampeRace` events 18 -> 0 and 262 -> 260,
+    `Npc_Gerudo_004` 210 -> 158), which they would not need if the Hookshot stayed: most likely it is replaced.
+    The saved "ever got it" flag stays (`IsGet.Item_Hookshot`, asked by `SageOfSpirit_RescueCarpenter`);
+  - for two chests it makes no difference: the chest that gives the second item is only opened once;
+  - **when the chest asks:** its AI's inventory question (`QueryGetPouchContentNumByActorName`) and the choice
+    of the item (`QuerySelectStringByBool`) are not marked "only on enter" and feed the shared chest module
+    while the chest waits, so the answer is the one at opening, not at room load. The scales in game
+    (2026-11-18) agree: both orders worked in one room.
+- **Ocarinas in a checking chest.** `Drop__DropActor` and `Drop__DropActor_Substitute` name the held-up
+  versions (`Item_NX2_Ocarina_Fairy`, `Item_NX2_Ocarina_Time`: the builder's `in_chest`, as for any chest
+  ocarina), `Drop__CheckActor` names the ocarina itself (`Item_Ocarina_Fairy`). A held-up version has no saved
+  entry of its own (no `IsGet.Item_NX2_...`): it names the ocarina (`ActorName` in its `ActorInfo` row and
+  `PouchActor` in its item settings), so what the inventory holds is `Item_Ocarina_Fairy`, the name the
+  game's flows ask for. (The opening event is handed the held actor's file name, `Item_NX2_Ocarina_Fairy`:
+  `QueryGenericGetActorName.ActorFileName` in `TreasureBox.module`, as for the game's `TBox_Shield_Deku`.)
+- **A held-up version as a checking chest's item.** The checking chest makes both items the way the ordinary
+  chest makes its one (`OneShotActorHolderTryRequestCreateActorWithActorFileName`, by actor name, into the
+  slots `Content` and `SubContent`, which have the same settings). A held-up version is an item event actor
+  like the Boomerang's with the get-demo command, which is what a chest holds; `Item_NX2_Ocarina_Fairy` was
+  held by an ordinary chest in game (2026-11-17). Its files are the kinds the size rules already cover (actor
+  file, animation list, item settings, pack, three table rows): no new rule.
+- **The Ocarina of Time from a chest teaches nothing and needs nothing.** In the game the moat object
+  (`Obj_Ocarina_Time_A_01`, a thing to look at, not an item) starts `DoorOfTime_GetOcarinaOfTime`, which plays
+  the cutscene `Dm_MelodyGet_Time`. The cutscene adds the ocarina (`EventTriggerAddOrRemovePouchContent`
+  `Item_Ocarina_Time`), shows its window, and gives the Song of Time as an item of its own
+  (`GetPouchContent<GetPouchContentByActorName>` `Item_Melody_TimeSong`). No logic file names the ocarina.
+- **Changed:** `PROGRESSIVE_PAIRS` has the two pairs; new `pair_check` (the check name and the second item of
+  a pair's chest, used by the build and the test). Nothing else in the builder: the chest already gets the
+  first item as a chest gives it.
+- `tests/chest_check.py` now also checks: the three pairs; every item of a pair is an inventory item under
+  its own name and saved under it; the game's own check names are stand-ins; the game's own Hookshot and
+  Longshot chests; ocarinas become held-up versions that are item event actors with the get demo and stand for
+  the ocarina; the hookshots in Mido's top chests and the ocarinas in the bottom ones at both ages, nothing
+  else changed. 16 lines, ALL OK. edit_check, evfl_add_check: all OK; logic_check: 0 failed; db_check: 0
+  errors.
+- **Test build** (`out/mods/NX2-ZOOTR`, the six usual fixes; `KF_MIDO_CHEST_01` and `_02` =
+  `Item_Hookshot>Item_Longshot`, `KF_MIDO_CHEST_03` and `_04` = `Item_Ocarina_Fairy>Item_Ocarina_Time`): 17
+  files. Read back: the four placements at both ages are `Obj_TBox_A_06` with the three settings and
+  `GetEventName: KokiriForest_TreasureBox_NaviChatOff`; the other 3,635 (child) and 3,670 (adult) actors are
+  identical. `KokiriForest_Child_Dynamic` 510,884 -> 511,056 bytes, entry 511,176 -> 511,348 (rule: 511,336);
+  `KokiriForest_Adult_Dynamic` 516,036 -> 516,208, entry 516,328 -> 516,500 (rule: 516,488). Held-up versions:
+  `Item_NX2_Ocarina_Fairy` (pack 4,244 bytes, entry 4,568) and `Item_NX2_Ocarina_Time` (4,212, entry 4,536),
+  two rows added to each of `ActorInfo`, `GameActorInfo`, `PouchActorInfo`. Size table: 15 entries new or
+  changed, all for files the mod holds; none below its rule or below the game's (187 files with those inside
+  the packs).
+- Known and not changed here: a child can't use the Hookshot or the Longshot (the table above), so their reach
+  can't be tried on a new file; a chest ocarina plays only after a save and reload (2026-11-17); Saria still
+  gives her Fairy Ocarina on the bridge (`LW_SARIA_GIFT`: her cutscene `Dm_Kokiri_0155` adds it directly, and
+  the builder has no data for that gift yet, so nothing could be placed there for this test).
+- Open: whether the second ocarina chest finds a Fairy Ocarina that came from a held-up version before any
+  reload (the files say the inventory holds the ocarina itself); what the Ocarina of Time's held-up version
+  looks like (never seen in game). **Not yet tested in game.**
+- **In game (2026-11-19):** the user: "it all worked properly". Both pairs gave the first item, then the second,
+  as the checklist asked (both opening orders, the second ocarina chest also straight after the first, without
+  a reload).
+
 ## 2026-11-18
 
 ### Size table entries from the file's contents (branch `claude/size-floors`)

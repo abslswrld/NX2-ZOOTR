@@ -28,7 +28,8 @@ Progressive pair (opt-in, a test for now): CHECK_ID=First>Second on a small ches
 gives First while Link doesn't have First, else Second; only the pairs in PROGRESSIVE_PAIRS are accepted:
 
     python tools/build_mod.py ... "KF_MIDO_CHEST_01=Item_Scale_Silver>Item_Scale_Gold"
-(quoted: > is the shell's redirection otherwise)
+(quoted: > is the shell's redirection otherwise). The pairs: Silver > Gold Scale, Hookshot > Longshot, Fairy
+Ocarina > Ocarina of Time.
 
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
@@ -111,11 +112,32 @@ PLAIN_CHEST = {v: k for k, v in CHECKING_CHEST.items()}
 CHECK_SETTINGS = ('Drop__CheckActor', 'Drop__DropActor_Substitute', 'Drop__CheckCondition')
 # Progressive pairs (opt-in, CHECK_ID=First>Second on a small chest): the chest becomes the game's checking
 # chest: First while Link doesn't have First, else Second. Two chests with the same pair give First then Second
-# in either opening order. Only pairs listed here are accepted: each family is added once seen working in game
-# (the chest's inventory question must know the family's name; three-level families can't be done this way).
+# in either opening order. Only pairs listed here are accepted, one family at a time (the chest's inventory
+# question must know the family's name; three-level families can't be done this way).
+# The names are the items' own names, the ones the inventory is saved under (GameData: IsGet.<name>,
+# PouchData.<name>.StockNum) and the game's own flows ask about (EventQueryIsExistInPouch). The chest looks for
+# First under that name (Drop__CheckActor) and holds each item as a chest gives it (in_chest: an ocarina as its
+# held-up version Item_NX2_<x>, which goes into the inventory as the ocarina itself, its PouchActor).
 PROGRESSIVE_PAIRS = {
-    ('Item_Scale_Silver', 'Item_Scale_Gold'),      # step 1: not yet tested in game
+    ('Item_Scale_Silver', 'Item_Scale_Gold'),      # in game 2026-11-18: both opening orders work
+    # the game's own chests give these two names (Dampe's goal chest, the Water Temple). Its flows ask for the
+    # Longshot and then for the Hookshot to mean "has a hookshot" (MiniGame_DampeRace, Npc_Gerudo_004), so the
+    # Longshot most likely takes the Hookshot's place in the inventory: the second chest of a pair is only
+    # opened once, so the order holds either way
+    ('Item_Hookshot', 'Item_Longshot'),            # in game 2026-11-19: works
+    # ocarinas are Link's instrument (no get-demo settings): the chest holds their held-up versions. The
+    # Ocarina of Time itself teaches nothing: the Song of Time is an item of the moat cutscene (Dm_MelodyGet_Time)
+    ('Item_Ocarina_Fairy', 'Item_Ocarina_Time'),   # in game 2026-11-19: works
 }
+
+
+def pair_check(pair, in_chest=lambda item: item):
+    """(Drop__CheckActor, Drop__DropActor_Substitute) of a checking chest holding a progressive pair: it looks
+    for First under the item's own name and holds Second as a chest gives it (in_chest), as it holds First
+    (its Drop__DropActor)"""
+    return pair[0], in_chest(pair[1])
+
+
 # name -> (BYML file, path of keys to the entry to remove, value it must have now)
 FILE_FIXES = {
     'skippable_opening': (
@@ -1874,7 +1896,7 @@ def main(argv):
         src, old = out.read(path)
         # (item to look for in the inventory: the item's own name; item given when Link has it: as a chest
         # gives it)
-        checking = {h: (steps[cid][0], in_chest(steps[cid][1])) for h, (cid, _, _, kind) in changes.items()
+        checking = {h: pair_check(steps[cid], in_chest) for h, (cid, _, _, kind) in changes.items()
                     if cid in steps}
         new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking)
         for h, (cid, item, expected_old, kind) in changes.items():
