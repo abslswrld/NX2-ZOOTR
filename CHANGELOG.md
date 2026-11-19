@@ -4,6 +4,107 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-19
 
+### Progressive upgrades, step 3: pairs on freestanding items, the "turning item" (branch `claude/ground-progressive`)
+- `CHECK_ID=First>Second` is now also accepted on a **freestanding item**: the placement gets First's *turning
+  item*. Plan and evidence: `out/RESEARCH_ground_progressive.md`. Still refused on shelves, pots, rocks, bushes
+  and Gold Skulltulas (and on gifts, songs and scrubs), and only the pairs in `PROGRESSIVE_PAIRS`.
+- **Found** (all in the game's files):
+  - a ground item decides nothing: what goes into the inventory, the model on the ground and the model Link
+    holds up all come from the one actor picked up. So the actor lying there has to be the right level's;
+  - a ground item's AI (`DropItem.root`, 13 nodes: spin, bounce, a layer change while carried) is named in its
+    own parameter files (`AIInfoRef`), so a copy under another name can replace it, as the shop versions'
+    `Shop_NX2_Once`;
+  - an object's AI can ask the inventory every frame: `Enemy_Tentacle_Red.utility.root` asks
+    `QueryGetPouchContentNumByActorName` for `Item_Boomerang` into a "when 0 / otherwise" selector. It is the
+    checking chest's question;
+  - the game has an actor that turns into another through a drop table of its own: `Animal_ButterflyToFairy`
+    (`DropRef` -> `Component/DropParam` -> `Drop/DropTable` -> `Drop/DropSubTable`, one item). Its three files
+    are only in its own pack: no table (`RSDB`) and no file under `GameParameter` names them;
+  - an AI can drop without dying (`OneShotDropDrop`: trees, the Gerudo cow bone), switch its drop on and off
+    (`OneShotDropSetDropValid`: chests) and remove its actor without marking its placement
+    (`OneShotGenericDeleteThisActor`, `IsFade` false: the silver rupee counter);
+  - **death reason 10 is not "picked up"**: the code's list of reasons makes 4 `PickedUp` and 10 `LifeDepleted`
+    (the numbers in the game's AI files agree: pots breaking 10, the silver rupee taking itself 4). The pick-up
+    scene (`Dm_SY_Get`) ends the item with 10, and the ground items' death table drops on that reason
+    (`IsDropItem`). An item with a drop part would drop its next level when picked up, so its drop is switched
+    off as soon as it is made;
+  - the ground items' death table ignores reason 0 (`AI`: `IsIgnoreThisDeathReason`), the reason the butterfly
+    turns with: turning by dying would need a death table of our own (a loose file). Not used;
+  - no game AI drops and deletes itself in one step. Pots and the butterfly are gone as soon as they have
+    dropped (through their death), and in game a pot's drop of one of our ground versions appeared
+    (2026-11-16): a drop outlives its dropper there. Whether it does after a delete can only be seen in game.
+- **The turning item** (`tools/turn_items.py`, new): one actor per level, `Obj_NX2P_<level>`: the ordinary ground
+  version of that level (`tools/ground_items.py`, version `turn`) with a root AI of its own,
+  `NX2_Turn_<level>.root`: `DropItem.root` with one more branch under its root. Every frame: dead? in an event?
+  a main event playing? then nothing. Else, once Link owns this level: switch the drop on, drop the next
+  level's actor, delete itself, in one step (the last level only deletes itself). The first level also deletes
+  itself when Link owns the second but not the first (a second level that takes the first one's place in the
+  inventory, as the Longshot most likely does). On entering, a level with a next level switches its drop off.
+  - The first level has a drop part: copies of the butterfly's three files under its own name, the sub-table
+    naming the second level's actor, with the two game files they inherit from as they are.
+  - Every new node is a copy of a game node of the same type, found by what it is and checked before use:
+    the yes/no selector and the "do nothing" of `DropItem.root` itself; the inventory question and the "dead"
+    question of `Enemy_Tentacle_Red.utility.root`; "in an event" of `Obj_TBox_A_01.root`; "main event" and the
+    enter/update split of `Door.root`; the number selector, the one-step sequence and the delete of
+    `Obj_silverRupeeCounter.root`; the drop switch of `TreasureBox.event.root`; the drop of the cow bone's AI.
+    The 13 nodes of the game's file keep their numbers and contents (the root gets one child more).
+  - Three guards instead of the plan's two. Which question is true through the whole pick-up scene is not in a
+    file, so all three the game's own item AIs use are asked: `QueryDeathIsDead` (Piece of Heart),
+    `QueryEventMemberIsEventMemberSomeReason` (Ruto's letter, same event settings; chests) and
+    `QueryIsPlayingMainEvent` (a Poe soul does not end itself while one plays). The cost: an item turns after
+    another one's scene, not during it.
+  - Memory: the ground version's `InstanceHeapSize` plus what a drop part, an actor holder and more AI add to the
+    game's butterfly (`Animal_ButterflyToFairy` over `Animal_Butterfly`: 34,208).
+- **Builder** (`tools/build_mod.py`): `pair_kind` (chest: the checking chest as before; freestanding: the
+  turning item; anything else stops the build); `turn_spacing` refuses two items of one family less than 2 m
+  apart (Link could touch both at once; the second could be taken before it has turned); both levels' packs and
+  rows are made for each family placed. Families of three levels are refused (`turn_items.build`).
+- **Sizes**: no new rule. The AI, the AI settings, the actor file, the item settings and the pack have rules
+  (`tools/sizes.py`). The three drop kinds have none: each new file keeps the headroom of the butterfly's file it
+  is a copy of (`Output.add`), and its list is as long. The entries come out at what the research fitted on the
+  game's files of each kind (size rounded up to 32, plus 5,144 / 5,120 / 5,472).
+- New test `tests/ground_prog_check.py` (in `run_tests.bat`), 16 lines: where a pair is accepted and refused
+  (shelf, pot, rock, bush, Gold Skulltula, gift, scrub; three levels; two items too close); the two placements
+  in the map, nothing else changed; for all three pairs: names, the AI read back with `formats/ainb.py` (the 13
+  game nodes untouched, every new node the copy of a game node, the branch followed link by link, no node
+  unreached), the pack's settings, the drop files naming the second level, the three rows, a size entry for
+  every file. ALL OK. edit_check, evfl_add_check, chest_check: all OK; logic_check: 0 failed; db_check: 0 errors.
+- **Test build** (`out/mods/NX2-ZOOTR`, the six usual fixes; `KF_RUPEE_NEAR_MIDO_ITEM` and
+  `KF_RUPEE_NEAR_FADO_ITEM_01` = `Item_Scale_Silver>Item_Scale_Gold`): 16 files. Read back against a build of the
+  fixes alone: only `KokiriForest_Child_Dynamic` (2 of 3,639 actors: `Obj_Rupee_Blue` -> `Obj_NX2P_Scale_Silver`,
+  nothing else of them), the three tables (2 rows each) and the size table (16 entries) differ, and the two
+  packs are new. `KokiriForest_Child_Dynamic` 510,884 -> 510,912 bytes, entry 511,176 -> 511,204.
+  `Obj_NX2P_Scale_Silver`: pack 51,636 bytes (entry 51,960), 51 files, 7 new; AI 35 nodes, 10,860 bytes (entry
+  11,256). `Obj_NX2P_Scale_Gold`: pack 47,260 bytes (entry 47,576), 46 files, 4 new; AI 26 nodes, 8,292 bytes
+  (entry 8,696). No entry below its rule or below the game's.
+- **The two spots** (child, both blue rupees in the game, 40.2 m apart): `KF_RUPEE_NEAR_FADO_ITEM_01` lies 1.2 m
+  from Fado, on her ledge (y 116.1, about 6 m above the ground below). `KF_RUPEE_NEAR_MIDO_ITEM` (the spot where a
+  Piece of Heart was taken on 2026-11-16) is at y 107.6 under the pond's water plane (`Land_Kokiri_WaterPlane_A_01`,
+  y 109.7), by the waterfall: 2.1 m under the surface. Taken while swimming, an item may go through
+  `Dm_SY_Get_WithoutPlayer` (no hold-up, and the item is not ended by the scene's own step), a path the guards
+  were not read for: the checklist takes Fado's first.
+- Known limits (from the research): a placement whose item turned and was then taken is not marked collected, so
+  on a later visit its first level is made, turns, and the second removes itself in the first frames (maybe
+  visible for a moment); the item that appears is dropped (a short hop).
+- Open, in game only: an item actor accepts a drop part; the drop still happens when the actor deletes itself
+  in the same step; one of the guards is true from the start of the item's own pick-up to its death, and none
+  stays true for good; the inventory answers for a name asked by an item as it does for the chest.
+- **In game (2026-11-19):** the user: "both scales worked as intended" (the turn, the pick-ups, the checklist's
+  runs). But both scales lie partly in the ground (seen on Fado's ledge): the scales are not in `GROUND_LIFT`.
+- **Scales no longer in the ground:** each scale has its own model and animation
+  project. The models are built standing above their origin (`Skl_Root` at 0.223), and `Pose_Common` puts
+  `Skl_Root` at -0.007 instead, which centres the scale on its point: with the spin's 0.05, the lowest vertex was
+  0.142 (Silver) and 0.153 (Gold) under the ground. The box in `ActorInfo` is no measure here: it is the model as
+  built (lowest 0.038, 0.027), and by it the scales would need no lift. So both are in `GROUND_LIFT` now, measured
+  from the model's vertices and skeleton (`tools/item_pose.py`): their ground, token and turn versions get
+  `NX2G_Scale_Silver_Animation` / `NX2G_Scale_Gold_Animation` with only the pose's height changed, -0.007 -> 0.184
+  and -0.007 -> 0.196, lowest vertex 0.05 above the ground. Chests, shelves and held-up keep the game's animation.
+  The bracelet and the magic stay on the box (`GROUND_LIFT_BOX`), as tested: their files come out byte for byte
+  the same as before (by its vertices the bracelet lies 0.074 above the ground, the magic 0.05).
+  `tests/ground_prog_check.py` checks the lifted copies.
+- **In game (2026-11-19, second test):** the user: "it worked correctly": the scales sit on the ground, and the
+  turn still works.
+
 ### Progressive upgrades, step 2: Hookshot > Longshot, Fairy Ocarina > Ocarina of Time (branch `claude/progressive-pairs`)
 - Two more two-level pairs for the game's checking chest (`CHECK_ID=First>Second` on a small chest, step 1
   below): `Item_Hookshot>Item_Longshot` and `Item_Ocarina_Fairy>Item_Ocarina_Time`.
