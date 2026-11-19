@@ -2147,7 +2147,7 @@ def main(argv):
     for (item, price), name in sorted(shops.items()):
         tpl_pack_path = ground_items.pack_path(shop_items.TEMPLATE)
         tpl_pack = plain(tpl_pack_path)
-        got, pack, new_inner, rows = shop_items.build(item, price, plain, table_rows, once=True)
+        got, pack, new_inner, rows, loose = shop_items.build(item, price, plain, table_rows, once=True)
         assert got == name
         path = ground_items.pack_path(name)
         out.write_new(path, pack, like=tpl_pack_path)
@@ -2168,6 +2168,22 @@ def main(argv):
                 raise SystemExit('%s: %s has no resource size entry' % (name, inner))
         for t, row in rows.items():
             new_rows.setdefault(t, []).append(row)
+        for path, (data, like, info) in sorted(loose.items()):
+            if path in shop_shared:                    # one animation project for every shop version of the item
+                continue
+            shop_shared[path] = data
+            out.write_new(path, data, like)
+            out.add(path, data, like, plain(like))
+            vec = lambda v: '(%s)' % ', '.join('%.4f' % x for x in v)  # noqa: E731
+            print('shelf pose %s: %s, a copy of %s; Pose_Common: the item\'s Pose_Common (scale %.3f, turn %s, at '
+                  '%s); Pose_GetDemo (held up): the same at %s, the model y %.3f .. %.3f from the point it is held '
+                  'at; Pose_Shop: scale %.3f, turn %s, at %s; on the shelf the model is x %.3f .. '
+                  '%.3f, y %.3f .. %.3f, z %.3f .. %.3f from the shelf point'
+                  % ((item, path, like.split('/')[-1]) + tuple(x for x in (info['common'][0], vec(info['common'][1]),
+                                                                           vec(info['common'][2])))
+                     + (vec(info['held'][2]), info['held_lo'][1], info['held_hi'][1])
+                     + tuple(x for x in (info['shop'][0], vec(info['shop'][1]), vec(info['shop'][2])))
+                     + tuple(x for i in range(3) for x in (info['lo'][i], info['hi'][i]))))
         print('shop   version %-22s for %s, %d rupees, sold once (%d bytes); its AI %s marks the shelf\'s '
               'placement as not to be made again once sold and never shows the model again'
               % (name, item, price, len(pack), shop_items.ONCE_AI))

@@ -78,6 +78,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 from formats import sarc, byml, ainb  # noqa: E402
+import item_pose  # noqa: E402
 from ground_items import (pack_path, ap_path, table_path, TABLES, _ref_path, pouch_param_path,  # noqa: E402,F401
                           resolved_components)
 
@@ -86,9 +87,32 @@ PRICE_TEMPLATE = 'Shop_DekuNutBundle_01'      # its price table: the shop base's
 PREFIX = 'Shop_NX2_'
 ITEM_REFS = ('ActorNameRef', 'AnimationRef', 'ModelInfoRef', 'PouchContentRef')
 ROW_FROM_ITEM = ('ActorName', 'FmdbName', 'ModelAabbMax', 'ModelAabbMin', 'ModelProjectName')
-# items the game never sells stand on the shelf in a pose not made for them: how much higher to place them
-# (metres, found in game). The Hookshot stood on end, half inside the shelf (2026-11-17).
-SHELF_LIFT = {'Item_Hookshot': 0.25}         # 0.3 tested 2026-11-17: right, a touch high
+# items the game never sells have no pose made for a shelf: their one pose (Pose_Common, tools/item_pose.py) is
+# centred on the point they are placed at, where the game's shelf items stand on it (lowest point of the model
+# -0.03 .. +0.03 above the shelf point, measured on the vertices of everything the game sells).
+# SHELF_LIFT: how much higher the shelf is placed in the map (metres). The Hookshot stood on end, half inside the
+# shelf (2026-11-17); 0.3 tested: right, a touch high; with 0.25 its lowest vertex is 0.000 above the shelf point.
+# The Hover Boots' pose is centred too (lowest vertex 0.190 under the point, default size 0.44 x 0.40 x 0.43 m):
+# lifted the same way. (Their pose sets 18 bones, legs and wings; no game project with a shelf pose has them, so
+# they get no pose of their own, SHELF_POSE.)
+SHELF_LIFT = {'Item_Hookshot': 0.25, 'Item_HoverBoot': 0.19}
+# SHELF_POSE: items that get a shelf pose (Pose_Shop) of their own, as the game's own shelf items have (bomb, Deku
+# Stick, arrows, Hylian Shield: their Pose_Common times one number): how many times its Pose_Common the item is on
+# the shelf. The Giant's Knife's pose lays it nearly flat, 1.53 m wide (0.50 m tall, 0.56 m deep), centred on the
+# shelf point: half inside the shelf and across its neighbours (shelves are 0.65 m apart, items 0.5 m apart).
+# The shop version's animation project is a copy of SHELF_BASE (a game project with exactly Pose_Common,
+# Pose_GetDemo and Pose_Shop for the bones Root and Skl_Root, what the knife's model has) under a name of the same
+# length (shelf_project): Pose_Common and Pose_GetDemo are the item's own Pose_Common (held up, looked at in the
+# menu: as in the game), Pose_Shop is that pose times the number, lifted so that the model's lowest vertex is
+# SHELF_GAP above the shelf point. The turn stays the game's.
+SHELF_POSE = {'Item_Sword_Giant': 0.8}       # 0.37 (2026-11-18, in game): much too small
+SHELF_GAP = 0.0
+# HELD_LOWER: how much lower than the item's own pose the shop version is held up (Pose_GetDemo; metres; size and
+# turn stay the game's). Empty: held up, every item is exactly as in the game. Tried in game (2026-11-18): the
+# Giant's Knife 0.11 lower; the user preferred the game's own height.
+HELD_LOWER = {}
+SHELF_BASE = 'Item_DekuSeed_Animation'
+COMMON_ANIM = 'Item_Common_Animation'
 NO_RESPAWN = '?Component/ActorGameDataSetting/NoRespawn.game__component__ActorGameDataSetting.bgyml'
 # sold once, for good: the AI of the shop versions (the shelf's own with one addition, sold_for_good_ai)
 BASE_AI = 'Shop_Item_Base'                    # the AI of every shelf
@@ -335,9 +359,51 @@ def can_sell(read_pack, item):
     return all(r in c for r in ('ActorNameRef', 'ModelInfoRef', 'PouchContentRef'))
 
 
+def shelf_project(item):
+    """the name of the animation project of an item's shop version (SHELF_POSE): as long as SHELF_BASE"""
+    name = ('NX2S_' + item.split('_', 1)[1]).ljust(len(SHELF_BASE), '_')
+    if len(name) != len(SHELF_BASE):
+        raise SystemExit('%s: no animation project name of %d letters' % (item, len(SHELF_BASE)))
+    return name
+
+
+def shelf_pose(item, project, row, read_pack):
+    """the animation project of the shop version of `item` (SHELF_POSE; `project`: the item's own, `row`: its
+    ActorInfo row). Returns (data, {'common': the item's pose, 'shop': the shelf pose, 'held': the held-up pose
+    (HELD_LOWER), each (scale, rot, move); 'lo', 'hi': the model's lowest and highest x, y, z on the shelf;
+    'held_lo', 'held_hi': the same held up, from the point it is held at})."""
+    anim = read_pack(item_pose.model_path(project))
+    own = item_pose.read_pose(anim)
+    if len(set(own['scale'])) != 1:
+        raise SystemExit('%s: its pose has a scale per axis' % item)
+    points, bind, _ = item_pose.model_points(read_pack('Model/%s.%s.bfres' % (row['ModelProjectName'],
+                                                                              row['FmdbName'])))
+    k = SHELF_POSE[item]
+    scale = own['scale'][0] * k
+    flat = (own['move'][0] * k, 0.0, own['move'][2] * k)
+    lo, _ = item_pose.extent(points, bind, (scale,) * 3, own['rot'], flat)
+    move = (flat[0], SHELF_GAP - lo[1], flat[2])
+    data = item_pose.shelf_copy(read_pack(item_pose.model_path(SHELF_BASE)), SHELF_BASE, shelf_project(item), anim,
+                                (scale, own['rot'], move), HELD_LOWER.get(item, 0.0))
+    back = item_pose.read_pose(data, item_pose.SHELF_POSES[2])
+    lo, hi = item_pose.extent(points, bind, back['scale'], back['rot'], back['move'])
+    if abs(lo[1] - SHELF_GAP) > 1e-4:
+        raise SystemExit('read-back: %s does not stand %.2f above the shelf point' % (item, SHELF_GAP))
+    held = item_pose.read_pose(data, item_pose.SHELF_POSES[1])
+    held_lo, held_hi = item_pose.extent(points, bind, held['scale'], held['rot'], held['move'])
+    own_lo, _ = item_pose.extent(points, bind, own['scale'], own['rot'], own['move'])
+    if abs(own_lo[1] - held_lo[1] - HELD_LOWER.get(item, 0.0)) > 1e-4:
+        raise SystemExit('read-back: %s is not held up %.2f lower' % (item, HELD_LOWER.get(item, 0.0)))
+    return data, {'common': (own['scale'][0], own['rot'], own['move']), 'shop': (scale, own['rot'], move),
+                  'held': (held['scale'][0], held['rot'], held['move']), 'lo': lo, 'hi': hi,
+                  'held_lo': held_lo, 'held_hi': held_hi}
+
+
 def build(item, price, read_pack, read_table_rows, once=False):
     """the shop version of `item` at `price` rupees.
-    Returns (name, pack data, {inner path: (data, similar game file)} for files new to the game, {table: row})."""
+    Returns (name, pack data, {inner path: (data, similar game file)} for files new to the game, {table: row},
+    {loose file new to the game: (data, the game file it is a copy of, what shelf_pose says about it)}: the
+    animation project of an item with a shelf pose of its own, SHELF_POSE)."""
     name = shop_name(item, price, once)
     tpl = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))
     base = sarc.Sarc.read(read_pack(pack_path(PRICE_TEMPLATE)))
@@ -395,6 +461,23 @@ def build(item, price, read_pack, read_table_rows, once=False):
         else:
             comp.pop(r, None)
     comp['GameParameterTableRef'] = '?' + gpt_path(name)
+    loose = {}
+    if item in SHELF_POSE:
+        # no pose made for a shelf: its animation project replaced by one with a shelf pose (SHELF_POSE)
+        adoc = byml.loads(files[_ref_path(ic['AnimationRef'])])
+        res = [dict(x) for x in adoc.root['AnimationResources']]
+        own = [x['ModelProjectName'] for x in res if x['ModelProjectName'] != COMMON_ANIM]
+        if len(own) != 1:
+            raise SystemExit('%s: animation projects %r, expected %s and one of its own' % (item, res, COMMON_ANIM))
+        row = {r['__RowId']: r for r in read_table_rows('ActorInfo')}[item]
+        data, info = shelf_pose(item, own[0], row, read_pack)
+        loose[item_pose.model_path(shelf_project(item))] = (data, item_pose.model_path(SHELF_BASE), info)
+        adoc.root = type(adoc.root)(adoc.root)
+        adoc.root['AnimationResources'] = [dict(x, ModelProjectName=shelf_project(item))
+                                           if x['ModelProjectName'] == own[0] else x for x in res]
+        anim_path = 'Component/AnimationParam/%s.engine__component__AnimationParam.bgyml' % name
+        new_inner[anim_path] = (byml.dumps(adoc), _ref_path(tc['AnimationRef']))
+        comp['AnimationRef'] = '?' + anim_path
     # item settings of its own naming the item for the pouch, as the game's shelves of single items
     tpp = _ref_path(tc['PouchContentRef'])
     pdoc = byml.loads(tpl.files[tpp])
@@ -491,4 +574,4 @@ def build(item, price, read_pack, read_table_rows, once=False):
                 != 'Work/AI/Root/%s.root.ain' % ONCE_AI \
                 or ainb.loads(back.files[ai_path(ONCE_AI)]).filename != ONCE_AI + '.root':
             raise SystemExit('read-back: the sold-once AI of %s differs' % name)
-    return name, pack, new_inner, rows
+    return name, pack, new_inner, rows, loose
