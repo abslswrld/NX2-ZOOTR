@@ -4,6 +4,21 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-17
 
+### Goron Bracelet and magic blessing no longer half in the ground (branch `claude/ground-heights`)
+- **Bug (in game):** dropped by rocks, the Goron Bracelet and the magic blessing lay half in the ground.
+- **Found in the game's files** (skeletal animations; details in `tools/ground_items.py`): on the ground the spin
+  `Rotate_Obj` lifts the bone `Root` by 0.05, and each item's own pose `Pose_Common` sets the height of the bone
+  `Skl_Root`. Items made to lie on the ground lift themselves there (Bottle 0.114, Deku Shield 0.238; the
+  Bottle's lowest point is 0.05 above the ground). The bracelet's pose lifts it by -0.01 (at 2.1 times its size),
+  the magic blessing's by nothing; both models are centred on their origin.
+- **Fix:** their ground versions and Gold Skulltula drops (`GROUND_LIFT`, only these two items) get a copy of the
+  item's animation project (`NX2G_Gauntlet_Goron_Animation`, `NX2G_FairyBless_MPDouble_Animation`: same-length
+  names) with only the pose's height changed, so the model's lowest point (its box, sized and turned by the
+  pose) is 0.05 above the ground: bracelet -0.010 -> 0.130, magic 0 -> 0.285. Chests and shelves keep the
+  game's animation. Check build: both files read back as intended.
+- **In game (2026-11-18, built together with the shelf fix on main): works.** Under the rocks behind Saria's
+  house, the bracelet and the magic now lie on the ground, not in it.
+
 ### Harp cloth in the song's colour (branch `claude/harp-colors`)
 - New `tools/harp_colors.py`: the harp model (one material, one colour texture
   `Tex/Mt_Harp_Sheik_Item_Harp_Sheik_Alb.bntx`, BC1 sRGB 768 x 768, 10 mip levels, frame and cloth together)

@@ -1999,11 +1999,12 @@ def main(argv):
                 'shelf %d: %s' % (i, n) for i, n in sorted(goods[keeper].items())) or 'all shelves open'))
 
     new_rows = {}
+    loose_done = set()                                 # lifted animations shared by an item's versions
     for (item, version), name in sorted(grounds.items()):
         tpl_name = ground_items.template_of(name)
         tpl_pack_path = ground_items.pack_path(tpl_name)
         tpl_pack = plain(tpl_pack_path)
-        got, pack, new_inner, rows = ground_items.build(
+        got, pack, new_inner, rows, loose = ground_items.build(
             item, plain, lambda t: byml.loads(plain(ground_items.table_path(t))).root,
             lambda project: os.path.exists(os.path.join(a.romfs, 'Model', project + '.anim.bfres.zs')), version)
         assert got == name
@@ -2021,6 +2022,14 @@ def main(argv):
                 raise SystemExit('%s: %s has no resource size entry' % (name, inner))
         for t, row in rows.items():
             new_rows.setdefault(t, []).append(row)
+        for path, (data, like, old_h, new_h) in sorted(loose.items()):
+            if path in loose_done:
+                continue
+            loose_done.add(path)
+            out.write_new(path, data, like)
+            out.add(path, len(data), like, len(plain(like)))
+            print('%-6s %s: lies %.3f higher on the ground (pose height %.3f -> %.3f, %s)'
+                  % (version, item, new_h - old_h, old_h, new_h, path))
         print('%-6s version %-22s for %s (%d bytes)%s' % (version, name, item, len(pack), {
             'token': ': dropped by a Gold Skulltula, marks it done when picked up (the token\'s AI and blackboard), '
                      'spins as the token does (the token\'s animation settings start %s)' % ground_items.SPIN
