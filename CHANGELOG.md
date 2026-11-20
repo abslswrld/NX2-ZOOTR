@@ -341,6 +341,55 @@ Two bugs of the in-game test above.
   Scale, both in the inventory. Chest first: the chest gives the Silver Scale, the Kokiri the Gold Scale, his last
   line plays, talking to him again gives nothing. Held up and named alike every time; no freeze.
 
+### An item on Saria's gift (`LW_SARIA_GIFT`, branch `claude/saria-gift`)
+- `LW_SARIA_GIFT=<item>` is accepted now: Saria's cutscene on the bridge gives that item. Research and evidence:
+  `out/RESEARCH_saria_gift.md`. **Not yet tested in game.**
+- **Found** (all in the game's files):
+  - the cutscene that gives the ocarina, `Dm_Kokiri_0155`, has no timeline: `formats/evfl.py` already reads it
+    and writes it back byte for byte. The timeline file is the cutscene before it, `Dm_Kokiri_0150` (Saria's
+    goodbye), which gives nothing. No format work: `formats/` is unchanged;
+  - walking onto the bridge starts `KokiriForest_ArriveLostWood` (flow `Goto_HyruleCastle`): `Dm_Kokiri_0150`,
+    then `Dm_Kokiri_0155`, then Link is sent to Hyrule Field. The trigger area is there until `Dm_Kokiri_0150`
+    has been played (`Logic/KokiriForest_Child_Level_All_02_ddcd`): "played", not owning the ocarina;
+  - in `Dm_Kokiri_0155` Link holds a cutscene actor named `Item_Ocarina_Fairy`, bound to his left hand
+    (`Event93`, `EventTriggerModelBind`, `Weapon_L`); `Event77` shows the get window (`GetPouchContent`, entry
+    `DisplayGetByActorName`: the window alone, the text is the item's own); `Event68` adds the item
+    (`PouchSystemActor.EventTriggerAddOrRemovePouchContent`). No flag, no song, no talk step, and nobody plays
+    the ocarina there;
+  - the game's cutscenes bind other item actors to a hand the same way (`Item_Gauntlet_Goron`,
+    `Item_ZeldaLetter`, `Item_Sword_Giant`, `Item_Bottle_Letter`, `Item_BulletBag_Medium`), all built on
+    `Item_EventObject_Base`;
+  - none of the 262 files with a timeline gives an item: every cutscene gift (the Ocarina of Time, the stones,
+    the medallions, the Light Arrow) is in a file the reader handles. None of those was changed.
+- **Builder** (`tools/build_mod.py`): a check with `"cutscene": {flow, add, window, item}` in its data
+  (`plan_cutscene_gifts`). `cutscene_gift_edit` sets the item of the add step and of the window, and renames the
+  actor Link holds to the item when the item is built on `Item_EventObject_Base`; for anything else (a rupee, a
+  heart, equipment) Link keeps the ocarina in his hand and the build says so. A slingshot or bow gets its small
+  bag added right after it. `cutscene_gift_check` reads the written file back against the game's: nothing else
+  may differ. The data is checked against the file first (the add step, the window, one held actor).
+- Left as they are: the Zelda Notes screenshot step (`Event58`, still names the Fairy Ocarina) and
+  `Dm_Kokiri_0150`, where Saria still holds out an ocarina.
+- **Sizes**: no new rule. `Dm_Kokiri_0155.bfevfl` 45,216 -> 45,208 bytes with the Boomerang, entry 45,488 ->
+  45,488 (size rounded up to 32, plus 272).
+- `tools/build_db.py`: the original contents of a check with `cutscene` data; `data/db/KokiriForest.json`
+  rebuilt (`LW_SARIA_GIFT`: `Item_Ocarina_Fairy`, from `Dm_Kokiri_0155`, `Event68`).
+- New test `tests/saria_check.py` (in `run_tests.bat`), 15 lines: the data against the game's file; the cutscene
+  byte for byte through the reader; the Boomerang given, named and held, nothing else changed; the size entry;
+  the ocarina placed on its own check gives the game's file; a rupee keeps the ocarina in the hand; the
+  slingshot's seed bag; wrong data and a progressive pair refused; the read-back notices a change elsewhere.
+  ALL OK. edit_check, evfl_add_check, chest_check, ground_prog_check: all OK; logic_check: 0 failed; db_check: 0
+  errors. Round-trip: the same report as before the change (evfl 650 identical, 264 errors).
+- Check build (the six usual fixes, `LW_SARIA_GIFT=Item_Boomerang`), read back: `Event68` adds `Item_Boomerang`,
+  `Event77` names it, the held actor is `Item_Boomerang` with its three steps (join, bind to `Weapon_L`, leave).
+- Open, in game only: how the item sits in Link's hand (no offset, turned as the ocarina was); that an item actor
+  other than the ones the game binds behaves as a held prop there; what skipping the cutscene does to the gift
+  (the game's own behaviour, not changed).
+- **In game (2026-11-19, combined test with the ground lift, the three-level chest and the progressive gift):
+  works.** Saria's goodbye plays as usual; in the second scene Link holds the Boomerang, the window names it, the
+  scene goes on to Hyrule Field; the Boomerang is in the inventory and throws, no Fairy Ocarina; the scenes don't
+  play again. Skipping Saria's scene by hand: the Boomerang still arrives. Looks: the Boomerang doesn't spin
+  there, and is slightly too big in his hands (screenshot); the user: a unique pose, "not a big deal".
+
 ### Progressive upgrades, step 3: pairs on freestanding items, the "turning item" (branch `claude/ground-progressive`)
 - `CHECK_ID=First>Second` is now also accepted on a **freestanding item**: the placement gets First's *turning
   item*. Plan and evidence: `out/RESEARCH_ground_progressive.md`. Still refused on shelves, pots, rocks, bushes

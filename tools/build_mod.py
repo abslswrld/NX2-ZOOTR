@@ -311,7 +311,7 @@ def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: 
     for cid, item_given in assignments:
         r, name, loc = find_check(world, cid)
         sps = world.spots_of(r, loc)
-        if not sps and (loc.get('gift') or loc.get('song')):
+        if not sps and (loc.get('gift') or loc.get('song') or loc.get('cutscene')):
             continue                                  # an event: plan_gifts
         if not sps:
             raise SystemExit('%s has no map placement (an event): not supported yet' % cid)
@@ -422,6 +422,8 @@ def plan_gifts(world, assignments):
             continue
         if loc.get('song'):
             continue                                  # plan_songs
+        if loc.get('cutscene'):
+            continue                                  # plan_cutscene_gifts
         g = loc.get('gift')
         if not g:
             raise SystemExit('%s has no map placement (an event) and no "gift" data: not supported yet' % cid)
@@ -521,6 +523,134 @@ def gift_edit(fc, events, direct=(), sync=None):
                                       if steps else ''))
         want[ev] = (e.flowchart, e.entry, dict(e.params), None if e.next is None else fc.events[e.next].name)
     return said, want, [x.name for x in fc.events[first_new:]]
+
+
+# Gifts a cutscene gives by itself (Saria's Fairy Ocarina on the bridge, Dm_Kokiri_0155): the cutscene shows the
+# "You got ..." window (a call of GetPouchContent<DisplayGetByActorName>, the window alone: what the chests'
+# Dm_SY_Treasurebox calls with whatever the chest holds) and adds the item with a step of its own
+# (PouchSystemActor.EventTriggerAddOrRemovePouchContent, the step and parameters GetPouchContent itself adds any
+# item with). Link holds the item's actor meanwhile: an actor of the cutscene, made for it and bound to his
+# hand (EventTriggerModelBind). The game's cutscenes bind item actors built on Item_EventObject_Base that way
+# (Item_Gauntlet_Goron, Item_ZeldaLetter, Item_Sword_Giant, Item_BulletBag_Medium...), so another item of that
+# kind takes the cutscene actor's place; for anything else (a rupee, a heart: actors Link picks up by touching
+# them; equipment) the cutscene keeps the actor it has, and only the window and the inventory change.
+CUTSCENE_WINDOW = ('GetPouchContent', 'DisplayGetByActorName')
+CUTSCENE_ADD = ('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent')
+CUTSCENE_BIND = 'EventTriggerModelBind'
+CUTSCENE_SHOWN_KIND = 'item'                       # ground_items.kind_of: built on Item_EventObject_Base
+
+
+def plan_cutscene_gifts(world, assignments):
+    """{cutscene flow path: (check id, new item, the check's data)} for the cutscene gifts among the assignments.
+    A cutscene gift's data: "cutscene": {"flow": the cutscene, "add": the event adding the item, "window": the
+    event showing the get window, "item": what it gives (also the name of the cutscene actor Link holds)}"""
+    out = {}
+    for cid, item in assignments:
+        r, name, loc = find_check(world, cid)
+        g = loc.get('cutscene')
+        if not g or world.spots_of(r, loc):
+            continue
+        path = 'Event/EventFlow/%s.bfevfl' % g['flow']
+        if path in out:
+            raise SystemExit('%s: %s is also %s' % (cid, g['flow'], out[path][0]))
+        out[path] = (cid, item, g)
+    return out
+
+
+def cutscene_gift_edit(fc, cid, g, item, show, companions=()):
+    """the cutscene gives `item` instead of g['item']: the item its add step adds and the one its get window
+    names; show: the cutscene actor Link holds becomes the item's too. companions: what the item needs to be
+    usable (SCRUB_COMPANIONS), added silently right after it. Nothing else of the cutscene changes.
+    Returns (lines saying what was changed, names of the new events)."""
+    old = g['item']
+    by_name = {e.name: e for e in fc.events}
+    add, win = by_name.get(g['add']), by_name.get(g['window'])
+    if add is None or win is None:
+        raise SystemExit('%s: event %s or %s not in the cutscene' % (cid, g['add'], g['window']))
+    if add.type != 'action' or (fc.actors[add.actor].name, _action_name(fc, add)) != CUTSCENE_ADD \
+            or not isinstance(add.params, dict) or add.params.get('Actor') != old or add.params.get('Num') != 1:
+        raise SystemExit('%s: event %s does not add one %s' % (cid, g['add'], old))
+    if win.type != 'subflow' or (win.flowchart, win.entry) != CUTSCENE_WINDOW \
+            or not isinstance(win.params, dict) or win.params.get('ActorName') != old:
+        raise SystemExit('%s: event %s is not the get window of %s' % (cid, g['window'], old))
+    others = [e.name for e in fc.events if e is not add and e is not win and (
+        (e.type == 'action' and (fc.actors[e.actor].name, _action_name(fc, e)) == CUTSCENE_ADD)
+        or (e.type == 'subflow' and e.flowchart == CUTSCENE_WINDOW[0]))]
+    if others:
+        raise SystemExit('%s: the cutscene gives or shows more than the data says (%s)' % (cid, ', '.join(others)))
+    held = [a for a in fc.actors if a.name == old]
+    if len(held) != 1 or held[0].secondary or CUTSCENE_BIND not in held[0].actions:
+        raise SystemExit('%s: the cutscene does not have one actor %s bound to someone' % (cid, old))
+    said = []
+    first_new = len(fc.events)
+    add.params['Actor'] = item
+    win.params['ActorName'] = item
+    said.append('%-18s %s adds %s, %s names it in the get window (was %s)' % (cid, g['add'], item, g['window'], old))
+    if show:
+        if item != old and any(a.name == item for a in fc.actors):
+            raise SystemExit('%s: the cutscene already has an actor %s' % (cid, item))
+        held[0].name = item
+        if item != old:
+            said.append('%-18s Link holds %s in the cutscene (the cutscene actor %s renamed)' % (cid, item, old))
+    else:
+        said.append('%-18s Link still holds %s in the cutscene: %s is not an item actor of the kind the '
+                    'game binds to a hand' % (cid, old, item))
+    nxt = add.next
+    for companion in reversed(list(companions)):
+        nxt = fc.add_action(add.actor, CUTSCENE_ADD[1],
+                            evfl.Params(Num=1, Actor=companion, IsGetEvent=False,
+                                        IsSetMessageTargetActorName=False, IsEquipDIrect=False), next=nxt)
+        said.append('%-18s %s comes with it (%s)' % (cid, companion, fc.events[nxt].name))
+    add.next = nxt
+    return said, [e.name for e in fc.events[first_new:]]
+
+
+def cutscene_gift_check(orig, back, cid, g, item, show, added=()):
+    """read-back of a cutscene gift: against the original cutscene, only the add step's item, the window's item
+    and (show) the held actor's name differ; the new events are the companions' adds, chained after the add
+    step and leading on as it did. Stops the build otherwise."""
+    def bad(what):
+        raise SystemExit('read-back: %s: %s' % (cid, what))
+
+    old = g['item']
+    if len(back.actors) != len(orig.actors) or len(back.events) != len(orig.events) + len(added):
+        bad('actors or events differ in number from what was intended')
+    for a, b in zip(orig.actors, back.actors):
+        va, vb = dict(vars(a)), dict(vars(b))
+        if a.name == old:
+            if vb['name'] != (item if show else old):
+                bad('the held actor is %s' % vb['name'])
+            vb['name'] = old
+        if va != vb:
+            bad('actor %s differs from the original' % a.name)
+    if [vars(p) for p in orig.entry_points] != [vars(p) for p in back.entry_points]:
+        bad('entry points differ from the original')
+    chain = lead = None
+    for o, e in zip(orig.events, back.events):
+        vo, ve = dict(vars(o)), dict(vars(e))
+        if o.name == g['add']:
+            if ve['params'].get('Actor') != item:
+                bad('%s adds %s' % (o.name, ve['params'].get('Actor')))
+            ve['params'] = evfl.Params(ve['params'])
+            ve['params']['Actor'] = old
+            chain, lead = ve['next'], vo['next']
+            ve['next'] = lead
+        elif o.name == g['window']:
+            if ve['params'].get('ActorName') != item:
+                bad('%s names %s' % (o.name, ve['params'].get('ActorName')))
+            ve['params'] = evfl.Params(ve['params'])
+            ve['params']['ActorName'] = old
+        if vo != ve:
+            bad('event %s differs from the original' % o.name)
+    for _ in added:
+        if chain is None or chain < len(orig.events):
+            bad('the companions do not follow the add step')
+        e = back.events[chain]
+        if e.type != 'action' or (back.actors[e.actor].name, _action_name(back, e)) != CUTSCENE_ADD:
+            bad('%s is not an add step' % e.name)
+        chain = e.next
+    if chain != lead:
+        bad('what follows the add step is not what followed it')
 
 
 # Deku Scrubs. When Link talks to one, the game copies its map setting ScrubBusiness_ShopItemActorName0 into
@@ -2342,6 +2472,21 @@ def main(argv):
         said, made = gift_pair_edit(ef.flowchart, pairs, template, direct)
         new = flow_write_checked(ef)
         gift_pair_read_back(path, evfl.loads(old).flowchart, evfl.loads(new).flowchart, pairs, made, template)
+        out.write(path, src, old, new)
+        for line in said:
+            print(line, '(%s)' % path.split('/')[-1])
+
+    # cutscene gifts: the item the cutscene adds, names in its window and puts in Link's hand (read back and
+    # compared with the original: nothing else differs)
+    for path, (cid, item, g) in sorted(plan_cutscene_gifts(world, assignments).items()):
+        src, old = out.read(path)
+        ef = evfl.loads(old)
+        if item not in {r['__RowId'] for r in byml.loads(plain(ground_items.table_path('PouchActorInfo'))).root}:
+            raise SystemExit('%s has no row in PouchActorInfo: not an item' % item)
+        show = item == g['item'] or ground_items.kind_of(plain, item) == CUTSCENE_SHOWN_KIND
+        said, added = cutscene_gift_edit(ef.flowchart, cid, g, item, show, SCRUB_COMPANIONS.get(item, ()))
+        new = flow_write_checked(ef)
+        cutscene_gift_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, cid, g, item, show, added)
         out.write(path, src, old, new)
         for line in said:
             print(line, '(%s)' % path.split('/')[-1])
