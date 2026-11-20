@@ -281,6 +281,66 @@ Two bugs of the in-game test above.
   the third item and the fixed-name question all work. Not answered: whether the three chests are lit like the
   fourth, leaving and coming back (run 3, and the chests staying open).
 
+### Progressive upgrades: a pair on a gift, decided in the giver's own flow (branch `claude/progressive-gift`)
+- `CHECK_ID=First>Second` is now also accepted on a **gift that has flow data** (today: the rock-circle Kokiri,
+  `KF_CIRCLE_KOKIRI_GIFT`). The giver's own flow asks the inventory in front of its call of the shared get flow:
+  First if Link doesn't have First, else Second. Plan: `out/RESEARCH_progressive.md`, question B1. The shared
+  get flows (`Dm_SY_GetInEvent`, `Dm_SY_Get`, `GetPouchContent`) are only called, not changed.
+- **Found** (all in the game's files):
+  - the game's own example of exactly this is the Deku Theater, `LostWood_ScrubForestStageElder_SkullMaskFirst`:
+    `Event30`, a switch on `PouchSystemActor.EventQueryIsExistInPouch {Num: 1, Actor: Item_StickBag_Medium}`,
+    case 0 (has it) -> `Event32`, case 1 (has not) -> `Event29`. Both are calls of
+    `Dm_SY_GetInEvent<GetInEvent_NotTurn>` that differ only in `ActorName` (`Item_StickBag_Large` /
+    `_Medium`), and both lead on to the same step (`Event0`). The Kokiri's gift is a call of the same entry;
+  - the question has one shape in the whole game: 153 switches in the flows read, parameters `Num: 1` and
+    `Actor` only, cases 0 and 1. `PouchSystemActor` has the same actor entry in all 110 flows that have one
+    (no secondary name, the six usual settings);
+  - the game's flows ask about each pair's first item under its own name: `Item_Scale_Silver` (6 times),
+    `Item_Hookshot` (12), `Item_Ocarina_Fairy` (4);
+  - the Kokiri's gift (`Npc_Kokiri_008_Child`, `Event224`) is the head of one branch of a fork (`Event219`) and
+    ends that branch. The game has forks whose branch starts with a two-way switch between two calls that end
+    the branch (6, e.g. `Common_Dungeon_OpenShutterMove` `Event210` -> `Event194`);
+  - `Dm_SY_GetInEvent` makes the held-up model, the window and the inventory entry from the one `ActorName` it
+    is called with, so each branch shows what it gives;
+  - no table lists a flow's actors (`RSDB/EventSetting`, `GameAnalyzedEventInfo`: only the flow files an event
+    may run, and none is added here).
+- **Changed** (`tools/build_mod.py`, a section of its own: `gift_pair_kind`, `gift_pair_template`,
+  `gift_pair_edit`, `gift_pair_read_back`; `gift_edit` and `pair_kind` are untouched):
+  - the gift is first set to First as any gift (`gift_edit`). Then, in the same flow: a new call that is a copy
+    of the gift's call naming Second, with the same next step; a new switch with the game's question about
+    First, 0 -> Second's call, 1 -> the gift's own call; every link to the gift moved to the switch
+    (`repoint`). The question's parameters, its case values and the `PouchSystemActor` entry are read from the
+    Deku Theater's flow at build time, found by what they are;
+  - for the Kokiri: 2 new events (`Event241` the Gold Scale's call, `Event242` the question), 1 new actor
+    (`PouchSystemActor`, 9 instead of 8), 1 link moved (the fork `Event219`: branch `Event224` -> `Event242`),
+    and the two entry points that list the gift's call list the second call too. The other 236 events are as
+    in the game. 134,144 -> 135,408 bytes, size entry 134,416 -> 135,696 (length rounded up to 32, plus 272);
+  - items Link can't hold up (the ocarinas) keep their way: both branches are the get window call
+    (`GetPouchContent`) and lead to the same sync steps. A pair with one item held up and the other not is
+    refused;
+  - **refused:** a pair on a gift with no flow data (Saria's cutscene gift `LW_SARIA_GIFT`, the Skull Kids, the
+    Deku Theater: no step of the giver's flow to put the question in front of), on a song, and as before on
+    scrubs, shelves, pots, rocks, bushes and Gold Skulltulas; pairs not in `PROGRESSIVE_PAIRS`.
+- New test `tests/gift_check.py` (in `run_tests.bat`), 29 lines: the game's pattern (the Deku Theater's switch,
+  the 110 actor entries, the 153 questions, the fork shape); where a pair is accepted and refused; the Kokiri's
+  flow read back (the two steps, the actor, the question's parameters, the branch naming the right items, both
+  calls ending where the gift ended, every other step and entry point as in the game, the size entry); the
+  builder's own read-back stops a branch the wrong way round; hookshots and ocarinas; one whole build in a
+  temporary folder against a build of the fixes alone. ALL OK. edit_check, evfl_add_check, chest_check,
+  ground_prog_check: all OK; logic_check: 0 failed; db_check: 0 errors.
+- **Check build** (scratch folder only, the six usual fixes; `KF_CIRCLE_KOKIRI_GIFT` and `KF_MIDO_CHEST_04` =
+  `Item_Scale_Silver>Item_Scale_Gold`): 14 files. Against a build of the fixes alone: only
+  `Npc_Kokiri_008_Child.bfevfl` (as above), `KokiriForest_Child_Dynamic` and `KokiriForest_Adult_Dynamic` (one
+  actor each: Mido's bottom right chest `Obj_TBox_A_01` -> `Obj_TBox_A_06` with the pair's three settings) and
+  three entries of the size table differ.
+- **Not yet tested in game.** To see: the Kokiri hands the Silver Scale when Link has none and the Gold Scale
+  after the chest's Silver one, held up and named alike; no freeze at the hand-over (a flow gaining
+  `PouchSystemActor` and a switch at the head of a fork branch is new for the builder).
+- **In game (2026-11-19, combined test with the ground lift, the three-level chest and Saria's gift): works.**
+  Gift first: the Kokiri gives the Silver Scale, his last line plays, the bottom right chest then gives the Gold
+  Scale, both in the inventory. Chest first: the chest gives the Silver Scale, the Kokiri the Gold Scale, his last
+  line plays, talking to him again gives nothing. Held up and named alike every time; no freeze.
+
 ### Progressive upgrades, step 3: pairs on freestanding items, the "turning item" (branch `claude/ground-progressive`)
 - `CHECK_ID=First>Second` is now also accepted on a **freestanding item**: the placement gets First's *turning
   item*. Plan and evidence: `out/RESEARCH_ground_progressive.md`. Still refused on shelves, pots, rocks, bushes
