@@ -193,6 +193,94 @@ Two bugs of the in-game test above.
   along the way: the two scales were placed as two plain items (not as the pair), so the Gold Scale could be taken
   before the Silver one. That is the test's placement, not the lift; but nothing in the builder stops it.
 
+### Progressive upgrades, step 4: a chest with three outcomes, the bomb bags (branch `claude/three-level-chest`)
+- `CHECK_ID=First>Second>Third` on a **small chest** makes it a chest of our own, `Obj_TBox_NX2_<family>`, that
+  gives Third when Link has Second, else Second when Link has First, else First. Only the families in the new
+  table `THREE_LEVEL_FAMILIES` (`tools/build_mod.py`), for now one:
+  `Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large`. Plan: `out/RESEARCH_progressive.md`, question A.
+  Two-level pairs stay on the game's checking chest. **Not yet tested in game.**
+- **Found** (all in the game's files):
+  - the checking chest (`Obj_TBox_A_06`) is the small chest (`$parent` `Obj_TBox_A_01`) with four parts of its
+    own: its AI, its held actors (the small chest's, plus the slot `SubContent`), its drop settings and
+    `AffiliationRef`. Its AI (101 nodes) makes both items when the chest is made and hands the name of one
+    slot (`HolderKey`) to the shared chest module, chosen by "0 < the number Link has";
+  - a slot's name is free: `ActorHoldSettings` is a table of names (`Content`, `SubContent`, `ContentDisplay`,
+    `ShopHolder`, `Obj_Bomb`...), and the code has no slot name of its own (its one `SubContent` is a parameter
+    of an error node). The chest module only allows opening when the slot it is handed holds an actor;
+  - the names: each bag is an inventory item under its own name, saved under it (`IsGet.<name>`,
+    `PouchData.<name>.StockNum`), 20 / 30 / 40 bombs, filled when received (`RSDB/PouchActorInfo`). The game's
+    own chest gives `Item_BombBag_Small` (Dodongo's Cavern), and a small chest of Mido's gave it in game on
+    2026-11-15;
+  - Medium and Large inherit the Small one's item settings (`Component/PouchContentParam/BombBag`). For a
+    chest that changes nothing: those settings name no other item to put in the inventory, so each bag goes in
+    as itself, and all three are item event actors with the get demo (a chest holds them as they are);
+  - a chest is lit by a light on its bone, given to it **by actor name** in
+    `System/GameGraphics/LocationalLightRigGroupSetting/Gimmick0` (one entry per chest actor). Without an entry
+    a chest of ours would not be lit as the others;
+  - the game's tag table (`RSDB/Tag`) has a row per chest: `Graphics`, `HasLightRigBone`, `MapIcon_Treasure`.
+    The code reads `HasLightRigBone` from `RSDB/GameActorInfo` (its only uses are the table's columns). The
+    table's layout: one bit per actor and tag, and per tag a running count every 32 actors (`RankTable`); made
+    again from the bits it comes out byte for byte.
+- **Design, one change from the plan:** the plan had two more map settings read with
+  `QueryBlackboardGetString`. Instead the level-2 question and level 3 are **fixed in the chest's AI**, one
+  chest actor per family, as a turning item's names are. Why: the game asks the inventory with a fixed name
+  (`Enemy_Tentacle_Red`: `Item_Boomerang`) and makes a held item from a fixed name (the chests' own default
+  `TBox_Rupee_Green`), and the turning items' fixed-name question was seen working in game; the only game use of
+  `QueryBlackboardGetString` on an actor's own settings reads one no placement can set (`BalloonMessageId`). So the
+  game's drop settings and settings table are used as they are, and only the third slot is new to the game.
+- **The chest** (`tools/three_chest.py`, new): `Obj_TBox_NX2_BombBag` (and `_NoBake` for a `_NoBake` small
+  chest): the checking chest's pack with four files of our own in place of its four:
+  - the actor file: the small chest with the checking chest's four parts, the AI and the held actors ours;
+  - the held actors: the checking chest's, plus the slot `ThirdContent`, a copy of `SubContent`'s settings;
+  - the AI `Obj_TBox_NX2_BombBag.root`: the checking chest's 101 nodes with their numbers and four more, each a
+    copy of a game node of the same type: make `Item_BombBag_Large` in `ThirdContent` (the chest's own node for
+    its default item), "how many `Item_BombBag_Medium` has Link" (the tentacle's), "0 < that" (the chest's
+    own), and "yes: `ThirdContent`, no: the checking chest's answer" (the chest's local module's). Two game
+    nodes change: the node that makes the held items gets one child more, and the chest module takes its slot
+    name from the new choice;
+  - level 1 and 2 are the placement's settings, as for a pair (`Drop__DropActor`, `Drop__CheckActor`,
+    `Drop__DropActor_Substitute`);
+  - two table rows, the checking chest's under our name (`ActorInfo`, `GameActorInfo`). Memory: the checking
+    chest has 9,344 more than the small chest; ours gets as much again (197,392);
+  - an entry in the game's list of chest lights, a copy of the checking chest's, added at the end (25 -> 26).
+- **Not done:** no row in the tag table. In a dungeon a chest of ours would most likely not be drawn on the
+  dungeon map. Mido's house is not one.
+- **Builder:** `three_level_parse` (only the table's families; only chests, a big chest is refused when its map
+  is changed), `checking_chest` (which chest takes a small chest's place), `patch_file` takes the family's
+  chest. A family on a number of checks other than three prints a note.
+- **Sizes:** two new rules in `tools/sizes.py`, both exact for every game file of the kind
+  (`tests/size_check.py`): held actors (`ActorHolderParam`, 99 files): 5,128 + 224 a slot + 104 a bound bone;
+  light lists (`LocationalLightRigGroupSetting`, 17 files): 5,096 + 160 an entry. The slots of
+  `ActorHoldSettings` have free names, so a rule can now write `*` for an entry's name (`FREE_KEYS`).
+- New test `tests/three_chest_check.py` (in `run_tests.bat`), 26 lines: the names, the syntax, the refusals
+  (a family not in the table; a freestanding item, shelf, pot, rock, bush, Gold Skulltula, gift, scrub; a big
+  chest), Mido's three chests in both maps with nothing else changed, the `_NoBake` twin, the pack file by
+  file, the rows, the light entry, a size entry for every new file, the AI read back byte for byte (99 of the
+  101 game nodes untouched, every new node the copy of a game node), and what the chest gives **worked out from
+  the file's nodes**: the game's checking chest first (it comes out as seen in game: the first item, then the
+  second), then ours for all 8 inventories and all six opening orders (Small, Medium, Large each time). ALL OK.
+  edit_check, evfl_add_check, chest_check, ground_prog_check: all OK; logic_check: 0 failed; db_check: 0
+  errors; size_check: OK.
+- **Check build** (scratchpad only, the six usual fixes; `KF_MIDO_CHEST_01`, `_02`, `_03` = the bomb bag
+  family): 17 files. Read back against a build of the fixes alone: `KokiriForest_Child_Dynamic` (3 of 3,639
+  actors) and `KokiriForest_Adult_Dynamic` (3 of 3,674): `Obj_TBox_A_01` -> `Obj_TBox_NX2_BombBag` with the
+  three settings, the opening event kept, nothing else of them; `ActorInfo` and `GameActorInfo` one row more
+  each; the light list one entry more; the pack new; 10 size entries differ. `KokiriForest_Child_Dynamic`
+  510,884 -> 511,004 bytes (entry 511,176 -> 511,296), `KokiriForest_Adult_Dynamic` 516,036 -> 516,156
+  (516,328 -> 516,448). The pack: 98,596 bytes (entry 98,936), 64 files, 4 new. The AI: 105 nodes, 33,787 bytes
+  (entry 34,206; the game's 32,549 and 32,968). Held actors 440 bytes (entry 6,024), actor file 556 (5,912), AI
+  settings 108 (5,224), light list 4,872 -> 5,004 (13,992 -> 14,280).
+- Known: once Link has the second level, every chest of the family left gives the third (a fourth chest, or
+  three chests after a first bag from elsewhere, give the biggest bag again). The game itself adds the small
+  bag on the first bomb picked up without one.
+- Open, in game only: the engine accepts a third slot and three held items in one chest; the third item is
+  made in time; the light entry lights the chest; a chest shown = given for all three levels.
+- **In game (2026-11-19, combined test with the ground lift, the progressive gift and Saria's gift): works.**
+  Run 1 (no leaving the house): bomb bag, bigger, biggest, each held up and named alike, 20 / 30 / 40 bombs. Run 2
+  (reverse order): 20 / 30 / 40 in order. More orders: "tried a handful, all seemed fine". So the third slot,
+  the third item and the fixed-name question all work. Not answered: whether the three chests are lit like the
+  fourth, leaving and coming back (run 3, and the chests staying open).
+
 ### Progressive upgrades, step 3: pairs on freestanding items, the "turning item" (branch `claude/ground-progressive`)
 - `CHECK_ID=First>Second` is now also accepted on a **freestanding item**: the placement gets First's *turning
   item*. Plan and evidence: `out/RESEARCH_ground_progressive.md`. Still refused on shelves, pots, rocks, bushes
