@@ -204,19 +204,33 @@ def main(romfs):
             anim = byml.loads(files[ground_items._ref_path(comp['AnimationRef'])]).root['AnimationResources']
             projects = [x['ModelProjectName'] for x in anim]
             lift_ok &= a['AnimationResources'] == anim and (len(loose) == 1) == (item in ground_items.GROUND_LIFT)
-            for path, (x, like, old_h, new_h) in loose.items():
-                game = plain(like)
-                own = like[len('Model/'):-len('.anim.bfres')]
+            for path, (x, like, old_h, new_h, own_path) in loose.items():
+                made_of, game = plain(like), plain(own_path)
+                own = own_path[len('Model/'):-len('.anim.bfres')]
                 model_file = plain('Model/%s.%s.bfres' % (a['ModelProjectName'], a['FmdbName']))
                 low = ground_items.vertex_low(x, model_file, None) + ground_items.SPIN_ROOT_LIFT
                 was = ground_items.vertex_low(game, model_file, None) + ground_items.SPIN_ROOT_LIFT
                 pose, old_pose = item_pose.read_pose(x), item_pose.read_pose(game)
-                lift_ok &= path == 'Model/%s.anim.bfres' % ground_items.lifted_project(own)                     and not os.path.exists(os.path.join(romfs, *path.split('/')) + '.zs')                     and projects == [ground_items.COMMON_ANIM, ground_items.lifted_project(own)]                     and len(x) == len(game) and sum(i != j for i, j in zip(x, game)) <= 12                     and (pose['scale'], pose['rot'], pose['move'][0], pose['move'][2])                     == (old_pose['scale'], old_pose['rot'], old_pose['move'][0], old_pose['move'][2])                     and abs(pose['move'][1] - new_h) < 1e-6 and abs(old_pose['move'][1] - old_h) < 1e-6
+                # held up: the game's own pose (its Pose_GetDemo, or its Pose_Common when it has none)
+                was_held = ground_items.HELD_POSE if ground_items.has_held_pose(game) else ground_items.GROUND_POSE
+                held, old_held = item_pose.read_pose(x, ground_items.HELD_POSE), item_pose.read_pose(game, was_held)
+                lifted_name = ground_items.lifted_project(own, game)
+                lift_ok &= path == 'Model/%s.anim.bfres' % lifted_name \
+                    and not os.path.exists(os.path.join(romfs, *path.split('/')) + '.zs') \
+                    and projects == [ground_items.COMMON_ANIM, lifted_name] \
+                    and like == (own_path if was_held == ground_items.HELD_POSE
+                                 else ground_items.model_path(ground_items.HELD_BASE)) \
+                    and len(x) == len(made_of) and len(path) == len(like) \
+                    and (like != own_path or sum(i != j for i, j in zip(x, made_of)) <= 12) \
+                    and (pose['scale'], pose['rot'], pose['move'][0], pose['move'][2]) \
+                    == (old_pose['scale'], old_pose['rot'], old_pose['move'][0], old_pose['move'][2]) \
+                    and abs(pose['move'][1] - new_h) < 1e-6 and abs(old_pose['move'][1] - old_h) < 1e-6 \
+                    and all(held[f] == old_held[f] for f in ('scale', 'rot', 'move'))
                 if item not in ground_items.GROUND_LIFT_BOX:
                     lift_ok &= abs(low - ground_items.GROUND_GAP) < 1e-5 and was < 0
                 if path not in lifted:                    # one copy for an item's versions, as the build does
                     lifted.add(path)
-                    out.add(path, x, like, game)
+                    out.add(path, x, like, made_of)
                     lift_ok &= out.table.get(path) == out.table.get(like)
                 if family == PAIR:
                     said.append('  %s: pose height %.4f -> %.4f, lowest vertex %.4f -> %.4f above the ground (%s)'
@@ -248,9 +262,8 @@ def main(romfs):
     good &= check('ground items of the level (Obj_Item_Base), walked into, stored under the item\'s name', packs)
     good &= check('the first level\'s drop files name the second level\'s actor; the second has none', drops)
     good &= check('three table rows each: the item\'s name and model, the ground parts, the item row', rows_ok)
-    good &= check('levels in GROUND_LIFT: a lifted copy of their animation project, only its name and '
-                  'pose height differ, lowest vertex %.2f above the ground; the others have none'
-                  % ground_items.GROUND_GAP,
+    good &= check('levels in GROUND_LIFT: a lifted copy, the ground pose only higher, lowest vertex %.2f above '
+                  'the ground, held up the game\'s pose; the others have none' % ground_items.GROUND_GAP,
                   lift_ok and bool(lifted))
     good &= check('every file of the packs has a size entry that meets the rules (drop kinds: the game\'s)',
                   size_ok)

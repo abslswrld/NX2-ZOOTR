@@ -23,6 +23,9 @@ echo.
 echo === Turning items check ===
 %PY% tests\ground_prog_check.py "%ROMFS%"
 echo.
+echo === Ground lift check ===
+%PY% tests\ground_lift_check.py "%ROMFS%"
+echo.
 echo === Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence) ===
 %PY% tests\roundtrip.py "%ROMFS%" Event RSDB Mals GameData Pack System AI Logic Sequence --report report.txt
 echo.
