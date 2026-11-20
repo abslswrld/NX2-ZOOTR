@@ -34,6 +34,12 @@ The same on a freestanding item (to test in game): the placement becomes First's
 (tools/turn_items.py): a ground item of First that, once Link owns First, drops Second's in its place and removes
 itself; Second's removes itself once Link owns Second. Two freestanding items with the same pair give First then
 Second in either order. Not on shelves, pots, rocks, bushes or Gold Skulltulas yet.
+Three-level family (to test in game): CHECK_ID=First>Second>Third on a small chest makes it a chest of our own
+(tools/three_chest.py: the checking chest with a third held item and a second question) that gives Third when
+Link has Second, else Second when Link has First, else First; only the families in THREE_LEVEL_FAMILIES (the
+bomb bags), and only in small chests:
+
+    python tools/build_mod.py ... "KF_MIDO_CHEST_01=Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large"
 
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
@@ -78,6 +84,7 @@ import ground_items  # noqa: E402
 import harp_colors  # noqa: E402
 import shop_items  # noqa: E402
 import sizes  # noqa: E402
+import three_chest  # noqa: E402
 import turn_items  # noqa: E402
 from formats import zstd, byml, restbl, sarc, evfl, ainb, msbt  # noqa: E402
 from logic.world import World  # noqa: E402
@@ -134,6 +141,52 @@ PROGRESSIVE_PAIRS = {
     # Ocarina of Time itself teaches nothing: the Song of Time is an item of the moat cutscene (Dm_MelodyGet_Time)
     ('Item_Ocarina_Fairy', 'Item_Ocarina_Time'),   # in game 2026-11-19: works
 }
+# Three-level families (opt-in, CHECK_ID=First>Second>Third on a small chest): the chest becomes a chest of our
+# own, Obj_TBox_NX2_<name> (tools/three_chest.py): the game's checking chest with a third held item and a second
+# question. Third when Link has Second, else Second when Link has First, else First: three chests with the same
+# family give the three levels in order, whatever the opening order. family -> the name of its chest.
+# Every level is its own inventory item under its own name and stays owned when the next one comes
+# (GameData: IsGet.<name>, PouchData.<name>.StockNum for each; the game's own flows ask "has Medium?" and then
+# "has Large?": Npc_Goron_012_Child, MiniGame_BombchuBowling), so "has Second?" then "has First?" finds the next.
+# A chest holds each level under its own name: all three are item event actors with the get demo (Medium and
+# Large inherit the Small one's item settings, Component/PouchContentParam/BombBag, which name no other item to
+# put in the inventory: each goes in as itself). The game's own chest gives Item_BombBag_Small (Dodongo's Cavern).
+THREE_LEVEL_FAMILIES = {
+    ('Item_BombBag_Small', 'Item_BombBag_Medium', 'Item_BombBag_Large'): 'BombBag',   # 20, 30, 40 bombs
+}
+
+
+def three_level_parse(world, assignments):
+    """takes the three-level families (CHECK_ID=First>Second>Third) out of `assignments`: each becomes
+    (CHECK_ID, First), as a pair's; returns {check id: family}. Stops the build for a family that is not in
+    THREE_LEVEL_FAMILIES, and for a check that is not a chest (a big chest is refused when its map is changed:
+    patch_file)"""
+    out = {}
+    for k, (cid, item) in enumerate(assignments):
+        if item.count('>') != 2:
+            continue
+        family = tuple(item.split('>'))
+        if family not in THREE_LEVEL_FAMILIES:
+            raise SystemExit('%s: %s is not a three-level family the builder knows (%s)' % (cid, item, ', '.join(
+                '>'.join(x) for x in sorted(THREE_LEVEL_FAMILIES))))
+        r, name, loc = find_check(world, cid)
+        kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
+        if kinds != {'chest'}:
+            raise SystemExit('%s: a three-level family (First>Second>Third) can only be put in a small chest '
+                             '(this check: %s)' % (cid, ', '.join(sorted(kinds)) or 'an event, no map placement'))
+        out[cid] = family
+        assignments[k] = (cid, family[0])
+    return out
+
+
+def checking_chest(gyaml, family=None):
+    """the chest that takes the place of a small chest (`gyaml`: Obj_TBox_A_01, the game's checking chest, or
+    the _NoBake twin of either): the game's checking chest, or for a three-level family (its name in
+    THREE_LEVEL_FAMILIES) the chest of our own"""
+    plain = PLAIN_CHEST.get(gyaml, gyaml)
+    if family is None or plain not in CHECKING_CHEST:
+        return CHECKING_CHEST.get(plain, plain)
+    return three_chest.chest_name(family, plain.endswith(three_chest.NOBAKE))
 
 
 # Where a progressive pair can be placed: a small chest (the checking chest) or a freestanding item (a turning
@@ -804,14 +857,17 @@ def scrub_messages(out, romfs, lines):
         out.write(path, src, old, new)
 
 
-def patch_file(data, changes, checking=None):
+def patch_file(data, changes, checking=None, three=None):
     """change what the actors with these hashes give: chests and pots through their Drop__DropActor (chests'
     special opening events handled by CHEST_EVENTS), freestanding items by their actor type (Gyaml);
     checking: {hash: (item to look for, item given when Link has it)}: that small chest becomes the game's
     checking chest (CHECKING_CHEST). A game checking chest that is not in `checking` becomes the ordinary chest
     (PLAIN_CHEST) without its check settings, so it always gives the placed item;
+    three: {hash: name of a three-level family}: that chest (one of `checking`) becomes the family's own chest
+    instead (checking_chest), with the same settings;
     returns (new data, {hash: old item}, {hash: new Dynamic as intended})"""
     checking = checking or {}
+    three = three or {}
     doc = byml.loads(data)
     found, intended = {}, {}
     for a in doc.root.get('Actors', []):
@@ -852,7 +908,7 @@ def patch_file(data, changes, checking=None):
                 if what[0] == 'remove':
                     del dyn['GetEventName']
             if h in checking:
-                a['Gyaml'] = CHECKING_CHEST.get(a['Gyaml'], a['Gyaml'])
+                a['Gyaml'] = checking_chest(a['Gyaml'], three.get(h))
                 for k in CHECK_SETTINGS:
                     dyn.pop(k, None)
                 dyn['Drop__CheckActor'], dyn['Drop__DropActor_Substitute'] = checking[h]
@@ -1744,6 +1800,14 @@ def main(argv):
     steps = {}                                         # check id -> (first, second): chests
     turning = {}                                       # check id -> (first, second): freestanding items
     world = World()
+    # CHECK_ID=First>Second>Third: a three-level family (THREE_LEVEL_FAMILIES), small chests only: planned as
+    # First, the chest made the family's own chest further down (tools/three_chest.py)
+    triples = three_level_parse(world, assignments)    # check id -> (first, second, third)
+    for family in sorted(set(triples.values())):
+        n = sum(1 for f in triples.values() if f == family)
+        if n != len(family):
+            print('  note: %s is on %d checks, not %d: %s' % ('>'.join(family), n, len(family), (
+                'the last level cannot be reached' if n < len(family) else 'the last level is given more than once')))
     for k, (cid, item) in enumerate(assignments):
         if '>' in item:
             pair = tuple(item.split('>'))
@@ -1977,6 +2041,9 @@ def main(argv):
     for cid in sorted(set(steps) - stepped):
         raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest or on a freestanding '
                          'item' % cid)
+    for cid in sorted(set(triples) - stepped):
+        raise SystemExit('%s: a three-level family (First>Second>Third) can only be put in a small chest' % cid)
+    three_used = {}                                    # (family name, _NoBake twin) -> (second, third as held)
     for changes in planned.values():
         for cid, item, _, kind in changes.values():
             if (cid in turning) != item.startswith(turn_items.PREFIX) or (cid in turning and kind != 'freestanding'):
@@ -1989,7 +2056,13 @@ def main(argv):
         # gives it)
         checking = {h: pair_check(steps[cid], in_chest) for h, (cid, _, _, kind) in changes.items()
                     if cid in steps}
-        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking)
+        # three-level families: the first two levels as a pair's settings; the family's own chest knows the
+        # second level's name and holds the third as a chest gives it
+        three = {h: THREE_LEVEL_FAMILIES[triples[cid]] for h, (cid, _, _, kind) in changes.items()
+                 if cid in triples}
+        checking.update({h: pair_check(triples[cid][:2], in_chest) for h, (cid, _, _, kind) in changes.items()
+                         if cid in triples})
+        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three)
         for h, (cid, item, expected_old, kind) in changes.items():
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
@@ -2020,9 +2093,17 @@ def main(argv):
                     dyn = {k: v for k, v in dyn.items() if k not in CHECK_SETTINGS}
                     if h in checking:
                         want['Gyaml'] = CHECKING_CHEST.get(was, was)
+                        if h in three:
+                            twin = PLAIN_CHEST.get(was, was) != three_chest.PLAIN
+                            want['Gyaml'] = three_chest.chest_name(three[h], twin)
                         dyn.update(Drop__CheckActor=checking[h][0], Drop__DropActor_Substitute=checking[h][1])
                         print('%-18s   %s -> %s: gives %s while Link has no %s, then %s'
                               % (changes[h][0], was, want['Gyaml'], changes[h][1], checking[h][0], checking[h][1]))
+                        if h in three:
+                            family = triples[changes[h][0]]
+                            names = three_used.setdefault((three[h], twin), (family[1], in_chest(family[2])))
+                            print('%-18s   a three-level chest: once Link has %s it gives %s'
+                                  % (changes[h][0], names[0], names[1]))
                     else:
                         want['Gyaml'] = PLAIN_CHEST[was]
                         print('%-18s   %s -> %s: a checking chest of the game made an ordinary chest (its check '
@@ -2304,6 +2385,40 @@ def main(argv):
                      'once Link owns %s it drops %s and deletes itself'
                      % (item, turn_items.turn_name(family[level + 1])) if what['drops']
                      else 'once Link owns %s it deletes itself' % item))
+    # three-level chests: one actor per family placed, and its _NoBake twin where a placement is one
+    # (tools/three_chest.py); the twin's pack holds the same new files
+    three_shared = {}
+    if three_used:
+        # the light on a chest's bone is given to it by name: an entry in the game's list for each of ours
+        lit = [three_chest.chest_name(family, twin) for family, twin in sorted(three_used)]
+        src, old = out.read(three_chest.LIGHT_RIGS)
+        out.write(three_chest.LIGHT_RIGS, src, old, three_chest.light_rigs(old, lit))
+        print('chest lights       %s: %s added, as the checking chest\'s' % (
+            three_chest.LIGHT_RIGS.split('/')[-1], ', '.join(lit)))
+    for (family, twin), (second, third) in sorted(three_used.items()):
+        name, pack, new_inner, rows = three_chest.build(family, second, third, plain, table_rows, twin)
+        base_pack = ground_items.pack_path(three_chest.BASE + (three_chest.NOBAKE if twin else ''))
+        path = ground_items.pack_path(name)
+        out.write_new(path, pack, like=base_pack)
+        out.add(path, pack, base_pack, plain(base_pack))
+        like_files = sarc.Sarc.read(plain(base_pack)).files
+        for inner, (data, like) in new_inner.items():
+            if inner in three_shared:
+                if three_shared[inner] != data:
+                    raise SystemExit('%s: %s differs from the one in its twin' % (name, inner))
+                continue
+            three_shared[inner] = data
+            out.add(inner, data, like, like_files[like])
+        for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry, but for
+            if out.table.get(inner) is None and inner not in like_files:   # the game's own without one (debug)
+                raise SystemExit('%s: %s has no resource size entry' % (name, inner))
+        for t, row in rows.items():
+            new_rows.setdefault(t, []).append(row)
+        what = three_chest.describe(sarc.Sarc.read(pack).files[shop_items.ai_path(three_chest.chest_name(family))])
+        print('chest  %-22s (%d bytes): %s with a third held item (%s); its AI %s (%d nodes more than %s): Link '
+              'has %s -> %s, else the checking chest\'s own answer'
+              % (name, len(pack), three_chest.BASE + (three_chest.NOBAKE if twin else ''), what['key'],
+                 what['name'], what['new'], three_chest.BASE, what['second'], what['third']))
     shop_shared = {}                                   # new files that are the same in every shop version
     for (item, price), name in sorted(shops.items()):
         tpl_pack_path = ground_items.pack_path(shop_items.TEMPLATE)

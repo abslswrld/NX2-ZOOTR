@@ -57,6 +57,21 @@ BGYML = {
     'engine__actor__AIInfo': (5088, {'{}': 0}),
     'game__component__PouchContentParam': (5216, {'{}': 0, '/GetDemoOffsetPos{}': 0}),
     'game__pouchcontent__PriceParam': (5064, {'{}': 0}),
+    # the actors an actor holds: 224 per slot, 104 per bone a slot is bound to (exact for the game's 98 files)
+    'game__component__ActorHolderParam': (5128, {
+        '{}': 0, '/ActorHoldSettings{}': 224, '/ActorHoldSettings/*{}': 0,
+        '/ActorHoldSettings/*/ModelBindSettings[]': 104, '/ActorHoldSettings/*/ModelBindSettings[]{}': 0,
+        '/ActorHoldSettings/*/ModelBindSettings[]/RotOffset{}': 0,
+        '/ActorHoldSettings/*/ModelBindSettings[]/TransOffset{}': 0}),
+    # the lights on actors' bones, one list per group: 160 per actor (exact for the game's 17 files)
+    'game__gfx__LocationalLightRigGroupSetting': (5096, {'{}': 0, '/LightRigSettingList[]': 160,
+                                                         '/LightRigSettingList[]{}': 0}),
+}
+
+# .bgyml types with a table whose keys are free names (the slots of ActorHoldSettings): in the containers of
+# BGYML above, the name of an entry of such a table is written *
+FREE_KEYS = {
+    'game__component__ActorHolderParam': ('/ActorHoldSettings',),
 }
 
 # .bgyml types with no rule above, but whose tables are all structs: among the game's files of the type, those
@@ -106,6 +121,16 @@ def containers(data):
     return counts
 
 
+def free_key(where, tables):
+    """a container's name with the entry name of a free-key table (`tables`: their places) written *"""
+    for t in tables:
+        if where.startswith(t + '/'):
+            rest = where[len(t) + 1:]
+            end = min([rest.index(c) for c in '/{[<' if c in rest] or [len(rest)])
+            return t + '/*' + rest[end:]
+    return where
+
+
 def exb_extra(data):
     """what an .ainb's expression block adds to its entry"""
     o_exb = struct.unpack_from('<I', data, 0x44)[0]
@@ -137,6 +162,7 @@ def rule(path, data):
         const, costs = BGYML[bgyml_type(path)]
         total = size32(len(data)) + const
         for where, n in containers(data).items():
+            where = free_key(where, FREE_KEYS.get(bgyml_type(path), ()))
             if where not in costs:
                 raise Unknown('%s: no game file of its type has %s: what it costs is not known' % (path, where))
             total += costs[where] * n
