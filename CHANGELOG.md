@@ -4,6 +4,195 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-19
 
+### More items lie on the ground, not in it (branch `claude/ground-lift-all`)
+- **Measured:** every item the builder can put on the ground, the way the scales were (below): the model's
+  vertices taken into the bone `Skl_Root`, then sized, turned and placed by the item's `Pose_Common`, plus the
+  spin's 0.05 (`tools/item_pose.py`). Items the game itself puts on the ground or a shelf come out standing on
+  their point (lowest vertex +0.02 .. +0.06, a few up to +0.11). Items it only ever shows held up have a pose
+  centred on their point: 0.07 .. 0.28 in the ground.
+- **Lifted** (`GROUND_LIFT` in `tools/ground_items.py`, 33 items more): those whose measure is sure, meaning every
+  vertex of the model hangs on `Skl_Root` (checked per vertex, not only by the number of bones), and whose lowest
+  vertex is more than 0.02 from the 0.05 wanted. As before: the ground, token and turn versions get a copy of the
+  animation project under a new name of the same length, with only the pose's height changed; chests, shelves and
+  the held-up item keep the game's file. Lowest vertex before -> after, and the change of height:
+
+  | Item | before | after | height |
+  |---|---|---|---|
+  | Din's Fire, Farore's Wind, Nayru's Love (one model, one project) | -0.283 | +0.050 | +0.333 |
+  | Quiver small / medium / large | -0.227 / -0.250 / -0.262 | +0.050 | +0.277 / +0.300 / +0.312 |
+  | Deku Stick bag small / medium / large | -0.181 / -0.222 / -0.261 | +0.050 | +0.231 / +0.272 / +0.311 |
+  | Bomb bag medium / large | -0.184 / -0.205 | +0.050 | +0.234 / +0.255 |
+  | Bullet bag small / medium / large | -0.094 / -0.115 / -0.196 | +0.050 | +0.144 / +0.165 / +0.246 |
+  | Deku Nut bag small / medium / large | -0.096 / -0.111 / -0.179 | +0.050 | +0.146 / +0.161 / +0.229 |
+  | Megaton Hammer | -0.243 | +0.050 | +0.293 |
+  | Kokiri Sword | -0.204 | +0.050 | +0.254 |
+  | Wallet medium / large | -0.162 / -0.194 | +0.050 | +0.212 / +0.244 |
+  | Boss key | -0.170 | +0.050 | +0.220 |
+  | Dungeon map | -0.151 | +0.050 | +0.201 |
+  | Gold Skulltula token (`Item_Token_Gold`) | -0.143 | +0.050 | +0.193 |
+  | Magic Bean | -0.114 | +0.050 | +0.164 |
+  | Fairy Ocarina / Ocarina of Time | -0.090 / -0.086 | +0.050 | +0.140 / +0.136 |
+  | Stone of Agony | -0.074 | +0.050 | +0.124 |
+  | Double magic / double defence blessing | -0.235 / -0.235 | +0.0502 / +0.0505 | +0.285 (the magic's copy) |
+  | Fire Arrow | +0.085 | +0.050 | -0.035 |
+  | Ice Arrow | +0.092 | +0.057 | -0.035 (the Fire Arrow's copy) |
+  | Single arrow (`TBox_ArrowBundle_Small`) | +0.106 | +0.050 | -0.056 |
+
+  The last three were too high and are lowered (`lifted_animation` now moves a pose either way, and refuses a
+  change of 0.02 or less). To know: the game's own ground versions of two of them, `Obj_Arrow_Fire` and
+  `Obj_ArrowBundle_Small`, use the same models and poses and lie at the same +0.085 and +0.106. Lowering ours is
+  a choice, not a repair; taking the three out of the list undoes it.
+- **Unchanged, byte for byte:** the bracelet's, the magic blessing's and both scales' copies (the test holds their
+  checksums); a build of the four gives the same packs, rows and files as before.
+- **Shared projects: one copy each** (`GROUND_LIFT_AS`). A copy is named after the project, so a project can have
+  only one. It is now always measured on one named item, whichever item is built first, and the others are
+  checked against it with their own model (within 0.01, or the build stops). A build that would write two
+  different copies under one name stops too.
+  - Din's Fire, Farore's Wind, Nayru's Love: the same model and project, one copy, exact for all three.
+  - The double blessings use the magic blessing's project. They reuse its copy as it is (measured on the box, as
+    tested in game): by their own vertices they lie 0.0502 and 0.0505 above the ground.
+  - The Ice Arrow uses the Fire Arrow's project: on the Fire Arrow's copy it lies 0.057 above the ground.
+  - The **Light Arrow** uses that project too, and its measure is as sure (all vertices on `Skl_Root`), but its
+    model needs the bone at 0.377 where the Fire Arrow needs 0.235. One copy cannot be right for both. Left as
+    it is (0.107 too low); it needs a copy of its own under another name.
+  - The single arrow uses the large bundle's project (`Obj_ArrowBundle_Large_Animation`). The large bundle lies
+    right (+0.042), is not listed and keeps the game's file, so the copy only serves the single arrow.
+  - Names: a copy's name is the project's with its first letters changed, `Item` -> `NX2G`, `Weapon` -> `NX2Gnd`
+    (Kokiri Sword), `Obj_` -> `NX2G` (token, single arrow).
+- **Left out:**
+  - trade quest items (the user's rule: not in the randomizer for now): Giant's Knife, Biggoron's Sword, both
+    broken swords, Claim Check, Eyeball Frog, Eye Drops, Prescription, Poacher's Saw, Odd Mushroom, Odd Powder,
+    Cojiro, Pocket Egg, Pocket Cucco, Weird Egg, the alarm Cucco; and Zelda's Letter and the masks, not decided;
+  - vertices on more bones than `Skl_Root`, so the pose of one bone does not say where the model is, for later:
+    Fairy Bow, Slingshot, Iron and Hover Boots, Hookshot and Longshot, Fishing Rod, Silver and Golden
+    Gauntlets, Lens of Truth, Gerudo token, compass (its needle), small bomb bag (its two bombs), the bomb
+    (`Item_Bomb`), Hylian Shield (+0.017);
+  - within 0.02 of the 0.05 wanted: bottles, Boomerang, Deku Sticks, Deku Nuts, Bombchus, medium and large
+    arrow bundles, large magic jar, rupees, small key, Deku and Mirror Shields, and the Deku Seed bundle (+0.070,
+    just on the limit, and where the game's own `Obj_DekuSeed` lies). The Deku Scrub's seed
+    (`Item_ScrubBusinessSeed`) is 0.022 low, as the game's own ground version of it: left;
+  - no pose of their own, so no number that can be trusted: the spiritual stones, medallions, songs,
+    `Item_Arrow_Normal`.
+- **Found on the way:** the medium and large quivers, bags and wallets cannot get a ground version yet: their
+  actor inherits its item settings from the smaller one's (`no PouchContentRef`), and the builder stops. Their
+  Gold Skulltula drops build, and are lifted. Not changed here.
+- **Tests:** new `tests/ground_lift_check.py` (in `run_tests.bat`), 17 lines, for every listed item in every
+  version that builds: one copy; its name; only the name, one flag and the height differ from the game's file;
+  lowest vertex 0.05 above the ground by the item's own model (shared copies within 0.01); every vertex on
+  `Skl_Root`; the pack and the row name the copy; one copy per project with the same bytes whichever item is
+  built (32 copies for 37 items); the size entry is the game file's; the four tested copies' checksums; no trade
+  item or mask listed; items not listed get no copy. ALL OK. ground_prog_check (now also the lifted ocarinas as
+  turning items), edit_check, evfl_add_check, chest_check: all OK; logic_check: 0 failed; db_check: 0 errors.
+  A check build in the scratchpad (23 placements: 18 ground versions, 2 pairs, 3 Gold Skulltula drops) read
+  back: 20 copies, each 7 or 8 bytes from the game's file, every actor that names one with its lowest vertex as
+  above, every file with a size entry.
+- **Test build** (`out/mods/NX2-ZOOTR`, the six usual fixes, 31 files), eight items on child spots in Kokiri
+  Forest, each once: `KF_RUPEE_NEAR_FADO_ITEM_01` Din's Fire (Fado's ledge), `KF_SHOP_RUPEE_ITEM` Megaton Hammer
+  (the shop floor), `KF_TRAINING_AREA_RUPEE_ITEM_01` small Deku Stick bag and `_02` Fire Arrow (behind the crawl
+  hole), `KF_SARIAS_HOUSE_HEART_ITEM_02` Magic Bean, `_03` Stone of Agony, `_04` Gold Skulltula token, `_07`
+  Fairy Ocarina (Saria's house, the four hearts at floor height). Read back against a build of the fixes alone:
+  only those placements changed (8 of 3,639 actors in `KokiriForest_Child_Dynamic`, and the same checks' adult
+  placements, 5 of 3,674 in `KokiriForest_Adult_Dynamic`: `Gyaml` only), 8 rows added to each of the three
+  tables, 8 packs and 8 copies new. Not placed: the Kokiri Sword (its chest still gives it) and a large quiver
+  or bag (no ground version, above).
+- **Not yet tested in game.** Open there: whether each sits right; the six spots other than Fado's ledge and the
+  shop have not been changed in game before.
+- **In game (2026-11-19, combined test with the three-level chest, the progressive gift and Saria's gift):**
+  - **On the ground: right.** Din's Fire, the Megaton Hammer, the Fire Arrow, the Magic Bean, the Stone of Agony,
+    the Gold Skulltula token and the Fairy Ocarina all sit right. Of the bean the user wrote "maybe invis double
+    check" (not yet clear what to check). The Stone of Agony is called the **Echo Gem** in this game (the user:
+    there is no Shard of Agony here).
+  - **Held up: too high.** Picking up Din's Fire, Link holds it well above his hands (screenshot); the user: "some
+    holdup animations are too high", and wants the game's own height when held up. Cause, most likely: the item
+    held up after a pick-up is the ground actor itself (as found for the turning items), so it uses the lifted
+    copy too. The scales' small lift (+0.1) was not noticed; Din's Fire's +0.333 is.
+  - **The small Deku Stick bag soft-locks** when picked up. The user: the game never gives the small stick bag;
+    the first stick picked up unlocks the sticks. So it must not be placed. Not checked yet: the small Deku Nut
+    bag, very likely the same.
+
+### Lifted items are held up as in the game; items the game never gives are refused (2026-11-19, branch `claude/ground-lift-all`)
+Two bugs of the in-game test above.
+- **Held up too high. Found** (all in the game's files):
+  - picking an item up runs `Dm_SY_Get`, which plays the animation command `Rotate_GetDemo` on the actor picked
+    up: the item Link holds up is the ground actor itself, with its own animation project, so with the lifted copy;
+  - in `AS/Item_Common.root.asb` (the animation file of every ground version) that command shows the pose
+    `Pose_GetDemo`, and `Pose_Common` when the project has none. The spin on the ground (`Rotate_Obj`) shows
+    `Pose_Common`;
+  - of the listed items' projects only three have a `Pose_GetDemo`: the Gold Skulltula token's, the Fire Arrow's
+    (also the Ice Arrow's) and the large arrow bundle's (the single arrow). The other 27 have `Pose_Common` alone
+    (the quivers' and the hammer's also a `Pose_Pouch`): held up, the game shows them in `Pose_Common`, the pose
+    the lift raised. So Din's Fire was held 0.333 too high, the hammer 0.293, the bean 0.164, the Echo Gem 0.124,
+    the Fairy Ocarina 0.140, and the scales 0.19 and 0.20, the bracelet 0.14, the magic blessing 0.285 (not
+    noticed then). The token and the Fire Arrow were held up right already: "some" in the user's words;
+  - the game's own items that both lie on the ground and are held up have the two poses: 13 projects have exactly
+    `Pose_Common` (standing on its point) and `Pose_GetDemo` (centred) for the bones `Root` and `Skl_Root`: the
+    magic jars, the Heart Container, the ground Goron Tunic, the Deku Scrub's seed, the masks.
+- **Fix** (`lifted_animation` in `tools/ground_items.py`): the lifted copy of a project without a `Pose_GetDemo`
+  is no longer made of the project itself but of one of those 13, the large magic jar's
+  (`Obj_MagicJar_Large_Animation`, `HELD_BASE`), the way the shop versions' shelf copies are made (the Giant's
+  Knife, seen right in game): its `Pose_Common` is the item's pose at the lifted height, its `Pose_GetDemo` the
+  item's own `Pose_Common` exactly as the game has it (size, turn, place, flags). Only the name and the two
+  poses' values change in the jar's file. On the ground nothing changes: every item lies exactly where it did.
+  The three projects that have a `Pose_GetDemo` are copied as before, byte for byte.
+  - Names: such a copy is as long as the jar's name (28 letters): `NX2G_`, the project's own part, filled with
+    `_`, e.g. `NX2G_DinFire________________`, `NX2G_Sword_Kokiri___________`. The three others keep theirs
+    (`NX2GToken_Gold_Animation`).
+  - **The bytes of the four copies tested before change** (bracelet, magic blessing, both scales): new names, 1,216
+    bytes instead of 880 / 888, made of the jar's file. Their `Pose_Common` is the one seen right in game (the
+    test builds the old copy, checks its checksum and compares the poses); held up they are now the game's.
+  - Lost: the `Pose_Pouch` of the quivers' and the hammer's projects (the pose of the animation state `Pouch`),
+    which the jar's project has not; that state then shows `Pose_GetDemo`, the game's `Pose_Common`. The item in
+    the inventory is the item itself (`PouchActor`) with the game's project, so this should never show. Not
+    known: what uses the state `Pouch`.
+- **The small Deku Stick bag soft-locks. Found:**
+  - the game never gives it. No map, chest or event flow names `Item_StickBag_Small` at all (every file of the
+    game searched, but models, textures and sound). Its actor has no animation settings (`ASRef`, `ASInfoRef`,
+    `AnimationRef`): it cannot be shown held up;
+  - the first Deku Stick brings it by itself: in `PouchActorInfo` the sticks' rows (`Item_DekuStick`,
+    `Obj_DekuStick`, `Pouch_`, `Shop_`, `Weapon_DekuStick`) have `IsAbleToGetBagIfGet` and
+    `SmallBagActor: Item_StickBag_Small`. The Deku Nut is the same (`Item_DekuNut`, the scrub's nut:
+    `SmallBagActor: Item_NutBag_Small`); `Item_NutBag_Small` is named by one flow only, which asks whether Link
+    has it (a scrub's nut sale, `NecessaryActor`). The two bags' own rows are the only ones of the 15 bags and
+    quivers without `IsItemStockMaxIfGet`;
+  - the small wallet (`Item_Wallet_Small`) is in the inventory from the start
+    (`Sequence/SetPouchAndStatusForGameStart`) and has no actor pack at all;
+  - the small seed bag and the small quiver are not given by any map, chest or flow either: flows only ask for
+    them (`IsGet.Item_BulletBag_Small`, `IsGet.Item_Quiver_Small` in `DisplayShop`, `NecessaryActor` in the
+    scrubs' sales), their actors have no animation settings, and seeds and arrows name them as `SmallBagActor`
+    without `IsAbleToGetBagIfGet` (the bag has to be there first). The builder already never places them: placed
+    alone they mean the slingshot and the bow (`FAMILY_ALIASES`), and scrubs give them with the weapon
+    (`SCRUB_COMPANIONS`). Left as it is;
+  - given as such: the small bomb bag (the Dodongo's Cavern chest), every medium and large bag, quiver and wallet
+    (mini games, Gorons, scrubs, the Forest Stage, the Gold Skulltula rewards).
+- **Fix:** `NEVER_GIVEN` in `tools/build_mod.py`: `Item_StickBag_Small`, `Item_NutBag_Small` and
+  `Item_Wallet_Small` are refused on every kind of spot, alone or in a pair, before anything is written
+  ("... cannot be placed anywhere: the game never gives it as an item (the first Deku Stick Link gets brings
+  it)"). The two small bags are out of `GROUND_LIFT`: 35 items, 30 copies (27 made of the jar's project, 3 of
+  their own).
+- **Tests:** `tests/ground_lift_check.py`, now 26 lines: as before, and for every copy: made of the item's own
+  project when that has a `Pose_GetDemo`, else of the jar's; only the name and the poses' values differ from that
+  file; held up, size, turn and place are exactly the game's; the ground pose of the four tested copies is as
+  then; the three items are refused whatever the check, alone and in a pair, with nothing written; the evidence above read from `PouchActorInfo` and the packs; the small seed bag
+  and quiver still stand for their weapons. ALL OK. `tests/ground_prog_check.py` (changed for the new copies):
+  ALL OK. edit_check, evfl_add_check, chest_check: all OK; logic_check: 0 failed; db_check: 0 errors; round trip
+  as before (evfl 650 of 914 identical).
+- **Check build** (scratch folder, the six usual fixes, 29 files): `KF_RUPEE_NEAR_FADO_ITEM_01` Din's Fire,
+  `KF_SHOP_RUPEE_ITEM` Megaton Hammer, `KF_TRAINING_AREA_RUPEE_ITEM_02` Fire Arrow,
+  `KF_SARIAS_HOUSE_HEART_ITEM_02` Magic Bean, `_03` Echo Gem, `_04` Gold Skulltula token, `_07` Fairy Ocarina.
+  Read back from the written files: each of the seven packs and rows names its copy; with it the lowest vertex
+  is 0.050 above the ground, as in the build tested in game; `Pose_GetDemo` is the game's held-up pose for all
+  seven (Din's Fire at height 0.000 instead of 0.333). A build with
+  `KF_TRAINING_AREA_RUPEE_ITEM_01=Item_StickBag_Small` stops with the message and writes nothing.
+- **Not yet tested in game.** Open there: the five items made of the jar's project held up (Din's Fire, the
+  hammer, the bean, the Echo Gem, the Fairy Ocarina) and still lying right; the scales, bracelet and magic
+  blessing again, as their files changed.
+- **In game (2026-11-20): works.** Nine items in Kokiri Forest (Din's Fire on Fado's ledge, the hammer on the
+  shop floor, the Silver and Gold Scale behind the crawl hole, the magic blessing near Mido, the bean, the Echo
+  Gem, the Goron Bracelet and the Fairy Ocarina in Saria's house): each lies on the ground and is held up at the
+  game's height. The hammer seemed a little high but fine; the user: don't change it any more for now. Found
+  along the way: the two scales were placed as two plain items (not as the pair), so the Gold Scale could be taken
+  before the Silver one. That is the test's placement, not the lift; but nothing in the builder stops it.
+
 ### Progressive upgrades, step 3: pairs on freestanding items, the "turning item" (branch `claude/ground-progressive`)
 - `CHECK_ID=First>Second` is now also accepted on a **freestanding item**: the placement gets First's *turning
   item*. Plan and evidence: `out/RESEARCH_ground_progressive.md`. Still refused on shelves, pots, rocks, bushes

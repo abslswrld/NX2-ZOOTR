@@ -549,6 +549,28 @@ def seed_bag_guard(fc):
 # the small seed bag alone froze the game, seen in game). Placed alone, they become their weapon (main), and the
 # bag comes with it (a chest's slingshot brings 30 seeds by itself; scrubs add it, SCRUB_COMPANIONS).
 FAMILY_ALIASES = {'Item_BulletBag_Small': 'Item_Range_SlingShot', 'Item_Quiver_Small': 'Item_Range_Bow'}
+# items the game never gives as such: no map, chest or event flow of the game gives them, and they are refused
+# everywhere (the small Deku Stick bag picked up from the ground froze the game, 2026-11-19). Found in the game's
+# files: the first Deku Stick or Deku Nut Link gets brings its small bag by itself (PouchActorInfo: the sticks'
+# and nuts' rows have IsAbleToGetBagIfGet, and SmallBagActor names the bag; the two bags' own rows are the only
+# bags' without IsItemStockMaxIfGet), and their actors have no animation settings at all (they cannot be held
+# up). The small wallet is in the inventory from the start (Sequence/SetPouchAndStatusForGameStart) and has no
+# actor pack. (The small seed bag and quiver are never given alone either: FAMILY_ALIASES.)
+NEVER_GIVEN = {
+    'Item_StickBag_Small': 'the first Deku Stick Link gets brings it',
+    'Item_NutBag_Small': 'the first Deku Nut Link gets brings it',
+    'Item_Wallet_Small': 'Link has it from the start',
+}
+
+
+def never_given(assignments):
+    """stops the build when an item the game never gives as such is placed (NEVER_GIVEN); assignments:
+    [(check id, item or First>Second)]"""
+    for cid, item in assignments:
+        for x in item.split('>'):
+            if x in NEVER_GIVEN:
+                raise SystemExit('%s: %s cannot be placed anywhere: the game never gives it as an item (%s)'
+                                 % (cid, x, NEVER_GIVEN[x]))
 
 
 def plan_scrubs(world, assignments):
@@ -1715,6 +1737,7 @@ def main(argv):
     if not a.assign and not a.fix:
         ap.error('nothing to do: give CHECK_ID=Item assignments and/or --fix')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
+    never_given(assignments)
     # CHECK_ID=First>Second: a progressive pair (PROGRESSIVE_PAIRS). In a small chest: planned as First, the
     # chest made a checking chest further down. On a freestanding item: planned as First's turning item
     # (tools/turn_items.py). Nowhere else yet (pair_kind).
@@ -2201,7 +2224,17 @@ def main(argv):
                 'shelf %d: %s' % (i, n) for i, n in sorted(goods[keeper].items())) or 'all shelves open'))
 
     new_rows = {}
-    loose_done = set()                                 # lifted animations shared by an item's versions
+    loose_done = {}                                    # lifted animations shared by an item's versions, and by
+    #                                                    the items that share an animation project: one copy each
+
+    def lifted_before(path, data):
+        if path not in loose_done:
+            loose_done[path] = data
+            return False
+        if loose_done[path] != data:
+            raise SystemExit('%s: two different lifted copies in one build' % path)
+        return True
+
     for (item, version), name in sorted(grounds.items()):
         tpl_name = ground_items.template_of(name)
         tpl_pack_path = ground_items.pack_path(tpl_name)
@@ -2224,14 +2257,13 @@ def main(argv):
                 raise SystemExit('%s: %s has no resource size entry' % (name, inner))
         for t, row in rows.items():
             new_rows.setdefault(t, []).append(row)
-        for path, (data, like, old_h, new_h) in sorted(loose.items()):
-            if path in loose_done:
+        for path, (data, like, old_h, new_h, _) in sorted(loose.items()):
+            if lifted_before(path, data):
                 continue
-            loose_done.add(path)
             out.write_new(path, data, like)
             out.add(path, data, like, plain(like))
-            print('%-6s %s: lies %.3f higher on the ground (pose height %.3f -> %.3f, %s)'
-                  % (version, item, new_h - old_h, old_h, new_h, path))
+            print('%-6s %s: lies %.3f %s on the ground (pose height %.3f -> %.3f, %s)'
+                  % (version, item, abs(new_h - old_h), 'higher' if new_h > old_h else 'lower', old_h, new_h, path))
         print('%-6s version %-22s for %s (%d bytes)%s' % (version, name, item, len(pack), {
             'token': ': dropped by a Gold Skulltula, marks it done when picked up (the token\'s AI and blackboard), '
                      'spins as the token does (the token\'s animation settings start %s)' % ground_items.SPIN
@@ -2258,14 +2290,14 @@ def main(argv):
                     raise SystemExit('%s: %s has no resource size entry' % (name, inner))
             for t, row in rows.items():
                 new_rows.setdefault(t, []).append(row)
-            for path, (data, like, old_h, new_h) in sorted(loose.items()):
-                if path in loose_done:
+            for path, (data, like, old_h, new_h, _) in sorted(loose.items()):
+                if lifted_before(path, data):
                     continue
-                loose_done.add(path)
                 out.write_new(path, data, like)
                 out.add(path, data, like, plain(like))
-                print('%-6s %s: lies %.3f higher on the ground (pose height %.3f -> %.3f, %s)'
-                      % ('turn', item, new_h - old_h, old_h, new_h, path))
+                print('%-6s %s: lies %.3f %s on the ground (pose height %.3f -> %.3f, %s)'
+                      % ('turn', item, abs(new_h - old_h), 'higher' if new_h > old_h else 'lower', old_h, new_h,
+                         path))
             what = turn_items.describe(sarc.Sarc.read(pack).files[shop_items.ai_path(turn_items.ai_name(item))])
             print('turn   version %-22s for %s (%d bytes); its AI %s (%d nodes more than %s): %s'
                   % (name, item, len(pack), turn_items.ai_name(item), what['new'], turn_items.BASE_AI,

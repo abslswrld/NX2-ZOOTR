@@ -96,6 +96,39 @@ skeleton (tools/item_pose.py): the vertices taken into the bone, sized and turne
 the magic blessing stay on the box (GROUND_LIFT_BOX), as tested in game: for the magic both ways give 0.285; the
 bracelet's turned box is larger than the turned model (0.130; by its vertices 0.106), so it lies 0.074 above the
 ground, not 0.05.
+
+The other items (2026-11-19). Every item the builder can put on the ground was measured the same way. The items the
+game itself puts on the ground or a shelf stand on their point (lowest vertex +0.02 .. +0.06, a few up to +0.11);
+those it only ever shows held up have a pose centred on their point, and lie 0.07 .. 0.28 in the ground. Listed in
+GROUND_LIFT are those whose measure is sure: every vertex of the model hangs on `Skl_Root` (the pose's other bones
+carry none), and the lowest vertex is more than GROUND_NEAR from GROUND_GAP. An item that lies too high is lowered
+the same way (the Fire and Ice Arrows, the single arrow).
+
+Items that share one animation project (GROUND_LIFT_AS). A lifted copy is named after the project, so a project
+has one copy, whichever item is built first: the copy is always measured on the one item named there, and the
+others are checked against it with their own model (GROUND_SHARED: how far from GROUND_GAP they may lie). Din's
+Fire, Farore's Wind and Nayru's Love are one model in one project. The two double blessings use the magic
+blessing's project: its copy (measured on the box, as tested) puts them 0.0502 and 0.0505 above the ground. The
+Ice Arrow uses the Fire Arrow's project: with the Fire Arrow's copy it lies 0.057 above the ground. The Light
+Arrow uses that project too, but its model needs the bone 0.14 higher than the Fire Arrow's: it is not listed,
+it would need a copy of its own under another name. The single arrow uses the large bundle's project; the large
+bundle is not listed and keeps the game's file.
+
+Held up (2026-11-19: Din's Fire picked up from the ground was held well above Link's hands). The item Link holds up
+after a pick-up is the very actor he picked up (`Dm_SY_Get` plays the animation command `Rotate_GetDemo` on it), so
+it uses the lifted copy too. In `AS/Item_Common.root.asb` that command shows the pose `Pose_GetDemo`, and
+`Pose_Common` when the project has none; the spin on the ground (`Rotate_Obj`) shows `Pose_Common`. Of the listed
+items only the Gold Skulltula token, the Fire Arrow (and Ice Arrow) and the single arrow have a `Pose_GetDemo`: for
+the others the lifted `Pose_Common` was also the held-up pose. The game's own ground items that are held up have
+both poses: 13 projects have exactly `Pose_Common` (standing on its point) and `Pose_GetDemo` (centred) for the
+bones `Root` and `Skl_Root` (the magic jars, the Heart Container, the ground Goron Tunic, the masks). So the lifted
+copy of a project without a `Pose_GetDemo` is made of one of those (HELD_BASE, the large magic jar's) instead of
+the project itself, as the shop versions' shelf copies are (tools/item_pose.py, `shelf_copy`): `Pose_Common` is the
+item's pose at the lifted height, `Pose_GetDemo` the item's own `Pose_Common` as the game has it. Its name is as
+long as HELD_BASE's. A project that has a `Pose_GetDemo` is copied as before; held up it was the game's already.
+Lost on the way: the `Pose_Pouch` of the quivers' and the hammer's projects (the pose of the state `Pouch`), which
+HELD_BASE has not; the state then shows `Pose_GetDemo`, the game's `Pose_Common`. What goes into the inventory is
+the item itself (`PouchActor`), with the game's project.
 """
 import copy
 import math
@@ -246,27 +279,74 @@ def resolved_components(files, actor):
 
 GET_DEMO = b'Rotate_GetDemo'
 
-# items whose own pose leaves them half in the ground (seen in game, 2026-11-17; the scales 2026-11-19); the magic
-# blessings share one animation project
-GROUND_LIFT = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP', 'Item_Scale_Silver', 'Item_Scale_Gold')
+# items whose own pose leaves them in the ground (seen in game, 2026-11-17; the scales 2026-11-19) or above it.
+# Not the small Deku Stick and Deku Nut bags: the game never gives them as items, and the builder refuses them
+# (NEVER_GIVEN in tools/build_mod.py)
+GROUND_LIFT = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP', 'Item_Scale_Silver', 'Item_Scale_Gold',
+               # measured 2026-11-19 (see the notes at the top); not yet seen in game
+               'Item_DinFire', 'Item_FaroreWind', 'Item_NayruLove',
+               'Item_Quiver_Small', 'Item_Quiver_Medium', 'Item_Quiver_Large',
+               'Item_StickBag_Medium', 'Item_StickBag_Large',
+               'Item_BombBag_Medium', 'Item_BombBag_Large',
+               'Item_BulletBag_Small', 'Item_BulletBag_Medium', 'Item_BulletBag_Large',
+               'Item_NutBag_Medium', 'Item_NutBag_Large',
+               'Item_Hammer', 'Item_Sword_Kokiri', 'Item_Wallet_Medium', 'Item_Wallet_Large',
+               'Item_Dungeon_BossKey', 'Item_Dungeon_Map', 'Item_Token_Gold',
+               'Item_MagicBean', 'Item_Ocarina_Fairy', 'Item_Ocarina_Time', 'Item_AgonyStone',
+               'Item_FairyBless_MPDouble', 'Item_FairyBless_DefenseDouble',
+               # these lie too high: lowered
+               'Item_Arrow_Fire', 'Item_Arrow_Ice', 'TBox_ArrowBundle_Small')
+# items that share an animation project with another listed item: the one copy is measured on that item
+GROUND_LIFT_AS = {'Item_FairyBless_MPDouble': 'Item_FairyBless_MP',
+                  'Item_FairyBless_DefenseDouble': 'Item_FairyBless_MP',
+                  'Item_FaroreWind': 'Item_DinFire', 'Item_NayruLove': 'Item_DinFire',
+                  'Item_Arrow_Ice': 'Item_Arrow_Fire'}
 # measured with the box of ActorInfo (their models are built in the bone, so the box is right for them), as
 # tested in game; the others with the model's vertices (tools/item_pose.py)
 GROUND_LIFT_BOX = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP')
 GROUND_POSE, POSE_BONE = 'Pose_Common', 'Skl_Root'
 SPIN_ROOT_LIFT = 0.05                        # Rotate_Obj's lift of the bone Root
 GROUND_GAP = 0.05                            # the lowest point above the ground, as the Bottle's
+GROUND_NEAR = 0.02                           # an item this near GROUND_GAP already is left as it is
+GROUND_SHARED = 0.01                         # how far from GROUND_GAP an item on another item's copy may lie
+# the lifted copy's name: the project's with its first letters changed (same length)
+LIFTED_NAMES = (('Item', 'NX2G'), ('Weapon', 'NX2Gnd'), ('Obj_', 'NX2G'))
 COMMON_ANIM = 'Item_Common_Animation'
+# held up, an item is shown in its Pose_GetDemo, and in its Pose_Common only when its project has none (see "Held
+# up" in the notes at the top). A project without one gets its lifted copy made of HELD_BASE instead of itself: a
+# game project with exactly Pose_Common and Pose_GetDemo for the bones Root and Skl_Root (the ground magic jar's)
+HELD_POSE = 'Pose_GetDemo'
+HELD_BASE = 'Obj_MagicJar_Large_Animation'
+HELD_NAME = 'NX2G_'                          # such a copy's name: this, the project's own part, '_' to the length
 
 
 def model_path(project):
     return 'Model/%s.anim.bfres' % project
 
 
-def lifted_project(project):
-    """the name of the lifted copy of an item's animation project (same length)"""
-    if not project.startswith('Item'):
-        raise SystemExit('%s: no lifted name for it (expected Item...)' % project)
-    return 'NX2G' + project[4:]
+def has_held_pose(anim):
+    """whether an animation project (its file) has a pose of its own for being held up (HELD_POSE)"""
+    return HELD_POSE in item_pose.animations(anim)
+
+
+def lifted_project(project, anim):
+    """the name of the lifted copy of an item's animation project (`anim`: its file). A project with a held-up
+    pose of its own is copied as it is: its name with its first letters changed (same length). One without is
+    made of HELD_BASE: HELD_NAME, the project's name without its first word and '_Animation', filled with '_' to
+    the length of HELD_BASE's name."""
+    if has_held_pose(anim):
+        for old, new in LIFTED_NAMES:
+            if project.startswith(old):
+                return new + project[len(old):]
+        raise SystemExit('%s: no lifted name for it (expected %s...)'
+                         % (project, ', '.join(o for o, _ in LIFTED_NAMES)))
+    tail = '_Animation'
+    if '_' not in project or not project.endswith(tail):
+        raise SystemExit('%s: no lifted name for it (expected <word>_<name>%s)' % (project, tail))
+    name = (HELD_NAME + project.split('_', 1)[1][:-len(tail)]).ljust(len(HELD_BASE), '_')
+    if len(name) != len(HELD_BASE):
+        raise SystemExit('%s: no lifted name of %d letters for it' % (project, len(HELD_BASE)))
+    return name
 
 
 def _str_at(data, off):
@@ -343,25 +423,45 @@ def vertex_low(data, model, height=0.0):
     return item_pose.extent(points, bind, pose['scale'], pose['rot'], move)[0][1]
 
 
-def lifted_animation(data, project, low):
-    """the item's animation project renamed (lifted_project) with the ground pose's height of Skl_Root set so the
-    model's lowest point is GROUND_GAP above the ground; `low`: the model's lowest point in that pose at height 0
-    (box_low, vertex_low); returns (new data, old height, new height)"""
+def lifted_animation(data, project, low, read_base=None):
+    """the lifted copy of an item's animation project (`data`: its file): the ground pose's height of Skl_Root set
+    so the model's lowest point is GROUND_GAP above the ground (higher, or lower for an item that lies too high);
+    `low`: the model's lowest point in that pose at height 0 (box_low, vertex_low). Held up, the item stays as the
+    game shows it:
+    - a project with a held-up pose of its own (HELD_POSE): the project itself renamed (lifted_project), only the
+      ground pose's height changed;
+    - one without (held up, the game shows its ground pose): HELD_BASE renamed, with the lifted pose as its ground
+      pose and the item's own, untouched ground pose as its held-up pose. `read_base(path)` reads HELD_BASE.
+    Returns (new data, old height, new height, the game file the copy is made of)"""
     o, flags, base = pose_bone(data, GROUND_POSE, POSE_BONE)
     scale, rot, t = _pose(data, base, flags)
     old = struct.unpack_from('<f', data, t + 4)[0]
     if flags & 0x8000000:                     # "no translation": the stored height was not used
         old = 0.0
     new_h = GROUND_GAP - SPIN_ROOT_LIFT - low
-    if new_h <= old:
-        raise SystemExit('%s: its pose already lifts it enough (%.3f, needed %.3f)' % (project, old, new_h))
+    if abs(new_h - old) <= GROUND_NEAR:
+        raise SystemExit('%s: its pose already puts it where it should be (%.3f, wanted %.3f)'
+                         % (project, old, new_h))
+    if has_held_pose(data):
+        return lifted_in_place(data, project, new_h), old, new_h, model_path(project)
+    if read_base is None:
+        raise SystemExit('%s: no %s of its own, and no way to read %s' % (project, HELD_POSE, HELD_BASE))
+    return lifted_on_base(read_base(model_path(HELD_BASE)), data, project, new_h), old, new_h, model_path(HELD_BASE)
+
+
+def lifted_in_place(data, project, new_h, new_project=None):
+    """the project's own file renamed (same length), the ground pose's height of Skl_Root set to `new_h`; nothing
+    else. Every other pose, the held-up one too, stays the game's."""
+    new_project = new_project or lifted_project(project, data)
+    o, flags, base = pose_bone(data, GROUND_POSE, POSE_BONE)
+    t = _pose(data, base, flags)[2]
     raw = (project + '.anim').encode('ascii')
     pat = struct.pack('<H', len(raw)) + raw + b'\0'
     k = data.find(pat)
-    if k < 0 or data.find(pat, k + 1) >= 0:
-        raise SystemExit('%s: its name is not in the file once' % project)
+    if k < 0 or data.find(pat, k + 1) >= 0 or len(new_project) != len(project):
+        raise SystemExit('%s: its name is not in the file once, or %s is not as long' % (project, new_project))
     out = bytearray(data)
-    out[k + 2:k + 2 + len(raw)] = (lifted_project(project) + '.anim').encode('ascii')
+    out[k + 2:k + 2 + len(raw)] = (new_project + '.anim').encode('ascii')
     struct.pack_into('<I', out, o + 0x28, flags & ~0x8000000)
     struct.pack_into('<f', out, t + 4, new_h)
     out = bytes(out)
@@ -370,7 +470,68 @@ def lifted_animation(data, project, low):
     o2, f2, b2 = pose_bone(out, GROUND_POSE, POSE_BONE)
     if abs(struct.unpack_from('<f', out, _pose(out, b2, f2)[2] + 4)[0] - new_h) > 1e-6 or f2 & 0x8000000:
         raise SystemExit('read-back: %s lifted pose' % project)
-    return out, old, new_h
+    return out
+
+
+def lifted_on_base(base, data, project, new_h):
+    """HELD_BASE (`base`: its file) renamed, its ground pose the item's own (`data`: the item's project) at height
+    `new_h`, its held-up pose the item's own ground pose as it is; nothing else"""
+    new_project = lifted_project(project, data)
+    raw = (HELD_BASE + '.anim').encode('ascii')
+    pat = struct.pack('<H', len(raw)) + raw + b'\0'
+    k = base.find(pat)
+    if k < 0 or base.count(HELD_BASE.encode('ascii')) != 1:
+        raise SystemExit('%s: its name is not in the file once' % HELD_BASE)
+    bones = sorted((item_pose.ROOT, POSE_BONE))
+    theirs, mine = item_pose.animations(base), item_pose.animations(data)
+    if sorted(theirs) != sorted((GROUND_POSE, HELD_POSE)) or any(sorted(b) != bones for b in theirs.values()):
+        raise SystemExit('%s: not exactly %s and %s for the bones %s and %s'
+                         % (HELD_BASE, GROUND_POSE, HELD_POSE, item_pose.ROOT, POSE_BONE))
+    if sorted(mine.get(GROUND_POSE, ())) != bones:
+        raise SystemExit('%s: its %s does not pose exactly %s and %s'
+                         % (project, GROUND_POSE, item_pose.ROOT, POSE_BONE))
+    src = item_pose.read_pose(data, GROUND_POSE)
+    shape = item_pose._still(data, src, '%s %s' % (project, GROUND_POSE))
+    if item_pose.read_pose(data, GROUND_POSE, item_pose.ROOT)['flags'] != item_pose.STILL:
+        raise SystemExit('%s: its %s moves %s' % (project, GROUND_POSE, item_pose.ROOT))
+    # a still pose's values: scale (12 bytes), rotation (16), translation (12)
+    own = data[src['base']:src['base'] + 40]
+    lying = own[:32] + struct.pack('<f', new_h) + own[36:]
+    values = {GROUND_POSE: (lying, src['flags'] & ~item_pose.NO_TRANSLATION), HELD_POSE: (own, src['flags'])}
+    out = bytearray(base)
+    out[k + 2:k + 2 + len(raw)] = (new_project + '.anim').encode('ascii')
+    allowed = set(range(k + 2, k + 2 + len(raw)))
+    for p, (vals, flags) in values.items():
+        dst = item_pose.read_pose(base, p)
+        if item_pose._still(base, dst, '%s %s' % (HELD_BASE, p)) != shape \
+                or item_pose.read_pose(base, p, item_pose.ROOT)['flags'] != item_pose.STILL:
+            raise SystemExit('%s %s: not laid out like the %s of %s' % (HELD_BASE, p, GROUND_POSE, project))
+        out[dst['base']:dst['base'] + 40] = vals
+        struct.pack_into('<I', out, dst['at'] + 0x28, flags)
+        allowed |= set(range(dst['base'], dst['base'] + 40)) | set(range(dst['at'] + 0x28, dst['at'] + 0x2c))
+    out = bytes(out)
+    # read-back: only the name and the two poses' values changed; held up it is the game's pose, lying the same
+    # pose at the new height
+    if len(out) != len(base) or not {i for i in range(len(base)) if out[i] != base[i]} <= allowed:
+        raise SystemExit('%s: more than the name and the two poses changed' % new_project)
+    held, lies = item_pose.read_pose(out, HELD_POSE), item_pose.read_pose(out, GROUND_POSE)
+    if any(held[f] != src[f] for f in ('scale', 'rot', 'move', 'flags')):
+        raise SystemExit('read-back: %s held up is not the %s of %s' % (new_project, GROUND_POSE, project))
+    want = struct.unpack('<3f', struct.pack('<3f', src['move'][0], new_h, src['move'][2]))
+    if any(lies[f] != src[f] for f in ('scale', 'rot')) or lies['move'] != want \
+            or sorted(item_pose.animations(out)) != sorted(values):
+        raise SystemExit('read-back: %s lifted pose' % new_project)
+    return out
+
+
+def own_projects(read_pack, item):
+    """the animation projects of an item's own pack, apart from the shared one (COMMON_ANIM)"""
+    files = sarc.Sarc.read(read_pack(pack_path(item))).files
+    comp = byml.loads(files[ap_path(item)]).root['Components']
+    if 'AnimationRef' not in comp or _ref_path(comp['AnimationRef']) not in files:
+        return []
+    res = byml.loads(files[_ref_path(comp['AnimationRef'])]).root['AnimationResources']
+    return [x['ModelProjectName'] for x in res if x['ModelProjectName'] != COMMON_ANIM]
 
 
 def can_hold_up(read, item):
@@ -410,7 +571,8 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
     read_pack(path) -> decompressed pack; read_table_rows(table) -> list of rows; model_exists(project name)
     -> whether Model/<project>.anim.bfres exists (items with no animation file of their own: ocarinas).
     Returns (name, pack data, {inner path: data} of files new to the game, {table: new row}, {loose file new to
-    the game: (data, the game file it is a copy of, old height, new height)}: a lifted animation, GROUND_LIFT)."""
+    the game: (data, the game file it is a copy of, old height, new height, the file of the item's own animation
+    project)}: a lifted animation, GROUND_LIFT)."""
     TEMPLATE, TEMPLATE_ITEM, _, TEMPLATE_ONLY, auto_get, tpl_anim = VERSIONS[version]
     name = ground_name(item, version)
     tpl = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))
@@ -484,18 +646,32 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         own = [x['ModelProjectName'] for x in res if x['ModelProjectName'] != COMMON_ANIM]
         if len(own) != 1:
             raise SystemExit('%s: animation projects %r, expected %s and one of its own' % (item, res, COMMON_ANIM))
-        row = {r['__RowId']: r for r in read_table_rows('ActorInfo')}[item]
+        info = {r['__RowId']: r for r in read_table_rows('ActorInfo')}
+        row = info[item]
         src = read_pack(model_path(own[0]))
-        if item in GROUND_LIFT_BOX:
-            data, old_h, new_h = lifted_animation(src, own[0], box_low(src, row['ModelAabbMin'], row['ModelAabbMax']))
+        # a project has one copy: measured on `first`, whichever of the items that share it is built
+        first = GROUND_LIFT_AS.get(item, item)
+        if first != item and (first not in GROUND_LIFT or first in GROUND_LIFT_AS
+                              or own_projects(read_pack, first) != own):
+            raise SystemExit('%s: %s is not a lifted item with the same animation project' % (item, first))
+
+        def model_of(r):
+            return read_pack('Model/%s.%s.bfres' % (r['ModelProjectName'], r['FmdbName']))
+
+        if first in GROUND_LIFT_BOX:
+            low = box_low(src, info[first]['ModelAabbMin'], info[first]['ModelAabbMax'])
         else:
-            model = read_pack('Model/%s.%s.bfres' % (row['ModelProjectName'], row['FmdbName']))
-            data, old_h, new_h = lifted_animation(src, own[0], vertex_low(src, model))
-            if abs(vertex_low(data, model, None) + SPIN_ROOT_LIFT - GROUND_GAP) > 1e-5:
-                raise SystemExit('read-back: %s does not lie %.2f above the ground' % (item, GROUND_GAP))
-        loose[model_path(lifted_project(own[0]))] = (data, model_path(own[0]), old_h, new_h)
+            low = vertex_low(src, model_of(info[first]))
+        data, old_h, new_h, like = lifted_animation(src, own[0], low, read_pack)
+        new_project = lifted_project(own[0], src)
+        if item not in GROUND_LIFT_BOX:
+            # on its own copy: exactly; on another item's: near enough
+            off = vertex_low(data, model_of(row), None) + SPIN_ROOT_LIFT - GROUND_GAP
+            if abs(off) > (1e-5 if first == item else GROUND_SHARED):
+                raise SystemExit('read-back: %s does not lie %.2f above the ground (%+.4f)' % (item, GROUND_GAP, off))
+        loose[model_path(new_project)] = (data, like, old_h, new_h, model_path(own[0]))
         adoc.root = type(adoc.root)(adoc.root)
-        adoc.root['AnimationResources'] = [dict(x, ModelProjectName=lifted_project(x['ModelProjectName']))
+        adoc.root['AnimationResources'] = [dict(x, ModelProjectName=new_project)
                                            if x['ModelProjectName'] == own[0] else x for x in res]
         files[anim_param_path(name)] = byml.dumps(adoc)
         comp['AnimationRef'] = '?' + anim_param_path(name)
