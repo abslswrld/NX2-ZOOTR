@@ -41,6 +41,10 @@ bomb bags), and only in small chests:
 
     python tools/build_mod.py ... "KF_MIDO_CHEST_01=Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large"
 
+The same on a gift that has flow data (to test in game): the giver's own flow asks the inventory in front of
+its call of the shared get flow, as the game's own flows do for upgrades, and gives First or Second
+(gift_pair_edit). Gifts without flow data (cutscene gifts) and songs are refused.
+
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
                              Deku Tree (the "low on stock" set is removed, every shelf is open from the
@@ -191,7 +195,7 @@ def checking_chest(gyaml, family=None):
 
 # Where a progressive pair can be placed: a small chest (the checking chest) or a freestanding item (a turning
 # item, tools/turn_items.py). Not yet: shelves (the shop version has no such AI), pots, rocks, bushes and Gold
-# Skulltulas (a drop: to do after freestanding items are seen working), gifts, songs and scrubs (events).
+# Skulltulas (a drop: to do after freestanding items are seen working), songs and scrubs (events). Gifts: gift_pair_kind, gift_pair_edit.
 PAIR_KINDS = ('chest', 'freestanding')
 # Two turning items of one family must not lie where Link can touch both at once: the second could be picked up
 # in the frame the first's scene ends, before it has turned (it would give the first level again). Metres,
@@ -951,6 +955,159 @@ def patch_pack(pack_data, inner, key, expected, value):
     if byml.loads(back.files[inner]).root != want:
         raise SystemExit('read-back: %s differs from what was intended' % inner)
     return new_pack, (old_inner, new_inner)
+
+
+# A progressive pair on a gift (CHECK_ID=First>Second, PROGRESSIVE_PAIRS): the gift decides in the NPC's own
+# flow, the way the game's own flows hand out upgrades: a switch on PouchSystemActor.EventQueryIsExistInPouch
+# {Num: 1, Actor: <item>} (0 = Link has it, 1 = he doesn't), then one call of Dm_SY_GetInEvent per answer, each
+# with a fixed ActorName, both leading on to the same step. The Deku Theater does exactly this for the stick
+# bags (LostWood_ScrubForestStageElder_SkullMaskFirst, Event30: has Item_StickBag_Medium -> Event32 gives
+# Item_StickBag_Large, else Event29 gives Item_StickBag_Medium, both GetInEvent_NotTurn, both on to Event0), as
+# do the shooting galleries, Bombchu Bowling and the bomb bag Goron. The question, its parameters, its two case
+# values and the PouchSystemActor entry are copied from that flow. Nothing is written and the shared get flow
+# is only called, with the name of the item given: it makes the held-up model, the window and the inventory
+# entry from that one name (its ActorName), so shown = given. The game's flows ask about the three pairs' first
+# items under these very names (Item_Scale_Silver, Item_Hookshot, Item_Ocarina_Fairy).
+GIFT_PAIR_FLOW = 'Event/EventFlow/LostWood_ScrubForestStageElder_SkullMaskFirst.bfevfl'
+GIFT_PAIR_ACTOR = 'PouchSystemActor'
+GIFT_PAIR_QUERY = 'EventQueryIsExistInPouch'
+
+
+def gift_pair_kind(world, cid):
+    """True for a check a progressive pair can be placed on as a gift: an event (no map placement) with "gift"
+    data (the flow and the event that hand the item over). Gifts without that data (cutscene gifts: the builder
+    has no flow step to put the question in front of) and songs stop the build"""
+    r, name, loc = find_check(world, cid)
+    if world.spots_of(r, loc):
+        return False
+    if loc.get('song') or not loc.get('gift'):
+        raise SystemExit('%s: a progressive pair (First>Second) cannot be put on this gift: the builder has no '
+                         'flow data for it ("gift": flow, event, item), so there is no step of the giver\'s own '
+                         'flow to put the inventory question in front of' % cid)
+    return True
+
+
+def gift_pair_template(fc):
+    """the game's own question as the Deku Theater's flow has it: (the PouchSystemActor entry, the query's
+    parameters, the case value for "has it", the case value for "doesn't"). Found by what it is: a switch on
+    EventQueryIsExistInPouch whose two cases are calls of Dm_SY_GetInEvent leading on to the same event"""
+    for e in fc.events:
+        if e.type != 'switch' or fc.actors[e.actor].name != GIFT_PAIR_ACTOR \
+                or fc.actors[e.actor].queries[e.query] != GIFT_PAIR_QUERY:
+            continue
+        gives = {v: fc.events[c] for v, c in e.cases}
+        if sorted(gives) != [0, 1] or any(g.type != 'subflow' or g.flowchart != GIFT_FLOW
+                                          or not isinstance(g.params, dict) for g in gives.values()):
+            continue
+        asked = e.params.get('Actor') if isinstance(e.params, dict) else None
+        # "doesn't have it" gives the item asked about, "has it" another one, and both lead on to the same step
+        if list(e.params) == ['Num', 'Actor'] and e.params['Num'] == 1 and isinstance(asked, str) \
+                and gives[1].params.get('ActorName') == asked and gives[0].params.get('ActorName') != asked \
+                and gives[0].next == gives[1].next and gives[0].entry == gives[1].entry:
+            return fc.actors[e.actor], evfl.Params(e.params), 0, 1
+    raise SystemExit('%s: no %s.%s switch between two calls of %s found (game files differ from what this was '
+                     'made for)' % (GIFT_PAIR_FLOW, GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY, GIFT_FLOW))
+
+
+def gift_pair_edit(fc, events, template, direct=()):
+    """a progressive pair on gift events. events: {event name: (check id, (first, second))}; each event already
+    gives First (gift_edit: a call of Dm_SY_GetInEvent, or of GetPouchContent for an item in `direct`, one Link
+    can't hold up). In front of it goes the game's question "does Link have First?" (template:
+    gift_pair_template; the PouchSystemActor entry is added as the game's flow has it when this flow has none):
+    no -> the event as it is (First), yes -> a new copy of that call naming Second, leading on to the same step.
+    Every link to the gift event (a step before it, a branch, a fork, an entry point) now goes to the question.
+    Returns (lines saying what was changed, {event name: (question's name, Second's call's name)})."""
+    actor, params, has, has_not = template
+    said, made = [], {}
+    for ev, (cid, (first, second)) in sorted(events.items()):
+        i = next((k for k, e in enumerate(fc.events) if e.name == ev), None)
+        if i is None:
+            raise SystemExit('%s: event %s not in the flow' % (cid, ev))
+        e = fc.events[i]
+        how = DIRECT_GET[0] if first in direct else GIFT_FLOW
+        if e.type != 'subflow' or e.flowchart != how or not isinstance(e.params, dict) \
+                or e.params.get('ActorName') != first:
+            raise SystemExit('%s: event %s is not the call that gives %s' % (cid, ev, first))
+        if (first in direct) != (second in direct):
+            raise SystemExit('%s: %s and %s are not given the same way (one is held up, the other only has the '
+                             'get window): not as a pair on a gift' % (cid, first, second))
+        give = evfl.Params(e.params)
+        give['ActorName'] = second
+        yes = fc.add_subflow(e.flowchart, e.entry, give, next=e.next)
+        ask = evfl.Params(params)
+        ask['Actor'] = first
+        q = fc.add_switch(flow_copy_actor(fc, actor), GIFT_PAIR_QUERY, [(has, yes), (has_not, i)], ask)
+        moved = fc.repoint(i, q, keep=(q,))
+        if not moved:
+            raise SystemExit('%s: nothing leads to event %s' % (cid, ev))
+        made[ev] = (fc.events[q].name, fc.events[yes].name)
+        said.append('%-18s %s: asks first (%s: %s.%s %s): Link has no %s -> %s gives %s, else %s gives %s '
+                    '(%s<%s>); %d link%s moved to the question'
+                    % (cid, ev, fc.events[q].name, GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY, dict(ask), first, ev, first,
+                       fc.events[yes].name, second, e.flowchart, e.entry, moved, '' if moved == 1 else 's'))
+    fc.update_entry_points()
+    return said, made
+
+
+def gift_pair_read_back(path, before, after, events, made, template):
+    """the flow written (after) against the flow before the pair went in: the same events, actors and entry
+    points, but: two new events per gift (the question and Second's call, as intended), the links to the gift
+    now on the question, PouchSystemActor (added when the flow had none) with the query, and the entry points'
+    lists of calls with Second's call added where the gift's is"""
+    bad = lambda what: SystemExit('read-back: %s: %s' % (path, what))   # noqa: E731
+    actor, params, has, has_not = template
+    old = {e.name: e for e in before.events}
+    new = {e.name: e for e in after.events}
+    added = {n for pair in made.values() for n in pair}
+    if set(new) != set(old) | added or set(old) & added or len(added) != 2 * len(events):
+        raise bad('events differ from what was intended')
+    name_of = lambda fc, i: None if i is None else fc.events[i].name   # noqa: E731
+    to_q = {ev: q for ev, (q, _) in made.items()}
+
+    def shape(fc, e, moved=False):
+        sw = (lambda n: to_q.get(n, n)) if moved else (lambda n: n)   # noqa: E731
+        a = fc.actors[e.actor] if e.type in ('action', 'switch') else None
+        return (e.type, (a.name, a.secondary) if a else None,
+                a.actions[e.action] if e.type == 'action' else None,
+                a.queries[e.query] if e.type == 'switch' else None,
+                e.params, e.flowchart, e.entry, e.value, sw(name_of(fc, e.next)), sw(name_of(fc, e.join)),
+                [(v, sw(name_of(fc, c))) for v, c in e.cases], [sw(name_of(fc, f)) for f in e.forks])
+
+    for name, o in old.items():
+        if shape(after, new[name]) != shape(before, o, moved=True):
+            raise bad('%s differs from what was intended' % name)
+    for ev, (cid, (first, second)) in events.items():
+        q, yes, gift = new[made[ev][0]], new[made[ev][1]], new[ev]
+        qa = after.actors[q.actor] if q.type == 'switch' else None
+        if qa is None or (qa.name, qa.secondary, qa.queries[q.query]) != (GIFT_PAIR_ACTOR, '', GIFT_PAIR_QUERY) \
+                or list(q.params.items()) != [(k, first if k == 'Actor' else v) for k, v in params.items()] \
+                or [(v, name_of(after, c)) for v, c in q.cases] != [(has, yes.name), (has_not, ev)]:
+            raise bad('the question in front of %s is not as intended' % ev)
+        want = evfl.Params(gift.params)
+        want['ActorName'] = second
+        if gift.params.get('ActorName') != first or yes.type != 'subflow' \
+                or (yes.flowchart, yes.entry, yes.next) != (gift.flowchart, gift.entry, gift.next) \
+                or list(yes.params.items()) != list(want.items()):
+            raise bad('the two calls behind the question of %s are not as intended' % ev)
+    was = [(a.name, a.secondary, a.argument, a.actions, a.queries, a.params, a.entry_point, a.cut)
+           for a in before.actors]
+    now = [(a.name, a.secondary, a.argument, a.actions, a.queries, a.params, a.entry_point, a.cut)
+           for a in after.actors]
+    k = next((n for n, a in enumerate(before.actors) if a.name == GIFT_PAIR_ACTOR and not a.secondary), None)
+    if k is None:
+        was.append((actor.name, '', '', [], [GIFT_PAIR_QUERY], actor.params, None, actor.cut))
+    elif GIFT_PAIR_QUERY not in was[k][4]:
+        was[k] = was[k][:4] + (was[k][4] + [GIFT_PAIR_QUERY],) + was[k][5:]
+    if now != was:
+        raise bad('actors differ from what was intended')
+    if [p.name for p in after.entry_points] != [p.name for p in before.entry_points]:
+        raise bad('entry points differ')
+    for p, o in zip(after.entry_points, before.entry_points):
+        calls = [name_of(before, i) for i in o.subflows]
+        extra = [made[n][1] for n in calls if n in made]
+        if to_q.get(name_of(before, o.main), name_of(before, o.main)) != name_of(after, p.main) \
+                or [name_of(after, i) for i in p.subflows] != calls + extra:
+            raise bad('entry point %s differs from what was intended' % p.name)
 
 
 # Songs as items: their actors (Item_Melody_*) borrow the rupee model (Obj_Rupee), so a song held up, on a
@@ -1796,9 +1953,11 @@ def main(argv):
     never_given(assignments)
     # CHECK_ID=First>Second: a progressive pair (PROGRESSIVE_PAIRS). In a small chest: planned as First, the
     # chest made a checking chest further down. On a freestanding item: planned as First's turning item
-    # (tools/turn_items.py). Nowhere else yet (pair_kind).
+    # (tools/turn_items.py). On a gift with flow data: planned as First, the question added further down
+    # (gift_pair_kind). Nowhere else yet (pair_kind).
     steps = {}                                         # check id -> (first, second): chests
     turning = {}                                       # check id -> (first, second): freestanding items
+    gift_pairs = {}                                    # check id -> (first, second): gifts (gift_pair_edit)
     world = World()
     # CHECK_ID=First>Second>Third: a three-level family (THREE_LEVEL_FAMILIES), small chests only: planned as
     # First, the chest made the family's own chest further down (tools/three_chest.py)
@@ -1814,7 +1973,10 @@ def main(argv):
             if pair not in PROGRESSIVE_PAIRS:
                 raise SystemExit('%s: %s is not a progressive pair the builder knows (%s)' % (cid, item, ', '.join(
                     '>'.join(x) for x in sorted(PROGRESSIVE_PAIRS))))
-            if pair_kind(world, cid) == 'chest':
+            if gift_pair_kind(world, cid):
+                gift_pairs[cid] = pair             # planned as First; the question is added further down
+                assignments[k] = (cid, pair[0])
+            elif pair_kind(world, cid) == 'chest':
                 steps[cid] = pair
                 assignments[k] = (cid, pair[0])
             else:
@@ -2164,6 +2326,22 @@ def main(argv):
                     raise SystemExit('read-back: %s %s was not edited as intended' % (path, name))
             if call(back_fc, e) != want or e.type != o.type or e.cases != o.cases or e.forks != o.forks:
                 raise SystemExit('read-back: %s %s differs from what was intended' % (path, name))
+        out.write(path, src, old, new)
+        for line in said:
+            print(line, '(%s)' % path.split('/')[-1])
+
+    # progressive pairs on gifts: each such gift now gives First (above); the inventory question goes in front
+    # of it in the giver's own flow, with a second call for Second (gift_pair_edit), read back against the flow
+    # as it was before the question
+    for path, events in sorted(plan_gifts(world, [(c, i) for c, i in assignments if c in gift_pairs]).items()):
+        src, old = out.read(path)
+        ef = evfl.loads(old)
+        pairs = {ev: (cid, gift_pairs[cid]) for ev, (cid, _, _) in events.items()}
+        template = gift_pair_template(evfl.loads(plain(GIFT_PAIR_FLOW)).flowchart)
+        direct, _ = get_plan(sorted({x for _, pair in pairs.values() for x in pair}))
+        said, made = gift_pair_edit(ef.flowchart, pairs, template, direct)
+        new = flow_write_checked(ef)
+        gift_pair_read_back(path, evfl.loads(old).flowchart, evfl.loads(new).flowchart, pairs, made, template)
         out.write(path, src, old, new)
         for line in said:
             print(line, '(%s)' % path.split('/')[-1])
