@@ -1086,14 +1086,20 @@
     "id": "LW_SARIA_GIFT",
     "rule": "is_child",
     "kind": "gift",
-    "note": "Saria's ocarina on the bridge; not a map placement (an event), id still to be found",
+    "cutscene": {
+     "flow": "Dm_Kokiri_0155",
+     "add": "Event68",
+     "window": "Event77",
+     "item": "Item_Ocarina_Fairy"
+    },
+    "note": "Saria's Fairy Ocarina on the bridge; not a map placement. Walking onto the bridge (area Area_aaaa, there until the cutscene Dm_Kokiri_0150 has been played: Logic/KokiriForest_Child_Level_All_02_ddcd) starts the event KokiriForest_ArriveLostWood (flow Goto_HyruleCastle): the cutscene Dm_Kokiri_0150 (Saria's goodbye, a timeline file), then Dm_Kokiri_0155, which gives the ocarina by itself: Link holds the actor Item_Ocarina_Fairy (bound to his left hand), Event77 shows the get window (GetPouchContent, DisplayGetByActorName), Event68 adds it (PouchSystemActor.EventTriggerAddOrRemovePouchContent); then Link is sent to Hyrule Field. tools/build_mod.py changes the item of those two events and, for an item actor built on Item_EventObject_Base, the actor Link holds (cutscene_gift_edit)",
     "pos": [
      -117.1,
      114.5,
      -38.2
     ],
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "tools/build_mod.py changes it (cutscene_gift_edit, 2026-11-19); not yet changed in game"
    },
    "LW Deku Scrub Near Bridge": {
     "id": "LW_NEAR_BRIDGE_SCRUB",

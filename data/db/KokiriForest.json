@@ -5000,12 +5000,12 @@
   "check_type": "gift",
   "object_id": [],
   "vanilla_contents": {
-   "value": null,
-   "source": null,
-   "note": "event with no map placement; contents not found in the game data yet"
+   "value": "Item_Ocarina_Fairy",
+   "source": "event flow Dm_Kokiri_0155, Event68",
+   "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "tools/build_mod.py changes it (cutscene_gift_edit, 2026-11-19); not yet changed in game",
   "requirements": {
    "child": [
     [
@@ -5023,6 +5023,6 @@
   "verification_status": "not verified in game",
   "requirements_note": "the child answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "object_id_note": "no map placement (an event); its ID in the game is still to be found",
-  "notes": "Saria's ocarina on the bridge; not a map placement (an event), id still to be found"
+  "notes": "Saria's Fairy Ocarina on the bridge; not a map placement. Walking onto the bridge (area Area_aaaa, there until the cutscene Dm_Kokiri_0150 has been played: Logic/KokiriForest_Child_Level_All_02_ddcd) starts the event KokiriForest_ArriveLostWood (flow Goto_HyruleCastle): the cutscene Dm_Kokiri_0150 (Saria's goodbye, a timeline file), then Dm_Kokiri_0155, which gives the ocarina by itself: Link holds the actor Item_Ocarina_Fairy (bound to his left hand), Event77 shows the get window (GetPouchContent, DisplayGetByActorName), Event68 adds it (PouchSystemActor.EventTriggerAddOrRemovePouchContent); then Link is sent to Hyrule Field. tools/build_mod.py changes the item of those two events and, for an item actor built on Item_EventObject_Base, the actor Link holds (cutscene_gift_edit)"
  }
 ]
