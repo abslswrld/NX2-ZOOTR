@@ -41,7 +41,32 @@ LEFT_OUT = ('Sword_Giant', 'Sword_Biggoron', 'Sword_BrokenGiant', 'BrokenSword',
             'ZeldaLetter', 'Mask_')
 # not listed, so no copy: an item that lies right, one whose project another item's copy is made of, one with
 # vertices on more bones than Skl_Root
-NOT_LIFTED = ('Item_Boomerang', 'TBox_ArrowBundle_Large', 'Item_Arrow_Light', 'Item_BombBag_Small')
+NOT_LIFTED = ('Item_Boomerang', 'TBox_ArrowBundle_Large', 'Item_BombBag_Small')
+# the Fire Arrow's copy (also the Ice Arrow's) as it was before the Light Arrow got a copy of its own of the same
+# project (2026-11-20): its name and checksum, and the checksums of the four packs that name it
+ARROW_COPY = ('NX2G_Arrow_Fire_Animation', '882e3ca4009701ff166c7fa06a43bcd906ea49792c672ae9422b4c84f3f212d7')
+ARROW_PACKS = {('Item_Arrow_Fire', 'ground'): '710d4ee27bd1b9e89414cec59b673e10bcc33d75e4f1287d25edc81abe2bf9f9',
+               ('Item_Arrow_Fire', 'token'): 'ac4defb0535c9620520e0abb7f8a8e865e28746eed1a08de27654465ff9e3e1b',
+               ('Item_Arrow_Ice', 'ground'): '21621bdc06aa8284074b4b624409612a59b9dfcf404d7e206345489b803d44f9',
+               ('Item_Arrow_Ice', 'token'): 'dba673b0ec61389b72705fbb6b5174af918eb95620c9b9bed4b94708e97db66a'}
+LIGHT, LIGHT_LIKE = 'Item_Arrow_Light', 'Item_Arrow_Fire'
+# the items that name no item settings (PouchContentRef) themselves: theirs are the ones of the actor they inherit
+# from. {item: (the actor it inherits from, the item settings it has from the small one, its own count)}
+KEY, BOMB = 'KeyItemDefault', 'BombBag'
+INHERITS = {'Item_BombBag_Medium': ('Item_BombBag_Small', BOMB, 30),
+            'Item_BombBag_Large': ('Item_BombBag_Medium', BOMB, 40),
+            'Item_BulletBag_Medium': ('Item_BulletBag_Small', KEY, 40),
+            'Item_BulletBag_Large': ('Item_BulletBag_Medium', KEY, 50),
+            'Item_NutBag_Medium': ('Item_NutBag_Small', KEY, 30),
+            'Item_NutBag_Large': ('Item_NutBag_Medium', KEY, 40),
+            'Item_Quiver_Medium': ('Item_Quiver_Small', KEY, 40),
+            'Item_Quiver_Large': ('Item_Quiver_Medium', KEY, 50),
+            'Item_StickBag_Medium': ('Item_StickBag_Small', KEY, 20),
+            'Item_StickBag_Large': ('Item_StickBag_Medium', KEY, 30),
+            'Item_Wallet_Medium': ('Item_Wallet_Small', KEY, 500),
+            'Item_Wallet_Large': ('Item_Wallet_Medium', KEY, 1000)}
+# actors that inherit item settings in other ways (not built on the item base): still no version of them
+STILL_REFUSED = ('Armor_Child_Mask_Bunny', 'Obj_Spirit_PoeFlat', 'Armor_Adult_Default_Head')
 
 
 def check(name, ok):
@@ -103,6 +128,7 @@ def main(romfs):
     copies = {}                                        # path -> (data, the game file, first item)
     built = one = names = only = poses = lows = sure = packs = entries = same = helds = bases = True
     tested, kinds = {}, {True: set(), False: set()}
+    arrow_packs, light = {}, {}
     said = []
     for item in lift:
         row = info[item]
@@ -112,15 +138,15 @@ def main(romfs):
             try:
                 name, pack, _, new_rows, loose = ground_items.build(item, plain, table_rows, has_model, version)
             except SystemExit:
-                continue                               # (some items have no ground version yet: their settings
-            versions += 1                              # are in the actor they inherit from)
+                continue                               # (the small seed bag and quiver have no animation
+            versions += 1                              # settings: only the token version)
             one &= len(loose) == 1
             (path, (x, like, old_h, new_h, own_path)), = loose.items()
             game, made_of = plain(own_path), plain(like)
             own = own_path[len('Model/'):-len('.anim.bfres')]
             own_held = ground_items.has_held_pose(game)
             kinds[own_held].add(own)
-            lifted_name = ground_items.lifted_project(own, game)
+            lifted_name = ground_items.lifted_project(own, game, item)
             # the copy: a name new to the game, as long as the name of the game file it is made of
             names &= path == ground_items.model_path(lifted_name) and len(path) == len(like) \
                 and lifted_name.startswith('NX2G') and not os.path.exists(os.path.join(romfs, *path.split('/')) + '.zs')
@@ -183,10 +209,15 @@ def main(romfs):
                 out.add(path, x, like, made_of)         # the size entry, made as the build makes it
                 need = sizes.rule(path, x)
                 entries &= out.table.get(path) == out.table.get(like) and (need is None or out.table.get(path) >= need)
+            if (item, version) in ARROW_PACKS:
+                arrow_packs[item, version] = (hashlib.sha256(pack).hexdigest(), path, hashlib.sha256(x).hexdigest())
+            if item == LIGHT:
+                light[version] = (path, x, game, low, was, model)
             if version == 'token':
                 said.append('  %-30s height %+.4f -> %+.4f (%+.3f), lowest vertex %+.4f -> %+.4f  %s' % (
                     item, old_h, new_h, new_h - old_h, was, low,
-                    'on the copy of ' + shared[item] if item in shared else 'by the box' if item in box else ''))
+                    'on the copy of ' + shared[item] if item in shared else 'by the box' if item in box
+                    else 'on a copy of its own' if item in ground_items.GROUND_LIFT_OWN else ''))
         built &= versions > 0
     good &= check('every listed item (%d) builds in at least one version, each with one lifted copy' % len(lift),
                   built and one)
@@ -211,11 +242,127 @@ def main(romfs):
     for item, first in sorted(shared.items()):
         good &= check('  %s lies on the copy of %s' % (item, first),
                       ground_items.own_projects(plain, item) == ground_items.own_projects(plain, first))
+    # the Light Arrow: on the Fire Arrow's project, with a copy of its own under another name
+    own_names = ground_items.GROUND_LIFT_OWN
+    fire_path = ground_items.model_path(ARROW_COPY[0])
+    light_path = ground_items.model_path(own_names[LIGHT])
+    project = LIGHT_LIKE + '_Animation'
+    good &= check('the Light Arrow (%s) uses the Fire Arrow\'s project and is the only item with a copy of its own'
+                  % LIGHT, list(own_names) == [LIGHT] and LIGHT in lift and LIGHT not in shared and LIGHT not in box
+                  and ground_items.own_projects(plain, LIGHT) == ground_items.own_projects(plain, LIGHT_LIKE)
+                  == [project])
+    good &= check('  its copy (%s): a name as long as the project\'s, no other copy\'s, new to the game'
+                  % own_names[LIGHT],
+                  len(own_names[LIGHT]) == len(project) and light_path != fire_path
+                  and sorted(light) == sorted(VERSIONS) and {v[0] for v in light.values()} == {light_path}
+                  and copies[light_path][2] == LIGHT and copies[fire_path][2] == LIGHT_LIKE
+                  and len({c.lower() for c in copies}) == len(copies) and not has_model(own_names[LIGHT]))
+    _, x, game, low, was, model = light['ground']
+    on_fire = ground_items.vertex_low(copies[fire_path][0], model, None) + spin
+    good &= check('  it lies %.2f above the ground on it (%+.4f; on the game\'s file %+.4f, on the Fire Arrow\'s '
+                  'copy %+.4f)' % (gap, low, was, on_fire),
+                  abs(low - gap) < 1e-5 and abs(was - gap) > 0.1 and abs(on_fire - gap) > 0.1)
+    # held up: every byte but the name and the ground pose's flag and height of Skl_Root is the game's, so the
+    # whole Pose_GetDemo is (both bones: values, flags and where they are)
+    at = item_pose.read_pose(game, ground_items.GROUND_POSE)
+    k = game.find(project.encode())
+    spots = set(range(k, k + len(project))) | set(range(at['base'], at['base'] + 40)) \
+        | set(range(at['at'] + 0x28, at['at'] + 0x2c))
+    good &= check('  held up: its %s is the game\'s, byte for byte (only the name and the ground pose differ)'
+                  % ground_items.HELD_POSE,
+                  len(x) == len(game) and {i for i in range(len(game)) if x[i] != game[i]} <= spots
+                  and all(item_pose.read_pose(x, ground_items.HELD_POSE, b) == item_pose.read_pose(
+                      game, ground_items.HELD_POSE, b) for b in (item_pose.ROOT, item_pose.BONE))
+                  and item_pose.read_pose(x, ground_items.HELD_POSE)['move']
+                  != item_pose.read_pose(x, ground_items.GROUND_POSE)['move'])
+    good &= check('  the Fire and Ice Arrows are as before: the same copy (%s) and the same packs, byte for byte'
+                  % ARROW_COPY[0],
+                  hashlib.sha256(copies[fire_path][0]).hexdigest() == ARROW_COPY[1]
+                  and sorted(arrow_packs) == sorted(ARROW_PACKS)
+                  and all(arrow_packs[k] == (ARROW_PACKS[k], fire_path, ARROW_COPY[1]) for k in ARROW_PACKS))
     none = True
     for item in NOT_LIFTED:
         for version in ('ground', 'token'):
             none &= not ground_items.build(item, plain, table_rows, has_model, version)[4]
     good &= check('items not listed get no copy (%s)' % ', '.join(NOT_LIFTED), none)
+
+    # items whose item settings are the ones of the actor they inherit from (the medium and large bags, quivers
+    # and wallets): a ground version that gives the item itself
+    pouch_rows = {r['__RowId']: r for r in table_rows('PouchActorInfo')}
+    ref, base = 'PouchContentRef', ground_items.ap_path(ground_items.ITEM_BASE)
+    gyml = lambda path: 'Work/' + path[:-len('.bgyml')] + '.gyml'   # noqa: E731
+    found, parents, counts, gives, lifted, untouched = [], True, True, True, True, True
+    for item in sorted(pouch_rows):
+        if not os.path.exists(os.path.join(romfs, *ground_items.pack_path(item).split('/')) + '.zs'):
+            continue
+        files = sarc.Sarc.read(plain(ground_items.pack_path(item))).files
+        own = byml.loads(files[ground_items.ap_path(item)]).root
+        if item == ground_items.ITEM_BASE or base not in files:
+            continue
+        if ref in own['Components']:
+            # names its own: read as before
+            untouched &= ground_items.item_components(files, item) == own['Components']
+            continue
+        found.append(item)
+        if item not in INHERITS:
+            continue
+        parent, settings, count = INHERITS[item]
+        settings_path = ground_items.pouch_param_path(settings)
+        comp = ground_items.item_components(files, item)
+        # the actor it inherits from is in its pack; the settings are the nearest one's that names any; everything
+        # else is its own
+        chain, at = [], ground_items._parent_path(own)
+        while at in files and at != base:
+            chain.append(at)
+            at = ground_items._parent_path(byml.loads(files[at]).root)
+        named = [byml.loads(files[c]).root['Components'][ref] for c in chain
+                 if ref in byml.loads(files[c]).root['Components']]
+        parents &= chain[0] == ground_items.ap_path(parent) and at == base and comp[ref] == named[0] \
+            and comp[ref] == '?' + settings_path and settings_path in files \
+            and {k: v for k, v in comp.items() if k != ref} == own['Components'] \
+            and all(r in own['Components'] for r in ground_items.ITEM_REFS if r != ref)
+        # its count is its own: in its own actor's files and in its own row
+        table = byml.loads(files[ground_items._ref_path(own['Components']['GameParameterTableRef'])]).root
+        num = byml.loads(files[ground_items._ref_path(table['Components']['ExpansionMaxNumActor'])]).root
+        counts &= num['MaxNum'] == count == pouch_rows[item]['AfterExpansionMaxNum']
+        for version in VERSIONS:
+            name, pack, new_inner, new_rows, loose = ground_items.build(item, plain, table_rows, has_model, version)
+            inner = sarc.Sarc.read(pack).files
+            ap = byml.loads(inner[ground_items.ap_path(name)]).root['Components']
+            mine = byml.loads(inner[ground_items._ref_path(ap[ref])]).root
+            # its own item settings: the item's as parent, picked up by walking into it, and the item itself is
+            # what goes into the inventory; nothing else. The item's own files are the game's, the row the item's
+            gives &= ap[ref] == '?' + ground_items.pouch_param_path(name) \
+                and dict(mine) == {'$parent': gyml(settings_path), 'DefaultAutoGet': True,
+                                   'PouchActor': gyml(ground_items.ap_path(item))} \
+                and inner[settings_path] == files[settings_path] \
+                and all(inner[q] == files[q] for q in inner if q in files) \
+                and not [q for q in inner if q.startswith('GameParameter/') and item[5:] in q] \
+                and {k: v for k, v in new_rows['PouchActorInfo'].items() if k != '__RowId'} \
+                == {k: v for k, v in pouch_rows[item].items() if k != '__RowId'} \
+                and new_rows['PouchActorInfo']['AfterExpansionMaxNum'] == count \
+                and new_rows['ActorInfo']['ActorName'] == item and new_rows['ActorInfo']['FmdbName'] == item \
+                and ap['ActorNameRef'] == own['Components']['ActorNameRef'] \
+                and ap['ModelInfoRef'] == own['Components']['ModelInfoRef']
+            lifted &= item in lift and len(loose) == 1
+    good &= check('item actors that name no item settings themselves: the %d medium and large bags, quivers and '
+                  'wallets' % len(INHERITS), found == sorted(INHERITS))
+    good &= check('  each inherits from the smaller one, in its own pack; its item settings are that one\'s (%s, %s)'
+                  % (BOMB, KEY), parents)
+    good &= check('  its count is its own, in its actor\'s files and its row (%s)'
+                  % ', '.join('%s %d' % (k[5:], v[2]) for k, v in sorted(INHERITS.items())), counts)
+    good &= check('  each builds on the ground, as a Gold Skulltula drop and as a turning item, lifted', lifted)
+    good &= check('  what the pick-up adds is the item itself (PouchActor), with its own row, name and model', gives)
+    good &= check('  an item that names its own item settings is read as before', untouched)
+    refused = True
+    for item in STILL_REFUSED + (ground_items.ITEM_BASE,):
+        try:
+            ground_items.build(item, plain, table_rows, has_model, 'ground')
+            refused = False
+        except SystemExit as e:
+            refused &= ref in str(e) or 'ActorNameRef' in str(e)
+    good &= check('  actors not built on %s, and it itself, get no version this way (%s)'
+                  % (ground_items.ITEM_BASE, ', '.join(STILL_REFUSED)), refused)
 
     # items the game never gives as such (build_mod.NEVER_GIVEN): refused everywhere, not lifted
     never = build_mod.NEVER_GIVEN

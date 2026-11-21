@@ -136,6 +136,119 @@ rewards), scrubs, shop shelves. Pots were not started (the user's call) and stay
     Longshot, Link moves after. Which of the guard's outcomes happened (plain Longshot, or the Hookshot held up
     again and then the Longshot) was not noted, so whether the guard itself was needed is still not proven.
 
+### The bigger bags, quivers and wallets lie on the ground (branch `claude/big-bags-ground`)
+- **Why they had no ground version** ("no PouchContentRef in its actor parameters"). Found in the game's files:
+  - an actor's parameters (`Actor/<name>.engine__actor__ActorParam`) name the actor they inherit from (`$parent`)
+    and list only the settings that differ. The medium bomb bag's (`Item_BombBag_Medium`) inherit from
+    `Item_BombBag_Small` and name their own name, model, animation, icon and count (`ActorNameRef`, `ModelInfoRef`,
+    `AnimationRef`, `CaptureRef`, `GameParameterTableRef`) but no item settings (`PouchContentRef`): those are the
+    small bag's, `Component/PouchContentParam/BombBag`. The large bag inherits from the medium one, and so from
+    the small one. The parents' parameter files and the item settings are in the item's own pack;
+  - the same for the Deku Stick, Deku Nut and Deku Seed bags, the quivers and the wallets; their small ones name
+    `Component/PouchContentParam/KeyItemDefault`. That makes **12 items**, and no other: every other item actor
+    (built on `Item_EventObject_Base`, with a row in `PouchActorInfo`) names its own item settings;
+  - the builder read only the item's own list (`tools/ground_items.py`, `build`), found no `PouchContentRef` and
+    stopped. Their Gold Skulltula drops built already: that version reads the inherited settings too;
+  - what makes a medium bag a medium bag is not in those shared settings: its count is in its own
+    `GameParameter/ExpansionMaxNumActor/<item>` (`MaxNum`) and in its own row of `PouchActorInfo`
+    (`AfterExpansionMaxNum`), e.g. bomb bags 20 / 30 / 40, wallets 500 / 1000.
+- **Fix** (`item_components` in `tools/ground_items.py`): an item actor's item settings are read as the game reads
+  them, its own, else those of the nearest actor it inherits from, in its pack. Only `PouchContentRef`
+  (`INHERITED_REFS`), only for actors built on `Item_EventObject_Base`, and nothing from that base itself (its
+  item settings are `Default`, no item's own). The ground version is then built as every other one: item
+  settings of its own with the inherited ones as `$parent`, `DefaultAutoGet`, and `PouchActor` naming the item;
+  the item's row; the item's name and model.
+- **Items now possible on the ground** (freestanding spots, drops of rocks and bushes, turning items; all were in
+  `GROUND_LIFT` already, so all are lifted to 0.05 and held up at the game's height): `Item_BombBag_Medium`,
+  `Item_BombBag_Large`, `Item_BulletBag_Medium`, `Item_BulletBag_Large`, `Item_NutBag_Medium`,
+  `Item_NutBag_Large`, `Item_Quiver_Medium`, `Item_Quiver_Large`, `Item_StickBag_Medium`, `Item_StickBag_Large`,
+  `Item_Wallet_Medium`, `Item_Wallet_Large`. Still refused: `Item_StickBag_Small`, `Item_NutBag_Small`,
+  `Item_Wallet_Small` (`NEVER_GIVEN`); the small seed bag and quiver still stand for their weapons.
+- **What the pick-up adds is the item itself.** Read from the built packs: the ground version's own settings are
+  exactly `$parent` (`BombBag` or `KeyItemDefault`), `DefaultAutoGet: true` and
+  `PouchActor: Work/Actor/<item>...` (as the game's `Obj_Shield_Deku` names `Weapon_Shield_Deku`, and as every
+  other ground version of ours names its item, the ones tested in game too). The item's own actor, with its
+  count, is the game's file, untouched and not in the mod; the ground version's row is the item's row
+  (`AfterExpansionMaxNum` the item's own); nothing of the count is in the ground version's pack.
+- **Nothing else changes:** `ground_items.build` for every actor with a row in `PouchActorInfo` (393) in the four
+  versions, before and after: the 1,395 that built give the same bytes; of those that stopped, only these 12
+  items' ground, turn and held-up versions build now (their Gold Skulltula drops built before, unchanged). Masks,
+  Poes and other actors that inherit item settings in other ways (not built on the item base) stay refused.
+- **Tests:** `tests/ground_lift_check.py`, 7 lines more (33): the item actors that name no item settings are
+  exactly these 12; each inherits from the smaller one, in its own pack, and its settings are that one's; its
+  count is its own, in its actor's files and its row; each builds on the ground, as a Gold Skulltula drop and as
+  a turning item, with one lifted copy (so the older lines now also measure their ground and turn versions);
+  the built settings are exactly parent, `DefaultAutoGet` and `PouchActor` = the item, the row the item's, the
+  name and model the item's, every game file in the pack unchanged; an item that names its own settings is read
+  as before; actors not built on the item base, and the base, are still refused. ALL OK. edit_check,
+  evfl_add_check, chest_check, ground_prog_check, three_chest_check, gift_check, saria_check: all OK;
+  logic_check: 0 failed; db_check: 0 errors; size_check: OK; round trip as before (evfl 650 of 914 identical).
+- **Check build** (scratch folder, the six usual fixes, 31 files; a build of the fixes alone: 11):
+  `KF_RUPEE_NEAR_FADO_ITEM_01` medium bomb bag, `KF_SHOP_RUPEE_ITEM` large wallet,
+  `KF_TRAINING_AREA_RUPEE_ITEM_01` large quiver, `_02` medium Deku Stick bag, `KF_SARIAS_HOUSE_HEART_ITEM_02`
+  medium Deku Nut bag, `_03` large seed bag, `_04` medium wallet, `_07` large bomb bag. Read back from the written
+  files: 8 of 3,639 actors changed in `KokiriForest_Child_Dynamic` and 5 of 3,674 in `KokiriForest_Adult_Dynamic`
+  (`Gyaml` only); 8 rows added to each of the three tables, no other row changed; 8 packs and 8 copies new. Each
+  pack names the item as `PouchActor`, its row has the item's count (30, 1000, 50, 20, 30, 50, 500, 40), the
+  lowest vertex is 0.050 above the ground (the game's pose: 0.11 .. 0.26 in it), and `Pose_GetDemo` is the game's
+  held-up pose.
+- **To know for the test:** a medium or large bag placed alone skips a level (the medium bomb bag without the
+  small one, the large wallet before the medium one): fine for a look test, not for a seed. And nothing stops a
+  smaller one taken after a bigger one: what the count is then (the medium wallet after the large one, the medium
+  bomb bag after the large one) is not known; take the medium one first.
+- **Not yet tested in game.** Open there: each lies on the ground and is held up at the game's height; the
+  inventory shows the bag itself and the new count (bombs 30 then 40, rupees up to 500 then 1000, sticks 20,
+  nuts 30; seeds 50 and arrows 50 only show with the slingshot and the bow); whether taking a bag fills it
+  (`IsItemStockMaxIfGet`, not on the wallets).
+- **In game (2026-11-20, combined test of the pairs, ocarina fix, Light Arrow and bigger bags branches together):**
+  all eight (medium Stick, Nut and Bomb bags, large Bullet and Bomb bags, large Quiver, medium and large Wallet) lie
+  right on the ground, are held up normally and named in the window. **Works.** The medium Deku Stick bag, taken before
+  any stick, carries 20. As placed (each bag alone, no guard), bags could be taken out of order, as expected.
+
+### The Light Arrow lies on the ground, not in it (branch `claude/light-arrow-lift`)
+The one item left low on 2026-11-19 ("it needs a copy of its own under another name").
+- **Cause, confirmed** (the game's files): `Item_Arrow_Light` has no animation project of its own. Its pack names
+  `Item_Arrow_Fire_Animation`, as the Fire and Ice Arrows' do. That project's `Pose_Common` puts `Skl_Root` at
+  0.270. The three models are not built alike: with it the Fire Arrow's lowest vertex is +0.085, the Ice Arrow's
+  +0.092, the Light Arrow's -0.057 (0.107 too low). To lie 0.05 above the ground the Fire Arrow needs the bone at
+  0.235, the Light Arrow at 0.377. A lifted copy was named after the project, so the project had one copy, the
+  Fire Arrow's; on that one the Light Arrow would lie lower still (-0.092). So it was not listed and kept the
+  game's file.
+- **Fix** (`tools/ground_items.py`): a new table `GROUND_LIFT_OWN` = {item: the name of a copy of its own}, for an
+  item that shares a project but needs another height: `Item_Arrow_Light` -> `NX2G_ArrowLight_Animation` (25
+  letters, as `Item_Arrow_Fire_Animation`; the Fire Arrow's copy is `NX2G_Arrow_Fire_Animation`). The Light Arrow
+  is now in `GROUND_LIFT`, measured on its own model (every vertex on `Skl_Root`); `lifted_project` and
+  `lifted_animation` take the item and give its copy that name. The copy is made as the Fire Arrow's: the
+  project's own file with the name, one flag and the height of `Skl_Root` in `Pose_Common` changed (12 bytes of
+  1,800), 0.270 -> 0.377. Lowest vertex -0.057 -> +0.050.
+  - **Held up: the game's.** The project has a `Pose_GetDemo` (`Skl_Root` at -0.0225) and the copy keeps it byte
+    for byte, so no jar-based copy (`HELD_BASE`) is needed.
+  - The builder stops when such a name is not as long as the project's, is the shared copy's name, is used twice,
+    when the project has no `Pose_GetDemo`, or when the item is also listed in `GROUND_LIFT_AS`.
+- **Unchanged, byte for byte:** the Fire Arrow's copy (also the Ice Arrow's) and the ground and Gold Skulltula
+  drop packs of both (the test holds their five checksums, taken from the builder as it was before this change).
+  `Dm_SY_GetInEvent` and `Dm_SY_Get` are not touched.
+- **Tests:** `tests/ground_lift_check.py`, five lines more: the Light Arrow uses the Fire Arrow's project and is
+  the only item with a copy of its own; the copy's name (as long as the project's, no other copy's, new to the
+  game); lowest vertex +0.0500 on it (-0.0574 on the game's file, -0.0925 on the Fire Arrow's copy); its
+  `Pose_GetDemo` the game's, only the name and the ground pose differ; the Fire and Ice Arrows as before. The
+  Light Arrow now also runs through every line for listed items (36 items, 31 copies) and is out of the "not
+  listed, no copy" line. ALL OK. The other tests of `run_tests.bat`, run one by one: edit_check,
+  evfl_add_check, chest_check, ground_prog_check, three_chest_check, gift_check, saria_check: all OK;
+  round-trip: the same report as before (evfl 650 identical, 264 errors; byml 5 differ).
+- **Check build** (scratch folder, the six usual fixes, 18 files): `KF_RUPEE_NEAR_FADO_ITEM_01` Light Arrow
+  (Fado's ledge), `KF_TRAINING_AREA_RUPEE_ITEM_02` Fire Arrow (behind the crawl hole). Read back against a build
+  of the fixes alone (11 files): two actors changed in `KokiriForest_Child_Dynamic` (`Gyaml` only), 2 rows added
+  to each of the three tables, 2 packs and 2 copies new. `Obj_NX2_Arrow_Light` names `NX2G_ArrowLight_Animation`
+  in its pack and its row; with the written copy its lowest vertex is +0.0500. `Obj_NX2_Arrow_Fire` names
+  `NX2G_Arrow_Fire_Animation`, the written copy has the checksum held by the test (+0.0500). Both copies'
+  `Pose_GetDemo` are the game's.
+- **Not yet tested in game.** To look at: the Light Arrow on Fado's ledge lies just above the ground (not in it,
+  not floating), as the Fire Arrow behind the crawl hole; picked up, each is held at Link's hands as the game
+  holds it.
+- **In game (2026-11-20, combined test of the pairs, ocarina fix, Light Arrow and bigger bags branches together):**
+  on the ground right, held up normally, named in the window. **Works.**
+
 ## 2026-11-19
 
 ### More items lie on the ground, not in it (branch `claude/ground-lift-all`)
