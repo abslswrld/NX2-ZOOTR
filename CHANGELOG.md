@@ -2,6 +2,140 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-20
+
+### Progressive pairs on rocks, bushes and Deku Scrubs (branch `claude/pairs-more-places`)
+`CHECK_ID=First>Second` (`PROGRESSIVE_PAIRS`) is now also accepted on a liftable rock, a solid bush and a Deku
+Scrub that sells one thing once. Looked at kind by kind: rocks and bushes, Gold Skulltulas (the drop and the
+rewards), scrubs, shop shelves. Pots were not started (the user's call) and stay refused.
+- **Rocks and bushes: the turning item as their drop. Found** (all in the game's files):
+  - rocks, bushes and pots drop through one drop part, `Component/DropParam/Drop_ResourceSupply_00` (the same
+    file in `Obj_LiftRock_A_01`, `Obj_Plant_Grass_A_01` and `Obj_Pot_A_01`), on the base `DropParam/Default`,
+    whose table (`BlackboardParamTable/Drop`) holds the placement's `Drop__DropActor`. The game names a drop on
+    its own rocks and bushes (`Obj_LiftRock_A_01` with rupees in Desert Colossus, 14 placements;
+    `Obj_Plant_Grass_A_01` with a blue rupee in Hyrule Field, Deku Seeds in the Deku Tree);
+  - the turning item's own drop part stands on the same base and table, and a turning item made by a drop is
+    what the second level of every pair already is (seen working in game on freestanding pairs).
+- **Built:** the rock's or bush's `Drop__DropActor` becomes First's turning item (`Obj_NX2P_<first>`,
+  `tools/turn_items.py`), the same actor a freestanding pair uses. No new actor, AI or table. What comes out is
+  First while Link doesn't own it; once he does, it drops Second's in its place and removes itself; with both
+  owned nothing is left. Decided where the item lies, not when the rock breaks. `PAIR_KINDS` has `rock` and
+  `bush`; `TURN_KINDS` are the kinds whose pair is a turning item. The 2 m rule between two items of one family
+  holds for where rocks and bushes stand (two rocks of the circle's ring, 1.9 m apart, are refused).
+- **Deku Scrubs: the question in the scrub's own branch. Found** (`Enemy_Scrub_Business_Common`):
+  - the game's own upgrade scrubs are a pair already: the stick-bag scrub's map setting is
+    `Item_StickBag_Medium`, and its branch asks `PouchSystemActor.EventQueryIsExistInPouch {Num: 1, Actor:
+    Item_StickBag_Medium}` (`Event319`): 0 (Link has it) -> the one-time sale of `Item_StickBag_Large`, 1 -> of
+    `Item_StickBag_Medium`, same price and line. The nut-bag scrub the same (`Event323`);
+  - what keeps a one-time scrub gone is its talk entry (it sets the scrub's sold flag after a buy), whatever
+    was sold;
+  - the flow writes scrub item names (`EventTriggerSetGameDataString64` on `Scrub_Business_TempItemName_02`)
+    and waits (`EventSystemActor.EventWait`, 1 frame) before the step that reads them.
+- **Built** (`scrub_flow_edit`, point 4; `scrub_pair_kind`, `scrub_pair_template`, `scrub_pair_read`,
+  `scrub_pair_check`): the scrub's map setting names First, and the builder's branch for First asks the game's
+  question in front of the sale: Link has no First -> the one-time sale of First, as before; else First's name
+  in `Scrub_Business_TempItemName_00` is written over with Second's, the flow waits 2 frames
+  (`SCRUB_WRITE_WAIT`), and the same sale runs with Second, at the scrub's price. The name is written because
+  the generic line names the item from it and an item Link can't hold up (an ocarina) is sorted out by it in
+  front of the pay-and-get call. Six new steps; no new actor, action or question (the flow has all three); the
+  shared flows `Dm_SY_GetInEvent` / `Dm_SY_Get` are only called, as before. Refused: a pair on a scrub that
+  sells again and again, a second scrub selling First alone or Second beside the pair, a pair with an item that
+  needs a companion.
+- **Not built, and why** (the full reasons, with the designs in order of safety, are in the research file):
+  - **Gold Skulltula drops.** The drop must carry the skulltula's saved flag (what marks it done). The game has
+    no node that hands it from one drop to the next: `QueryBlackboardOverwriteParamAddNoRespawnGmdHash` (the
+    skulltula, the Gohma egg) hands over a placed actor's own flag, and nothing reads a 64-bit value from an
+    actor's own table. The plain turning item would never mark the skulltula (it would come back and give both
+    levels); a token-built one would lose the flag when it turns. Next step: one small test of a skulltula
+    whose placement names a drop table with two entries (both levels dropped at once, each deciding for itself).
+  - **Gold Skulltula rewards** (the House of Skulltula): gifts with a flow (`GatheringTokenGold` calls
+    `Dm_SY_GetInEvent`), so the gift's question fits; Kakariko is not in the check data yet.
+  - **Shop shelves.** The shopkeeper's list names one actor per shelf and the game's code gives that actor's
+    own item; a choice could only be made in `DisplayShop`, shared by every shop. A lock (Second's shelf
+    released by `IsGet.<first>`) is possible with settings alone, but it is not a pair.
+- **Known limits of what was built:**
+  - a rock or bush that comes back (their saved flag is reset, type 88) gives the next level, as it gives a
+    plain item again today: no level is skipped or given twice, but "one level per check" holds only while
+    rocks stay gone;
+  - a rock carried and thrown onto another item of its family is not covered by the 2 m rule;
+  - the first level made by a drop has not been seen in game (placed in the map it has; the second level made
+    by a drop has).
+- **Tests:** new `tests/pairs_more_check.py` (in `run_tests.bat`), 31 lines: the kinds accepted and refused; the
+  drop part shared by rocks, bushes and pots and the turning item's on the same base; the game's own rocks and
+  bushes with a drop; the two map edits (only `Drop__DropActor` added); the spacing rule; the game's question
+  in the scrub flow (`Event319`), its name write and wait; the scrub branch for the scales (six new steps, the
+  question, the two sales alike but for the item, the write and the wait, every step of the game's flow as it
+  was, the entry points) and for the ocarinas (each given with the get window under its own name); the
+  refusals; the read-back noticing swapped answers, a missing wait and a wrong name; one whole build (two
+  rocks, two bushes, the scrub and a chest, three pairs) read back against a build of the fixes alone. ALL OK.
+  `tests/ground_prog_check.py` and `tests/gift_check.py`: their "refused on a rock, a bush, a scrub" lines
+  follow. Every test of `run_tests.bat` run: edit_check, evfl_add_check, chest_check, ground_prog_check,
+  ground_lift_check, three_chest_check, gift_check, saria_check, pairs_more_check: all OK; round trip as
+  before; logic_check: 0 failed; db_check: 0 errors.
+- **Check builds** (scratch folder, the six usual fixes each; read back from the written files, nothing
+  unexpected):
+  - rocks: `KF_BEHIND_SARIAS_HOUSE_CHILD_ROCK_01` and `KF_WEST_OF_MIDOS_HOUSE_CHILD_ROCK_01` Silver > Gold
+    Scale; `KF_NEAR_KNOW_IT_ALL_HOUSE_CHILD_ROCK_01` and Mido's chest `KF_MIDO_CHEST_01` Fairy Ocarina >
+    Ocarina of Time (a rock and a chest of one pair);
+  - bushes: `KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_01` and `KF_BEHIND_SHOP_CHILD_BUSH_01` Hookshot > Longshot;
+    `KF_BESIDE_MIDOS_HOUSE_CHILD_BUSH_01` and the freestanding `KF_RUPEE_NEAR_FADO_ITEM_01` Silver > Gold Scale;
+  - scrub: `LW_NEAR_BRIDGE_SCRUB` (by the bridge out of the forest, 40 rupees) and `KF_MIDO_CHEST_01` Silver >
+    Gold Scale;
+  - all three kinds in one: `KF_BEHIND_SARIAS_HOUSE_CHILD_ROCK_01` and `KF_MIDO_CHEST_01` the ocarinas, the two
+    bushes above the hookshots, `LW_NEAR_BRIDGE_SCRUB` and `KF_WEST_OF_MIDOS_HOUSE_CHILD_ROCK_01` the scales.
+  None of them uses the 4 adult corner rocks of the circle.
+- **Not yet tested in game.** Open there: the first level coming out of a rock and a bush and turning when
+  owned; the scrub's line naming the item sold; an ocarina pair on a scrub (after the scales); whether and when
+  rocks and bushes come back.
+- **In game (2026-11-20, combined test of the pairs, ocarina fix, Light Arrow and bigger bags branches together):**
+  - rocks: the scales (rocks behind Saria's house) and the ocarinas (Know-It-All rocks, with Mido's chest) came out at
+    the right level in both orders;
+  - bushes: run 1 (Saria's bushes, then the shop's) gave the Hookshot, then the Longshot, both fine. Run 2 (the shop's
+    first) gave the Hookshot, then **the Longshot from the bushes beside Saria's house left Link stuck in place**
+    after the pick-up: camera and menu worked, but he could not move. Looked into below;
+  - scrub: its line named the item, and it sold the Silver Scale first and the Gold Scale second, in both orders.
+- **The stuck Longshot: most likely cause, and a guard for it** (not proven: seen once, not yet repeated; the full
+  account is in `out/RESEARCH_longshot_freeze.md`).
+  - **Compared:** the two bushes are the same in the built map (`Obj_Plant_Grass_A_01`, only `Drop__DropActor:
+    Obj_NX2P_Hookshot` added, one link to the cut bush), the two turning items are the same files, and the
+    Longshot came out of the shop's bush fine in run 1. Nothing in the data is different for Saria's bush. What
+    is different there is the place: a Kokiri (`Npc_Kokiri_005_Child`) stands 0.9 m from the bush, between it
+    and the other two, so where Link stands to cut it is not the same; and by chance, how close he was.
+  - **Most likely:** when Link already owns the Hookshot, what the bush drops is the Hookshot's turning item
+    for a few frames, until it has turned (dropped the Longshot's and deleted itself). On a rock that is thrown,
+    or an item lying in the map, Link is never there in those frames; next to a bush cut with the sword he can
+    be. Touching it asks for its pick-up scene; the scene has not begun, so none of the three guards holds yet,
+    and the item turns: it deletes itself with its scene on its way. Link is left waiting for a scene that
+    never plays (no scene running, so camera and menu work), and the Longshot dropped beside him is picked up
+    normally, which is what was seen.
+  - **The game guards against exactly this:** its one item that ends itself, the Poe soul, asks "is my pick-up
+    asked for" (`QueryPouchContentIsRequestingGetEvent`) at the very root of its AI (`Obj_Spirit_Poe.root`: asked
+    for -> nothing, in front of its vanishing). Only the Poe souls' AI files ask it. The turning items did not.
+  - **Built** (`tools/turn_items.py`): the same question, copied from the Poe soul's AI, asked last before
+    "Link owns this level": asked for -> no turning and no delete. The scene then plays (Link holds up the
+    Hookshot he already has), and so that the Longshot is not lost, a level with a next level switches its drop
+    on when it is asked for while owned: the scene ends the item with the death ground items drop on (reason
+    10), which drops the next level. 3 more nodes in the last level's AI (16), 6 in the first's (28), each a
+    copy of a game node. An item touched while Link doesn't own it does nothing new.
+  - **Not known:** whether the question answers in those frames as the Poe soul's use suggests, and whether the
+    death that ends the scene drops (read from the death table, never seen: the drop was always off). If it
+    does not, that bush's Longshot is not given until the bush comes back; no freeze either way.
+  - **Also looked at, and why not:** the weeding Kokiri (the three bushes beside Saria's house are his: all
+    three cut sets `KokiriForest_Npc_Kokiri_005_Child_Talk_01`, `Logic/KokiriForest_Common_Level_All_01_b11a`)
+    changes his lines only; his reward is given when Link talks to him, his "near" event is a balloon
+    (`NPCNear`: a sub event), and all of it happened in run 1 as well. The Longshot in a child's hands: fine at
+    the shop. Two items at once: the other bushes there have no drop. The pick-up scene's short form (no
+    hold-up, taken when the camera has no room): not ruled out; the new question covers it if it is true
+    through the scene.
+  - **Tests:** `tests/ground_prog_check.py`, two new lines (the Poe soul's root asks the question and does
+    nothing when asked for; the turning items ask it last, stay, and the first level switches its drop on) and
+    the node counts; `run_tests.bat`: all OK, round trip as before; logic_check 0 failed, db_check 0 errors. A
+    check build of the two bushes (scratch folder) wrote without complaint.
+  - **In game (2026-11-20, retest with the guard):** shop bushes first, then Saria's item bush cut standing
+    right against it: no freeze, Hookshot and Longshot both in the menu. The other order: Hookshot, then
+    Longshot, Link moves after. Which of the guard's outcomes happened (plain Longshot, or the Hookshot held up
+    again and then the Longshot) was not noted, so whether the guard itself was needed is still not proven.
+
 ## 2026-11-19
 
 ### More items lie on the ground, not in it (branch `claude/ground-lift-all`)

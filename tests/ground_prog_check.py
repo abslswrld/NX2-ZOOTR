@@ -24,9 +24,11 @@ MAP = 'Banc/KokiriForest/KokiriForest_Child_Dynamic.bcett.byml'
 SPOTS = ('KF_RUPEE_NEAR_MIDO_ITEM', 'KF_RUPEE_NEAR_FADO_ITEM_01')    # two freestanding blue rupees (child)
 PAIR = ('Item_Scale_Silver', 'Item_Scale_Gold')
 GUARDS = ['QueryDeathIsDead', 'QueryEventMemberIsEventMemberSomeReason', 'QueryIsPlayingMainEvent']
-# one check of each kind a pair is refused on
-REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01', 'KF_CIRCLE_CENTER_ROCK',
-           'KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT', 'LW_NEAR_BRIDGE_SCRUB')
+ASKED = 'QueryPouchContentIsRequestingGetEvent'    # the item's own pick-up asked for, its scene not yet begun
+# one check of each kind a turning item (or a checking chest) is refused on. Rocks and bushes are accepted
+# (tests/pairs_more_check.py); a gift and a scrub have their own ways (gift_pair_kind, scrub_pair_kind)
+REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT',
+           'LW_NEAR_BRIDGE_SCRUB')
 CLOSE = ('KF_SARIAS_HOUSE_HEART_ITEM_03', 'KF_SARIAS_HOUSE_HEART_ITEM_04')     # 1.4 m apart
 # what the drop kinds' entries are in the game: the constant over the size rounded up to 32, for a file with
 # one element in its list (fitted on the game's files of each kind, out/RESEARCH_ground_progressive.md)
@@ -74,7 +76,7 @@ def main(romfs):
     good &= check('a pair on a freestanding item is a turning item, in a chest a checking chest',
                   [build_mod.pair_kind(world, c) for c in SPOTS + ('KF_MIDO_CHEST_01',)]
                   == ['freestanding', 'freestanding', 'chest'])
-    good &= check('a pair is refused on a shelf, a pot, a rock, a bush, a Gold Skulltula, a gift and a scrub',
+    good &= check('a turning item is refused on a shelf, a pot, a Gold Skulltula, a gift and a scrub',
                   all(refused(build_mod.pair_kind, world, c) for c in REFUSED))
     good &= check('only the listed pairs, first level first',
                   all(len(p) == 2 and p[::-1] not in build_mod.PROGRESSIVE_PAIRS
@@ -112,13 +114,21 @@ def main(romfs):
     sources = [base] + [ainb.loads(shared[p]) for p in turn_items.SOURCES.values()]
     sources.append(ainb.loads(sarc.Sarc.read(plain(ground_items.pack_path(turn_items.DROP_ACTOR)))
                               .files[turn_items.DROP_AI]))
+    # the game's own item that ends itself: "is my pick-up asked for" is the question at its root, and asked
+    # for means nothing is done (the Poe soul)
+    poe = ainb.loads(sarc.Sarc.read(plain(ground_items.pack_path(turn_items.REQUEST_ACTOR)))
+                     .files[turn_items.REQUEST_AI])
+    sources.append(poe)
+    top = poe.nodes[poe.commands[0].left]
+    asks = [poe.nodes[x.node] for x in top.inputs['bool'] if x.node >= 0]
+    poe_ok = top.type == turn_items.BOOL_SELECTOR and [n.name for n in asks] == [ASKED]         and [l.name for l in top.links[2]] == ['True', 'False']         and not any(poe.nodes[top.links[2][0].node].links)         and poe.nodes[top.links[2][0].node].name == 'ExecuteGenericDummyAction'
     game_shapes = {shape(n) for doc in sources for n in doc.nodes}
     # a sequence keeps its kind of child link whatever their number
     game_names = {(n.type, n.name) for doc in sources for n in doc.nodes}
     root = base.commands[0].left
     fly = sarc.Sarc.read(plain(ground_items.pack_path(turn_items.DROP_TEMPLATE))).files
     out = build_mod.Output(romfs, None, d)
-    ai_ok = copies = branch = names_ok = packs = rows_ok = drops = size_ok = lift_ok = True
+    ai_ok = copies = branch = names_ok = packs = rows_ok = drops = size_ok = lift_ok = asked_ok = True
     lifted = set()
     said = []
     for family in sorted(build_mod.PROGRESSIVE_PAIRS):
@@ -149,12 +159,14 @@ def main(romfs):
             ids = [bytes(n.guid) for n in doc.nodes]
             copies &= len(set(ids)) == len(ids)
             # the branch
-            branch &= what['guards'] == GUARDS and what['own'] == item and what['drops'] == (not last) \
+            branch &= what['guards'] == GUARDS + [ASKED] and what['own'] == item                 and what['drops'] == (not last) \
                 and what['later'] == list(family[level + 1:])
             branch &= what['turn'] == ([('OneShotGenericDeleteThisActor', [])] if last else [
                 ('OneShotDropSetDropValid', [True]), ('OneShotDropDrop', []), ('OneShotGenericDeleteThisActor', [])])
             branch &= what['enter'] == ([] if last else [('OneShotDropSetDropValid', [False])])
-            branch &= what['new'] == (13 if last else 22)
+            branch &= what['new'] == (16 if last else 28)
+            # its own pick-up asked for: it stays; with a next level and this one owned, the drop is switched on
+            asked_ok &= what['guards'][-1] == ASKED                 and what['asked'] == ([] if last else [('OneShotDropSetDropValid', [True])])
             if family == PAIR:
                 said.append('  %s: %d nodes (%d new), %d bytes' % (ai, len(doc.nodes), what['new'], len(data)))
             # the pack and its settings
@@ -259,6 +271,10 @@ def main(romfs):
     good &= check('their AI reads back; the 13 nodes of DropItem.root are untouched (one child more)', ai_ok)
     good &= check('  every new node is a copy of a game node of the same type', copies)
     good &= check('  the branch: dead / in an event / main event playing stop it; then "Link owns this level"', branch)
+    good &= check('game: the Poe soul, the item that ends itself, asks "is my pick-up asked for" at its root; '
+                  'asked for -> nothing', poe_ok)
+    good &= check('  the same question, last before "Link owns this level": asked for -> no turning, no delete; '
+                  'owned and a next level -> the drop switched on', asked_ok)
     good &= check('ground items of the level (Obj_Item_Base), walked into, stored under the item\'s name', packs)
     good &= check('the first level\'s drop files name the second level\'s actor; the second has none', drops)
     good &= check('three table rows each: the item\'s name and model, the ground parts, the item row', rows_ok)

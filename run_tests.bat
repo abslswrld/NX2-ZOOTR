@@ -35,6 +35,9 @@ echo.
 echo === Cutscene gift check ===
 %PY% tests\saria_check.py "%ROMFS%"
 echo.
+echo === Pairs on rocks, bushes and scrubs check ===
+%PY% tests\pairs_more_check.py "%ROMFS%"
+echo.
 echo === Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence) ===
 %PY% tests\roundtrip.py "%ROMFS%" Event RSDB Mals GameData Pack System AI Logic Sequence --report report.txt
 echo.

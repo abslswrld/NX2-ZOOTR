@@ -33,6 +33,8 @@ version of that level (tools/ground_items.py) with a root AI of its own, `NX2_Tu
       dead?                    -> nothing
       in an event?             -> nothing
       a main event playing?    -> nothing
+      its pick-up asked for?   -> Link owns this level (levels with a next level)? -> switch the drop on
+                                  otherwise nothing
       Link owns this level?    -> switch the drop on, drop the next level, delete itself (one step)
                                   (last level: only delete itself)
       Link owns a later level? -> delete itself
@@ -48,6 +50,17 @@ share one slot): without it the first level would lie there again once the secon
 The three guards keep the item from turning while it is itself being picked up: between the moment it is added
 to the inventory and its death it still exists, and Link owns it. Each is a copy of a game node; which of them
 holds through the whole scene can only be seen in game, so all three are asked.
+
+The fourth question, "is my pick-up being asked for" (`QueryPouchContentIsRequestingGetEvent`), is for the time
+before that scene begins: Link has touched the item, the scene is asked for but not yet playing, so none of the
+three guards holds yet. An item made by a drop right where Link stands (a bush cut with the sword) can be
+touched in the few frames before it has turned; turning then would delete an item whose scene is on its way,
+and Link is left waiting for it (seen 2026-11-20: stuck in place after a bush's Longshot, camera and menu
+working). The game's only item that ends itself asks this in front of everything else: the Poe soul
+(`Obj_Spirit_Poe.root`, the selector at its root: asked for -> nothing). Here the item stays, the scene plays
+(Link holds up the level he already has), and so that the next level is not lost the drop is switched on: the
+scene ends the item with the death the ground items drop on (reason 10, see above), which then drops the next
+level. An item touched while Link doesn't own it (the normal case) does nothing here.
 
 Every new node is a copy of a game node of the same type, found by what it is (not by its number) and checked
 before it is used; new nodes go after the file's own.
@@ -80,6 +93,8 @@ SOURCES = {
 }
 DROP_ACTOR = 'Obj_Gerudo_CowBoneDecoration_A_01'            # OneShotDropDrop: its own AI, in its pack
 DROP_AI = 'AI/Obj_Gerudo_CowBoneDecoration_A_01.root.ainb'
+REQUEST_ACTOR = 'Obj_Spirit_Poe'                            # QueryPouchContentIsRequestingGetEvent: its own AI
+REQUEST_AI = 'AI/Obj_Spirit_Poe.root.ainb'
 # the actor whose drop part is copied: it turns into another actor through a drop table of its own
 DROP_TEMPLATE = 'Animal_ButterflyToFairy'
 DROP_SHARED = ('Component/DropParam/Default.game__component__DropParam.bgyml',
@@ -94,6 +109,7 @@ S32_SELECTOR, SEQUENTIAL, SIMULTANEOUS, BOOL_SELECTOR, SPLIT_TIMING = 1, 2, 3, 7
 VALUE, FLOW, INT = 0, 2, 5                        # link types (formats/ainb.py)
 Q_OWNED, Q_DEAD = 'QueryGetPouchContentNumByActorName', 'QueryDeathIsDead'
 Q_EVENT, Q_MAIN = 'QueryEventMemberIsEventMemberSomeReason', 'QueryIsPlayingMainEvent'
+Q_ASKED = 'QueryPouchContentIsRequestingGetEvent'  # the item's own pick-up scene is asked for
 N_VALID, N_DROP, N_DELETE, N_IDLE = ('OneShotDropSetDropValid', 'OneShotDropDrop',
                                      'OneShotGenericDeleteThisActor', 'OneshotDoNothing')
 GUARDS = ((Q_DEAD, 'IsDead'), (Q_EVENT, 'IsEventMember'), (Q_MAIN, 'IsPlayingMainEvent'))
@@ -176,11 +192,12 @@ def _element(doc, type_, immediates, flow, other=()):
     return _find(doc, ainb.NODE_TYPES[type_], ok)
 
 
-def turning_ai(base, sources, drop_ai, own, later=(), drops=False, name=None):
+def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, name=None):
     """the ground items' AI (`base`: DropItem.root) under the name `name`, with the turning branch (see the top
     of this file). own: the level's own name, as the inventory knows it; later: the names of the levels after
     it; drops: whether it drops the next level when it turns (it has a drop part) or only deletes itself.
-    sources: {key of SOURCES: that AI file}; drop_ai: the AI the drop node is copied from.
+    sources: {key of SOURCES: that AI file}; drop_ai: the AI the drop node is copied from; request_ai: the AI
+    the "pick-up asked for" question is copied from.
     Read back: the 13 nodes of the game's file are as they were but for the root's one new child."""
     doc = ainb.loads(base)
     if doc.filename != BASE_AI + '.root':
@@ -242,6 +259,7 @@ def turning_ai(base, sources, drop_ai, own, later=(), drops=False, name=None):
     t_guard = {Q_DEAD: _query(src['owned'], Q_DEAD, 'bool', 'IsDead'),
                Q_EVENT: _query(src['event'], Q_EVENT, 'bool', 'IsEventMember'),
                Q_MAIN: _query(src['door'], Q_MAIN, 'bool', 'IsPlayingMainEvent')}
+    t_asked = _query(ainb.loads(request_ai), Q_ASKED, 'bool', 'IsRequestingGetEvent')
 
     nodes = []                                     # the new nodes, in order: node number n0 + its place
 
@@ -300,8 +318,21 @@ def turning_ai(base, sources, drop_ai, own, later=(), drops=False, name=None):
         turn = delete('owned')
     sel = owned(own, 'own')
     flow(sel, after, turn)
+    # the item's own pick-up asked for, its scene not yet begun: no turning (see the top of this file). With a
+    # next level and this one owned, the drop is switched on, for the death that ends the scene
+    q = new(t_asked[0], 'guard IsRequestingGetEvent')
+    asked = new(t_bool, 'is IsRequestingGetEvent')
+    ask((q, t_asked[1]), asked, 'bool')
+    if drops:
+        keep = new(t_valid, 'drop on, asked for')
+        nodes[keep - n0].inputs['bool'][0].value = True
+        mine = owned(own, 'own, asked for')
+        flow(mine, idle('asked for'), keep)
+    else:
+        mine = idle('asked for')
+    flow(asked, mine, sel)                          # True -> stay, False -> go on
     # the guards, the first asked last made
-    top = sel
+    top = asked
     for q_name, out in reversed(GUARDS):
         q = new(t_guard[q_name][0], 'guard ' + out)
         g = new(t_bool, 'is ' + out)
@@ -336,7 +367,8 @@ def turning_ai(base, sources, drop_ai, own, later=(), drops=False, name=None):
             raise SystemExit('read-back: new node %d of %s differs from what was intended' % (n0 + k, ai_path(name)))
     want = describe(data)
     if want['own'] != own or want['later'] != list(later) or want['drops'] != drops \
-            or want['guards'] != [q for q, _ in GUARDS] or want['new'] != len(nodes):
+            or want['guards'] != [q for q, _ in GUARDS] + [Q_ASKED] or want['new'] != len(nodes) \
+            or want['asked'] != ([(N_VALID, [True])] if drops else []):
         raise SystemExit('read-back: the turning branch of %s is not as intended: %r' % (ai_path(name), want))
     return data
 
@@ -345,7 +377,9 @@ def describe(data):
     """what a turning AI does, read from the file by following its links: {'name', 'new' (nodes after the
     game's 13), 'guards' (the questions that stop it, in order), 'own' (the name whose owning turns it), 'turn'
     (what it then does, in order), 'drops' (whether that drops), 'later' (the names whose owning deletes it),
-    'enter' (what it does on entering)}. Raises SystemExit when the branch is not the one turning_ai makes."""
+    'enter' (what it does on entering), 'asked' (what it does while its own pick-up is asked for and Link
+    owns it: nothing, or the drop switched on)}. Raises SystemExit when the branch is not the one turning_ai
+    makes."""
     doc = ainb.loads(data)
     nodes = doc.nodes
     pre = [i for i, n in enumerate(nodes) if n.flags & 1]
@@ -371,7 +405,9 @@ def describe(data):
 
     root = nodes[doc.commands[0].left]
     top = root.links[FLOW][-1].node
-    out = {'name': doc.filename, 'new': len(nodes) - BASE_NODES, 'enter': [], 'guards': [], 'later': []}
+    out = {'name': doc.filename, 'new': len(nodes) - BASE_NODES, 'enter': [], 'guards': [], 'later': [],
+           'asked': []}
+    stay = []                                      # what "pick-up asked for" leads to
     if nodes[top].type == SPLIT_TIMING:
         k = dict(kids(top))
         if list(k) != ['Enter', 'Update', 'Leave']:
@@ -385,7 +421,10 @@ def describe(data):
         k = dict(kids(top))
         if list(k) != ['True', 'False']:
             bad('guard %d not as expected' % top)
-        nothing(k['True'])
+        if q.name == Q_ASKED:
+            stay.append(k['True'])
+        else:
+            nothing(k['True'])
         out['guards'].append(q.name)
         top = k['False']
 
@@ -398,6 +437,16 @@ def describe(data):
         return q.inputs['string'][0].value, k[0][1], k[1][1]
 
     out['own'], rest, turn = owned(top)
+    if len(stay) != 1 or out['guards'][-1:] != [Q_ASKED]:
+        bad('"pick-up asked for" is not the last question before "Link owns this level"')
+    if nodes[stay[0]].type == S32_SELECTOR:        # asked for and owned: the drop switched on, nothing else
+        item, none, keep = owned(stay[0])
+        nothing(none)
+        if item != out['own'] or nodes[keep].name != N_VALID or any(nodes[keep].links):
+            bad('"pick-up asked for" does not switch the drop on for the level owned')
+        out['asked'] = [(nodes[keep].name, [x.value for x in nodes[keep].inputs['bool']])]
+    else:
+        nothing(stay[0])
     steps = [turn] if nodes[turn].type != SEQUENTIAL else [c for _, c in kids(turn)]
     if nodes[turn].type == SEQUENTIAL and not {x.name: x.value for x in nodes[turn].immediates['bool']}.get(
             'IsUpdateNextInFrame'):
@@ -467,8 +516,11 @@ def build(family, level, read_pack, read_table_rows, model_exists=lambda project
     drop_ai = sarc.Sarc.read(read_pack(pack_path(DROP_ACTOR))).files.get(DROP_AI)
     if drop_ai is None:
         raise SystemExit('%s: no %s in its pack' % (DROP_ACTOR, DROP_AI))
+    request_ai = sarc.Sarc.read(read_pack(pack_path(REQUEST_ACTOR))).files.get(REQUEST_AI)
+    if request_ai is None:
+        raise SystemExit('%s: no %s in its pack' % (REQUEST_ACTOR, REQUEST_AI))
     ai_data = turning_ai(shared[ai_path(BASE_AI)], {k: shared[p] for k, p in SOURCES.items()}, drop_ai,
-                         item, family[level + 1:], drops=not last, name=ai)
+                         request_ai, item, family[level + 1:], drops=not last, name=ai)
     new_inner[ai_info_path(ai)] = (byml.dumps(idoc), base_info)
     new_inner[ai_path(ai)] = (ai_data, ai_path(BASE_AI))
     # (the ground items' own AI settings stay in the pack: the item base's file still names them)
