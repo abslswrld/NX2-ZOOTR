@@ -38,7 +38,10 @@ Ocarina > Ocarina of Time.
 The same on a freestanding item (to test in game): the placement becomes First's turning item
 (tools/turn_items.py): a ground item of First that, once Link owns First, drops Second's in its place and removes
 itself; Second's removes itself once Link owns Second. Two freestanding items with the same pair give First then
-Second in either order. Not on shelves, pots, rocks, bushes or Gold Skulltulas yet.
+Second in either order.
+The same on a liftable rock or a solid bush (to test in game): its drop (Drop__DropActor) becomes First's turning
+item, so what comes out is First while Link doesn't own it, else Second, decided where it lies and not when the
+rock breaks. Not on shelves, pots or Gold Skulltulas yet.
 Three-level family (to test in game): CHECK_ID=First>Second>Third on a small chest makes it a chest of our own
 (tools/three_chest.py: the checking chest with a third held item and a second question) that gives Third when
 Link has Second, else Second when Link has First, else First; only the families in THREE_LEVEL_FAMILIES (the
@@ -49,6 +52,9 @@ bomb bags), and only in small chests:
 The same on a gift that has flow data (to test in game): the giver's own flow asks the inventory in front of
 its call of the shared get flow, as the game's own flows do for upgrades, and gives First or Second
 (gift_pair_edit). Gifts without flow data (cutscene gifts) and songs are refused.
+The same on a Deku Scrub that sells one thing once (to test in game): the scrub's branch of the scrub flow asks
+the inventory before the sale, as the game's own stick-bag and nut-bag scrubs do, and sells First or Second at
+the scrub's price (scrub_flow_edit, point 4).
 
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
@@ -198,24 +204,31 @@ def checking_chest(gyaml, family=None):
     return three_chest.chest_name(family, plain.endswith(three_chest.NOBAKE))
 
 
-# Where a progressive pair can be placed: a small chest (the checking chest) or a freestanding item (a turning
-# item, tools/turn_items.py). Not yet: shelves (the shop version has no such AI), pots, rocks, bushes and Gold
-# Skulltulas (a drop: to do after freestanding items are seen working), songs and scrubs (events). Gifts: gift_pair_kind, gift_pair_edit.
-PAIR_KINDS = ('chest', 'freestanding')
+# Where a progressive pair can be placed: a small chest (the checking chest), a freestanding item (a turning
+# item, tools/turn_items.py), or a liftable rock or solid bush (its drop is the turning item: rocks, bushes and
+# pots drop through the same drop part, Component/DropParam/Drop_ResourceSupply_00, whatever their placement's
+# Drop__DropActor names, and a turning item made by a drop is what the second level of every pair already is).
+# Not yet: shelves (the shop version has no such AI), pots (the user: not started), Gold Skulltulas (what they
+# drop must carry the skulltula's flag on: no game node hands it from one drop to the next), songs (events).
+# Gifts: gift_pair_kind, gift_pair_edit. Scrubs: scrub_pair_kind, scrub_flow_edit.
+PAIR_KINDS = ('chest', 'freestanding', 'rock', 'bush')
+TURN_KINDS = ('freestanding', 'rock', 'bush')     # the kinds whose pair is a turning item
 # Two turning items of one family must not lie where Link can touch both at once: the second could be picked up
 # in the frame the first's scene ends, before it has turned (it would give the first level again). Metres,
-# between their map positions.
+# between their map positions (for a rock or a bush: where it stands; a rock carried and thrown next to another
+# item of its family is not covered).
 TURN_MIN_DISTANCE = 2.0
 
 
 def pair_kind(world, cid):
-    """the kind of check a progressive pair is placed on ('chest' or 'freestanding'); stops the build for any
-    other kind, or when the check's placements are not all of one kind"""
+    """the kind of check a progressive pair is placed on (one of PAIR_KINDS); stops the build for any other
+    kind, or when the check's placements are not all of one kind"""
     r, name, loc = find_check(world, cid)
     kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
     if len(kinds) != 1 or not kinds <= set(PAIR_KINDS):
-        raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest or on a freestanding '
-                         'item (this check: %s)' % (cid, ', '.join(sorted(kinds)) or 'an event, no map placement'))
+        raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest, on a freestanding '
+                         'item, or on a rock or a bush (this check: %s)'
+                         % (cid, ', '.join(sorted(kinds)) or 'an event, no map placement'))
     return kinds.pop()
 
 
@@ -973,11 +986,125 @@ def scrub_map_edit(data, changes):
 SCRUB_PRICE_KEYS = {SCRUB_SELL: 'ActorName', SEED_SELL: 'Actor',
                     'SimpleShopSub_Scrub_Business_Seed_Bottle': 'DisplayActor'}
 SCRUB_ONE_TIME_TALK = 'Enemy_Scrub_Business_DekuStickPouch_01'   # its call of the root: the greetings to copy
+# A progressive pair on a scrub (CHECK_ID=First>Second, PROGRESSIVE_PAIRS): the scrub's map setting names First,
+# and the builder's own branch for First in Enemy_Scrub_Business_Common asks the inventory before the sale, the
+# way the game's own upgrade scrubs do in that very flow: the stick-bag scrub's map setting is
+# Item_StickBag_Medium, and its branch asks PouchSystemActor.EventQueryIsExistInPouch {Num: 1, Actor:
+# Item_StickBag_Medium} (Event319): 0 (Link has it) -> the one-time sale of Item_StickBag_Large, 1 -> of
+# Item_StickBag_Medium; the nut-bag scrub the same (Event323). The question is copied from there. The generic
+# line names the item from Scrub_Business_TempItemName_00 (the map setting: First), and an item Link can't hold
+# up is sorted out by that name too (scrub_flow_edit, point 3), so before Second's sale the name is written
+# over with Second's and the flow waits, as the game's own flows do after writing a name they use
+# (Enemy_Scrub_Business_Potion: EventTriggerSetGameDataString64 on Scrub_Business_TempItemName_02 and _03, a
+# call that writes _00, then EventWait of 1 frame before the step that reads them; a value written is read back
+# a frame or two later, seen in game 2026-11-18).
+SCRUB_PAIR_QUERY = 'EventQueryIsExistInPouch'
+SCRUB_NAME_WRITE = 'EventTriggerSetGameDataString64'
+SCRUB_WRITE_WAIT = 2                               # frames between writing the name and the sale that uses it
 
 
-def scrub_flow_edit(fc, sales, direct=(), sync=None):
+def scrub_pair_kind(world, cid):
+    """True for a check whose placements are all Deku Scrubs: a progressive pair on it is decided in the
+    scrub's own branch of the scrub flow (scrub_flow_edit)"""
+    r, name, loc = find_check(world, cid)
+    kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
+    return kinds == {'scrub'}
+
+
+def scrub_pair_template(fc):
+    """the game's own question as the upgrade scrubs' branches have it: (the actor's index, the query's
+    parameters, the case value for "has it", the case value for "doesn't"), and the steps the game writes a
+    name and waits with: (the write's parameters, the wait's actor index, the wait's parameters). Found by what
+    they are"""
+    ask = None
+    for e in fc.events:
+        if e.type != 'switch' or fc.actors[e.actor].name != GIFT_PAIR_ACTOR or fc.actors[e.actor].secondary \
+                or fc.actors[e.actor].queries[e.query] != SCRUB_PAIR_QUERY or not isinstance(e.params, dict):
+            continue
+        sells = {v: fc.events[c] for v, c in e.cases}
+        if sorted(sells) != [0, 1] or any(s.type != 'subflow' or s.flowchart != '' or s.entry != SCRUB_SELL
+                                          or not isinstance(s.params, dict) for s in sells.values()):
+            continue
+        asked = e.params.get('Actor')
+        if list(e.params) == ['Num', 'Actor'] and e.params['Num'] == 1 and isinstance(asked, str) \
+                and sells[1].params.get('ActorName') == asked and sells[0].params.get('ActorName') != asked:
+            ask = (e.actor, evfl.Params(e.params), 0, 1)
+            break
+    if ask is None:
+        raise SystemExit('%s: no %s.%s switch between two one-time sales found (game files differ from what '
+                         'this was made for)' % (SCRUB_FLOW, GIFT_PAIR_ACTOR, SCRUB_PAIR_QUERY))
+    write = next((e for e in fc.events if e.type == 'action' and _action_name(fc, e) == SCRUB_NAME_WRITE
+                  and isinstance(e.params, dict) and sorted(e.params) == ['GameDataName', 'Index', 'Value']
+                  and e.params['Index'] == -1 and isinstance(e.params['Value'], str)
+                  and str(e.params['GameDataName']).startswith('Scrub_Business_TempItemName_')
+                  and fc.actors[e.actor].name == 'GameDataActor' and not fc.actors[e.actor].secondary), None)
+    wait = next((e for e in fc.events if e.type == 'action' and _action_name(fc, e) == 'EventWait'
+                 and isinstance(e.params, dict) and sorted(e.params) == ['Frames', 'IsWaitEnd']
+                 and e.params['IsWaitEnd'] is True and fc.actors[e.actor].name == 'EventSystemActor'
+                 and not fc.actors[e.actor].secondary), None)
+    if write is None or wait is None:
+        raise SystemExit('%s: no name written, or no wait, found as expected (game files differ from what this '
+                         'was made for)' % SCRUB_FLOW)
+    return ask, (evfl.Params(write.params), wait.actor, evfl.Params(wait.params))
+
+
+def scrub_pair_read(fc, first):
+    """what the flow does for a scrub whose map setting is `first`, read from the flow by following its links
+    from the root: {'first', 'second' (None when the branch is a plain sale), 'ask' (the question's
+    parameters), 'steps' (what Second's branch does before its sale, in order: actor, action, parameters),
+    'sells' ((First's sale's parameters, Second's))}. Raises SystemExit when the branch is not one
+    scrub_flow_edit makes"""
+    by = fc.events
+    eps = {p.name: p.main for p in fc.entry_points}
+    sw = next((by[i] for i in flow_reachable(fc, eps[SCRUB_ROOT]) if by[i].type == 'switch'
+               and isinstance(by[i].params, dict) and by[i].params.get('GameDataName') == SCRUB_VAR
+               and by[i].params.get('Value') == first), None)
+    if sw is None:
+        raise SystemExit('%s: no branch for %s' % (SCRUB_ROOT, first))
+    e = by[dict(sw.cases)[0]]
+    if e.type == 'subflow':
+        return {'first': first, 'second': None, 'sells': (dict(e.params), None)}
+    a = fc.actors[e.actor] if e.type == 'switch' else None
+    if a is None or (a.name, a.secondary or '', a.queries[e.query]) != (GIFT_PAIR_ACTOR, '', SCRUB_PAIR_QUERY) \
+            or sorted(v for v, _ in e.cases) != [0, 1]:
+        raise SystemExit('%s: the branch for %s is neither a sale nor the inventory question' % (SCRUB_ROOT, first))
+    cases = dict(e.cases)
+    steps, k = [], by[cases[0]]
+    while k.type == 'action':
+        steps.append((fc.actors[k.actor].name, _action_name(fc, k), dict(k.params)))
+        if k.next is None:
+            raise SystemExit('%s: the branch for %s ends before a sale' % (SCRUB_ROOT, first))
+        k = by[k.next]
+    one, two = by[cases[1]], k
+    if any(s.type != 'subflow' or s.flowchart != '' or s.entry != SCRUB_SELL or s.next is not None
+           for s in (one, two)):
+        raise SystemExit('%s: the branch for %s does not end in two one-time sales' % (SCRUB_ROOT, first))
+    return {'first': first, 'second': two.params.get('ActorName'), 'ask': dict(e.params), 'steps': steps,
+            'sells': (dict(one.params), dict(two.params))}
+
+
+def scrub_pair_check(fc, first, second):
+    """read-back of a pair's branch: the question asks for First; "has not" sells First; "has" writes Second's
+    name where the line and the hold-up check read it, waits, and sells Second; the two sales differ in the
+    item only"""
+    got = scrub_pair_read(fc, first)
+    one, two = got['sells']
+    if got['second'] != second or got.get('ask') != {'Num': 1, 'Actor': first} \
+            or one.get('ActorName') != first or {k: v for k, v in one.items() if k != 'ActorName'} \
+            != {k: v for k, v in two.items() if k != 'ActorName'} \
+            or got['steps'] != [('GameDataActor', SCRUB_NAME_WRITE,
+                                 {'Index': -1, 'GameDataName': SCRUB_VAR, 'Value': second}),
+                                ('EventSystemActor', 'EventWait', {'Frames': SCRUB_WRITE_WAIT, 'IsWaitEnd': True})]:
+        raise SystemExit('read-back: %s: the branch for %s>%s is not as intended: %r'
+                         % (SCRUB_FLOW, first, second, got))
+    return got
+
+
+def scrub_flow_edit(fc, sales, direct=(), sync=None, pairs=None):
     """sales: [(check id, new item, [(talk event, original item)])]. Every changed scrub sells its item once.
     direct: the items Link can't hold up (ground_items.can_hold_up); sync {item: sync steps}: see point 3.
+    pairs: {check id: (first, second)} for the scrubs that hold a progressive pair (their item in `sales` is
+    First): see point 4.
     1. In front of the first item comparison of SimpleShopRoot_Enemy_Scrub_Business_Pouch, one branch per item:
            Scrub_Business_TempItemName_00 == item?   yes (0) -> SimpleShopSub_Scrub_Business_OneTime with the
                                                                 item, the scrub's price, the generic line (and
@@ -999,8 +1126,18 @@ def scrub_flow_edit(fc, sales, direct=(), sync=None):
                                                                 ocarina the sync steps, then on as after the
                                                                 game's call
                                                      no  (1) -> the game's call
+    4. A progressive pair: the branch of point 1 for First does not sell at once but asks first, as the game's
+       own upgrade scrubs do (scrub_pair_template):
+           PouchSystemActor.EventQueryIsExistInPouch {Num: 1, Actor: First}
+               1 (Link has no First) -> the one-time sale of First, as point 1
+               0 (Link has First)    -> Scrub_Business_TempItemName_00 = Second, a wait of SCRUB_WRITE_WAIT
+                                        frames, then the same one-time sale with Second (the line names Second,
+                                        and point 3 sorts Second out by its own name)
+       Only for a scrub whose talk runs the one-time root itself (the upgrade scrubs: their talk marks them
+       sold for good after a buy), so a scrub gives one level.
     The price is what the game's own calls ask for the scrub's original item (the first copy's). Returns lines
     saying what was changed."""
+    pairs = pairs or {}
     eps = {p.name: p.main for p in fc.entry_points}
     by = fc.events
     root = eps.get(SCRUB_ROOT)
@@ -1015,16 +1152,31 @@ def scrub_flow_edit(fc, sales, direct=(), sync=None):
     known = {by[i].params.get('Value') for i in flow_reachable(fc, root) if by[i].type == 'switch'
              and isinstance(by[i].params, dict) and by[i].params.get('GameDataName') == SCRUB_VAR}
     prices, repeat, said = {}, {}, []
+    second_of = {}                                     # First -> Second, or None for an item sold alone
     for cid, item, copies in sales:
-        if item in known:
-            raise SystemExit('%s: %s is sold by the game\'s own scrub branches (other scrubs would sell it at '
-                             'this price too): not supported yet' % (cid, item))
+        second = pairs[cid][1] if cid in pairs else None
+        if cid in pairs and pairs[cid][0] != item:
+            raise SystemExit('%s: sells %s, not the first level of its pair %s' % (cid, item, '>'.join(pairs[cid])))
+        for x in (item, second):
+            if x in known:
+                raise SystemExit('%s: %s is sold by the game\'s own scrub branches (other scrubs would sell it '
+                                 'at this price too): not supported yet' % (cid, x))
+        if second_of.setdefault(item, second) != second:
+            raise SystemExit('%s: %s is sold alone by one scrub and as the first level of a pair by another: '
+                             'one branch cannot do both' % (cid, item))
+        if second and (SCRUB_COMPANIONS.get(item) or SCRUB_COMPANIONS.get(second)):
+            raise SystemExit('%s: %s>%s: a pair with an item that needs another one given with it is not '
+                             'supported on a scrub' % (cid, item, second))
         asked = []
         for talk, old in copies:
             start = eps.get(talk)
             if start is None:
                 raise SystemExit('%s: its talk %s is not in %s: not supported yet' % (cid, talk, SCRUB_FLOW))
             if not (by[start].type == 'subflow' and by[start].entry == SCRUB_ROOT):
+                if second:
+                    raise SystemExit('%s: a progressive pair can only be put on a scrub that sells one thing '
+                                     'once (its talk %s sells again and again: nothing would keep it from '
+                                     'selling both levels)' % (cid, talk))
                 repeat.setdefault(talk, []).append(item)
             asked += sorted({e.params.get('Price') for e in calls if e.params.get(SCRUB_PRICE_KEYS[e.entry]) == old})
         if not asked:
@@ -1036,7 +1188,12 @@ def scrub_flow_edit(fc, sales, direct=(), sync=None):
             raise SystemExit('%s: %s is also sold by %s at %s rupees, here %s'
                              % (cid, item, prices[item][1], prices[item][0], price))
         prices[item] = (price, cid)
+    both = list(second_of) + [s for s in second_of.values() if s]
+    if len(set(both)) != len(both):
+        raise SystemExit('%s: an item would be sold by two branches: %s' % (SCRUB_FLOW, sorted(
+            x for x in set(both) if both.count(x) > 1)))
     template = next(e for e in calls if e.entry == SCRUB_SELL)
+    pair_tpl = scrub_pair_template(fc) if any(second_of.values()) else None
     first_new = len(by)
     for item, (price, cid) in prices.items():
         params = evfl.Params(template.params)
@@ -1054,14 +1211,35 @@ def scrub_flow_edit(fc, sales, direct=(), sync=None):
                                                 IsSetMessageTargetActorName=False, IsEquipDIrect=False), next=nxt)
             fc.events[sell].next = fc.add_switch('GameDataActor', 'EventQueryIsGameDataBool', [(0, nxt)],
                                                  evfl.Params(GameDataName='ScrubBusiness_BuySuccess', Index=-1))
-        sw = fc.add_switch('GameDataActor', 'EventQueryIsGameDataString64', [(0, sell), (1, head)],
+        target, second = sell, second_of[item]
+        if second:
+            (q_actor, q_params, has, has_not), (w_params, wait_actor, wait_params) = pair_tpl
+            params2 = evfl.Params(params)
+            params2['ActorName'] = second
+            sell2 = fc.add_subflow('', SCRUB_SELL, params2)
+            wait_params = evfl.Params(wait_params)
+            wait_params['Frames'] = SCRUB_WRITE_WAIT
+            wait = fc.add_action(wait_actor, 'EventWait', wait_params, next=sell2)
+            w_params = evfl.Params(w_params)
+            w_params['GameDataName'], w_params['Value'] = SCRUB_VAR, second
+            write = fc.add_action('GameDataActor', SCRUB_NAME_WRITE, w_params, next=wait)
+            ask = evfl.Params(q_params)
+            ask['Actor'] = item
+            target = fc.add_switch(q_actor, SCRUB_PAIR_QUERY, [(has, write), (has_not, sell)], ask)
+        sw = fc.add_switch('GameDataActor', 'EventQueryIsGameDataString64', [(0, target), (1, head)],
                            evfl.Params(GameDataName=SCRUB_VAR, Index=-1, Value=item))
         if fc.repoint(head, sw, keep=(sw,)) < 1:
             raise SystemExit('%s: nothing led to %s' % (SCRUB_ROOT, by[head].name))
         head = sw
         said.append('%s sells %s at %s rupees, once (new branch %s)%s' % (cid, item, price, fc.events[sw].name,
                     ', with %s' % ', '.join(extra) if extra else ''))
-    hard = sorted(i for i in prices if i in direct)
+        if second:
+            said.append('%s: a progressive pair: asks first (%s: %s.%s %s): Link has no %s -> %s sells %s, else '
+                        '%s is written into %s, %d frames pass and %s sells %s at the same price'
+                        % (cid, fc.events[target].name, GIFT_PAIR_ACTOR, SCRUB_PAIR_QUERY, dict(ask), item,
+                           fc.events[sell].name, item, second, SCRUB_VAR, SCRUB_WRITE_WAIT,
+                           fc.events[sell2].name, second))
+    hard = sorted(i for i in both if i in direct)
     if hard:
         shown = [i for i in flow_reachable(fc, eps[SCRUB_SELL]) if by[i].type == 'subflow'
                  and by[i].flowchart == GIFT_FLOW]
@@ -1118,6 +1296,9 @@ def scrub_flow_edit(fc, sales, direct=(), sync=None):
     if missing:
         raise SystemExit('%s: new steps not reached: %s' % (SCRUB_FLOW, [fc.events[i].name for i in missing]))
     fc.update_entry_points()
+    for first, second in sorted(second_of.items()):
+        if second:
+            scrub_pair_check(fc, first, second)
     return said
 
 
@@ -2240,12 +2421,14 @@ def main(argv):
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
     never_given(assignments)
     # CHECK_ID=First>Second: a progressive pair (PROGRESSIVE_PAIRS). In a small chest: planned as First, the
-    # chest made a checking chest further down. On a freestanding item: planned as First's turning item
-    # (tools/turn_items.py). On a gift with flow data: planned as First, the question added further down
-    # (gift_pair_kind). Nowhere else yet (pair_kind).
+    # chest made a checking chest further down. On a freestanding item, a rock or a bush: planned as First's
+    # turning item (tools/turn_items.py; the rock's or bush's drop). On a gift with flow data: planned as First,
+    # the question added further down (gift_pair_kind). On a scrub: planned as First, the question added in
+    # the scrub's branch of the scrub flow (scrub_pair_kind). Nowhere else yet (pair_kind).
     steps = {}                                         # check id -> (first, second): chests
-    turning = {}                                       # check id -> (first, second): freestanding items
+    turning = {}                                       # check id -> (first, second): turning items (TURN_KINDS)
     gift_pairs = {}                                    # check id -> (first, second): gifts (gift_pair_edit)
+    scrub_pairs = {}                                   # check id -> (first, second): scrubs (scrub_flow_edit)
     world = World()
     # CHECK_ID=First>Second>Third: a three-level family (THREE_LEVEL_FAMILIES), small chests only: planned as
     # First, the chest made the family's own chest further down (tools/three_chest.py)
@@ -2263,6 +2446,9 @@ def main(argv):
                     '>'.join(x) for x in sorted(PROGRESSIVE_PAIRS))))
             if gift_pair_kind(world, cid):
                 gift_pairs[cid] = pair             # planned as First; the question is added further down
+                assignments[k] = (cid, pair[0])
+            elif scrub_pair_kind(world, cid):
+                scrub_pairs[cid] = pair            # planned as First; the question goes in the scrub's branch
                 assignments[k] = (cid, pair[0])
             elif pair_kind(world, cid) == 'chest':
                 steps[cid] = pair
@@ -2501,20 +2687,20 @@ def main(argv):
         if not planned[path]:
             del planned[path]
 
-    # progressive pairs: in chests (the chest itself chooses) and on freestanding items (a turning item), as
-    # sorted out above (pair_kind); checked again on what was planned
+    # progressive pairs: in chests (the chest itself chooses) and on freestanding items, rocks and bushes (a
+    # turning item), as sorted out above (pair_kind); checked again on what was planned
     stepped = {cid for changes in planned.values() for cid, _, _, kind in changes.values() if kind == 'chest'}
     for cid in sorted(set(steps) - stepped):
-        raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest or on a freestanding '
-                         'item' % cid)
+        raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest, on a freestanding '
+                         'item, or on a rock or a bush' % cid)
     for cid in sorted(set(triples) - stepped):
         raise SystemExit('%s: a three-level family (First>Second>Third) can only be put in a small chest' % cid)
     three_used = {}                                    # (family name, _NoBake twin) -> (second, third as held)
     for changes in planned.values():
         for cid, item, _, kind in changes.values():
-            if (cid in turning) != item.startswith(turn_items.PREFIX) or (cid in turning and kind != 'freestanding'):
-                raise SystemExit('%s: a turning item (%s) planned on a %s: only freestanding items yet'
-                                 % (cid, item, kind))
+            if (cid in turning) != item.startswith(turn_items.PREFIX) or (cid in turning and kind not in TURN_KINDS):
+                raise SystemExit('%s: a turning item (%s) planned on a %s: only freestanding items, rocks and '
+                                 'bushes yet' % (cid, item, kind))
 
     for path, changes in sorted(planned.items()):
         src, old = out.read(path)
@@ -2535,8 +2721,9 @@ def main(argv):
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
             print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item))
             if cid in turning:
-                print('%-18s   a turning item: %s on the ground while Link has no %s, then %s'
-                      % (cid, turning[cid][0], turning[cid][0], turning[cid][1]))
+                print('%-18s   a turning item%s: %s on the ground while Link has no %s, then %s'
+                      % (cid, '' if kind == 'freestanding' else ' as the %s\'s drop' % kind, turning[cid][0],
+                         turning[cid][0], turning[cid][1]))
         # read back: only the changed values differ (worked out again here from the original, not from
         # what patch_file did)
         before = {str(int(x['Hash'])): x for x in byml.loads(old).root['Actors']}
@@ -2716,9 +2903,9 @@ def main(argv):
                 print('%-18s %s: scrub %s sells %s instead of %s' % (cid, path.split('/')[-1], h, item, was))
         src, old = out.read(SCRUB_FLOW)
         ef = evfl.loads(old)
-        direct, sync = get_plan(sorted({i for _, i, _ in scrubs}))
+        direct, sync = get_plan(sorted({i for _, i, _ in scrubs} | {p[1] for p in scrub_pairs.values()}))
         said = scrub_flow_edit(ef.flowchart, [(c, i, [(t, w) for _, _, t, w in rows]) for c, i, rows in scrubs],
-                               direct, sync) if scrubs else []
+                               direct, sync, scrub_pairs) if scrubs else []
         lines = {SCRUB_LABEL: SCRUB_LINE} if scrubs else {}
         if guard:
             said += seed_bag_guard(ef.flowchart)
@@ -2879,7 +3066,8 @@ def main(argv):
             'token': ': dropped by a Gold Skulltula, marks it done when picked up (the token\'s AI and blackboard), '
                      'spins as the token does (the token\'s animation settings start %s)' % ground_items.SPIN
         }.get(version, '')))
-    # turning items: every level of each family placed on a freestanding item (tools/turn_items.py)
+    # turning items: every level of each family placed on a freestanding item, a rock or a bush
+    # (tools/turn_items.py)
     for family in sorted(set(turning.values())):
         for level, item in enumerate(family):
             got, pack, new_inner, rows, loose = turn_items.build(

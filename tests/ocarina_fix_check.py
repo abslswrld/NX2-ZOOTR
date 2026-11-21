@@ -69,20 +69,21 @@ UNCHANGED = {
     (TIME, 'token'): '75583414eef413e1b6f5f4ca88b314503020dc17f43a780725b3d3592a2bd78f',
 }
 UNCHANGED_TURN = {
-    ('Item_Scale_Silver', 'Item_Scale_Gold'): ('d7b823049e389e7d20cd89006b3aa4c065d928c37903aefe24a5fec2a7321e6e',
-                                               '1963632f9648f99004259c0199dcc4261770013bea548fd8d34f7da150505c13'),
-    ('Item_Hookshot', 'Item_Longshot'): ('7ba3d27f3b6a251a42dd3cc08034f6008a01508139cf22917f5cefe637cbfa40',
-                                         '78d8b7f71ed3d5fb148ff9f650c23f38c423eb51d194c7ba0dabdadd32e14371'),
+    ('Item_Scale_Silver', 'Item_Scale_Gold'): ('adb112f27dbb74fbef2e5a6defd838b1426c95511d5338a1b057c95ad979eed7',
+                                               'cf67efacd12111be18754c734acfe3f5dfbb2d90a7c58e136ab9b3f35f8f8f0c'),
+    ('Item_Hookshot', 'Item_Longshot'): ('87e88d14e68e96e7575b13e8ae72a4afa527f92169ab568fc491f67308b95b78',
+                                         'db409c16dc1fc4e3887677926921c7f5367f75c484dcd9cc64da1dd67d36a5e1'),
 }
 # the ocarinas' ground and turning versions as they were before (contents: the names and sha256 of the pack's
 # files, see contents): with the two new files and the one new setting taken out again, each must hold exactly
-# those files (two files more move the others inside the pack, so the pack's own bytes differ)
+# those files (two files more move the others inside the pack, so the pack's own bytes differ). The turning
+# versions' and UNCHANGED_TURN's are as main built them after the turning items' pick-up guard (PR #27)
 SHIELD = 'Obj_Shield_Deku'
 BEFORE = {
     'Obj_NX2_Ocarina_Fairy': '1387b3b309dc19f6a214ac06fc5167b597b3f16aa845312eadbcb2eb04ddc471',
     'Obj_NX2_Ocarina_Time': '19636fd420fde9cea22590effd0675ba5655f0c90a3f0b0ac97b2e6afa2c2124',
-    'Obj_NX2P_Ocarina_Fairy': 'aa960465bb43f7d0f2bf017c4467ceb2ccab4bb8d15f9cb002a50ae7d8835096',
-    'Obj_NX2P_Ocarina_Time': '2eca19e803fadada5116bdd7aefdc63696cef5dbb794c3834dd2bfc1ecf23c2b',
+    'Obj_NX2P_Ocarina_Fairy': '6f53804edbe011b40a93dbd028aa5f9a0088a15becb330d68e3fa543e73832f0',
+    'Obj_NX2P_Ocarina_Time': '517b012a23b97f9819e477edc79e0dd938be08b0320ff4939c587580ed4461f4',
 }
 SHARED_FLOWS = ('Dm_SY_GetInEvent', 'Dm_SY_Get', 'GetPouchContent', 'Dm_SY_Treasurebox', 'Dm_SY_TreasureboxSmall')
 
