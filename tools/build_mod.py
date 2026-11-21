@@ -22,6 +22,11 @@ age, "age" in its data, only has that age's), the map files are
 written back compressed with the same dictionary as the original, and the resource size table (RESTBL)
 gets the new sizes. Output: <out>/<name>/romfs/... mirroring the game's romfs, for Longshot's HOS_MODS.
 
+Ocarina chests (to test in game): a chest that holds an ocarina (alone, or as a level of a progressive pair) gets
+an opening event of our own, which runs the chest's usual opening event and then makes Link's ocarina, so it can
+be played at once (TBOX_SYNC_FLOW: a new flow file and two table rows; the game's shared chest flows are not
+changed).
+
 Checking chests: the game has a small chest that looks in Link's inventory (Obj_TBox_A_06, see CHECKING_CHEST).
 One of the game's own that gets an item becomes the ordinary small chest, so it always gives the placed item.
 Progressive pair (opt-in, a test for now): CHECK_ID=First>Second on a small chest makes it a checking chest that
@@ -398,6 +403,154 @@ def sync_steps(fc, template, next=None):
         next = fc.add_action(flow_copy_actor(fc, actor), action,
                              evfl.Params(params) if params is not None else None, next=next)
     return next
+
+
+# An ocarina from a chest (to test in game). A chest gives its item with the same inventory step as the game's
+# own ocarina cutscenes, but it hands that step the held-up version (Item_NX2_Ocarina_*): the inventory gets
+# the ocarina, Link's own ocarina (equipment) is only made at the next map load (in game 2026-11-19;
+# out/RESEARCH_ocarina_chest.md). The shared chest flows are not touched. A chest that holds an ocarina gets an
+# opening event of our own instead (its map setting GetEventName), the way the game itself wraps 36 chests:
+# SubEvent_GetIceArrow_OpenTBox is a flow of one entry point: Player_Event.EventTriggerParticipateEvent, then
+# EventSystemActor.EventTransition {EventName: Dm_SY_Treasurebox, IsWaitEnd: True, ...}, then its own steps.
+# Ours: the same two steps with the chest's usual event as EventName, then the three sync steps above. One
+# event (one entry point of one new flow file, two table rows) per usual event used:
+#   Event/EventFlow/NX2_TBoxSync.bfevfl                  entry point NX2_TBoxSync_<usual event>
+#   RSDB/EventSetting            row NX2_TBoxSync_<usual event>: the flow file and the entry point
+#   RSDB/GameAnalyzedEventInfo   row NX2_TBoxSync_<usual event>: ChildEventList [<usual event>]
+# both rows copied from SubEvent_GetIceArrow_OpenTBox's. A chest's usual event is its GetEventName, else the
+# default of its actor's blackboard (chest_usual_event). A checking chest (a progressive pair) runs the event
+# whichever level it gives: the sync then also follows the other level (it only matches Link's equipment to
+# the inventory).
+TBOX_SYNC_FLOW = 'NX2_TBoxSync'
+TBOX_SYNC_LIKE = 'SubEvent_GetIceArrow_OpenTBox'       # the game's event ours are copies of
+TBOX_SYNC_LIKE_FLOW = 'SubEvent_GetIceArrow'           # its flow file
+TBOX_SYNC_JOIN = ('Player_Event', 'EventTriggerParticipateEvent')
+TBOX_SYNC_RUN = ('EventSystemActor', 'EventTransition')
+TBOX_EVENT_KEY = 'GetEventName'
+EVENT_SETTING = 'RSDB/EventSetting.Product.111.rstbl.byml'
+
+
+def flow_path(name):
+    return 'Event/EventFlow/%s.bfevfl' % name
+
+
+def tbox_sync_event(usual):
+    """the name of our opening event (and of its entry point) around the chest's usual event"""
+    return '%s_%s' % (TBOX_SYNC_FLOW, usual)
+
+
+def chest_usual_event(read, gyaml):
+    """the opening event a chest actor runs when its map placement names none: the GetEventName of its
+    blackboard (the first table that has it, the actor's own before those it inherits). read(path) -> file"""
+    try:
+        files = sarc.Sarc.read(read(ground_items.pack_path(gyaml))).files
+    except FileNotFoundError:
+        raise SystemExit('%s: no such chest actor in the game: its usual opening event is not known' % gyaml)
+    ref = ground_items.resolved_components(files, gyaml).get('BlackboardRef')
+    info = ground_items._ref_path(ref) if ref else None
+    while info and info in files:
+        root = byml.loads(files[info]).root
+        for t in root.get('BlackboardParamTables', []):
+            table = ground_items._parent_path({'$parent': str(t)})
+            if table not in files:
+                continue
+            for x in byml.loads(files[table]).root.get('BlackboardParamStringArray', []):
+                if x.get('BBKey') == TBOX_EVENT_KEY and x.get('InitValConverted'):
+                    return str(x['InitValConverted'])
+        info = ground_items._parent_path(root)
+    raise SystemExit('%s: no %s in its blackboard: its usual opening event is not known' % (gyaml, TBOX_EVENT_KEY))
+
+
+def tbox_sync_template(fc):
+    """the two steps the game's own wrapper starts with (TBOX_SYNC_LIKE): Link joins the event, then the chest's
+    usual event is run and waited for: [(actor, action name, parameters)]"""
+    start = {p.name: p.main for p in fc.entry_points}.get(TBOX_SYNC_LIKE)
+    join = fc.events[start] if start is not None else None
+    run = fc.events[join.next] if join is not None and join.next is not None else None
+    steps = [(fc.actors[e.actor], _action_name(fc, e), e.params) for e in (join, run)
+             if e is not None and e.type == 'action']
+    if [(a.name, n) for a, n, _ in steps] != [TBOX_SYNC_JOIN, TBOX_SYNC_RUN] or steps[0][2] is not None \
+            or not isinstance(steps[1][2], dict) or steps[1][2].get('IsWaitEnd') is not True \
+            or not isinstance(steps[1][2].get('EventName'), str):
+        raise SystemExit('%s: does not start by joining Link and running a chest event as expected (game files '
+                         'differ from what this was made for)' % TBOX_SYNC_LIKE)
+    return steps
+
+
+def tbox_sync_flow(template, sync, usuals, version):
+    """our flow: for each usual event one entry point: join, run the usual event and wait for its end
+    (`template`: tbox_sync_template), then the sync steps (`sync`: sync_template)"""
+    fc = evfl.Flowchart(TBOX_SYNC_FLOW)
+    ef = evfl.EventFlow(TBOX_SYNC_FLOW, [fc])
+    ef.version = version
+    (join_actor, join, _), (run_actor, run, run_params) = template
+    for usual in sorted(usuals):
+        nxt = sync_steps(fc, sync)
+        params = evfl.Params(run_params)
+        params['EventName'] = usual
+        nxt = fc.add_action(flow_copy_actor(fc, run_actor), run, params, next=nxt)
+        nxt = fc.add_action(flow_copy_actor(fc, join_actor), join, None, next=nxt)
+        fc.add_entry_point(tbox_sync_event(usual), nxt)
+    return ef
+
+
+def tbox_sync_read(data):
+    """{entry point: [(actor, action, parameters)]} of our flow as written: each entry point's steps in order"""
+    fc = evfl.loads(data).flowchart
+    out = {}
+    for p in fc.entry_points:
+        steps, i = [], p.main
+        while i is not None:
+            e = fc.events[i]
+            if e.type != 'action' or len(steps) > len(fc.events):
+                raise SystemExit('read-back: %s: %s is not a plain line of steps' % (TBOX_SYNC_FLOW, p.name))
+            steps.append((fc.actors[e.actor].name, _action_name(fc, e),
+                          dict(e.params) if isinstance(e.params, dict) else e.params))
+            i = e.next
+        out[p.name] = steps
+    return out
+
+
+def tbox_sync_steps(template, sync, usual):
+    """what an entry point of our flow must read back as (tbox_sync_read) for this usual event"""
+    (join_actor, join, _), (run_actor, run, run_params) = template
+    return [(join_actor.name, join, None), (run_actor.name, run, dict(run_params, EventName=usual))] \
+        + [(a.name, n, dict(p) if isinstance(p, dict) else p) for a, n, p in sync]
+
+
+def tbox_sync_rows(settings, infos, usuals):
+    """the two table rows of each of our events, copied from the game's wrapper's (TBOX_SYNC_LIKE):
+    {'EventSetting': [rows], 'GameAnalyzedEventInfo': [rows]}. The usual event must be an event that runs no
+    other event itself (no ChildEventList: the plain chest events)."""
+    setting = {r['__RowId']: r for r in settings}
+    info = {r['__RowId']: r for r in infos}
+    like_s, like_i = setting.get(TBOX_SYNC_LIKE), info.get(TBOX_SYNC_LIKE)
+    flow = lambda name: 'Work/Event/EventFlow/%s.evfc' % name   # noqa: E731
+    if like_s is None or like_i is None or like_s.get('EntryPointName') != TBOX_SYNC_LIKE \
+            or like_s.get('FlowchartFileName') != flow(TBOX_SYNC_LIKE_FLOW) \
+            or not isinstance(like_i.get('ChildEventList'), list) or len(like_i['ChildEventList']) != 1:
+        raise SystemExit('%s: its rows in EventSetting and GameAnalyzedEventInfo are not as expected (game files '
+                         'differ from what this was made for)' % TBOX_SYNC_LIKE)
+    rows = {'EventSetting': [], 'GameAnalyzedEventInfo': []}
+    for usual in sorted(usuals):
+        name = tbox_sync_event(usual)
+        if usual not in setting or usual not in info:
+            raise SystemExit('%s: not an event of the game (no row in EventSetting or GameAnalyzedEventInfo)' % usual)
+        if info[usual].get('ChildEventList'):
+            raise SystemExit('%s: runs other events itself (%s): an opening event of our own around it is not '
+                             'supported yet' % (usual, ', '.join(str(x) for x in info[usual]['ChildEventList'])))
+        if name in setting or name in info:
+            raise SystemExit('%s already exists in the game' % name)
+        s = type(like_s)(like_s)
+        s['__RowId'] = s['EntryPointName'] = name
+        s['FlowchartFileName'] = flow(TBOX_SYNC_FLOW)
+        i = type(like_i)(like_i)
+        i['__RowId'] = name
+        i['ChildEventList'] = type(like_i['ChildEventList'])([usual])
+        i.pop('SubFlowList', None)                      # ours runs no other flow file
+        rows['EventSetting'].append(s)
+        rows['GameAnalyzedEventInfo'].append(i)
+    return rows
 
 
 def direct_get_allowed(rows):
@@ -991,7 +1144,7 @@ def scrub_messages(out, romfs, lines):
         out.write(path, src, old, new)
 
 
-def patch_file(data, changes, checking=None, three=None):
+def patch_file(data, changes, checking=None, three=None, wrap=None):
     """change what the actors with these hashes give: chests and pots through their Drop__DropActor (chests'
     special opening events handled by CHEST_EVENTS), freestanding items by their actor type (Gyaml);
     checking: {hash: (item to look for, item given when Link has it)}: that small chest becomes the game's
@@ -999,9 +1152,12 @@ def patch_file(data, changes, checking=None, three=None):
     (PLAIN_CHEST) without its check settings, so it always gives the placed item;
     three: {hash: name of a three-level family}: that chest (one of `checking`) becomes the family's own chest
     instead (checking_chest), with the same settings;
+    wrap: {hash: f}: that chest gets an opening event of our own, GetEventName = f(the chest's actor, the event
+    its placement names or None): for chests that hold an ocarina (tbox_sync_event);
     returns (new data, {hash: old item}, {hash: new Dynamic as intended})"""
     checking = checking or {}
     three = three or {}
+    wrap = wrap or {}
     doc = byml.loads(data)
     found, intended = {}, {}
     for a in doc.root.get('Actors', []):
@@ -1050,6 +1206,8 @@ def patch_file(data, changes, checking=None, three=None):
                 a['Gyaml'] = PLAIN_CHEST[a['Gyaml']]
                 for k in CHECK_SETTINGS:
                     dyn.pop(k, None)
+            if h in wrap:
+                dyn[TBOX_EVENT_KEY] = wrap[h](a['Gyaml'], dyn.get(TBOX_EVENT_KEY))
             a['Dynamic'] = dyn
             intended[h] = dict(dyn)
     missing = set(changes) - set(found)
@@ -2266,6 +2424,22 @@ def main(argv):
         raise SystemExit('%s: not something a Gold Skulltula can drop (no version of it can be made from the '
                          'token)' % item)
 
+    # chests that hold an ocarina (alone or as a level of a pair): an opening event of our own around the
+    # chest's usual one, which makes Link's ocarina after it (TBOX_SYNC_FLOW)
+    tbox_usuals = {}                                   # usual opening event -> our event around it
+    tbox_deals = {}                                    # item -> PouchSpecialDeal (read once)
+
+    def holds_ocarina(cid):
+        if not tbox_deals:
+            tbox_deals.update({r['__RowId']: r.get('PouchSpecialDeal') for r in byml.loads(plain(
+                ground_items.table_path('PouchActorInfo'))).root})
+        levels = steps.get(cid) or triples.get(cid) or tuple(i for c, i in assignments if c == cid)
+        return any(tbox_deals.get(x) == SYNC_DEAL for x in levels)
+
+    def tbox_event(gyaml, event):
+        usual = event if event is not None else chest_usual_event(plain, gyaml)
+        return tbox_usuals.setdefault(usual, tbox_sync_event(usual))
+
     def get_plan(items):
         """how gifts, scrubs and song cutscenes give these items: (the items Link can't hold up in
         Dm_SY_GetInEvent: given with the get window, {ocarina: the sync steps to run after its get})"""
@@ -2354,7 +2528,8 @@ def main(argv):
                  if cid in triples}
         checking.update({h: pair_check(triples[cid][:2], in_chest) for h, (cid, _, _, kind) in changes.items()
                          if cid in triples})
-        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three)
+        wrap = {h: tbox_event for h, (cid, _, _, kind) in changes.items() if kind == 'chest' and holds_ocarina(cid)}
+        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three, wrap)
         for h, (cid, item, expected_old, kind) in changes.items():
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
@@ -2402,10 +2577,44 @@ def main(argv):
                               'for %s removed: it always gives the placed item)'
                               % (changes[h][0], was, want['Gyaml'],
                                  (before[h].get('Dynamic') or {}).get('Drop__CheckActor')))
+                if h in wrap:
+                    # an ocarina chest: our opening event around the one the chest would run
+                    usual = dyn.get(TBOX_EVENT_KEY) or chest_usual_event(plain, want['Gyaml'])
+                    dyn[TBOX_EVENT_KEY] = tbox_sync_event(usual)
+                    print('%-18s   holds an ocarina: opening event %s (runs %s, then makes Link\'s ocarina)'
+                          % (changes[h][0], dyn[TBOX_EVENT_KEY], usual))
                 want['Dynamic'] = dyn
             if act != want:
                 raise SystemExit('read-back: actor %s (%s) differs from what was intended' % (h, act['Gyaml']))
         out.write(path, src, old, new)
+
+    # ocarina chests: the flow of our opening events (one entry point per usual event used) and their two table
+    # rows each; read back: every entry point is join, the usual event, the three sync steps, nothing else
+    if tbox_usuals:
+        like = flow_path(TBOX_SYNC_LIKE_FLOW)
+        like_data = plain(like)
+        like_ef = evfl.loads(like_data)
+        template = tbox_sync_template(like_ef.flowchart)
+        sync = sync_template(evfl.loads(plain(SYNC_FLOW)).flowchart)
+        try:
+            data = evfl.dumps_checked(tbox_sync_flow(template, sync, tbox_usuals, like_ef.version))
+        except ValueError as e:
+            raise SystemExit(str(e))
+        if tbox_sync_read(data) != {name: tbox_sync_steps(template, sync, usual)
+                                    for usual, name in tbox_usuals.items()}:
+            raise SystemExit('read-back: %s differs from what was intended' % flow_path(TBOX_SYNC_FLOW))
+        out.write_new(flow_path(TBOX_SYNC_FLOW), data, like)
+        out.add(flow_path(TBOX_SYNC_FLOW), data, like, like_data)
+        rows = tbox_sync_rows(byml.loads(plain(EVENT_SETTING)).root, byml.loads(plain(EVENT_INFO)).root,
+                              tbox_usuals)
+        for t, path in (('EventSetting', EVENT_SETTING), ('GameAnalyzedEventInfo', EVENT_INFO)):
+            src, old = out.read(path)
+            out.write(path, src, old, ground_items.add_rows(old, rows[t]))
+        for usual, name in sorted(tbox_usuals.items()):
+            said = ' -> '.join('%s.%s%s' % (a, n, ' ' + usual if n == TBOX_SYNC_RUN[1] else '')
+                               for a, n, _ in tbox_sync_steps(template, sync, usual))
+            print('%-18s %s: entry point and event %s: %s' % ('ocarina chests', flow_path(TBOX_SYNC_FLOW), name, said))
+        print('%-18s %d rows added to %s and %s' % ('ocarina chests', len(tbox_usuals), EVENT_SETTING, EVENT_INFO))
 
     # songs: the cutscene only hands over the item
     for path, (cid, item, song) in sorted(plan_songs(world, assignments).items()):
@@ -2652,9 +2861,7 @@ def main(argv):
         out.add(path, pack, tpl_pack_path, tpl_pack)
         tpl_files = sarc.Sarc.read(tpl_pack).files
         for inner, data in new_inner.items():
-            like = (ground_items.anim_param_path(tpl_name) if 'AnimationParam' in inner
-                    else ground_items.pouch_param_path(tpl_name) if 'PouchContentParam' in inner
-                    else ground_items.ap_path(tpl_name))
+            like = ground_items.new_file_like(inner, tpl_name)
             out.add(inner, data, like, tpl_files[like])
         for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
             if out.table.get(inner) is None:

@@ -445,10 +445,7 @@ def build(family, level, read_pack, read_table_rows, model_exists=lambda project
     tpl = sarc.Sarc.read(read_pack(pack_path(tpl_name))).files
     new_inner = {}
     for p, d in ground_new.items():                # as tools/build_mod.py does for a ground version
-        like = (ground_items.anim_param_path(tpl_name) if 'AnimationParam' in p
-                else ground_items.pouch_param_path(tpl_name) if 'PouchContentParam' in p
-                else ap_path(tpl_name))
-        new_inner[p] = (d, like)
+        new_inner[p] = (d, ground_items.new_file_like(p, tpl_name))
 
     # the AI: the ground items' own, with the turning branch
     base_info = ai_info_path(BASE_AI)

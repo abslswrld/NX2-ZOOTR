@@ -2,6 +2,83 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-20
+
+### An ocarina from a chest or from the ground can be played at once (branch `claude/ocarina-fix`)
+The problem: an ocarina from a chest, a pot or the ground went into the inventory, but Link could not play it
+until the area was loaded again. Two fixes, one for chests and one for the ground. **Neither is tested in game
+yet.** The reasons and the other options are in `out/RESEARCH_ocarina_chest.md`.
+- **Chests: an opening event of our own.**
+  - A chest that holds an ocarina now names an opening event of ours (`GetEventName` in the map). Our event
+    does five steps: Link joins, the chest's usual opening event runs to its end, one frame passes, the game
+    matches Link's equipment to his inventory, and the game waits until his equipment is made.
+  - This is how the game itself wraps 36 of its chests (`SubEvent_GetIceArrow_OpenTBox` is the one copied). The
+    last three steps are the game's own, from the Dream world's boss fights. They already ran without harm
+    after the rock-circle Kokiri's ocarina.
+  - The usual event is read from the game, not assumed: the event the chest's placement names, else the one in
+    the chest's own files. Small chests: `Dm_SY_TreasureboxSmall`. Big chests: `Dm_SY_Treasurebox`. Mido's
+    chests: `KokiriForest_TreasureBox_NaviChatOff`. There is one event of ours per usual event used.
+  - It covers an ocarina alone, and a Fairy Ocarina > Ocarina of Time pair (the checking chest). A pair's chest
+    runs our event whichever ocarina it gives.
+  - New in the mod: one flow file (`Event/EventFlow/NX2_TBoxSync`), and one row per event in two tables
+    (`RSDB/EventSetting`, `RSDB/GameAnalyzedEventInfo`). The rows are copies of the Ice Arrow chest's rows with
+    our names.
+  - **Not changed:** the game's shared flows (`Dm_SY_Treasurebox`, `Dm_SY_TreasureboxSmall`, `GetPouchContent`,
+    `Dm_SY_Get`, `Dm_SY_GetInEvent`). Chests without an ocarina are as before.
+  - Refused for now: a usual event that itself runs other events, and the three-level chest (no family with
+    an ocarina exists).
+- **Ground: the ocarina's own settings on our ground versions (an experiment).**
+  - A pick-up from the ground has no event of its own to add steps to, so the chest fix cannot be used there.
+  - In the game, every actor that stands for an ocarina and makes it playable carries the ocarina's settings
+    (`OcarinaParam`, in its parameter table). The menu's `Pouch_Ocarina_Fairy` does. Ours did not.
+  - Now the ground version (`Obj_NX2_Ocarina_Fairy`, `_Time`) and the turning version used by pairs
+    (`Obj_NX2P_Ocarina_Fairy`, `_Time`) get a parameter table of their own. It inherits the ground item base's
+    table and names the ocarina's own settings file (the Fairy Ocarina's or the Ocarina of Time's). That file
+    is copied into the pack from the ocarina's own pack, as the menu's version has it.
+  - It lives in the shared builders (`tools/ground_items.py`, used by `tools/turn_items.py`), so it also covers
+    an ocarina from a pot, and pairs on rocks and bushes once that branch is merged.
+  - Whether this is what makes the ocarina playable is a guess: that part is in the game's code.
+  - **Not changed:** every other ground and turning item (byte for byte), the held-up versions a chest shows,
+    and what a Gold Skulltula drops.
+- **Tests:** new `tests/ocarina_fix_check.py` (in `run_tests.bat`), 28 lines. It builds a mod into a temporary
+  folder and reads it back: the flow has the five steps for each usual event and nothing else; both tables
+  have our rows, sorted, and every other row as it was; the size table has the new files; only the chests
+  that hold an ocarina name our event (plain small, big, Mido's, pairs), every other actor of the maps names
+  what it named; the ground and turning ocarinas carry the settings, and without them every file of their
+  packs is as before; other ground items, turning items, held-up versions and Gold Skulltula drops have the
+  same checksums as before. ALL OK, and the rest of `run_tests.bat` passes.
+- **To test in game:** a Fairy Ocarina in one of Mido's chests, and one on the ground or from a rock. Play it
+  straight after each, before any door.
+- **Risks to watch for:** a chest with an ocarina that does not open, or the game stopping at it (a wrong
+  row or flow); the game treating the ocarina on the ground as one in Link's hands (odd looks or a crash when
+  the item appears).
+- **In game (2026-11-20, combined test of the pairs, ocarina fix, Light Arrow and bigger bags branches together):**
+  - **Chest (option 1): works.** Mido's chest gave the Ocarina of Time after the rock's Fairy Ocarina (run 1), and
+    the Fairy Ocarina first (run 2); both played straight away, inside the house, before any door;
+  - **Ground (option 3): does not work.** The Fairy Ocarina from the rock could not be played straight away (run 1).
+    In run 2 the Ocarina of Time from the rock went into the inventory and the menu, but Link still played the Fairy
+    Ocarina, even after a change of scene.
+- **Ground, second try: the real ocarina named as Link's equipment** (replaces the first try, which is taken out).
+  - Why the first try failed (read in the game's code, `out/RESEARCH_ocarina_ground.md`): when an ocarina is
+    added, the game saves it as the one Link plays, and asks Link to make his ocarina under the name of the item
+    it was handed. Ours handed over the ground item's own name, which is not a piece of equipment, so nothing
+    was made. The ocarina's settings (the first try) are never read there.
+  - The game's own ground Deku Shield has the same problem and solves it in two places: its row in
+    `PouchActorInfo` names Link's shield (`AdultEquipment`, `ChildEquipment`), and its parameter table names it
+    too (`PlayerEquipmentActor`, a small file in its pack).
+  - Now the ground and turning ocarinas do the same, naming the real ocarina (the Fairy Ocarina or the Ocarina
+    of Time). Their parameter table is the ground shield's with the names changed. The ocarina settings file
+    and the first try's table are gone.
+  - Chests are not changed: they keep the opening event, which works.
+  - **Not yet tested in game.** If it fails, it should fail as before (the ocarina only plays after a load).
+  - Tests: `tests/ocarina_fix_check.py` now checks the table, the equipment file, the two row fields, that the
+    ground shield names Link's shield the same way, and that nothing else in the packs changed. ALL OK.
+- **In game (2026-11-20, retest of the second try, same build with the pairs branch and the Longshot guard):**
+  - **Ground: works.** Rock first: the Fairy Ocarina played straight away, before any door. Chest first, then
+    the rock: Link played the Ocarina of Time straight away (the case that failed before).
+  - **Chest while Link already has a working ocarina: works.** After the rock's Fairy Ocarina, Mido's chest gave
+    the Ocarina of Time, and Link played the Ocarina of Time straight away, inside the house.
+
 ## 2026-11-19
 
 ### More items lie on the ground, not in it (branch `claude/ground-lift-all`)
