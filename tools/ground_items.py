@@ -39,6 +39,19 @@ none (the game never puts it on the ground): in game (2026-11-16) the ground oca
 could not be played until a reload. The ground version's settings name the item (`PouchActor`), as the game's
 ground items do (to test).
 
+An ocarina on the ground (to test in game). With `PouchActor` the ocarina goes into the inventory, but Link's own
+ocarina (a piece of equipment) is not made: it played only after a map load (in game 2026-11-19), and one picked
+up when Link already had the other ocarina never became the one he plays (in game 2026-11-20). Read in the game's
+code (out/RESEARCH_ocarina_ground.md): every ocarina add asks Link to make his ocarina under the name of the actor
+handed to the add, or the equipment its `PouchActorInfo` row names (`ChildEquipment` / `AdultEquipment`). Ours
+named none, so Link was asked to make the ground version itself, which is not equipment. The game's own ground
+shield (`Obj_Shield_Deku`, the ground versions' template) names Link's shield in both: the row fields, and the
+component `PlayerEquipmentActor` of its parameter table (`Adult` / `Child`, a file in its pack). So the ground and
+turning versions of an ocarina get the same, naming the real ocarina (OCARINA_VERSIONS, equipment_files). An
+earlier try (the ocarina's own `OcarinaParam` in the table) changed nothing in game and is gone: nothing on the
+add path reads it. Held-up versions (chests) and Gold Skulltula drops are left as they were: a chest's ocarina is
+handled by its opening event (tools/build_mod.py, TBOX_SYNC_FLOW).
+
 Held-up versions (`Item_NX2_<x>`, to test): what a chest shows when it gives an item. The items that show
 (Boomerang, Bottle...) are item event actors (parent `Item_EventObject_Base`) with the get-demo animation
 settings (`ASInfo: Item_GetDemo`, `AS/Item_Common`, the `Item_Common_Animation` animations). The ocarinas'
@@ -622,6 +635,86 @@ def can_hold_up(read, item):
     return GET_DEMO in data
 
 
+# An ocarina's ground and turning versions name the real ocarina as the equipment Link makes (see "An ocarina on
+# the ground" in the notes at the top), as the ground shield names his shield. The ocarinas are known by their
+# settings (OcarinaParam in their parameter table); the component and row fields that name the equipment
+OCARINA_PARAM = 'OcarinaParam'
+OCARINA_VERSIONS = ('ground', 'turn')
+EQUIP_COMPONENT = 'PlayerEquipmentActor'
+EQUIP_ROW = ('AdultEquipment', 'ChildEquipment')
+
+
+def table_param_path(actor):
+    return 'GameParameter/GameParameterTable/%s.engine__actor__GameParameterTable.bgyml' % actor
+
+
+def equip_param_path(actor):
+    return 'GameParameter/PlayerEquipmentActor/%s.game__actor__PlayerEquipmentActor.bgyml' % actor
+
+
+def ocarina_param(files, actor):
+    """the ocarina settings file (Game/OcarinaParam/...) an actor's parameter table names, its own or one it
+    inherits from, as far as the pack `files` has them; None when it names none (not an ocarina)"""
+    ref = resolved_components(files, actor).get('GameParameterTableRef')
+    path = _ref_path(ref) if ref else None
+    while path and path in files:
+        root = byml.loads(files[path]).root
+        named = root.get('Components', {}).get(OCARINA_PARAM)
+        if named:
+            return _ref_path(named)
+        path = _parent_path(root)
+    return None
+
+
+def equipment_files(tpl_files, template, base_table, name, equipment):
+    """{path: data} of the two files that make `name` name `equipment` (an actor parameter path, Work/...gyml) as
+    Link's equipment: its parameter table and the PlayerEquipmentActor file it names. Both are the template's own
+    (the ground shield's, which name Link's shield) with the names changed; the table keeps the item base's table
+    (`base_table`) as $parent"""
+    t_path, e_path = table_param_path(template), equip_param_path(template)
+    if t_path not in tpl_files or e_path not in tpl_files:
+        raise SystemExit('%s: its parameter table or %s file not found (game files differ from what this was made '
+                         'for)' % (template, EQUIP_COMPONENT))
+    tdoc, edoc = byml.loads(tpl_files[t_path]), byml.loads(tpl_files[e_path])
+    comp = tdoc.root.get('Components', {})
+    if _parent_path(tdoc.root) != base_table or list(comp) != [EQUIP_COMPONENT] \
+            or _ref_path(comp[EQUIP_COMPONENT]) != e_path or sorted(edoc.root) != ['Adult', 'Child']:
+        raise SystemExit('%s: its parameter table or %s file not as expected (game files differ from what this was '
+                         'made for)' % (template, EQUIP_COMPONENT))
+    tdoc.root = type(tdoc.root)(tdoc.root)
+    comp = type(comp)()
+    comp[EQUIP_COMPONENT] = '?' + equip_param_path(name)
+    tdoc.root['Components'] = comp
+    edoc.root = type(edoc.root)(edoc.root)
+    edoc.root['Adult'] = edoc.root['Child'] = equipment
+    return {table_param_path(name): byml.dumps(tdoc), equip_param_path(name): byml.dumps(edoc)}
+
+
+def equipment_of(files, actor):
+    """the equipment (Adult, Child) an actor's parameter table names, as far as the pack `files` has it; None
+    when it names none"""
+    ref = resolved_components(files, actor).get('GameParameterTableRef')
+    path = _ref_path(ref) if ref else None
+    while path and path in files:
+        root = byml.loads(files[path]).root
+        named = root.get('Components', {}).get(EQUIP_COMPONENT)
+        if named and _ref_path(named) in files:
+            e = byml.loads(files[_ref_path(named)]).root
+            return e.get('Adult'), e.get('Child')
+        path = _parent_path(root)
+    return None
+
+
+def new_file_like(inner, tpl_name):
+    """the template's file of the same kind as `inner`, a file new to the game in a version's pack: what its
+    size entry is worked out from"""
+    return (anim_param_path(tpl_name) if 'AnimationParam' in inner
+            else pouch_param_path(tpl_name) if 'PouchContentParam' in inner
+            else table_param_path(tpl_name) if 'GameParameterTable' in inner
+            else equip_param_path(tpl_name) if EQUIP_COMPONENT in inner
+            else ap_path(tpl_name))
+
+
 def pouch_param_path(actor):
     return 'Component/PouchContentParam/%s.game__component__PouchContentParam.bgyml' % actor
 
@@ -762,6 +855,17 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         raise SystemExit('read-back: item settings parent of %s' % name)
     for r in TEMPLATE_ONLY:                         # as Obj_Item_Base
         comp.pop(r, None)
+    equipment = None
+    if version in OCARINA_VERSIONS and ocarina_param(itm.files, item):
+        # an ocarina: names the real ocarina as the equipment Link makes, as the ground shield names his shield
+        # (a parameter table of its own over the item base's, and the PlayerEquipmentActor file it names)
+        equipment = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
+        base_table = _ref_path(byml.loads(tpl.files[_parent_path(tpl_ap.root)]).root['Components'][
+            'GameParameterTableRef'])
+        if 'GameParameterTableRef' in comp or base_table not in files:
+            raise SystemExit('%s: the parameter table of the item base not found as expected' % item)
+        files.update(equipment_files(tpl.files, TEMPLATE, base_table, name, equipment))
+        comp['GameParameterTableRef'] = '?' + table_param_path(name)
     if version == 'token':
         # the spin: the token's AI plays no animation, its animation settings (ASInfo) start Rotate_Obj by
         # themselves; ground items are spun by their AI instead (DropItem / Obj_Heart_Piece: OneShotASPlay
@@ -798,6 +902,8 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
     doc.root = type(tpl_ap.root)(tpl_ap.root)
     doc.root['Components'] = comp
     files[ap_path(name)] = byml.dumps(doc)
+    if equipment and equipment_of(files, name) != (equipment, equipment):
+        raise SystemExit('read-back: equipment named by %s' % name)
     out = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))      # the shield pack's own layout settings
     out.files = files
     out.align = {p: (tpl.align.get(p) or itm.align.get(p) or 8) for p in files}
@@ -837,6 +943,11 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         raise SystemExit('%s has no row in PouchActorInfo' % item)
     pa = type(tables['PouchActorInfo'][item])(tables['PouchActorInfo'][item])
     pa['__RowId'] = name
+    if equipment:
+        if any(k in pa for k in EQUIP_ROW):
+            raise SystemExit('%s: its PouchActorInfo row names equipment already' % item)
+        for k in EQUIP_ROW:                         # as the ground shield's row
+            pa[k] = type(tables['PouchActorInfo'][TEMPLATE][k])(equipment)
     rows['PouchActorInfo'] = pa
 
     new_inner = {p: d for p, d in files.items() if p not in tpl.files and p not in itm.files}

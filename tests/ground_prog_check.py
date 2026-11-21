@@ -63,6 +63,15 @@ def shape(n, children=None):
             frozenset(links), len(n.preconditions))
 
 
+def equip_row(item):
+    """the row fields an ocarina's ground and turning versions add: the real ocarina named as Link's equipment
+    (tools/ground_items.py, "An ocarina on the ground"); none for other items"""
+    if item not in ('Item_Ocarina_Fairy', 'Item_Ocarina_Time'):
+        return {}
+    path = 'Work/Actor/%s.engine__actor__ActorParam.gyml' % item
+    return {k: path for k in ground_items.EQUIP_ROW}
+
+
 def main(romfs):
     d = zstd.Dictionaries.from_pack(open(os.path.join(romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
     plain = lambda path: zstd.decompress(open(os.path.join(romfs, *path.split('/')) + '.zs', 'rb').read(), d)  # noqa: E731
@@ -210,7 +219,7 @@ def main(romfs):
                 and a['FmdbName'] == rows['ActorInfo'][item]['FmdbName'] \
                 and int(a['InstanceHeapSize']) > int(rows['ActorInfo'][ground_items.TEMPLATE]['InstanceHeapSize']) \
                 and dict(g, __RowId=ground_items.TEMPLATE) == dict(rows['GameActorInfo'][ground_items.TEMPLATE]) \
-                and dict(p, __RowId=item) == dict(rows['PouchActorInfo'][item])
+                and dict(p, __RowId=item) == dict(rows['PouchActorInfo'][item], **equip_row(item))
             # how high it lies (ground_items.GROUND_LIFT): a lifted copy of the level's own animation project,
             # only its name and the ground pose's height changed; the lowest vertex 0.05 above the ground
             anim = byml.loads(files[ground_items._ref_path(comp['AnimationRef'])]).root['AnimationResources']
@@ -263,6 +272,11 @@ def main(romfs):
                 kind = sizes.bgyml_type(inner)
                 if inner in new_inner and kind in DROP_ENTRY:
                     size_ok &= e == sizes.size32(len(x)) + DROP_ENTRY[kind]
+                elif inner in new_inner and ground_items.EQUIP_COMPONENT in inner:
+                    # an ocarina's equipment file (no rule for its kind): the ground shield's headroom, as built
+                    eq_like = new_inner[inner][1]
+                    size_ok &= e == max(out.table.get(eq_like) - len(like_files[eq_like]) + len(x),
+                                        sizes.entry(inner, x, out.table.get(eq_like), like_files[eq_like]))
                 elif inner in new_inner:
                     size_ok &= need is not None
                 if family == PAIR and inner in new_inner:

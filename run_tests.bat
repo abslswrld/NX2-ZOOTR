@@ -20,6 +20,9 @@ echo.
 echo === Checking chest check ===
 %PY% tests\chest_check.py "%ROMFS%"
 echo.
+echo === Ocarina fix check ===
+%PY% tests\ocarina_fix_check.py "%ROMFS%"
+echo.
 echo === Turning items check ===
 %PY% tests\ground_prog_check.py "%ROMFS%"
 echo.

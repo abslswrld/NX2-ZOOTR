@@ -358,7 +358,8 @@ def main(romfs):
         new_files = files - files0
         want_files = {f + '.zs' for f in (CHILD_MAP, ADULT_MAP, build_mod.SCRUB_FLOW) + SCRUB_MAPS} | mals \
             | {ground_items.pack_path(n) + '.zs' for n in turns + held} \
-            | {ground_items.table_path(t) + '.zs' for t in ground_items.TABLES}
+            | {ground_items.table_path(t) + '.zs' for t in ground_items.TABLES}             | {f + '.zs' for f in (build_mod.flow_path(build_mod.TBOX_SYNC_FLOW), build_mod.EVENT_SETTING,
+                                   build_mod.EVENT_INFO)}
         anims = {f for f in new_files - want_files if f.startswith('Model/NX2G') and f.endswith('.anim.bfres.zs')}
         good &= check('whole build (two rocks, two bushes, the scrub and a chest): beside the fixes\' files the '
                       'maps, the scrub flow and lines, 4 turning items, 2 held-up ocarinas, their rows, %d lifted '
