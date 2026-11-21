@@ -50,6 +50,23 @@ ARROW_PACKS = {('Item_Arrow_Fire', 'ground'): '710d4ee27bd1b9e89414cec59b673e10b
                ('Item_Arrow_Ice', 'ground'): '21621bdc06aa8284074b4b624409612a59b9dfcf404d7e206345489b803d44f9',
                ('Item_Arrow_Ice', 'token'): 'dba673b0ec61389b72705fbb6b5174af918eb95620c9b9bed4b94708e97db66a'}
 LIGHT, LIGHT_LIKE = 'Item_Arrow_Light', 'Item_Arrow_Fire'
+# the items that name no item settings (PouchContentRef) themselves: theirs are the ones of the actor they inherit
+# from. {item: (the actor it inherits from, the item settings it has from the small one, its own count)}
+KEY, BOMB = 'KeyItemDefault', 'BombBag'
+INHERITS = {'Item_BombBag_Medium': ('Item_BombBag_Small', BOMB, 30),
+            'Item_BombBag_Large': ('Item_BombBag_Medium', BOMB, 40),
+            'Item_BulletBag_Medium': ('Item_BulletBag_Small', KEY, 40),
+            'Item_BulletBag_Large': ('Item_BulletBag_Medium', KEY, 50),
+            'Item_NutBag_Medium': ('Item_NutBag_Small', KEY, 30),
+            'Item_NutBag_Large': ('Item_NutBag_Medium', KEY, 40),
+            'Item_Quiver_Medium': ('Item_Quiver_Small', KEY, 40),
+            'Item_Quiver_Large': ('Item_Quiver_Medium', KEY, 50),
+            'Item_StickBag_Medium': ('Item_StickBag_Small', KEY, 20),
+            'Item_StickBag_Large': ('Item_StickBag_Medium', KEY, 30),
+            'Item_Wallet_Medium': ('Item_Wallet_Small', KEY, 500),
+            'Item_Wallet_Large': ('Item_Wallet_Medium', KEY, 1000)}
+# actors that inherit item settings in other ways (not built on the item base): still no version of them
+STILL_REFUSED = ('Armor_Child_Mask_Bunny', 'Obj_Spirit_PoeFlat', 'Armor_Adult_Default_Head')
 
 
 def check(name, ok):
@@ -121,8 +138,8 @@ def main(romfs):
             try:
                 name, pack, _, new_rows, loose = ground_items.build(item, plain, table_rows, has_model, version)
             except SystemExit:
-                continue                               # (some items have no ground version yet: their settings
-            versions += 1                              # are in the actor they inherit from)
+                continue                               # (the small seed bag and quiver have no animation
+            versions += 1                              # settings: only the token version)
             one &= len(loose) == 1
             (path, (x, like, old_h, new_h, own_path)), = loose.items()
             game, made_of = plain(own_path), plain(like)
@@ -268,6 +285,84 @@ def main(romfs):
         for version in ('ground', 'token'):
             none &= not ground_items.build(item, plain, table_rows, has_model, version)[4]
     good &= check('items not listed get no copy (%s)' % ', '.join(NOT_LIFTED), none)
+
+    # items whose item settings are the ones of the actor they inherit from (the medium and large bags, quivers
+    # and wallets): a ground version that gives the item itself
+    pouch_rows = {r['__RowId']: r for r in table_rows('PouchActorInfo')}
+    ref, base = 'PouchContentRef', ground_items.ap_path(ground_items.ITEM_BASE)
+    gyml = lambda path: 'Work/' + path[:-len('.bgyml')] + '.gyml'   # noqa: E731
+    found, parents, counts, gives, lifted, untouched = [], True, True, True, True, True
+    for item in sorted(pouch_rows):
+        if not os.path.exists(os.path.join(romfs, *ground_items.pack_path(item).split('/')) + '.zs'):
+            continue
+        files = sarc.Sarc.read(plain(ground_items.pack_path(item))).files
+        own = byml.loads(files[ground_items.ap_path(item)]).root
+        if item == ground_items.ITEM_BASE or base not in files:
+            continue
+        if ref in own['Components']:
+            # names its own: read as before
+            untouched &= ground_items.item_components(files, item) == own['Components']
+            continue
+        found.append(item)
+        if item not in INHERITS:
+            continue
+        parent, settings, count = INHERITS[item]
+        settings_path = ground_items.pouch_param_path(settings)
+        comp = ground_items.item_components(files, item)
+        # the actor it inherits from is in its pack; the settings are the nearest one's that names any; everything
+        # else is its own
+        chain, at = [], ground_items._parent_path(own)
+        while at in files and at != base:
+            chain.append(at)
+            at = ground_items._parent_path(byml.loads(files[at]).root)
+        named = [byml.loads(files[c]).root['Components'][ref] for c in chain
+                 if ref in byml.loads(files[c]).root['Components']]
+        parents &= chain[0] == ground_items.ap_path(parent) and at == base and comp[ref] == named[0] \
+            and comp[ref] == '?' + settings_path and settings_path in files \
+            and {k: v for k, v in comp.items() if k != ref} == own['Components'] \
+            and all(r in own['Components'] for r in ground_items.ITEM_REFS if r != ref)
+        # its count is its own: in its own actor's files and in its own row
+        table = byml.loads(files[ground_items._ref_path(own['Components']['GameParameterTableRef'])]).root
+        num = byml.loads(files[ground_items._ref_path(table['Components']['ExpansionMaxNumActor'])]).root
+        counts &= num['MaxNum'] == count == pouch_rows[item]['AfterExpansionMaxNum']
+        for version in VERSIONS:
+            name, pack, new_inner, new_rows, loose = ground_items.build(item, plain, table_rows, has_model, version)
+            inner = sarc.Sarc.read(pack).files
+            ap = byml.loads(inner[ground_items.ap_path(name)]).root['Components']
+            mine = byml.loads(inner[ground_items._ref_path(ap[ref])]).root
+            # its own item settings: the item's as parent, picked up by walking into it, and the item itself is
+            # what goes into the inventory; nothing else. The item's own files are the game's, the row the item's
+            gives &= ap[ref] == '?' + ground_items.pouch_param_path(name) \
+                and dict(mine) == {'$parent': gyml(settings_path), 'DefaultAutoGet': True,
+                                   'PouchActor': gyml(ground_items.ap_path(item))} \
+                and inner[settings_path] == files[settings_path] \
+                and all(inner[q] == files[q] for q in inner if q in files) \
+                and not [q for q in inner if q.startswith('GameParameter/') and item[5:] in q] \
+                and {k: v for k, v in new_rows['PouchActorInfo'].items() if k != '__RowId'} \
+                == {k: v for k, v in pouch_rows[item].items() if k != '__RowId'} \
+                and new_rows['PouchActorInfo']['AfterExpansionMaxNum'] == count \
+                and new_rows['ActorInfo']['ActorName'] == item and new_rows['ActorInfo']['FmdbName'] == item \
+                and ap['ActorNameRef'] == own['Components']['ActorNameRef'] \
+                and ap['ModelInfoRef'] == own['Components']['ModelInfoRef']
+            lifted &= item in lift and len(loose) == 1
+    good &= check('item actors that name no item settings themselves: the %d medium and large bags, quivers and '
+                  'wallets' % len(INHERITS), found == sorted(INHERITS))
+    good &= check('  each inherits from the smaller one, in its own pack; its item settings are that one\'s (%s, %s)'
+                  % (BOMB, KEY), parents)
+    good &= check('  its count is its own, in its actor\'s files and its row (%s)'
+                  % ', '.join('%s %d' % (k[5:], v[2]) for k, v in sorted(INHERITS.items())), counts)
+    good &= check('  each builds on the ground, as a Gold Skulltula drop and as a turning item, lifted', lifted)
+    good &= check('  what the pick-up adds is the item itself (PouchActor), with its own row, name and model', gives)
+    good &= check('  an item that names its own item settings is read as before', untouched)
+    refused = True
+    for item in STILL_REFUSED + (ground_items.ITEM_BASE,):
+        try:
+            ground_items.build(item, plain, table_rows, has_model, 'ground')
+            refused = False
+        except SystemExit as e:
+            refused &= ref in str(e) or 'ActorNameRef' in str(e)
+    good &= check('  actors not built on %s, and it itself, get no version this way (%s)'
+                  % (ground_items.ITEM_BASE, ', '.join(STILL_REFUSED)), refused)
 
     # items the game never gives as such (build_mod.NEVER_GIVEN): refused everywhere, not lifted
     never = build_mod.NEVER_GIVEN
