@@ -109,10 +109,16 @@ has one copy, whichever item is built first: the copy is always measured on the 
 others are checked against it with their own model (GROUND_SHARED: how far from GROUND_GAP they may lie). Din's
 Fire, Farore's Wind and Nayru's Love are one model in one project. The two double blessings use the magic
 blessing's project: its copy (measured on the box, as tested) puts them 0.0502 and 0.0505 above the ground. The
-Ice Arrow uses the Fire Arrow's project: with the Fire Arrow's copy it lies 0.057 above the ground. The Light
-Arrow uses that project too, but its model needs the bone 0.14 higher than the Fire Arrow's: it is not listed,
-it would need a copy of its own under another name. The single arrow uses the large bundle's project; the large
-bundle is not listed and keeps the game's file.
+Ice Arrow uses the Fire Arrow's project: with the Fire Arrow's copy it lies 0.057 above the ground. The single
+arrow uses the large bundle's project; the large bundle is not listed and keeps the game's file.
+
+A copy of its own for an item on a shared project (GROUND_LIFT_OWN, 2026-11-20). The Light Arrow uses the Fire
+Arrow's project too, but its model needs the bone at 0.377 where the Fire Arrow's needs 0.235: on the Fire Arrow's
+copy it would lie 0.092 in the ground (on the game's file 0.057 in it). It gets a second copy of that project,
+measured on its own model, under a name of its own of the same length (`NX2G_ArrowLight_Animation`); the Fire
+Arrow's copy (`NX2G_Arrow_Fire_Animation`, also the Ice Arrow's) is not touched. The project has a `Pose_GetDemo`,
+so the copy is the project itself with only the name and the ground pose's height changed: held up it is the
+game's.
 
 Held up (2026-11-19: Din's Fire picked up from the ground was held well above Link's hands). The item Link holds up
 after a pick-up is the very actor he picked up (`Dm_SY_Get` plays the animation command `Rotate_GetDemo` on it), so
@@ -295,12 +301,18 @@ GROUND_LIFT = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP', 'Item_Scale_Silver',
                'Item_MagicBean', 'Item_Ocarina_Fairy', 'Item_Ocarina_Time', 'Item_AgonyStone',
                'Item_FairyBless_MPDouble', 'Item_FairyBless_DefenseDouble',
                # these lie too high: lowered
-               'Item_Arrow_Fire', 'Item_Arrow_Ice', 'TBox_ArrowBundle_Small')
+               'Item_Arrow_Fire', 'Item_Arrow_Ice', 'TBox_ArrowBundle_Small',
+               # on the Fire Arrow's project, but its model needs another height: a copy of its own (2026-11-20)
+               'Item_Arrow_Light')
 # items that share an animation project with another listed item: the one copy is measured on that item
 GROUND_LIFT_AS = {'Item_FairyBless_MPDouble': 'Item_FairyBless_MP',
                   'Item_FairyBless_DefenseDouble': 'Item_FairyBless_MP',
                   'Item_FaroreWind': 'Item_DinFire', 'Item_NayruLove': 'Item_DinFire',
                   'Item_Arrow_Ice': 'Item_Arrow_Fire'}
+# items that share an animation project with another listed item but need another height than its copy gives:
+# a copy of their own, measured on their own model, under this name (as long as the project's, new to the game).
+# Only for a project with a held-up pose of its own (the copy is the project itself)
+GROUND_LIFT_OWN = {'Item_Arrow_Light': 'NX2G_ArrowLight_Animation'}
 # measured with the box of ActorInfo (their models are built in the bone, so the box is right for them), as
 # tested in game; the others with the model's vertices (tools/item_pose.py)
 GROUND_LIFT_BOX = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP')
@@ -329,11 +341,22 @@ def has_held_pose(anim):
     return HELD_POSE in item_pose.animations(anim)
 
 
-def lifted_project(project, anim):
+def lifted_project(project, anim, item=None):
     """the name of the lifted copy of an item's animation project (`anim`: its file). A project with a held-up
     pose of its own is copied as it is: its name with its first letters changed (same length). One without is
     made of HELD_BASE: HELD_NAME, the project's name without its first word and '_Animation', filled with '_' to
-    the length of HELD_BASE's name."""
+    the length of HELD_BASE's name. `item`: the item the copy is for; one in GROUND_LIFT_OWN has a copy of its
+    own, under the name given there."""
+    if item in GROUND_LIFT_OWN:
+        name = GROUND_LIFT_OWN[item]
+        shared = [n for o, n in LIFTED_NAMES if project.startswith(o)]
+        if not has_held_pose(anim) or len(name) != len(project) or not shared \
+                or name == shared[0] + project[len(shared[0]):] \
+                or list(GROUND_LIFT_OWN.values()).count(name) != 1:
+            raise SystemExit('%s: %s cannot be the name of its own lifted copy of %s (a project with a %s; a '
+                             'name as long, not the name of the shared copy, used once)'
+                             % (item, name, project, HELD_POSE))
+        return name
     if has_held_pose(anim):
         for old, new in LIFTED_NAMES:
             if project.startswith(old):
@@ -423,7 +446,7 @@ def vertex_low(data, model, height=0.0):
     return item_pose.extent(points, bind, pose['scale'], pose['rot'], move)[0][1]
 
 
-def lifted_animation(data, project, low, read_base=None):
+def lifted_animation(data, project, low, read_base=None, item=None):
     """the lifted copy of an item's animation project (`data`: its file): the ground pose's height of Skl_Root set
     so the model's lowest point is GROUND_GAP above the ground (higher, or lower for an item that lies too high);
     `low`: the model's lowest point in that pose at height 0 (box_low, vertex_low). Held up, the item stays as the
@@ -432,6 +455,7 @@ def lifted_animation(data, project, low, read_base=None):
       ground pose's height changed;
     - one without (held up, the game shows its ground pose): HELD_BASE renamed, with the lifted pose as its ground
       pose and the item's own, untouched ground pose as its held-up pose. `read_base(path)` reads HELD_BASE.
+    `item`: the item the copy is for, when it has a copy of its own (GROUND_LIFT_OWN: its own name).
     Returns (new data, old height, new height, the game file the copy is made of)"""
     o, flags, base = pose_bone(data, GROUND_POSE, POSE_BONE)
     scale, rot, t = _pose(data, base, flags)
@@ -443,7 +467,10 @@ def lifted_animation(data, project, low, read_base=None):
         raise SystemExit('%s: its pose already puts it where it should be (%.3f, wanted %.3f)'
                          % (project, old, new_h))
     if has_held_pose(data):
-        return lifted_in_place(data, project, new_h), old, new_h, model_path(project)
+        new_project = lifted_project(project, data, item)
+        return lifted_in_place(data, project, new_h, new_project), old, new_h, model_path(project)
+    if item in GROUND_LIFT_OWN:
+        raise SystemExit('%s: a copy of its own only of a project with a %s' % (item, HELD_POSE))
     if read_base is None:
         raise SystemExit('%s: no %s of its own, and no way to read %s' % (project, HELD_POSE, HELD_BASE))
     return lifted_on_base(read_base(model_path(HELD_BASE)), data, project, new_h), old, new_h, model_path(HELD_BASE)
@@ -651,6 +678,8 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         src = read_pack(model_path(own[0]))
         # a project has one copy: measured on `first`, whichever of the items that share it is built
         first = GROUND_LIFT_AS.get(item, item)
+        if item in GROUND_LIFT_OWN and item in GROUND_LIFT_AS:
+            raise SystemExit('%s: listed both for another item\'s copy and for one of its own' % item)
         if first != item and (first not in GROUND_LIFT or first in GROUND_LIFT_AS
                               or own_projects(read_pack, first) != own):
             raise SystemExit('%s: %s is not a lifted item with the same animation project' % (item, first))
@@ -662,8 +691,8 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
             low = box_low(src, info[first]['ModelAabbMin'], info[first]['ModelAabbMax'])
         else:
             low = vertex_low(src, model_of(info[first]))
-        data, old_h, new_h, like = lifted_animation(src, own[0], low, read_pack)
-        new_project = lifted_project(own[0], src)
+        data, old_h, new_h, like = lifted_animation(src, own[0], low, read_pack, item)
+        new_project = lifted_project(own[0], src, item)
         if item not in GROUND_LIFT_BOX:
             # on its own copy: exactly; on another item's: near enough
             off = vertex_low(data, model_of(row), None) + SPIN_ROOT_LIFT - GROUND_GAP

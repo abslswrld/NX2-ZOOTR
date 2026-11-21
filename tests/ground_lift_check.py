@@ -41,7 +41,15 @@ LEFT_OUT = ('Sword_Giant', 'Sword_Biggoron', 'Sword_BrokenGiant', 'BrokenSword',
             'ZeldaLetter', 'Mask_')
 # not listed, so no copy: an item that lies right, one whose project another item's copy is made of, one with
 # vertices on more bones than Skl_Root
-NOT_LIFTED = ('Item_Boomerang', 'TBox_ArrowBundle_Large', 'Item_Arrow_Light', 'Item_BombBag_Small')
+NOT_LIFTED = ('Item_Boomerang', 'TBox_ArrowBundle_Large', 'Item_BombBag_Small')
+# the Fire Arrow's copy (also the Ice Arrow's) as it was before the Light Arrow got a copy of its own of the same
+# project (2026-11-20): its name and checksum, and the checksums of the four packs that name it
+ARROW_COPY = ('NX2G_Arrow_Fire_Animation', '882e3ca4009701ff166c7fa06a43bcd906ea49792c672ae9422b4c84f3f212d7')
+ARROW_PACKS = {('Item_Arrow_Fire', 'ground'): '710d4ee27bd1b9e89414cec59b673e10bcc33d75e4f1287d25edc81abe2bf9f9',
+               ('Item_Arrow_Fire', 'token'): 'ac4defb0535c9620520e0abb7f8a8e865e28746eed1a08de27654465ff9e3e1b',
+               ('Item_Arrow_Ice', 'ground'): '21621bdc06aa8284074b4b624409612a59b9dfcf404d7e206345489b803d44f9',
+               ('Item_Arrow_Ice', 'token'): 'dba673b0ec61389b72705fbb6b5174af918eb95620c9b9bed4b94708e97db66a'}
+LIGHT, LIGHT_LIKE = 'Item_Arrow_Light', 'Item_Arrow_Fire'
 
 
 def check(name, ok):
@@ -103,6 +111,7 @@ def main(romfs):
     copies = {}                                        # path -> (data, the game file, first item)
     built = one = names = only = poses = lows = sure = packs = entries = same = helds = bases = True
     tested, kinds = {}, {True: set(), False: set()}
+    arrow_packs, light = {}, {}
     said = []
     for item in lift:
         row = info[item]
@@ -120,7 +129,7 @@ def main(romfs):
             own = own_path[len('Model/'):-len('.anim.bfres')]
             own_held = ground_items.has_held_pose(game)
             kinds[own_held].add(own)
-            lifted_name = ground_items.lifted_project(own, game)
+            lifted_name = ground_items.lifted_project(own, game, item)
             # the copy: a name new to the game, as long as the name of the game file it is made of
             names &= path == ground_items.model_path(lifted_name) and len(path) == len(like) \
                 and lifted_name.startswith('NX2G') and not os.path.exists(os.path.join(romfs, *path.split('/')) + '.zs')
@@ -183,10 +192,15 @@ def main(romfs):
                 out.add(path, x, like, made_of)         # the size entry, made as the build makes it
                 need = sizes.rule(path, x)
                 entries &= out.table.get(path) == out.table.get(like) and (need is None or out.table.get(path) >= need)
+            if (item, version) in ARROW_PACKS:
+                arrow_packs[item, version] = (hashlib.sha256(pack).hexdigest(), path, hashlib.sha256(x).hexdigest())
+            if item == LIGHT:
+                light[version] = (path, x, game, low, was, model)
             if version == 'token':
                 said.append('  %-30s height %+.4f -> %+.4f (%+.3f), lowest vertex %+.4f -> %+.4f  %s' % (
                     item, old_h, new_h, new_h - old_h, was, low,
-                    'on the copy of ' + shared[item] if item in shared else 'by the box' if item in box else ''))
+                    'on the copy of ' + shared[item] if item in shared else 'by the box' if item in box
+                    else 'on a copy of its own' if item in ground_items.GROUND_LIFT_OWN else ''))
         built &= versions > 0
     good &= check('every listed item (%d) builds in at least one version, each with one lifted copy' % len(lift),
                   built and one)
@@ -211,6 +225,44 @@ def main(romfs):
     for item, first in sorted(shared.items()):
         good &= check('  %s lies on the copy of %s' % (item, first),
                       ground_items.own_projects(plain, item) == ground_items.own_projects(plain, first))
+    # the Light Arrow: on the Fire Arrow's project, with a copy of its own under another name
+    own_names = ground_items.GROUND_LIFT_OWN
+    fire_path = ground_items.model_path(ARROW_COPY[0])
+    light_path = ground_items.model_path(own_names[LIGHT])
+    project = LIGHT_LIKE + '_Animation'
+    good &= check('the Light Arrow (%s) uses the Fire Arrow\'s project and is the only item with a copy of its own'
+                  % LIGHT, list(own_names) == [LIGHT] and LIGHT in lift and LIGHT not in shared and LIGHT not in box
+                  and ground_items.own_projects(plain, LIGHT) == ground_items.own_projects(plain, LIGHT_LIKE)
+                  == [project])
+    good &= check('  its copy (%s): a name as long as the project\'s, no other copy\'s, new to the game'
+                  % own_names[LIGHT],
+                  len(own_names[LIGHT]) == len(project) and light_path != fire_path
+                  and sorted(light) == sorted(VERSIONS) and {v[0] for v in light.values()} == {light_path}
+                  and copies[light_path][2] == LIGHT and copies[fire_path][2] == LIGHT_LIKE
+                  and len({c.lower() for c in copies}) == len(copies) and not has_model(own_names[LIGHT]))
+    _, x, game, low, was, model = light['ground']
+    on_fire = ground_items.vertex_low(copies[fire_path][0], model, None) + spin
+    good &= check('  it lies %.2f above the ground on it (%+.4f; on the game\'s file %+.4f, on the Fire Arrow\'s '
+                  'copy %+.4f)' % (gap, low, was, on_fire),
+                  abs(low - gap) < 1e-5 and abs(was - gap) > 0.1 and abs(on_fire - gap) > 0.1)
+    # held up: every byte but the name and the ground pose's flag and height of Skl_Root is the game's, so the
+    # whole Pose_GetDemo is (both bones: values, flags and where they are)
+    at = item_pose.read_pose(game, ground_items.GROUND_POSE)
+    k = game.find(project.encode())
+    spots = set(range(k, k + len(project))) | set(range(at['base'], at['base'] + 40)) \
+        | set(range(at['at'] + 0x28, at['at'] + 0x2c))
+    good &= check('  held up: its %s is the game\'s, byte for byte (only the name and the ground pose differ)'
+                  % ground_items.HELD_POSE,
+                  len(x) == len(game) and {i for i in range(len(game)) if x[i] != game[i]} <= spots
+                  and all(item_pose.read_pose(x, ground_items.HELD_POSE, b) == item_pose.read_pose(
+                      game, ground_items.HELD_POSE, b) for b in (item_pose.ROOT, item_pose.BONE))
+                  and item_pose.read_pose(x, ground_items.HELD_POSE)['move']
+                  != item_pose.read_pose(x, ground_items.GROUND_POSE)['move'])
+    good &= check('  the Fire and Ice Arrows are as before: the same copy (%s) and the same packs, byte for byte'
+                  % ARROW_COPY[0],
+                  hashlib.sha256(copies[fire_path][0]).hexdigest() == ARROW_COPY[1]
+                  and sorted(arrow_packs) == sorted(ARROW_PACKS)
+                  and all(arrow_packs[k] == (ARROW_PACKS[k], fire_path, ARROW_COPY[1]) for k in ARROW_PACKS))
     none = True
     for item in NOT_LIFTED:
         for version in ('ground', 'token'):
