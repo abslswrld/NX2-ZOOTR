@@ -129,6 +129,22 @@ long as HELD_BASE's. A project that has a `Pose_GetDemo` is copied as before; he
 Lost on the way: the `Pose_Pouch` of the quivers' and the hammer's projects (the pose of the state `Pouch`), which
 HELD_BASE has not; the state then shows `Pose_GetDemo`, the game's `Pose_Common`. What goes into the inventory is
 the item itself (`PouchActor`), with the game's project.
+
+Items that inherit their item settings (2026-11-20: the medium and large bags, quivers and wallets had no ground
+version, "no PouchContentRef"). An actor's parameters name the actor they inherit from (`$parent`), and a setting
+the actor does not name itself is its parent's. The medium bomb bag's actor (`Item_BombBag_Medium`) names its own
+name, model, animation, icon and count (`GameParameterTableRef`: `ExpansionMaxNumActor`, 30) and inherits from
+`Item_BombBag_Small`, whose `PouchContentRef` (`Component/PouchContentParam/BombBag`) is therefore the medium
+bag's too; the large bag inherits from the medium one. The parents' parameter files and those item settings are in
+the item's own pack. The same for the Deku Stick, Deku Nut and Deku Seed bags, the quivers and the wallets (their
+small ones name `KeyItemDefault`): 12 items. So an item actor's item settings (`PouchContentRef`,
+INHERITED_REFS) are read as the game reads them: the actor's own, else those of the actors it inherits from
+(`item_components`), down to but not the base of all item actors (ITEM_BASE: its item settings are `Default`, no
+item's own). Only that one setting, and only for actors built on ITEM_BASE: the 12 items name their own name,
+model and animation, and nothing that built before changes (masks, Poes and others that inherit in other ways
+stay refused).
+What the pick-up adds stays the item itself: the ground version's own settings name it (`PouchActor`), and its
+count is in the item's own actor and table row, which the ground version does not touch.
 """
 import copy
 import math
@@ -149,6 +165,10 @@ ITEM_REFS = ('ActorNameRef', 'AnimationRef', 'ModelInfoRef', 'PouchContentRef')
 # the ground shield's own settings, left out (the item base's are used): price table (equipment), hookshot
 # hold position, effect link
 TEMPLATE_ONLY = ('GameParameterTableRef', 'LiftableRef', 'ELinkRef')
+# of these, what an item may have from the actor it inherits from (the medium bag from the small one)
+INHERITED_REFS = ('PouchContentRef',)
+# the base of all item actors: its model (Dummy) and item settings (Default) are no item's own
+ITEM_BASE = 'Item_EventObject_Base'
 # kind of version -> (template actor, the item the template stands for, name prefix, template-only settings left
 # out, picked up by walking into it, the template's own animation project)
 VERSIONS = {
@@ -275,6 +295,24 @@ def resolved_components(files, actor):
             comp.setdefault(k, v)
         p = _parent_path(root)
     return comp
+
+
+def item_components(files, actor):
+    """an item actor's components as build() needs them: its own, and the item settings it does not name itself
+    (INHERITED_REFS) from the actors it inherits from ($parent, in its pack), the nearest first. Only for an actor
+    built on ITEM_BASE, and nothing from ITEM_BASE itself; any other actor: its own components alone, as before.
+    The medium and large bags, quivers and wallets name no PouchContentRef: theirs is the small one's."""
+    root = byml.loads(files[ap_path(actor)]).root
+    own, found, p = root['Components'], {}, _parent_path(root)
+    while p and p in files and p != ap_path(ITEM_BASE):
+        root = byml.loads(files[p]).root
+        for r in INHERITED_REFS:
+            if r in root.get('Components', {}):
+                found.setdefault(r, root['Components'][r])
+        p = _parent_path(root)
+    if p != ap_path(ITEM_BASE) or p not in files:
+        return own
+    return dict(found, **own)
 
 
 GET_DEMO = b'Rotate_GetDemo'
@@ -579,7 +617,8 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
     itm = sarc.Sarc.read(read_pack(pack_path(item)))
     tpl_ap = byml.loads(tpl.files[ap_path(TEMPLATE)])
     itm_ap = byml.loads(itm.files[ap_path(item)]).root
-    tc, ic = tpl_ap.root['Components'], itm_ap['Components']
+    # the item's settings as the game reads them: its own, else those of the actor it inherits from
+    tc, ic = tpl_ap.root['Components'], item_components(itm.files, item)
     if version == 'token':
         # ground items may inherit their parts (the blue rupee from the green one)
         ic = resolved_components(itm.files, item)
