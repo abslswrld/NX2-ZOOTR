@@ -2,6 +2,144 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-21
+
+### Progressive upgrade families, everywhere a pair can go (branch `claude/progressive-families`)
+The user's list of upgrade families is now in the builder. Every family can be placed in its progressive form on
+every kind of check that pairs already worked on. **Nothing new here is tested in game yet.** The details and the
+proposed test are in `out/RESEARCH_families.md`.
+- **The families** (the user's list; declared once, `FAMILIES` in `tools/build_mod.py`):
+
+  | Family | Levels, lowest first (the game's names) | Written as |
+  |---|---|---|
+  | Seed bags | Fairy Slingshot (with its Deku-Seed Bag) > Bigger Deku-Seed Bag > Biggest Deku-Seed Bag | `Item_Range_SlingShot>Item_BulletBag_Medium>Item_BulletBag_Large` |
+  | Quivers | Fairy Bow (with its Quiver) > Bigger Quiver > Biggest Quiver | `Item_Range_Bow>Item_Quiver_Medium>Item_Quiver_Large` |
+  | Strength | Goron Bracelet > Silver Gauntlets > Golden Gauntlets | `Item_Gauntlet_Goron>Item_Gauntlet_Silver>Item_Gauntlet_Gold` |
+  | Bomb bags | Bomb Bag > Bigger Bomb Bag > Biggest Bomb Bag (as before) | `Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large` |
+  | Deku Stick bags | Bigger Deku-Stick Bag > Biggest Deku-Stick Bag | `Item_StickBag_Medium>Item_StickBag_Large` |
+  | Deku Nut bags | Bigger Deku-Nut Bag > Biggest Deku-Nut Bag | `Item_NutBag_Medium>Item_NutBag_Large` |
+  | Wallets | Adult's Wallet (500) > Giant's Wallet (1000) | `Item_Wallet_Medium>Item_Wallet_Large` |
+  | Magic | the magic meter (the game's name: "Gift of Improved Spin") > Gift of Doubled Magic | `Item_FairyBless_MP>Item_FairyBless_MPDouble` |
+  | Scales, hookshots, ocarinas | as before | `Item_Scale_Silver>Item_Scale_Gold`, `Item_Hookshot>Item_Longshot`, `Item_Ocarina_Fairy>Item_Ocarina_Time` |
+
+  - Deku Sticks and Deku Nuts themselves are not placed (the user: they come from enemies and shops). Their first
+    bags and the Kokiri Wallet (the one from the start) are still refused everywhere (`NEVER_GIVEN`).
+  - The names of the gauntlets and of the two magic items were checked in the game's item table: they are the
+    ones above. Strength is one family, as asked.
+- **How to place a family:** put the same text on as many checks as the family has levels, for example three
+  checks with `Item_Range_SlingShot>Item_BulletBag_Medium>Item_BulletBag_Large`. Each check gives the lowest level
+  Link does not have yet. The checks can be of different kinds.
+- **Where a family can go** (pairs and three levels alike):
+
+  | Kind of check | Two levels | Three levels |
+  |---|---|---|
+  | Small chest | the game's checking chest (as before) | a chest of our own per family (was: bomb bags only) |
+  | Freestanding item | turning item (as before) | turning item with three levels: **new** |
+  | Liftable rock | turning item as its drop (as before) | the same with three levels: **new** |
+  | Solid bush | turning item as its drop (as before) | the same with three levels: **new** |
+  | Deku Scrub that sells once | one question in its branch (as before) | two questions: **new** |
+  | Gift with flow data | one question in the giver's flow (as before) | two questions: **new** |
+
+  All eleven families build on all six kinds. The bomb bags now work on all six too.
+- **Still refused, with a message:** a big chest (it has no checking version), shop shelves, pots (not started,
+  the user's call), Gold Skulltulas, cutscene gifts (Saria's ocarina) and songs. The reasons are the ones found on
+  2026-11-20. Nothing new was found for them.
+- **The Fairy Slingshot and the Fairy Bow as first levels.** Found in the game's files:
+  - the game gives both from chests only (the Deku Tree, the Forest Temple). None of its 914 event flows names
+    them;
+  - the first Deku-Seed Bag and the first Quiver ("small" in the files) are separate items. No chest, map or flow
+    gives them. The shared chest AI adds them: when a chest is opened and Link never had the weapon in it, the
+    chest adds the bag and 30 seeds (or the quiver and 30 arrows) without showing them (`TreasureBox.module`, the
+    small module inside it). That is why a slingshot from a chest came with 30 seeds and one from a scrub with 0;
+  - the bag fills itself when it is added, so adding the bag alone also gives 30.
+  - **So the first level is the weapon, and the builder makes sure the bag comes with it on every kind:**
+    - chest: the game's own chest AI does it, as for the Deku Tree chest. Nothing is added;
+    - freestanding item, rock, bush: the weapon's turning item does what the chest does. It uses copies of the
+      chest's own two steps (add the bag, add 30 seeds), read from the game's file by the weapon's name. It does
+      so when Link touches it, and again as soon as Link owns the weapon, both only while Link has no bag. So the
+      bag is given once;
+    - gift and scrub: the bag is added silently right after the weapon, as scrubs already did
+      (`SCRUB_COMPANIONS`). Gifts did not do this before. Now they do, also for a weapon placed alone on a gift.
+  - A weapon placed **alone** on the ground or in a pot still comes without its bag. The build now says so and
+    names the family form to use.
+- **Three levels on the ground.** The turning item has one actor per level. Level 1 turns into level 2 once Link
+  owns level 1, and level 2 into level 3 once Link owns level 2. The last one deletes itself once owned. Every
+  level keeps the pick-up guard of 2026-11-20 (it does not turn while Link is picking it up). The two-level
+  turning items are byte for byte what they were.
+- **Three levels on a gift and at a scrub.** One more question of the same kind in front of the first: "has the
+  second level?" Yes: give the third. No: the old question, "has the first level?". The questions use the names
+  the game's own flows ask about: the weapons and the gauntlets are kept in the inventory under another name
+  (`Weapon_Range_Bow`, `Armor_Child_Gauntlet_Goron`, `Armor_Adult_Gauntlet_Silver`...), read from the game's
+  table. The game's shared flows are only called, as before.
+- **Deku-Stick and Deku-Nut bags at a scrub.** The game's own scrubs already sell these two pairs, so they were
+  refused there before ("another scrub would sell it too"). Now the pair is accepted when the game's own branch
+  sells exactly the same two bags at the same price (it does: 40 rupees). One difference: the game's stick-bag
+  scrub sells the Bigger Deku-Stick Bag to anyone who never had a Deku Stick, even if he has that bag already.
+  Ours asks the inventory only, so no bag is sold twice. The scrub then says our general sales line, not the
+  game's own.
+- **The skip-level guard is part of this branch** (it was the unmerged `claude/skip-level-guard`; its own section
+  is below, under 2026-11-20). Changed here: its families are now the one list above, so the guard and the
+  progressive forms cannot disagree. Every later level placed alone is refused, and the message always names the
+  form to use (before, seven families had none). First levels placed alone still build.
+- **How the levels look.** Every level of every family has a ground version, a turning version and a held-up
+  pose for chests (26 levels checked). 19 of them lie on a lifted copy of their pose. **Seven keep the game's own
+  pose and may sit partly in the ground:** Fairy Slingshot, Fairy Bow, Silver Gauntlets, Golden Gauntlets, the
+  first Bomb Bag, and (as before) Hookshot and Longshot. Their models hang on several bones, or their pose places
+  several bones, so the lift cannot be measured or made the way it is for the others. Measured roughly: slingshot
+  about 0.17 m low, bow about 0.24 m, the first Bomb Bag about 0.14 m. The gauntlets could not be measured. Held
+  up, all seven are as the game shows them.
+- **Not changed:** the game's shared flows (`Dm_SY_GetInEvent`, `Dm_SY_Get`, `GetPouchContent`,
+  `Dm_SY_Treasurebox`, `Dm_SY_TreasureboxSmall`), the game's chest AI, Link's real items, pots. Every item goes
+  into the inventory as itself, so capacity, refill and the menu are the game's own.
+- **Files:** `tools/build_mod.py` (the families, the guard, three levels on gifts and scrubs, the bag on gifts),
+  `tools/turn_items.py` (three levels, what a chest gives with a weapon), `run_tests.bat`; new
+  `tests/families_check.py` and `tests/skip_level_check.py`; small changes in `tests/chest_check.py`,
+  `tests/three_chest_check.py`, `tests/gift_check.py`, `tests/ground_prog_check.py` (they keep looking at their
+  own three pairs or the bomb bags; the new test looks at every family).
+- **Tests:** new `tests/families_check.py` (in `run_tests.bat`), 39 lines. For every family: the list is the
+  user's; what the game's chests give with the two weapons, read from the game; every level's ground, turning and
+  held-up version; the turning items (each level asks for itself and turns into the next, the two weapons give
+  what a chest gives); the three-level chests; the questions on the gift and at the scrub. Then, worked out from
+  the built files: the checks of a family give its levels in order whatever kind they are, and one check more
+  gives nothing. Then whole builds: every family in small chests, on freestanding items, on rocks, on bushes and
+  on the gift, and four families at the scrub. `tests/skip_level_check.py` (20 lines): the guard against the same
+  list.
+  Both ALL OK. The whole `run_tests.bat` was run in the worktree: edit_check and evfl_add_check all OK;
+  chest_check, ocarina_fix_check, ground_prog_check, ground_lift_check, three_chest_check, gift_check,
+  saria_check, pairs_more_check, skip_level_check, families_check: ALL OK; round trip as before (650 event
+  flows identical, 264 not read, 5 BYML files differ: the known ones); `logic_check`: 0 failed; `db_check`:
+  0 errors.
+- **Check build** (scratch folder, the six usual fixes): the proposed in-game test, 20 checks in Kokiri
+  Forest with eight families on chests, rocks, bushes, freestanding items, the gift and the scrub, wrote 74
+  files without complaint. Not built into `out/mods`.
+- **Not yet tested in game.** To watch for:
+  - a slingshot or bow from the ground with 0 seeds or arrows (the bag step did not run);
+  - a level given twice or skipped when the checks of one family are of different kinds;
+  - the third level coming out of a rock or bush when Link has the first two (the item turns twice in a row);
+  - the Goron Bracelet question (the chest and the turning item ask under the item's name, as the game's chests
+    do for the bow; not seen in game for the gauntlets);
+  - the scrub's line naming the right level with three levels.
+- **Limits:** the mapped areas have one gift and one scrub of the right kind, so three levels on a gift or at a
+  scrub can each be tested with one family per build. A rock or bush that comes back gives the next level, as
+  before. Seven levels are not lifted (above).
+- **In game (2026-11-22, two runs, child Link; placements as proposed above):**
+  - **Order and counts: right in both runs.** Every family gave its levels in order, whichever kind came first:
+    stick and nut bags from rocks, bushes and the shop floor; the Fairy Slingshot with 30 seeds from a rock and
+    from the rock-circle Kokiri's gift; the Fairy Bow with 30 arrows from the ground and from a chest; bigger
+    and biggest seed bags and quivers from chests, rocks, bushes, the gift and the ground (the item near Mido
+    already lay there as the biggest quiver); the Goron Bracelet from a rock and from the scrub, the Silver
+    Gauntlets from a chest, the Golden Gauntlets from a rock; both wallets from bushes and Fado's ledge; the bomb
+    bags from rocks and bushes; the magic meter from Mido's chest.
+  - **The scrub's line named the right level both times** (Goron Bracelet first, Golden Gauntlets last). The
+    Golden Gauntlets were not bought in run 1: not enough rupees.
+  - **Two spots were never reached: `KF_SARIAS_HOUSE_HEART_ITEM_01` and `_05` are not in the house.** In the
+    map they stand about 6 m above the house floor (y 117.5 against 111.75 for `_02`, `_03`, `_04`, `_07`), on
+    Saria's roof, with `_06`. Only the four floor hearts were seen, so the magic upgrade and the biggest bomb
+    bag stayed where they were. Progression still held: the next spot gave the next level (Mido's chest gave
+    the magic meter, the beside-Mido bush the bigger bomb bag).
+  - **The Fairy Slingshot sits in the ground** (one of the seven items not lifted yet), as expected.
+  - Not filled in: run 2's Mido's chests, the menu at the end of run 1, and run 3.
+
 ## 2026-11-20
 
 ### An ocarina from a chest or from the ground can be played at once (branch `claude/ocarina-fix`)
@@ -326,6 +464,102 @@ The one item left low on 2026-11-19 ("it needs a copy of its own under another n
   holds it.
 - **In game (2026-11-20, combined test of the pairs, ocarina fix, Light Arrow and bigger bags branches together):**
   on the ground right, held up normally, named in the window. **Works.**
+
+### A later level of an upgrade family is never placed on its own (branch `claude/skip-level-guard`)
+- Background: the user's rule, progressive upgrades must never skip a level. Every level of a family is its own
+  inventory item (`IsGet.<name>`), so a later level placed alone can be taken before the earlier one. Seen in
+  game (below, the ground lift's test): `Item_Scale_Gold` placed alone was taken before the Silver Scale, and
+  nothing in the builder stopped it.
+- **The families, from the game's own files** (new table `UPGRADE_FAMILIES` in `tools/build_mod.py`, one row per
+  family, lowest level first). The order is the item table's own value (`RSDB/PouchActorInfo`), except the
+  hookshots':
+
+  | Family | Levels | The game's order |
+  |---|---|---|
+  | Scales | `Item_Scale_Silver` > `Item_Scale_Gold` | `DiveDepth` 6, 9 |
+  | Hookshots | `Item_Hookshot` > `Item_Longshot` | the weapons' `Component/HookshotParam`: `Range` 10, 20; the Longshot's settings have the Hookshot's as `$parent` |
+  | Ocarinas | `Item_Ocarina_Fairy` > `Item_Ocarina_Time` | `OcarinaTypeValue` 1, 2 |
+  | Bomb bags | `Item_BombBag_Small` > `_Medium` > `_Large` | `AfterExpansionMaxNum` 20, 30, 40 (`MaxNumGameData: Bomb`) |
+  | Seed bags | `Item_BulletBag_Small` > `_Medium` > `_Large` | 30, 40, 50 (`DekuSeed`) |
+  | Quivers | `Item_Quiver_Small` > `_Medium` > `_Large` | 30, 40, 50 (`Arrow`) |
+  | Deku Stick bags | `Item_StickBag_Small` > `_Medium` > `_Large` | 10, 20, 30 (`DekuStick`) |
+  | Deku Nut bags | `Item_NutBag_Small` > `_Medium` > `_Large` | 20, 30, 40 (`DekuNut`) |
+  | Wallets | `Item_Wallet_Small` > `_Medium` > `_Large` | 200, 500, 1000 (`Rupee`) |
+  | Strength | `Item_Gauntlet_Goron` > `Item_Gauntlet_Silver` > `Item_Gauntlet_Gold` | `ExpansionAvility: LiftGradeUP`, `LiftableGrade` Low, Middle, High |
+  | Magic meter | `Item_FairyBless_MP` > `Item_FairyBless_MPDouble` | `MPMax` 24, 48 |
+
+  No other `Item_` row of the table has one of those values (27 rows, the 29 levels less the two hookshots).
+  Not families: the double defence blessing (one level, `Item_FairyBless_DefenseDouble`); the swords (the Kokiri
+  and Master Sword are a child's and an adult's sword, `EquipmentPerformance` 1 and 2, and the Master Sword is no
+  item of a check; the Giant's Knife and Biggoron's Sword are trade quest items, out); the shields and tunics
+  (each a different thing: `WeaponSubType`, `ArmorEffectType`, no value that orders them); the magic items (all
+  `MPMax` 24, the same meter: `--fix magic_is_separate`).
+- **Which level is the first:** a level that is never placed (`NEVER_GIVEN`: the small stick bag, nut bag and
+  wallet) cannot be skipped, so the Medium one is the first of those three families. The game's own flows say
+  the same: they ask "has Medium?" and give Medium or Large (the Deku Theater for the stick and nut bags, the
+  scrubs' sales, `Dm_LostWood_0040` and `MiniGame_HitTarget` for the seed bag, `MiniGame_HitTarget` and
+  `Minigame_HorsebackArchery` for the quiver), the Gold Skulltula rewards are the Medium and the Large wallet
+  (`GatheringTokenGold`), and no flow names `Item_StickBag_Small` at all. The small seed bag and quiver are first levels: placed alone they still become
+  the slingshot and the bow (`FAMILY_ALIASES`), so their Medium ones are later levels.
+- **The guard** (`skip_level_guard`, run right after `never_given`, before the check is looked up and before
+  anything is written): a later level placed on its own stops the build, on any kind of spot. The message names
+  the check, the item, the family, the level it would skip, and the form to use when the builder has one:
+
+      KF_MIDO_CHEST_01: Item_Scale_Gold cannot be placed on its own: it is the second level of the upgrade
+      family Item_Scale_Silver > Item_Scale_Gold and could be taken before Item_Scale_Silver, skipping a level.
+      Use KF_MIDO_CHEST_01=Item_Scale_Silver>Item_Scale_Gold (on a chest, a freestanding item or a gift with
+      flow data).
+
+      KF_MIDO_CHEST_01: Item_BombBag_Large cannot be placed on its own: it is the third level of the upgrade
+      family Item_BombBag_Small > Item_BombBag_Medium > Item_BombBag_Large and could be taken before
+      Item_BombBag_Medium, skipping a level. Use
+      KF_MIDO_CHEST_01=Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large (on a small chest).
+
+      KF_MIDO_CHEST_01: Item_Quiver_Medium cannot be placed on its own: it is the second level of the upgrade
+      family Item_Quiver_Small > Item_Quiver_Medium > Item_Quiver_Large and could be taken before
+      Item_Quiver_Small, which comes with Item_Range_Bow, skipping a level. The builder has no progressive form
+      for this family yet: it cannot be placed for now.
+
+  - Refused alone, 15 levels: `Item_Scale_Gold`, `Item_Longshot`, `Item_Ocarina_Time` (their pair is named);
+    `Item_BombBag_Medium`, `Item_BombBag_Large` (the triple is named); and with no form yet, so not placeable for
+    now: `Item_BulletBag_Medium` / `_Large`, `Item_Quiver_Medium` / `_Large`, `Item_StickBag_Large`,
+    `Item_NutBag_Large`, `Item_Wallet_Large`, `Item_Gauntlet_Silver`, `Item_Gauntlet_Gold`,
+    `Item_FairyBless_MPDouble`. Also under their other names in the item table: the inventory's twin
+    `Pouch_<x>`, the gauntlets' `Armor_...`, `Obj_Ocarina_Time` (`UPGRADE_OTHER_NAMES`).
+  - Still placed alone, 11 first levels: `Item_Scale_Silver`, `Item_Hookshot`, `Item_Ocarina_Fairy`,
+    `Item_BombBag_Small`, `Item_BulletBag_Small` (the slingshot), `Item_Quiver_Small` (the bow),
+    `Item_StickBag_Medium`, `Item_NutBag_Medium`, `Item_Wallet_Medium`, `Item_Gauntlet_Goron`,
+    `Item_FairyBless_MP`.
+  - Unchanged: `NEVER_GIVEN` and its message, `FAMILY_ALIASES`, the scrubs' companions, gifts, songs, the pairs
+    and the triple and where they can go. The guard does not look at `First>Second` forms: only the known ones
+    pass, as before. A later level is refused also when its earlier level is on another check of the same
+    build (either could be reached first).
+  - To add a family: one row in `UPGRADE_FAMILIES`; a form for it goes into `PROGRESSIVE_PAIRS` or
+    `THREE_LEVEL_FAMILIES`, and the message names it by itself.
+- **Tests:** new `tests/skip_level_check.py` (in `run_tests.bat`), 17 lines: the table against the game's files
+  (every level a row of the item table; the order values above; the hookshots' `Range`; no other item with a
+  level; every form a run of one family); each of the 15 later levels alone refused on 13 spots (small and big
+  chest, freestanding item, shelf, pot, rock, bush, Gold Skulltula, two gifts, a scrub, a song, a name that is
+  no check) with the message and nothing written; the same under the other names and with the earlier level
+  elsewhere in the build; the never-given items and unknown pairs and triples refused as before; whole builds
+  of the three pairs in chests, the triple, a pair on a freestanding item and on a gift; whole builds of first
+  levels alone in chests, on the ground, on a gift and at a scrub (the small seed bag gives the slingshot, the
+  small quiver the bow with its quiver); a refused build leaves an earlier build of the same name untouched
+  byte for byte. ALL OK. No existing test placed a later level alone: none changed. edit_check,
+  evfl_add_check: all OK; chest_check, ground_prog_check, ground_lift_check, three_chest_check, gift_check,
+  saria_check: ALL OK; round trip as before.
+- **Check build** (scratch folder): `KF_SARIAS_HOUSE_HEART_ITEM_02=Item_Scale_Silver` with
+  `KF_SARIAS_HOUSE_HEART_ITEM_07=Item_Scale_Gold` (the placement seen in game) stops with the message and writes
+  nothing; the pair on `KF_RUPEE_NEAR_MIDO_ITEM` and `KF_RUPEE_NEAR_FADO_ITEM_01` with a Hookshot alone in
+  `KF_MIDO_CHEST_01` builds (10 files).
+- **Unsure:** whether the Medium stick or nut bag taken before any stick or nut (so before the Small bag, which
+  the first stick or nut then brings) keeps its size: the game sells and gives the Medium ones without asking
+  for the Small one, so it is allowed here; not tried in game. The bigger seed bags, quivers, wallet, stick and
+  nut bags, the gauntlets and the double magic need a form (or a rule that the earlier level is always reached
+  first) before they can be placed again. Nothing to test in game: the guard only stops builds.
+- **In game (2026-11-20, combined test of the pairs, ocarina fix, Light Arrow and bigger bags branches together):**
+  the medium Deku Stick bag taken before any stick carries 20 (its own count, not less). The guard itself was not in
+  the build: the bomb bags placed alone could be taken out of order, which is what it refuses.
 
 ## 2026-11-19
 

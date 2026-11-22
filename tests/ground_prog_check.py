@@ -30,6 +30,8 @@ ASKED = 'QueryPouchContentIsRequestingGetEvent'    # the item's own pick-up aske
 REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT',
            'LW_NEAR_BRIDGE_SCRUB')
 CLOSE = ('KF_SARIAS_HOUSE_HEART_ITEM_03', 'KF_SARIAS_HOUSE_HEART_ITEM_04')     # 1.4 m apart
+TESTED_PAIRS = (('Item_Scale_Silver', 'Item_Scale_Gold'), ('Item_Hookshot', 'Item_Longshot'),
+                ('Item_Ocarina_Fairy', 'Item_Ocarina_Time'))
 # what the drop kinds' entries are in the game: the constant over the size rounded up to 32, for a file with
 # one element in its list (fitted on the game's files of each kind, out/RESEARCH_ground_progressive.md)
 DROP_ENTRY = {'game__component__DropParam': 5136 + 8, 'game__drop__DropTable': 5112 + 8,
@@ -90,8 +92,10 @@ def main(romfs):
     good &= check('only the listed pairs, first level first',
                   all(len(p) == 2 and p[::-1] not in build_mod.PROGRESSIVE_PAIRS
                       for p in build_mod.PROGRESSIVE_PAIRS) and PAIR in build_mod.PROGRESSIVE_PAIRS)
-    good &= check('families of three levels are refused',
-                  refused(turn_items.build, PAIR + ('Item_Hookshot',), 0, plain, table_rows, model))
+    good &= check('families of one or four levels, or with a level twice, are refused',
+                  refused(turn_items.build, PAIR[:1], 0, plain, table_rows, model)
+                  and refused(turn_items.build, PAIR + ('Item_Hookshot', 'Item_Longshot'), 0, plain, table_rows, model)
+                  and refused(turn_items.build, PAIR + PAIR[:1], 0, plain, table_rows, model))
     far = build_mod.turn_spacing(world, {c: PAIR for c in SPOTS})
     good &= check('the two test spots are far apart (%.1f m)' % (far[0][2] if far else 0),
                   len(far) == 1 and far[0][2] > 20)
@@ -140,7 +144,8 @@ def main(romfs):
     ai_ok = copies = branch = names_ok = packs = rows_ok = drops = size_ok = lift_ok = asked_ok = True
     lifted = set()
     said = []
-    for family in sorted(build_mod.PROGRESSIVE_PAIRS):
+    # (the three pairs this test was written for; every family, three levels too: tests/families_check.py)
+    for family in sorted(p for p in build_mod.PROGRESSIVE_PAIRS if p in TESTED_PAIRS):
         for level, item in enumerate(family):
             last = level == 1
             name, pack, new_inner, new_rows, loose = turn_items.build(family, level, plain, table_rows, model)

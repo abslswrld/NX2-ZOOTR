@@ -112,8 +112,10 @@ def main(romfs):
                 asked.add(str(e.params['Actor']))
     good &= check('every flow of the game with a PouchSystemActor has the same entry (%d flows), every such '
                   'question the same shape (%d)' % (flows, questions), same and flows > 100 and questions > 100)
-    good &= check("the game's flows ask about each pair's first item under its own name",
-                  all(p[0] in asked for p in build_mod.PROGRESSIVE_PAIRS))
+    good &= check("the game's flows ask about each pair's first item under its own name (but the magic meter: "
+                  'no flow asks the inventory for it)',
+                  all(p[0] in asked for p in build_mod.PROGRESSIVE_PAIRS if p[0] != 'Item_FairyBless_MP')
+                  and 'Item_FairyBless_MP' not in asked)
     good &= check('the game has forks whose branch starts with a two-way switch between two calls that end the '
                   'branch (%d)' % fork_heads, fork_heads > 0)
 
