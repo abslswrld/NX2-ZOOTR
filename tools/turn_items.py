@@ -37,7 +37,7 @@ version of that level (tools/ground_items.py) with a root AI of its own, `NX2_Tu
                                   otherwise nothing
       Link owns this level?    -> switch the drop on, drop the next level, delete itself (one step)
                                   (last level: only delete itself)
-      Link owns a later level? -> delete itself
+      Link owns a later level? -> delete itself (the last level owned), or turn as above (a level between)
 
 While Link doesn't own the level, it is a normal ground item of that level. Every check of the family gets the
 first level's actor: an item can only be picked up while Link doesn't own it (no level twice), and a level
@@ -46,6 +46,23 @@ nothing of the game is changed.
 
 The last line is for a family whose later level takes the earlier one's place in the inventory (the hookshots
 share one slot): without it the first level would lie there again once the second is owned.
+
+Three levels (2026-11-21): the same actors, one per level. The first turns into the second, the second into the
+third, each once Link owns it, so a check gives the lowest level Link doesn't own. A level whose later level is
+owned without itself (should a family's level ever take an earlier one's place) turns too when that later level
+is not the last, and deletes itself when it is: the last level's own actor would delete itself at once.
+
+A first level that the game's chests give more with (the Fairy Slingshot and the Fairy Bow, 2026-11-21). The
+shared chest module (`TreasureBox.module`) runs a small module of its own when a chest is opened
+(`_LocalModule_f62224b7f673.module`): by the name of what the chest holds, when Link never had it (`IsGet.<name>`
+false): `Weapon_Range_SlingShot` -> add `Item_BulletBag_Small` and 30 `Item_DekuSeed`; `Weapon_Range_Bow` ->
+`Item_Quiver_Small` and 30 `Item_Arrow_Normal` (`OneShotAddOrRemovePouchContent`, `Reason` "Put", no get scene).
+Only chests run it: a slingshot picked up from the ground or handed over by an event comes with no bag (0 / 0
+seeds, seen in game at a scrub). So the first level's turning item does what the chest does, with copies of
+those very nodes, read from the module by the weapon's name (first_get): while Link has no small bag,
+- its pick-up is asked for and Link doesn't own the weapon (the moment a chest is opened): the bag and the 30;
+- Link owns the weapon (asked every frame, beside the guards, should the first not have answered): the same.
+Both ask "Link has no small bag" first, so the bag is given once.
 
 The three guards keep the item from turning while it is itself being picked up: between the moment it is added
 to the inventory and its death it still exists, and Link owns it. Each is a copy of a game node; which of them
@@ -96,6 +113,9 @@ DROP_AI = 'AI/Obj_Gerudo_CowBoneDecoration_A_01.root.ainb'
 REQUEST_ACTOR = 'Obj_Spirit_Poe'                            # QueryPouchContentIsRequestingGetEvent: its own AI
 REQUEST_AI = 'AI/Obj_Spirit_Poe.root.ainb'
 # the actor whose drop part is copied: it turns into another actor through a drop table of its own
+# what the game's chests give with a first weapon: a module embedded in the shared chest module
+FIRST_GET_OWNER = 'AI/TreasureBox.module.ainb'
+N_ADD = 'OneShotAddOrRemovePouchContent'
 DROP_TEMPLATE = 'Animal_ButterflyToFairy'
 DROP_SHARED = ('Component/DropParam/Default.game__component__DropParam.bgyml',
                'Component/Blackboard/BlackboardParamTable/Drop.engine__component__BlackboardParamTable.bgyml')
@@ -192,16 +212,79 @@ def _element(doc, type_, immediates, flow, other=()):
     return _find(doc, ainb.NODE_TYPES[type_], ok)
 
 
-def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, name=None):
+def _actor_of(path):
+    """'Work/Actor/X.engine__actor__ActorParam.gyml' -> 'X'"""
+    head, tail = 'Work/Actor/', '.engine__actor__ActorParam.gyml'
+    if not path.startswith(head) or not path.endswith(tail):
+        raise SystemExit('%r does not name an actor as expected' % path)
+    return path[len(head):-len(tail)]
+
+
+def _add_of(node):
+    """(actor file, number) of a node that adds to the inventory"""
+    return ({x.name: x.value for x in node.inputs['string']}['Actor'],
+            {x.name: x.value for x in node.inputs['int']}['Num'])
+
+
+def first_get(shared, name):
+    """what the game's chests add to the inventory with a first item whose name (as the inventory knows it) is
+    `name`, read from the module the shared chest module runs when a chest is opened: (the nodes that add it,
+    [(item, number)]). shared: the files of the shared AI pack. Stops the build when the module gives nothing
+    with that name."""
+    owner = ainb.loads(shared[FIRST_GET_OWNER])
+    for fn, _, _ in owner.modules:
+        doc = ainb.loads(shared['AI/' + fn])
+        for n in doc.nodes:
+            if n.type != 5:                        # Element_StringSelector: one child per name
+                continue
+            for l in n.links[FLOW]:
+                if len(l.extra) != 2 or doc.string_at(l.extra[1]) != name:
+                    continue
+                pick = doc.nodes[l.node]           # "ever had it?" (IsGet.<name>): True -> nothing, False -> the adds
+                kids = {x.name: doc.nodes[x.node] for x in pick.links[FLOW]}
+                q = doc.nodes[pick.inputs['bool'][0].node] if pick.type == BOOL_SELECTOR and pick.inputs['bool'] \
+                    and pick.inputs['bool'][0].node >= 0 else None
+                if q is None or q.name != 'QueryGetGameDataBool' or sorted(kids) != ['False', 'True'] \
+                        or kids['True'].name != N_IDLE or kids['False'].type != SIMULTANEOUS:
+                    raise SystemExit('%s: what a chest gives with %s is not read as expected' % (fn, name))
+                adds = [doc.nodes[x.node] for x in kids['False'].links[FLOW]]
+                want = [('int', 'Num'), ('bool', 'IsEquipDirect'), ('bool', 'IsGetEvent'), ('string', 'Actor'),
+                        ('string', 'Reason')]
+                for a in adds:
+                    v = {x.name: x.value for t in ainb.PARAM_TYPES for x in a.inputs[t]}
+                    if a.name != N_ADD or a.type != 0 or a.flags != 0 or not _plain(a) or any(a.links) \
+                            or a.preconditions \
+                            or [(t, x.name) for t in ainb.PARAM_TYPES for x in a.inputs[t]] != want \
+                            or any(x.node >= 0 or x.sources is not None
+                                   for t in ainb.PARAM_TYPES for x in a.inputs[t]) \
+                            or v['IsEquipDirect'] or v['IsGetEvent'] or v['Reason'] != 'Put' or v['Num'] < 1 \
+                            or _params(a, 'immediates') != [('bool', 'ExecuteEveryFrame', False)] \
+                            or any(a.outputs[t] for t in ainb.PARAM_TYPES):
+                        raise SystemExit('%s: what a chest gives with %s is not plain adds to the inventory'
+                                         % (fn, name))
+                if not adds:
+                    raise SystemExit('%s: a chest gives nothing with %s' % (fn, name))
+                return adds, [(_actor_of(_add_of(a)[0]), _add_of(a)[1]) for a in adds]
+    raise SystemExit('%s: the game\'s chests give nothing more with %s' % (FIRST_GET_OWNER, name))
+
+
+def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, name=None, later_turns=(),
+               bundle=None):
     """the ground items' AI (`base`: DropItem.root) under the name `name`, with the turning branch (see the top
     of this file). own: the level's own name, as the inventory knows it; later: the names of the levels after
     it; drops: whether it drops the next level when it turns (it has a drop part) or only deletes itself.
     sources: {key of SOURCES: that AI file}; drop_ai: the AI the drop node is copied from; request_ai: the AI
     the "pick-up asked for" question is copied from.
+    later_turns: the names among `later` whose owning turns the item (as owning its own level does) instead of
+    deleting it: the levels between, in a family of three. bundle: (the nodes that add what the game's chests
+    give with this level, the item whose absence says it was not given yet): first_get; both for an item with a
+    next level only.
     Read back: the 13 nodes of the game's file are as they were but for the root's one new child."""
     doc = ainb.loads(base)
     if doc.filename != BASE_AI + '.root':
         raise SystemExit('%s: not the ground items\' AI expected (%s)' % (ai_path(BASE_AI), doc.filename))
+    if (later_turns or bundle) and not drops or not set(later_turns) <= set(later):
+        raise SystemExit('%s: only a level with a next level turns on a later level or gives more' % name)
     src = {k: ainb.loads(d) for k, d in sources.items()}
     n0 = len(doc.nodes)
     if n0 != BASE_NODES:
@@ -302,20 +385,31 @@ def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, n
     def delete(what):
         return new(t_delete, 'delete ' + what)
 
-    # the question chain, from the last question back: a later level owned -> delete itself
+    def turning(what=''):
+        """switch the drop on, drop the next level, delete itself, in one step"""
+        on = new(t_valid, 'drop on' + what)
+        nodes[on - n0].inputs['bool'][0].value = True
+        seq = new(t_seq, 'turn' + what)
+        flow(seq, on, new(t_drop, 'drop' + what), delete('turned' + what))
+        return seq
+
+    def give(what):
+        """Link has no `bundle[1]` (the small bag) -> what a chest gives with this level, in one step"""
+        sel = owned(bundle[1], 'bundle bag, ' + what)
+        seq = new(t_seq, 'bundle, ' + what)
+        flow(seq, *[new(t, 'bundle %d, %s' % (j, what)) for j, t in enumerate(bundle[0])])
+        flow(sel, seq, idle('bundle, ' + what))
+        return sel
+
+    # the question chain, from the last question back: a later level owned -> delete itself, or turn (a level
+    # between)
     after = idle('owned')
     for k, item in reversed(list(enumerate(later))):
         sel = owned(item, 'later %d' % k)
-        flow(sel, after, delete('later %d' % k))
+        flow(sel, after, turning(' later %d' % k) if item in later_turns else delete('later %d' % k))
         after = sel
     # this level owned -> turn
-    if drops:
-        on = new(t_valid, 'drop on')
-        nodes[on - n0].inputs['bool'][0].value = True
-        turn = new(t_seq, 'turn')
-        flow(turn, on, new(t_drop, 'drop'), delete('turned'))
-    else:
-        turn = delete('owned')
+    turn = turning() if drops else delete('owned')
     sel = owned(own, 'own')
     flow(sel, after, turn)
     # the item's own pick-up asked for, its scene not yet begun: no turning (see the top of this file). With a
@@ -327,7 +421,8 @@ def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, n
         keep = new(t_valid, 'drop on, asked for')
         nodes[keep - n0].inputs['bool'][0].value = True
         mine = owned(own, 'own, asked for')
-        flow(mine, idle('asked for'), keep)
+        # not owned: nothing, or (a first weapon) what a chest would give with it, as a chest does when opened
+        flow(mine, give('asked for') if bundle else idle('asked for'), keep)
     else:
         mine = idle('asked for')
     flow(asked, mine, sel)                          # True -> stay, False -> go on
@@ -343,12 +438,20 @@ def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, n
         split = new(t_split, 'timing')
         flow(split, new(t_valid, 'drop off'), top, idle('leave'))
         top = split
+    # a first weapon: beside the guards, every frame: Link owns it and has no small bag -> what a chest gives
+    # with it
+    tops = [top]
+    if bundle:
+        has = owned(own, 'own, bundle')
+        flow(has, idle('own, bundle'), give('owned'))
+        tops = [has, top]
     for n in nodes:                                 # preconditions: the place of the query among the query nodes
         if hasattr(n, 'wants'):
             n.preconditions = [sum(1 for x in (doc.nodes + nodes)[:n.wants] if x.flags & 1)]
             del n.wants
     doc.nodes += nodes
-    root.links[FLOW].append(ainb.Link(top, '', ()))
+    for t in tops:
+        root.links[FLOW].append(ainb.Link(t, '', ()))
     doc.filename = name + '.root'
     data = doc.write()
 
@@ -359,7 +462,8 @@ def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, n
         raise SystemExit('read-back: %s differs from what was intended' % ai_path(name))
     for i, (o, b) in enumerate(zip(orig.nodes, back.nodes)):
         if i == roots[0]:
-            o.links[FLOW].append(ainb.Link(top, '', ()))
+            for t in tops:
+                o.links[FLOW].append(ainb.Link(t, '', ()))
         if _node_state(o) != _node_state(b):
             raise SystemExit('read-back: node %d of %s differs from what was intended' % (i, ai_path(name)))
     for k, n in enumerate(nodes):
@@ -368,7 +472,11 @@ def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, n
     want = describe(data)
     if want['own'] != own or want['later'] != list(later) or want['drops'] != drops \
             or want['guards'] != [q for q, _ in GUARDS] + [Q_ASKED] or want['new'] != len(nodes) \
-            or want['asked'] != ([(N_VALID, [True])] if drops else []):
+            or want['asked'] != ([(N_VALID, [True])] if drops else []) \
+            or want['later_turns'] != [x for x in later if x in later_turns] \
+            or (want['bundle'] is not None) != bool(bundle) \
+            or (bundle and (want['bundle']['bag'] != bundle[1]
+                            or want['bundle']['gives'] != [_add_of(t) for t in bundle[0]])):
         raise SystemExit('read-back: the turning branch of %s is not as intended: %r' % (ai_path(name), want))
     return data
 
@@ -378,8 +486,10 @@ def describe(data):
     game's 13), 'guards' (the questions that stop it, in order), 'own' (the name whose owning turns it), 'turn'
     (what it then does, in order), 'drops' (whether that drops), 'later' (the names whose owning deletes it),
     'enter' (what it does on entering), 'asked' (what it does while its own pick-up is asked for and Link
-    owns it: nothing, or the drop switched on)}. Raises SystemExit when the branch is not the one turning_ai
-    makes."""
+    owns it: nothing, or the drop switched on), 'later_turns' (the names among 'later' whose owning turns it
+    instead of deleting it), 'bundle' (None, or what it gives with itself as a chest would: {'bag': the item
+    whose absence is asked first, 'gives': [(actor file, number)]})}. Raises SystemExit when the branch is not
+    the one turning_ai makes."""
     doc = ainb.loads(data)
     nodes = doc.nodes
     pre = [i for i, n in enumerate(nodes) if n.flags & 1]
@@ -406,7 +516,8 @@ def describe(data):
     root = nodes[doc.commands[0].left]
     top = root.links[FLOW][-1].node
     out = {'name': doc.filename, 'new': len(nodes) - BASE_NODES, 'enter': [], 'guards': [], 'later': [],
-           'asked': []}
+           'asked': [], 'later_turns': [], 'bundle': None}
+    beside = [l.node for l in root.links[FLOW][3:-1]]   # what runs beside the turning branch
     stay = []                                      # what "pick-up asked for" leads to
     if nodes[top].type == SPLIT_TIMING:
         k = dict(kids(top))
@@ -436,12 +547,31 @@ def describe(data):
             bad('inventory question %d not as expected' % i)
         return q.inputs['string'][0].value, k[0][1], k[1][1]
 
+    def gives(i):
+        """a "Link has no bag -> the adds in one step" node: {'bag', 'gives'}"""
+        bag, seq, none = owned(i)
+        nothing(none)
+        steps = [nodes[c] for _, c in kids(seq)]
+        if nodes[seq].type != SEQUENTIAL or not steps or any(s.name != N_ADD or any(s.links) for s in steps) \
+                or not {x.name: x.value for x in nodes[seq].immediates['bool']}.get('IsUpdateNextInFrame'):
+            bad('node %d does not add to the inventory in one step' % seq)
+        return {'bag': bag, 'gives': [_add_of(s) for s in steps]}
+
     out['own'], rest, turn = owned(top)
+    if beside:                                     # a first weapon: owned, no bag -> what a chest gives with it
+        item, none, more = owned(beside[0]) if len(beside) == 1 else (None, None, None)
+        if item != out['own']:
+            bad('what runs beside the turning branch is not "Link owns this level"')
+        nothing(none)
+        out['bundle'] = gives(more)
     if len(stay) != 1 or out['guards'][-1:] != [Q_ASKED]:
         bad('"pick-up asked for" is not the last question before "Link owns this level"')
     if nodes[stay[0]].type == S32_SELECTOR:        # asked for and owned: the drop switched on, nothing else
         item, none, keep = owned(stay[0])
-        nothing(none)
+        if out['bundle'] is None:
+            nothing(none)
+        elif gives(none) != out['bundle']:
+            bad('"pick-up asked for" does not give what "Link owns this level" gives beside it')
         if item != out['own'] or nodes[keep].name != N_VALID or any(nodes[keep].links):
             bad('"pick-up asked for" does not switch the drop on for the level owned')
         out['asked'] = [(nodes[keep].name, [x.value for x in nodes[keep].inputs['bool']])]
@@ -453,14 +583,19 @@ def describe(data):
         bad('the turn is not done in one step')
     out['turn'] = [(nodes[s].name, [x.value for x in nodes[s].inputs['bool']]) for s in steps]
     out['drops'] = N_DROP in [n for n, _ in out['turn']]
+    want = [(N_VALID, [True]), (N_DROP, []), (N_DELETE, [])] if out['drops'] else [(N_DELETE, [])]
     while nodes[rest].type == S32_SELECTOR:
         item, nxt, gone = owned(rest)
-        if nodes[gone].name != N_DELETE:
+        if nodes[gone].type == SEQUENTIAL and out['drops']:
+            if [(nodes[c].name, [x.value for x in nodes[c].inputs['bool']]) for _, c in kids(gone)] != want \
+                    or not {x.name: x.value for x in nodes[gone].immediates['bool']}.get('IsUpdateNextInFrame'):
+                bad('a later level owned does not turn the item as its own level does')
+            out['later_turns'].append(item)
+        elif nodes[gone].name != N_DELETE:
             bad('a later level owned does not delete the item')
         out['later'].append(item)
         rest = nxt
     nothing(rest)
-    want = [(N_VALID, [True]), (N_DROP, []), (N_DELETE, [])] if out['drops'] else [(N_DELETE, [])]
     if out['turn'] != want or out['enter'] != ([(N_VALID, [False])] if out['drops'] else []):
         bad('the turn or the entering step is not as expected: %r, %r' % (out['turn'], out['enter']))
     reached, todo = set(), [doc.commands[0].left]
@@ -476,13 +611,16 @@ def describe(data):
     return out
 
 
-def build(family, level, read_pack, read_table_rows, model_exists=lambda project: False):
-    """the turning item of level `level` (0 = the first) of `family` (the items' own names, in order).
+def build(family, level, read_pack, read_table_rows, model_exists=lambda project: False, bundle_for=None):
+    """the turning item of level `level` (0 = the first) of `family` (the items' own names, in order; two or
+    three levels). bundle_for: for the first level, the name the inventory knows it by when the game's chests
+    give more with it (a first weapon: its small bag and ammunition, first_get): the turning item gives the same.
     Returns (name, pack data, {inner path: (data, the game file it is made from: its size entry's reference)}
     for the files new to the game, {table: new row}, loose files as ground_items.build)."""
-    if len(family) != 2:
-        # with three levels, a level whose next level is owned would have to turn too (not only delete itself)
-        raise SystemExit('%s: only families of two levels yet' % '>'.join(family))
+    if len(family) not in (2, 3) or len(set(family)) != len(family):
+        raise SystemExit('%s: only families of two or three levels' % '>'.join(family))
+    if bundle_for and level:
+        raise SystemExit('%s: only a first level gives more with itself' % family[level])
     item = family[level]
     last = level == len(family) - 1
     name, pack, ground_new, rows, loose = ground_items.build(item, read_pack, read_table_rows, model_exists, VERSION)
@@ -516,8 +654,13 @@ def build(family, level, read_pack, read_table_rows, model_exists=lambda project
     request_ai = sarc.Sarc.read(read_pack(pack_path(REQUEST_ACTOR))).files.get(REQUEST_AI)
     if request_ai is None:
         raise SystemExit('%s: no %s in its pack' % (REQUEST_ACTOR, REQUEST_AI))
+    bundle = None
+    if bundle_for:
+        adds, gives = first_get(shared, bundle_for)
+        bundle = (adds, gives[0][0])                # the first thing given (the small bag) says whether it was
     ai_data = turning_ai(shared[ai_path(BASE_AI)], {k: shared[p] for k, p in SOURCES.items()}, drop_ai,
-                         request_ai, item, family[level + 1:], drops=not last, name=ai)
+                         request_ai, item, family[level + 1:], drops=not last, name=ai,
+                         later_turns=() if last else family[level + 1:-1], bundle=bundle)
     new_inner[ai_info_path(ai)] = (byml.dumps(idoc), base_info)
     new_inner[ai_path(ai)] = (ai_data, ai_path(BASE_AI))
     # (the ground items' own AI settings stay in the pack: the item base's file still names them)

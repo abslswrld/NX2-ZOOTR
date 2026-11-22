@@ -33,10 +33,11 @@ HASHES = ('12786193094758345086', '10831981390482426294', '4555665598794293658')
 BIG = ('KF_KOKIRI_SWORD_CHEST', '16757992849254467386')              # a big chest (Obj_TBox_A_02)
 # the game's own chest that gives the first level
 GAME_CHEST = ('Banc/DodongoCavern/DodongoCavern_Static.bcett.byml', '12161709650443144121')
-# one check of each kind a family is refused on
-REFUSED = ('KF_RUPEE_NEAR_MIDO_ITEM', 'KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01',
-           'KF_CIRCLE_CENTER_ROCK', 'KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT',
-           'LW_NEAR_BRIDGE_SCRUB')
+# one check of each kind a family is refused on at once, and of each kind it goes on in another way than a
+# chest's (a turning item, a question in a flow: tests/families_check.py)
+REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01', 'KF_KNOW_IT_ALL_HOUSE_GS')
+OTHER_WAYS = ('KF_RUPEE_NEAR_MIDO_ITEM', 'KF_CIRCLE_CENTER_ROCK', 'KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_01',
+              'KF_CIRCLE_KOKIRI_GIFT', 'LW_SARIA_GIFT', 'LW_NEAR_BRIDGE_SCRUB')
 SETTINGS = ('Component/Blackboard/BlackboardParamTable/'
             'Drop_TreasureBox_A_06.engine__component__BlackboardParamTable.bgyml')
 HOLDER_KINDS = 99                                  # the game's ActorHolderParam files (tests/size_check.py)
@@ -123,8 +124,9 @@ def main(romfs):
         return item
 
     # the family and its names
-    good &= check('the three-level families: the bomb bags, first level first',
-                  build_mod.THREE_LEVEL_FAMILIES == {FAMILY: 'BombBag'}
+    good &= check('the three-level family looked at here: the bomb bags, first level first (every family: '
+                  'tests/families_check.py)',
+                  build_mod.THREE_LEVEL_FAMILIES.get(FAMILY) == 'BombBag'
                   and not any(set(p) & set(FAMILY) for p in build_mod.PROGRESSIVE_PAIRS))
     data = byml.loads(plain(GAME_DATA)).root['Data']
     saved = {kind: {int(e['Hash']) for e in data[kind]} for kind in ('Bool', 'Int')}
@@ -174,8 +176,11 @@ def main(romfs):
                   and refused(build_mod.three_level_parse, world,
                               [(CHECKS[0], 'Item_Scale_Silver>Item_Scale_Gold>Item_Hookshot')])
                   and FAMILY[:2] not in build_mod.PROGRESSIVE_PAIRS and FAMILY[1:] not in build_mod.PROGRESSIVE_PAIRS)
-    good &= check('refused: on a freestanding item, a shelf, a pot, a rock, a bush, a Gold Skulltula, a gift and '
-                  'a scrub', all(refused(build_mod.three_level_parse, world, [(c, text)]) for c in REFUSED))
+    good &= check('refused: on a shelf, a pot and a Gold Skulltula',
+                  all(refused(build_mod.three_level_parse, world, [(c, text)]) for c in REFUSED))
+    left = [(c, text) for c in OTHER_WAYS]
+    good &= check('left as it is for the other ways: on a freestanding item, a rock, a bush, a gift and a scrub',
+                  build_mod.three_level_parse(world, left) == {} and left == [(c, text) for c in OTHER_WAYS])
     old = plain(MIDO[0])
     good &= check('refused: in a big chest (the Kokiri Sword chest)',
                   build_mod.three_level_parse(world, [(BIG[0], text)]) == {BIG[0]: FAMILY}

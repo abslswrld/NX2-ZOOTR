@@ -120,8 +120,8 @@ def main(romfs):
             return ground_items.ground_name(item, 'held')
         return item
 
-    good &= check('the pairs: scales, hookshots, ocarinas',
-                  build_mod.PROGRESSIVE_PAIRS == {PAIR, HOOKSHOTS, OCARINAS})
+    good &= check('the pairs looked at here: scales, hookshots, ocarinas (every family: tests/families_check.py)',
+                  {PAIR, HOOKSHOTS, OCARINAS} <= build_mod.PROGRESSIVE_PAIRS)
     rows = {t: {r['__RowId']: r for r in byml.loads(plain(ground_items.table_path(t))).root}
             for t in ground_items.TABLES}
     data = byml.loads(plain(GAME_DATA)).root['Data']
