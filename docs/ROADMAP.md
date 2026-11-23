@@ -82,6 +82,8 @@ Parts, in order:
    is created. Tested in the forest: a new file that already has a chosen item and flag. Later used by "start
    with" keys, Zelda's Letter and Impa's item (D18), starting as adult, full wallets and the open options.
    Unknown settled here: can it set flags as well as items?
+   **Built 2026-11-23, waiting for its in-game test:** `--start ITEM` and `--start-flag NAME=VALUE` add to the
+   game's own new-file list (`Sequence/SetPouchAndStatusForGameStart`), which runs before Kokiri Forest loads.
 2. **The Forest Temple's data** (D25, D26): check IDs, regions and logic rules for its 46 spots (12 chests, 5 Gold
    Skulltulas, 28 pots, 1 loose item) plus the boss heart and the Medallion. No game changes: test scripts only.
 3. **Items on the Forest Temple's checks:** random items in its chests, pots, Gold Skulltulas and loose item, keys
@@ -206,7 +208,7 @@ models; barren and "always" hints; trade quest items.
 ## Unknowns (each settled in the phase named; each failure comes back to you as a decision)
 | Unknown | Phase |
 |---|---|
-| Starting state: setting flags as well as items on a new file | 1 |
+| Starting state: setting flags as well as items on a new file | **Answered from the game's files 2026-11-23: both**, to confirm in game (part 1's test). The game's own new-file list (`Sequence/SetPouchAndStatusForGameStart`) takes one more item push per item and one more setter per flag (Bool, Int, String64). Not covered yet: struct fields (hearts, rupees), items kept under another inventory name (Fairy Slingshot, Fairy Bow, gauntlets), per-placement flags (an opened chest) |
 | Keys placed outside their dungeon; "start with" keys | 1 |
 | Debug-menu warp leaves areas untouched | **Settled 2026-11-23:** a new file warped into the Forest Temple keeps its doors locked and 0 small keys |
 | Shortening each cutscene and keeping what it sets | 1 (list), then every area |

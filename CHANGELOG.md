@@ -4,6 +4,78 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
+### Phase 1, part 1: the starting state of a new file (to test in game)
+New builder options: `--start ITEM` or `--start ITEM=N` puts an item in the inventory of every new file, and
+`--start-flag NAME=VALUE` sets a flag on it. Later parts reuse this for "start with" keys, maps and compasses,
+Zelda's Letter, starting as adult, full wallets and the "open" options.
+
+- **The roadmap's unknown, answered from the game's files: both. Items and flags can be set on a new file, in
+  the same place.** Whether it holds in game is this part's test (`out\TEST_CHECKLIST.md`).
+- **Where the game sets up a new file** (read from its own files):
+  - The new-game sequence `Sequence/Opening.module.ainb` runs `Sequence/SetPouchAndStatusForGameStart.module.ainb`
+    once: after the title screen's map is gone (`ChangeBanc`, `DoAfterDestroyBanc`) and before it asks for the
+    event that loads Kokiri Forest (`Opening_LoadingKokiriForest`). No other sequence runs that module.
+  - That module is the game's own list of what a new file has. Four `SeqOneShotPushToPouch` nodes give the small
+    wallet (`Item_Wallet_Small`), the adult tunic (`Armor_Adult_Normal`) and the two green tunics
+    (`Obj_Armor_Child_Normal`, `Obj_Armor_Adult_Normal`), each named by its actor file
+    (`Work/Actor/<item>.engine__actor__ActorParam.gyml`) with a count (`Num`). Five `SeqOneShotSetGameDataInt`
+    nodes set `PlayerStatus`: `Life` 12 and `MaxLife` 12 (three hearts), `MP`, `MPEconomy`, `MPMax` 0.
+  - Everything else a new file has is the flag's default in `GameData/GameDataList`. Example: Mido's
+    `KokiriForest_Npc_Kokiri_Mido_Child_Blocker` is `true` by default; the game's flows only ever set it to
+    `false` (`Npc_Kokiri_Mido_Child`, twice).
+  - The sequence has a setter node per flag type: `SeqOneShotSetNonStructGameDataBool`, `...Int`,
+    `...String64` (also `...Float`, `...Enum`, `...Vector3`, not used yet). The game uses the first three in
+    `Sequence/DestroySceneCommon.module.ainb`.
+  - The opening's event flow (`OpeningEvent`: `Opening_LoadingKokiriForest`, then `Opening_Introduction`) and
+    `--fix skippable_opening` are not involved: the fix only removes the opening cutscene's "DisableSkip"
+    setting. The flows could also give items (`PouchSystemActor.EventTriggerAddOrRemovePouchContent`) and set
+    flags (`GameDataActor.EventTriggerSetGameDataBool` / `Int` / `String64`), but the sequence module is where
+    the game itself does it, and it doesn't depend on a cutscene being played or skipped: it is the one used.
+- **How it is built** (`tools/start_state.py`, called by `tools/build_mod.py`):
+  - A starting item is one more `SeqOneShotPushToPouch` node: a copy of the wallet's node with the item's actor
+    file and count, linked under the module's group of pushes.
+  - A starting flag is one more setter node: a copy of the game's own setter of that type (from
+    `DestroySceneCommon`) with the flag's name and value, linked under the module's group of status sets.
+  - The game's 17 nodes are not changed; the new nodes come after them. The module's size table entry follows
+    the game's rule for `.ainb` files (5,916 bytes: 6,296; with one item and one flag 6,627 bytes: 7,032).
+  - Read back before it is written: the game's nodes are unchanged but for the two groups' new children, every
+    new node is the game's node it was copied from with only the item and count, or flag and value, different,
+    and nothing else in the file changed.
+- **What is accepted:**
+  - An item must be an inventory item under its own name: a row in `RSDB/PouchActorInfo` and the saved pair
+    `IsGet.<item>` / `PouchData.<item>.StockNum`. Three of the game's four pushes are; the fourth
+    (`Obj_Armor_Adult_Normal`) has a row but no pair, so the game also pushes names that stand for another
+    inventory item. That case is **not tried yet and is refused for now**: the Fairy Slingshot and Fairy Bow as
+    they are placed (`Item_Range_SlingShot`, `Item_Range_Bow`) and the gauntlets (kept as armour:
+    `Armor_Child_Gauntlet_Goron`...).
+  - The item rules hold: nothing the game never gives as such (the small bags, the small wallet), and a later
+    level of an upgrade family only with every level in front of it (`--start Item_Longshot` asks for
+    `--start Item_Hookshot` too).
+  - A flag must be a Bool (`true` / `false`), an Int (a number) or a String64 (text) of `GameDataList`, saved
+    in the save slot (`slot_NN/progress.sav`), and not a field of a struct (`PlayerStatus.MaxLife`,
+    `IsGet.<item>`: the plain setters don't take those). A `BoolExp` is worked out from other flags and cannot be
+    set. A flag the game also resets at other times (reset type other than 8) is set with a printed NOTE.
+  - Everything refused stops the build before anything is written, with the reason.
+- **Not covered yet** (for the parts that need them): struct fields (hearts, magic, rupees: the module's own
+  `SeqOneShotSetGameDataInt` on `PlayerStatus` is the pattern), Enum and Float flags, items under another
+  inventory name, and the per-placement flags (`Bool64bitKey`: an opened chest, a taken heart piece), which have
+  no name to set.
+- **Tests:** `tests/start_state_check.py` (new, in `run_tests.bat`): where the game sets up a new file and what it
+  gives and sets there, read from its files; 5 items and one flag of each type added and read back; the
+  read-back stops 9 kinds of wrong file; 23 refused requests; whole builds (only the module and the size table
+  are written; a refused request leaves the earlier build untouched; a build without the options doesn't
+  touch the module).
+- **Test build** (`out\mods\NX2-ZOOTR`, checklist `out\TEST_CHECKLIST.md`): a new file starts with the
+  **Boomerang**, and Mido's blocking flag is off, so he should let Link through to the Deku Tree without the
+  sword and shield. Nothing is sold, so no gold rupee. Built with:
+
+      py -3 tools\build_mod.py --romfs "<romfs>" --out out\mods --name NX2-ZOOTR --fix skippable_opening --start Item_Boomerang --start-flag KokiriForest_Npc_Kokiri_Mido_Child_Blocker=false
+
+  What the flag does, from the forest's logic modules: while it is true,
+  `Logic/KokiriForest_Child_Level_All_02_35ae` keeps two areas in front of Mido that turn on
+  `KokiriForest_Npc_Kokiri_Blocker` when Link steps in; with it false those areas are removed.
+- **In-game result:** not tested yet.
+
 ### Roadmap to the public beta (docs only)
 - `docs/ROADMAP.md`: the approved plan of action, in priority order: the Forest Temple first, then every area in
   game order, then the generator and the app, your own seeds, a quiet early stage on Discord, and the public beta.
