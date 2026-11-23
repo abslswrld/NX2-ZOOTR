@@ -2,6 +2,407 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-22
+
+### Families on Gold Skulltulas are turning items too (passed in game)
+The user's choice after rocks, bushes and pots passed. A family on a Gold Skulltula is now the one-time turning
+item a rock drops.
+- **In game (2026-11-23): everything passed.**
+  - Run 1:
+    - Saria's rock: the Fairy Slingshot, 30 seeds.
+    - The Gold Skulltula above the Deku Theater: a slingshot that turned into the bigger seed bag (40). It
+      landed where Link could reach it.
+    - The shop bushes: a slingshot that turned twice, into the biggest seed bag (50).
+    - The House of Twins pot: the Silver Scale.
+    - The Know-It-All house Gold Skulltula, at night: a Silver Scale that turned into the Gold Scale. It
+      landed where Link could reach it.
+    - Done once: nothing came back after leaving the area.
+  - Run 3: two slingshots lay at once (Saria's rock and the shop bushes). After Link took Saria's, the
+    one at the shop bushes turned into the bigger seed bag (40).
+  - No level was skipped or given twice, and no spot dropped nothing.
+  - Run 2: the Fairy Bow from Mido's chest (a chest Bow, which uses the game's own pose) is **also held up
+    too high** for young Link. So the high pose is the game's own Bow pose: the game never gives young Link
+    the Bow, and its pose fits adult Link. It is not caused by our lifted ground pose. The user: fine to
+    leave it if it can't be fixed.
+
+How it works:
+- the skulltula's placement names the first level's `Obj_NX2Q_` version (`Drop__DropActor`, as a plain item on
+  a skulltula already does). The skulltula hands its flag to what it drops as it does to its token, and the item
+  marks it the way the token does: when picked up, or when it turns into the next level;
+- no AI is added to the skulltula (it hands its flag by itself), and the drop code's lists, the skulltula's pack
+  and the `Obj_NX2S_` drops are no longer in a build. `tools/skulltula_items.py` and `tools/drop_tables.py` stay,
+  but no build uses their family code now;
+- the same known limit as on rocks: if Link already owns the level that comes out, it marks the skulltula as
+  it turns, so a next level left lying is lost;
+- not known yet: where an item falls from a skulltula high on a wall (a rock's item lands at its feet);
+- tests: the whole-builds part of `tests/skulltula_prog_check.py` now checks the turning items: the
+  placement, every level's version in the mod, and nothing of the drop code's way in the mod.
+
+### Families on rocks, bushes and pots are turning items again (Run 1 passed in game)
+After four in-game tries (below) the game never put a lower level in place for our drops. At the user's choice
+("try 2"), rocks, bushes and pots go back to the version from before that work.
+- **In game, Run 1 (2026-11-22): all passed.**
+  - Saria's rock: the Fairy Slingshot, 30 seeds.
+  - The shop bushes: a slingshot that turned into the bigger seed bag (40).
+  - The House of Twins pot: the Silver Scale.
+  - The Know-It-All rock: the Fairy Bow turned into the bigger quiver, then the biggest quiver (50).
+  - Done once: no rock, bush or pot came back after leaving the area.
+  - Items work indoors. The earlier problem was bombs and the Boomerang **picked up** inside a house: they did
+    nothing until Link left. That is still open.
+  - The 5 rupees from bushes are the game's own: the Kokiri outside Saria's house gives them as a gift for
+    cutting the bushes. Not ours.
+  - The Fairy Bow is still held up too high when taken (this time from the rock). Run 2 (the chest Bow) was
+    not done, so it is still unknown whether that pose is ours. Run 3 (two of one family lying at once) was not
+    done either. (Both were done in the next test: see above.)
+
+How it works:
+- the drop is the family's **first** level as its one-time turning item (`Obj_NX2Q_<level>`). While it lies
+  there and Link owns its level, it marks the rock, bush or pot and turns into the next level, and again for a
+  third level. Players can see it change;
+- `TURN_KINDS` holds rocks, bushes and pots again, and `DROP_KINDS` is empty (`tools/build_mod.py`). The drop
+  table code stays for Gold Skulltulas only;
+- the dropper still never renames its drop (that crashed the game);
+- **Gold Skulltulas are unchanged**: a family there still relies on the swap that never happens, so it drops
+  nothing where a lower level is needed. They have no family in this test (changed in the next step: see
+  above);
+- tests: `tests/one_time_check.py` is the turning version again, and `tests/pairs_more_check.py` and
+  `tests/families_check.py` check turning items on rocks, bushes and pots again. Each keeps the other
+  branches' changes (pairs on Gold Skulltulas, the seven lifted poses).
+
+### Families on rocks, bushes, pots and Gold Skulltulas drop from a drop table of ours (dropped, see above)
+- **Why** (research: `out/RESEARCH_drop_tables.md`): the in-game test showed that the drop rules' fallback rows
+  were never applied to an actor a placement names directly. The game's files show the rows belong to drop
+  tables: every table item has `IsReplace: True`, and a table can switch the unlock rule off for itself
+  (`NotReplaceOnUnlockCondition`). The game's own rocks mostly name a table (`Drop__DropTable`), and a Gold
+  Skulltula drops its token from the one table of its drop part (and that token still marks the skulltula).
+- **What is done** (new `tools/drop_tables.py`):
+  - each family gets a drop table of ours with one item, its last level's drop (`Type` 126134492, the kind of
+    item that names one actor, as Gohma's heart; `IsReplace: True`): `NX2_<last level>` on rocks, bushes and
+    pots, `NX2_GS_<last level>` on Gold Skulltulas (made from the token's table);
+  - the tables are listed in a drop part of our own name (a copy of the actor's, the game's tables first), and
+    the rock's, bush's, pot's or skulltula's file names it (`DropRef`). No game file changes content: a game file
+    read from another pack could be kept as it was;
+  - the placement names the table (`Drop__DropTable`) and no actor, set in the map as the game does (no AI
+    writes it);
+  - the droppers' added AI also hands over its mark when its placement names a table starting with `NX2_`
+    (a second copy of the skulltula's three nodes);
+  - the rows, the `Obj_NX2S_` drops and both safety nets stay. Plain items keep their direct `Drop__DropActor`;
+  - the insect bushes' drop part has no one-actor table to copy: the rock's is the shape copied;
+  - size rules from the game's own files (`tools/sizes.py`): a drop part 5136 + 8 per table listed (65 files),
+    a drop table 5112 + 8 per sub-table (102 files).
+- **Not proven:** that the rows apply to a table item naming one actor; that a replacement is replaced again
+  (three levels); that a Gold Skulltula draws from `Drop__DropTable`.
+- **In game (first try): still no drops** where a lower level was needed (the user stopped the run). Longshot's
+  log: when the area loaded, the game loaded each table's item (the last levels: `Obj_NX2S_BulletBag_Large`,
+  `Quiver_Large`, `Scale_Gold`), and never loaded a lower level during the whole session.
+- **Then: the lower levels are kept loaded.** Every actor the game's own rows put in place (the green rupee, the
+  heart) is on the drop code's list of actors kept loaded everywhere (`SharePreLoadActorList` in
+  `DropGlobalParam`). The game seems to load only what a placement or table names, plus that list, so a
+  replacement had nothing loaded to drop. Each level the rows put in place is now added to that list (one each;
+  `skulltula_items.preload`); the game's entries are unchanged. Size: 256 per entry (upper bound, as for the
+  rows). Not proven: that this was the cause (the replacement could also not happen at all).
+- **In game (second try): still nothing from Saria's rock.** Longshot's log: the game loaded only the first 16
+  entries of that list. 14 are the game's own, so ours 15 and 16 (`Obj_NX2S_Quiver_Medium`, `Range_Bow`) were
+  loaded, and the bigger seed bag, the Slingshot and the Silver Scale were not. So the list is no way in, and
+  the preload addition is taken out again (the list is as the game has it).
+- **Then: each table lists the lower levels itself, with chance 0.** A sub-table picks one item by weight (the
+  game's weights add up to 100), and the game's own tables list items with weight 0 (Gohma's: the heart at 100,
+  three others at 0). Our table for a family is now its last level at 100, then each lower level at 0 (and bad
+  luck rate 0), highest first: `NX2_BulletBag_Large` is BulletBag_Large 100, BulletBag_Medium 0, Slingshot 0.
+  They are never picked; the idea is that the area loads every actor its tables name, as it loaded the last
+  levels. Size rule from the game's files: a sub-table 5336 + 136 per item (79 of its 80 files exact; one test
+  table of the game's has 4 more). Not proven: that the area loads the items at chance 0.
+- **In game (third try): still nothing from Saria's rock**, but the loading works: Longshot's log shows every
+  level (`BulletBag_Medium`, `Range_SlingShot`, `Quiver_Medium`, `Range_Bow`, `Scale_Silver` with the last
+  levels) loaded with Kokiri Forest. So loading was not the cause. Left: either the game never replaces, or
+  it replaces once only. Saria's rock needs two replacements (biggest bag -> bigger bag -> Slingshot), and a
+  bigger bag that comes out without the Slingshot owned deletes itself (the safety net), which also looks like
+  nothing. Next: a spot with one replacement (the House of Twins pot: Gold Scale -> Silver Scale).
+- **In game (fourth check, same build): the House of Twins pot dropped nothing either.** One replacement does
+  not happen: the game never puts the lower level in place for our drops, though our rows are shaped like the
+  game's own (a target, a condition, one replacement at 100, and an unlock entry naming an `IsGet.` flag).
+  The Gold Scale that comes out is deleted by its safety net (no Silver Scale owned).
+- **Tests:** `tests/skulltula_prog_check.py`, `tests/one_time_check.py`, `tests/pairs_more_check.py` check the
+  map settings, the drop parts and the tables in whole builds.
+
+### In-game results of the combined test (gossip, raised items, Gold Skulltulas, one-time drops, pots)
+Run 1 only; runs 2 and 3 were skipped because of the drop problem below.
+- **Gossip stones: all passed.** The three Kokiri Forest stones and the bridge stone say their test text (the
+  stone speaks, not Navi; highlight, line break, two boxes and the page break all fit). A sword hit still
+  tells the time.
+- **Raised items:** the Bow (Fado's ledge), Silver Gauntlets, Golden Gauntlets, Bomb Bag, Hookshot and Longshot
+  lie on the ground correctly. The right hook shows on each. **The Fairy Bow is held up far above Link's hands**
+  (screenshot). Not yet known whether that is our lifted pose or the game's own look for the Bow.
+- **Mido's chests:** bigger quiver and Goron Bracelet, correct.
+- **Bombs and Boomerang unusable until a scene change:** the Bomb Bag (Saria's floor) and the Boomerang (Know-It-All
+  pot) arrive in the inventory, but the button does nothing until Link leaves the house. Both were picked up
+  indoors; not yet known whether the game blocks those items inside houses.
+- **One-time drops:**
+  - pot: Boomerang left lying, the pot is back with it after re-entering; taken, the pot stays gone, also after
+    save, quit and reload. **Works.**
+  - rocks: the red-rupee rock and the Know-It-All rock stay gone. But the plain witness rocks and bushes did not
+    come back either, so this does not prove the rocks' mark yet.
+- **Families chosen by the drop list (rocks, bushes, pots, Gold Skulltulas): only half works.**
+  - Know-It-All rock, Bow family with the Bow and bigger quiver owned: the **biggest quiver came out at once**.
+    This is the one case where no replacement was needed (the drop named is the right one).
+  - **Every case that needed a replacement dropped nothing:** Saria's rock and the shop bushes (Slingshot family,
+    nothing owned), the Gold Skulltula above the Deku Theater (same family), the House of Twins pot and the
+    night Gold Skulltula (scales, nothing owned).
+  - So the game did **not** replace the drop with the lower level, and the safety net removed the too-high level
+    (nothing wrong was given, no level skipped). The rows are either not used for a drop a map names directly,
+    or the replacement fails.
+- Noted: the spot `KF_RUPEE_NEAR_MIDO_ITEM` (Silver Gauntlets) is in the water near the shop. Cutting bushes
+  gives 5 rupees.
+- No freeze or crash.
+
+### Custom gossip stone text (branch `claude/gossip-text`)
+A new builder option sets what a gossip stone says. It is the groundwork for hints. **Not tested in game yet.**
+- **How the game picks a stone's text** (read from the game's files):
+  - Every stone runs the same flow, `GossipStone`, entry `Talk`.
+  - The stone's own text is one step of that flow. It shows the text of `EventFlowMsg/GossipStone.msbt` whose
+    label is the stone's name in the map (for example `GOSSIP_KOKIRI_FOREST_01`). Each stone has its own text.
+  - The flow only gets there when Link owns the Mask of Truth and wears it. Without it, Navi talks instead.
+    The mask is a child's item, so an adult never hears a stone. The stone also says an opening line about the
+    mask first, and a closing line after. Nothing depends on the time of day.
+  - The stone's own AI can tell which stone it is: the question `EventQueryGossipStoneCheckInstanceName`
+    answers a number per stone name (0 to 39, 40 for any other name). No game flow asks it.
+- **The option:** `--gossip STONE=TEXT`, once per stone.
+  - `STONE` is the stone's check ID (`KF_NEAR_LOST_WOODS_GOSSIP`) or its name in the map
+    (`GOSSIP_KOKIRI_FOREST_01`). The name in the map works for stones in areas not mapped yet.
+  - In `TEXT`: `\n` is a new line, `\p` a new page, `{...}` is highlighted. Quote the whole argument.
+  - The same English text goes into all 16 language archives, as with the scrub lines.
+  - A bad `--gossip` (not a stone, a text that breaks a limit) stops the build before anything is written.
+  - It works alone or together with item placements and fixes.
+- **What the builder changes:**
+  - The chosen stones' texts in `GossipStone.msbt`, in every language. Every other text stays the game's.
+  - The `GossipStone` flow: `Talk` now first asks the stone which stone it is. A chosen stone does the talk
+    set-up the game uses with the mask, says its text, and ends. No mask needed, no opening or closing line,
+    and the "first time with the mask" flag is not set. Every other stone goes to the game's own first step, so
+    it behaves as before. The time-telling and the ocarina fairy are other entries and are not touched.
+  - So the chosen stones speak to a child without the mask, and to an adult too.
+  - The size table gets the new entries of the flow and the 16 archives (`tools/sizes.py`, through `Output`).
+- **Layout, copied from the game's rumours:** every rumour starts with colour 1, size 80 % and the dialogue
+  start tag. A new page repeats the size and colour (as `GOSSIP_LOST_WOOD_01` does). Lines are broken by hand.
+  - A highlight is colour 0, the game's usual highlight colour. After it the text goes back to colour 1, the
+    rumour's own colour. Only this one highlight colour is offered: the game's text uses few colours.
+- **Limits:**
+  - 65 characters a line (the longest line of the game's English rumours). Longer lines are wrapped at spaces.
+    The font is proportional, so this is a guide, not exact.
+  - 2 lines a page (every rumour has 1 or 2). A third line starts a new page.
+  - 8 pages at most (the most any game message has).
+  - Only characters the game's English text uses. `{`, `}` and `\` are never text. The build notes any
+    character a language's own messages never use (its font may lack it). None of the test texts has one.
+- **Test:** `tests/gossip_check.py`, in `run_tests.bat`. It reads the game's files, checks the option and the
+  layout, edits the flow and reads it back, and runs whole builds into a temporary folder. It checks that the
+  chosen stones say the new text in every language, that every other text and file is the game's, that other
+  stones still go to the mask question, and that the size entries are right. A build with a scrub too keeps
+  both the scrub line and the stone texts.
+- **To test in game** (child Link, new game, no Mask of Truth). The four stones a child reaches in Kokiri
+  Forest and at the bridge (the Lost Woods map has only the bridge stone):
+
+  | Stone | Where | Message |
+  |---|---|---|
+  | `KF_NEAR_LOST_WOODS_GOSSIP` | Up on the ledge with the Lost Woods entrance, behind Mido's house. Reachable at once. | Test 1: one page, two lines (wrapped), "Lost Woods" highlighted. |
+  | `KF_DEKU_TREE_GOSSIP_01` | Past Mido, in the Great Deku Tree's clearing: the stone nearer the tree. Needs the sword and shield. | Test 2: two lines, from a line break. |
+  | `KF_DEKU_TREE_GOSSIP_02` | The same clearing: the stone farther from the tree. | Test 3: a long text over two pages. |
+  | `LW_BRIDGE_GOSSIP` | Beside the bridge to Hyrule Field, past the forest exit, near where Saria waits. Needs the forest open (after the Deku Tree). | Test 4: two pages, from a page break. |
+
+  Build arguments (from the worktree):
+
+  ```
+  py -3 tools\build_mod.py --romfs "C:\Users\4bsol\Games\Longshot\romfs" --out out\mods --name NX2-ZOOTR --gossip "KF_NEAR_LOST_WOODS_GOSSIP=NX2-ZOOTR test 1 of 4: this stone by the {Lost Woods} speaks without the Mask of Truth." --gossip "KF_DEKU_TREE_GOSSIP_01=NX2-ZOOTR test 2 of 4: the Deku Tree stone nearer the tree.\nThis is the second line, after a line break." --gossip "KF_DEKU_TREE_GOSSIP_02=NX2-ZOOTR test 3 of 4: the Deku Tree stone farther from the tree. This message is long on purpose, so that it does not fit in one text box: the builder wraps the words into lines and carries on in a second box." --gossip "LW_BRIDGE_GOSSIP=NX2-ZOOTR test 4 of 4: the stone by the bridge to Hyrule Field.\pThis second page was asked for with a page break."
+  ```
+
+  To watch for: the stone itself speaks (not Navi); the highlight colour; whether two lines of 65 characters
+  fit the box; a Sacred Forest Meadow stone (not chosen) still gives Navi's lines; a sword hit still tells the
+  time. If the four stones still give Navi's lines, the stone's question did not answer as read from its AI.
+- **Not done:** hints themselves, other stones' places, the frozen adult Zora's Domain stone, launched stones
+  that disappear (`GossipStoneDisappear.<name>`). Not built into `out/mods`.
+
+### The last seven items lie on the ground, not in it (branch `claude/lift-seven`)
+The seven levels left low on 2026-11-21 ("their models hang on several bones"). **Not yet tested in game.**
+- **Why they were left.** Their models hang on many bones, and their ground pose (`Pose_Common`) places every bone:
+  19 for the slingshot, 10 for the bow, 77 and 73 for the gauntlets, 5 for the first bomb bag, 19 for the hookshot.
+  The lift so far only knew models on the one bone `Skl_Root`. And the copy that keeps the held-up pose (made of the
+  magic jar's project) only has two bones, so it cannot hold their pose.
+- **Measured, every bone posed** (`posed_points` in `tools/item_pose.py`). Every vertex, through the skeleton:
+  vertices on one bone move with it, skinned vertices (on up to eight bones) move with each bone by its weight.
+  Found in the game's files: these skeletons use Maya's scale mode, and almost every bone undoes its parent's
+  size before its own ("segment scale compensate"). Without that the gauntlets' pose comes out 2.3 m under the
+  ground; with it they fit in a 0.44 m box. The rough numbers of 2026-11-21 were taken without it, so they were
+  wrong. Checks of the measure: with no pose, the shapes the game shows give exactly the box of `ActorInfo`, for
+  all seven. For every other lifted item the new measure gives the same lowest vertex as before (to 0.000001).
+- **Lowest vertex, while spinning, before -> after** (the lift in brackets):
+
+  | Item | before | after |
+  |---|---|---|
+  | Fairy Slingshot | -0.149 | +0.050 (+0.199) |
+  | Fairy Bow | -0.378 | +0.050 (+0.428) |
+  | Silver Gauntlets | -0.163 | +0.050 (+0.213) |
+  | Golden Gauntlets | -0.163 | +0.050 (+0.213) |
+  | first Bomb Bag | -0.143 | +0.050 (+0.193) |
+  | Hookshot, Longshot | -0.200 | +0.050 (+0.250) |
+
+  The Hookshot and the Longshot are one model and one project. Their lowest vertex is on the body both show, so one
+  copy is exact for both (`GROUND_LIFT_AS`). Shapes the game hides (the slingshot's two seeds, the other hook) are
+  counted too; the test checks they never lie lower than the shown ones.
+- **How it is lifted.** Every vertex hangs on `Skl_Root` or a bone below it, and the pose leaves `Root` alone. So
+  raising the height of `Skl_Root` raises the whole model, and nothing else changes. The copy is the item's own
+  project under a new name of the same length (`NX2Gnd_Range_SlingShot_Animation`, `NX2Gnd_Range_Bow_Animation`,
+  `NX2GA_Adult_Gauntlet_Silver_Animation`, `NX2GA_Adult_Gauntlet_Gold_Animation`, `NX2G_BombBag_Small_Animation`,
+  `NX2G_Hookshot_Animation`). One animation is added to it: `Pose_GetDemo`, a copy of the game's `Pose_Common`,
+  every bone, with values of its own. Then only the height of `Skl_Root` in `Pose_Common` is changed.
+  - **Held up: the game's pose.** Held up, the game shows `Pose_GetDemo` first (`AS/Item_Common`). In the copy it is
+    the game's ground pose, bone for bone, so Link holds each item as now.
+  - **How the animation is added** (`add_pose_copy`): nothing in the file moves. The new parts go between the
+    strings and the relocation table: the new animation, its bones and values, a new list of the animations and
+    its dictionary. The header then points to the new list, and the relocation table lists the new offsets. The
+    dictionary is built the way the game's are: the builder gives back all 1,284 dictionaries of the game's
+    animation files exactly, and finds every name the way the game walks it. The copies are 1 to 9 KB larger
+    than the game's files; their size entries keep the game files' headroom.
+  - Chests, shelves and the held-up versions keep the game's files. Only the ground, Gold Skulltula drop and
+    turning versions of these seven use the copies.
+- **To know:**
+  - the bow's pose stands it upright, 0.86 m tall: it now spins standing on its tip;
+  - the hookshot's model picks its hook (short or long) with a visibility animation that its model settings name
+    by a path in the game's own project (`Item_Hookshot_Animation`), not in the actor's animation list. The game
+    does load such animations by path for other actors (Twinrova uses Kotake's), so the right hook should still
+    show. If both hooks or the wrong one show in game, this is why;
+  - the copies are the first files where the builder adds to a game file's structure (before, it only changed
+    values). Read back in every way known, but only the game can say it accepts them.
+- **Unchanged, byte for byte:** every other item in every version (ground, Gold Skulltula drop, turning, held up),
+  1,559 builds, against the builder of `main` (68e5e89); the held-up versions of these seven too. The test holds one
+  checksum over them all, and the checksums of the six new copies.
+- **Files:** `tools/item_pose.py` (the posed skeleton, bone visibility, the relocation table and dictionaries,
+  `add_pose_copy`; the list of animations is read from the file's header now, the same for all 1,427 game files),
+  `tools/ground_items.py` (the seven listed, `many_bones`, `skeleton_low`, `lifted_with_held`, the name rule for
+  `Armor_` projects), `tests/ground_lift_check.py`, `tests/families_check.py` (all 26 levels are lifted now).
+  Three tests held the hookshots as unlifted and were brought in line: `tests/ocarina_fix_check.py` (the ground
+  Hookshot's and the turning pair's checksums, taken again; main's old ones were checked first),
+  `tests/ground_prog_check.py` (measures a model on many bones with every bone posed, allows the larger copy),
+  `tests/pairs_more_check.py` (3 lifted copies in its whole build, not 2).
+- **Tests:** `tests/ground_lift_check.py`, 9 lines more: the seven listed, the Longshot on the Hookshot's copy;
+  their poses place many bones; their models read right (the box); hidden shapes never lower; the lowest vertex as
+  measured, 0.05 above the ground on the copy; held up every bone the game's; every animation found by name, every
+  new offset listed; the six copies' checksums; the new measure agrees for every other lifted item; every other
+  build as before. The older lines now cover the seven too. ALL OK. The whole `run_tests.bat` in the worktree:
+  edit_check and evfl_add_check all OK; chest_check, ocarina_fix_check, ground_prog_check, ground_lift_check,
+  three_chest_check, gift_check, saria_check, pairs_more_check, skip_level_check, families_check: ALL OK; round trip
+  as before (650 event flows identical, 264 not read, 5 BYML files differ: the known ones).
+- **Check build** (scratch folder, no fixes): `KF_RUPEE_NEAR_FADO_ITEM_01` Fairy Bow, `KF_SARIAS_HOUSE_HEART_ITEM_07`
+  Fairy Slingshot, `_03` first Bomb Bag, `KF_TRAINING_AREA_RUPEE_ITEM_01` and `_02` Hookshot > Longshot,
+  `KF_SARIAS_HOUSE_HEART_ITEM_02`, `KF_SHOP_RUPEE_ITEM` and `KF_RUPEE_NEAR_MIDO_ITEM` Goron Bracelet > Silver >
+  Golden Gauntlets. Read back from the written files: each pack names its copy, each copy has the checksum the
+  test holds and ends with `Pose_GetDemo`. (Saria's floor hearts are 1.5 m apart: two levels of one family cannot
+  both go there.)
+- **Not yet tested in game.** To look at: each of the seven lies just above the ground while it spins (not in it,
+  not floating); held up, Link holds it as the game does; the hookshot and longshot show the right hook.
+
+### Upgrade families on Gold Skulltulas (branch `claude/skulltula-progressive`)
+Every upgrade family can now be placed on a Gold Skulltula, as a pair or with three levels. **Not tested in game
+yet.** The details, what is not proven and the proposed test are in `out/RESEARCH_skulltula_progressive.md`.
+- **How to place it:** as everywhere else, for example `KF_KNOW_IT_ALL_HOUSE_GS=Item_Scale_Silver>Item_Scale_Gold`.
+  The skulltula drops the lowest level Link never got. It can be mixed with chests, rocks, gifts and the other
+  kinds. The Lost Woods skulltulas have no IDs yet: use their names, in quotes
+  (`"LW GS Above Theater=Item_Scale_Silver>Item_Scale_Gold"`).
+- **Why the turning item could not be used.** A Gold Skulltula is marked done when its drop is picked up, not
+  when it dies. The skulltula hands its saved flag to the one thing it drops. Nothing in the game can pass that
+  flag on to a second item. So an item that turns into the next level would not mark the skulltula, and the
+  skulltula would come back with another level.
+- **What is done instead: the game's own drop rules choose the level, before anything is dropped.**
+  - The game has two lists for all drops. One says "this is only dropped once something is true" (bombs once a
+    scrub sells them, bugs, Deku Sticks only as a child). The other says "until then, drop this instead".
+  - The game also remembers "Link ever got this item", for every item.
+  - So the skulltula is told to drop the **last** level. One row in each list per level says: "only once Link
+    ever got the level before; until then, drop the level before". With nothing owned, that leads down to the
+    first level.
+  - Only one item comes out, dropped by the skulltula itself. It carries the skulltula's flag, like every item
+    from a skulltula in this mod (seen working on 2026-11-17). Picking it up marks the skulltula done, once.
+  - A drop left lying is gone when the area is left. The skulltula is then back and drops the right level
+    again. That is how the game treats its own tokens.
+- **A safety net against skipping a level.** Each level after the first deletes itself if Link does not own the
+  level before. So if the drop rules work differently than read, the worst case is a skulltula that drops
+  nothing. A level is never skipped.
+- **The Fairy Slingshot and the Fairy Bow come with their bag and 30 seeds or arrows**, as on rocks and bushes.
+- **Not changed:** the Gold Skulltula itself, the token, the turning items, the game's shared flows. A single
+  item on a skulltula is built as before. The game's drop-rule file only gets new rows about our own items; the
+  game's rows stay as they are. A build with no family on a skulltula does not touch that file.
+- **Not proven (only the game can show):** that the drop rules are used for an item a map names on a skulltula;
+  that the item put in place still carries the skulltula's flag; for three levels, that the rules are checked
+  twice (last level, then second, then first); that "Link ever got this" is set however he got it; that the
+  item put in place loads in time; the bag on a slingshot from a skulltula; the memory size given to the
+  drop-rule file.
+- **To watch for in game:** a skulltula that drops nothing; a skulltula that is back after its drop was picked
+  up; the first level again although Link has it; a slingshot with 0 seeds.
+- **Files:** new `tools/skulltula_items.py`; `tools/build_mod.py`; `tools/sizes.py`; new
+  `tests/skulltula_prog_check.py` (in `run_tests.bat`); one check each in `tests/families_check.py`,
+  `tests/three_chest_check.py` and `tests/pairs_more_check.py` (they expected a family on a skulltula to be
+  refused).
+- **Tests:** the new `tests/skulltula_prog_check.py` has 29 checks. It reads from the game how a skulltula is
+  marked, the two drop lists and the "ever got" flag of every level. It builds every level's item for all 11
+  families. From the rows it works out, for everything Link can own, that the skulltula drops the lowest level
+  he never got, every level once and in order, and that nothing wrong can be picked up if the drop rules do
+  less than read. Then whole builds of all 11 families on Gold Skulltulas. The full `run_tests.bat`: all 13
+  checks OK, 0 failed; the round-trip as before. logic_check: 0 failed; db_check: 0 errors; size_check: OK.
+
+### Rocks, bushes and pots drop their item once; families on pots (branch `claude/pots-one-time`)
+**Not tested in game yet.** The research, what is not proven and the proposed test are in
+`out/RESEARCH_pots_one_time.md`.
+- **The problem.** A rock, a bush or a pot comes back when the area is loaded again. It then dropped its item
+  again. With a family it gave the next level, so one check gave two levels.
+- **What is done: the Gold Skulltula's own way of being done once.**
+  - A Gold Skulltula hands its saved flag to what it drops. When that item is picked up, it sets the skulltula's
+    two saved flags (read in the game's code). The skulltula then stays gone.
+  - Every rock, bush and pot check has the same two saved flags: one that is reset, and a second one that is
+    never reset (checked for all of them).
+  - Now every randomized rock, bush and pot hands its flag to its drop, as the skulltula does. Its drop is a
+    version of the item with the token's "picked up" step: `Obj_NX2O_<item>` for a plain item,
+    `Obj_NX2Q_<level>` for a level of a family, and the Gold Skulltula version for a rupee or a heart.
+  - The rock, bush or pot gets an AI of its own name: the game's AI, unchanged, plus one branch that only acts
+    when its drop is one of ours. Game rocks, bushes and pots take the other side, which does nothing.
+  - Left lying and not picked up: nothing is marked. When the rock is back, it drops the item again.
+- **Not proven, and the key point of the test:** that a rock, a bush or a pot whose second flag is set is not
+  made again. That is what keeps a Gold Skulltula away, but its first flag is never reset either, so the files
+  do not tell which flag does it. If the rock comes back, it drops its item again, as before.
+- **Found and dropped:** the "done already?" question of the game's cow skulls and hanging signs does not work
+  for rocks, bushes and pots (it needs a setting they do not have, and it reads a named flag they do not have).
+  It is not used.
+- **Families on pots.** Every family (pairs and three levels) can now be put on a pot, as on a rock or a bush:
+  `KF_HOUSE_OF_TWINS_CHILD_POT_01=Item_Scale_Silver>Item_Scale_Gold`. The Fairy Slingshot and the Fairy Bow
+  bring their bag, the pick-up guard is the turning item's, and the drop is given once.
+- **Crash fixed (in-game test, 2026-11-22):** the game crashed near the Know-It-All rocks once Link had the Fairy
+  Bow. The rock's AI tried to rename its drop to the next level, and the game crashes when an AI writes that
+  setting (it comes from the map). The rocks, bushes and pots no longer rename their drop. A test now checks
+  that nothing we build writes such a setting.
+- **Families on rocks, bushes and pots now work like Gold Skulltulas (after the crash, at the user's request).**
+  The first fix let the item come out as placed and turn into the next level on the ground; the user did not
+  want players to see a level they already have. Now:
+  - the rock's drop names the family's last level, and the game's drop list drops the lowest level Link never
+    got in its place, before anything comes out (`tools/skulltula_items.py`, the same rows as the skulltulas);
+  - what comes out is the same actor a Gold Skulltula drops (`Obj_NX2S_<level>`, built from the token), so it
+    marks the rock when picked up exactly as it marks a skulltula. No turning item, no `Obj_NX2Q_` version;
+  - **new safety net on every family drop (skulltulas too):** a level Link already owns removes itself without
+    marking anything (two drops of one family lying at once, or the level got elsewhere while it lay there).
+    The rock or skulltula comes back later with the next level. The old net stays: a level whose level before
+    Link does not own removes itself;
+  - every level, the first included, is now an `Obj_NX2S_` actor (the first level used to be the plain token
+    version), so the first level has the safety net too;
+  - two family drops on rocks, bushes or pots closer than 2 m are refused, as two turning items are.
+- **Not proven (shared with the skulltulas):** that the game uses the drop list for a drop a map names
+  directly. If not, the drop removes itself: nothing comes out, never a wrong level.
+- **Files:** new `tools/once_items.py`; `tools/build_mod.py` (pots in `PAIR_KINDS`, `DROP_KINDS` for rocks,
+  bushes and pots, the one-time versions and droppers, the flag check); `tools/skulltula_items.py` (every level
+  its own actor, the owned-level safety net); small changes in `tools/turn_items.py` and `tools/ground_items.py`;
+  new `tests/one_time_check.py` (in `run_tests.bat`); pots added to `tests/families_check.py`; pots no longer
+  refused in `tests/gift_check.py`, `tests/ground_prog_check.py`, `tests/pairs_more_check.py` and
+  `tests/three_chest_check.py`.
+- **Tests:** the whole `run_tests.bat` passes (all checks OK; the round-trip shows only the known differences).
+  `tests/one_time_check.py`, 22 lines: the two saved flags of every rock, bush and pot check; that no game
+  placement names one of our drops; the game nodes copied; every version with the mark (and, with the mark
+  taken out, node for node the turning item); the droppers' AI read back from the files; every order of a
+  family's checks, picked up or left behind; a whole build. `tests/families_check.py` now builds all 11
+  families on the 8 pots of Kokiri Forest. `logic_check` and `db_check` pass.
+
 ## 2026-11-21
 
 ### Progressive upgrade families, everywhere a pair can go (branch `claude/progressive-families`)

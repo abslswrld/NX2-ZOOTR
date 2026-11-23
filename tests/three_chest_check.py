@@ -35,8 +35,9 @@ BIG = ('KF_KOKIRI_SWORD_CHEST', '16757992849254467386')              # a big che
 GAME_CHEST = ('Banc/DodongoCavern/DodongoCavern_Static.bcett.byml', '12161709650443144121')
 # one check of each kind a family is refused on at once, and of each kind it goes on in another way than a
 # chest's (a turning item, a question in a flow: tests/families_check.py)
-REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01', 'KF_KNOW_IT_ALL_HOUSE_GS')
+REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_KNOW_IT_ALL_HOUSE_GS')
 OTHER_WAYS = ('KF_RUPEE_NEAR_MIDO_ITEM', 'KF_CIRCLE_CENTER_ROCK', 'KF_NEAR_SARIAS_HOUSE_CHILD_BUSH_01',
+              'KF_HOUSE_OF_TWINS_CHILD_POT_01',
               'KF_CIRCLE_KOKIRI_GIFT', 'LW_SARIA_GIFT', 'LW_NEAR_BRIDGE_SCRUB')
 SETTINGS = ('Component/Blackboard/BlackboardParamTable/'
             'Drop_TreasureBox_A_06.engine__component__BlackboardParamTable.bgyml')
@@ -176,10 +177,15 @@ def main(romfs):
                   and refused(build_mod.three_level_parse, world,
                               [(CHECKS[0], 'Item_Scale_Silver>Item_Scale_Gold>Item_Hookshot')])
                   and FAMILY[:2] not in build_mod.PROGRESSIVE_PAIRS and FAMILY[1:] not in build_mod.PROGRESSIVE_PAIRS)
-    good &= check('refused: on a shelf, a pot and a Gold Skulltula',
-                  all(refused(build_mod.three_level_parse, world, [(c, text)]) for c in REFUSED))
+    # (a Gold Skulltula takes a family in a form of its own since 2026-11-22, and a pot a turning item: left to
+    # them, as a rock's is)
+    good &= check("refused: on a shelf; on a Gold Skulltula it is left to the skulltula's own form",
+                  refused(build_mod.three_level_parse, world, [(REFUSED[0], text)])
+                  and build_mod.three_level_parse(world, [(REFUSED[1], text)]) == {}
+                  and build_mod.skulltula_pair_kind(world, REFUSED[1]))
     left = [(c, text) for c in OTHER_WAYS]
-    good &= check('left as it is for the other ways: on a freestanding item, a rock, a bush, a gift and a scrub',
+    good &= check('left as it is for the other ways: on a freestanding item, a rock, a bush, a pot, a gift and a '
+                  'scrub',
                   build_mod.three_level_parse(world, left) == {} and left == [(c, text) for c in OTHER_WAYS])
     old = plain(MIDO[0])
     good &= check('refused: in a big chest (the Kokiri Sword chest)',

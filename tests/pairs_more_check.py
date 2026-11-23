@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import build_mod  # noqa: E402
 import ground_items  # noqa: E402
 import shop_items  # noqa: E402
+import once_items  # noqa: E402
 import turn_items  # noqa: E402
 from formats import zstd, byml, sarc, evfl, restbl, msbt  # noqa: E402
 from logic.world import World  # noqa: E402
@@ -41,9 +42,11 @@ CHEST = 'KF_MIDO_CHEST_01'
 SCALES = ('Item_Scale_Silver', 'Item_Scale_Gold')
 HOOKS = ('Item_Hookshot', 'Item_Longshot')
 OCARINAS = ('Item_Ocarina_Fairy', 'Item_Ocarina_Time')
-# still refused: a shelf, a pot, a Gold Skulltula, a cutscene gift, a song
-REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT',
-           'Song from Saria')
+# still refused: a shelf, a Gold Skulltula, a cutscene gift, a song (pots: tests/one_time_check.py)
+REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT', 'Song from Saria')
+# the packs that hold the rock's and the bush's own actor file: they get the AI that drops once
+ONCE_PACKS = ('Obj_LiftRock_A_01', 'Obj_LiftRock_A_02', 'Obj_LiftRock_A_03',
+              'Obj_Plant_Grass_A_01', 'Obj_Plant_Grass_A_01_Respawn', 'Obj_Plant_Grass_A_03')
 # the actors that drop what their placement names, and the drop part they share
 DROPPERS = ('Obj_LiftRock_A_01', 'Obj_Plant_Grass_A_01', 'Obj_Pot_A_01')
 DROP_PART = 'Component/DropParam/Drop_ResourceSupply_00.game__component__DropParam.bgyml'
@@ -100,8 +103,8 @@ def main(romfs):
     good &= check('a pair on a rock or a bush is a turning item, as on a freestanding item',
                   [build_mod.pair_kind(world, c) for c in ROCKS + BUSHES] == ['rock', 'rock', 'bush', 'bush']
                   and all(k in build_mod.TURN_KINDS for k in ('freestanding', 'rock', 'bush'))
-                  and 'pot' not in build_mod.PAIR_KINDS and 'skulltula' not in build_mod.PAIR_KINDS)
-    good &= check('still refused: a shelf, a pot, a Gold Skulltula, a cutscene gift, a song',
+                  and 'skulltula' not in build_mod.PAIR_KINDS)
+    good &= check('still refused: a shelf, a Gold Skulltula, a cutscene gift, a song',
                   all(refused(build_mod.pair_kind, world, c) for c in REFUSED))
     # what the game's files show: rocks, bushes and pots drop through one drop part, whose settings table holds
     # the placement's Drop__DropActor; the turning item's own drop part is built on the same base and table
@@ -343,29 +346,33 @@ def main(romfs):
         mod = lambda b, path: rd(os.path.join(b, *path.split('/')) + '.zs')   # noqa: E731
         raw = lambda b, path: open(os.path.join(b, *path.split('/')), 'rb').read()   # noqa: E731
         scales, hooks, ocarinas = ('>'.join(p) for p in (SCALES, HOOKS, OCARINAS))
-        good &= check('the build refuses: a pair on a pot, on a Gold Skulltula, on a shelf; two rocks of one '
-                      'family side by side',
-                      refused(run, 'no1', 'KF_HOUSE_OF_TWINS_CHILD_POT_01=' + scales)
-                      and refused(run, 'no2', 'KF_KNOW_IT_ALL_HOUSE_GS=' + scales)
-                      and refused(run, 'no3', 'KF_KOKIRI_CHILD_SHOP_01=' + scales)
+        # (a pair on a pot or a Gold Skulltula builds since 2026-11-22: tests/one_time_check.py,
+        # tests/skulltula_prog_check.py)
+        good &= check('the build refuses: a pair on a shelf; two rocks of one family side by side',
+                      refused(run, 'no3', 'KF_KOKIRI_CHILD_SHOP_01=' + scales)
                       and refused(run, 'no4', *[c + '=' + scales for c in CLOSE]))
         base0, _, files0 = run('fixes')
         base, said, files = run('pairs', *([c + '=' + scales for c in ROCKS] + [c + '=' + hooks for c in BUSHES]
                                            + [SCRUB + '=' + ocarinas, CHEST + '=' + ocarinas]))
-        turns = [turn_items.turn_name(x) for x in SCALES + HOOKS]
+        # the second levels' turning items (what the one-time versions turn into; a family only on rocks and
+        # bushes has no first-level turning item)
+        turns = [turn_items.turn_name(x) for x in (SCALES[1], HOOKS[1])]
+        onces = [once_items.once_name(x) for x in SCALES + HOOKS]     # what the rocks and bushes drop: given once
         held = [ground_items.ground_name(x, 'held') for x in OCARINAS]
         mals = {'Mals/' + f for f in os.listdir(os.path.join(romfs, 'Mals')) if f.endswith('.sarc.zs')}
         new_files = files - files0
         want_files = {f + '.zs' for f in (CHILD_MAP, ADULT_MAP, build_mod.SCRUB_FLOW) + SCRUB_MAPS} | mals \
-            | {ground_items.pack_path(n) + '.zs' for n in turns + held} \
-            | {ground_items.table_path(t) + '.zs' for t in ground_items.TABLES}             | {f + '.zs' for f in (build_mod.flow_path(build_mod.TBOX_SYNC_FLOW), build_mod.EVENT_SETTING,
+            | {ground_items.pack_path(n) + '.zs' for n in turns + onces + held + list(ONCE_PACKS)} \
+            | {ground_items.table_path(t) + '.zs' for t in ground_items.TABLES} \
+            | {f + '.zs' for f in (build_mod.flow_path(build_mod.TBOX_SYNC_FLOW), build_mod.EVENT_SETTING,
                                    build_mod.EVENT_INFO)}
         anims = {f for f in new_files - want_files if f.startswith('Model/NX2G') and f.endswith('.anim.bfres.zs')}
         good &= check('whole build (two rocks, two bushes, the scrub and a chest): beside the fixes\' files the '
-                      'maps, the scrub flow and lines, 4 turning items, 2 held-up ocarinas, their rows, %d lifted '
-                      'poses' % len(anims),
+                      'maps, the scrub flow and lines, 4 one-time versions and 2 second-level turning items, the %d packs '
+                      'of the rock and the bush, 2 held-up ocarinas, their rows, %d lifted poses'
+                      % (len(ONCE_PACKS), len(anims)),
                       new_files - anims == want_files - files0 and want_files - files0 <= files and files0 <= files
-                      and len(anims) == 2
+                      and len(anims) == 3      # both scales and the hookshots (lifted since 2026-11-22)
                       and all(raw(base, f) == raw(base0, f) for f in files0 - want_files if f != RESTBL + '.zs'))
 
         def changed(m):
@@ -402,11 +409,11 @@ def main(romfs):
 
         chest = [('Obj_TBox_A_01', 'Obj_TBox_A_06', OCARINAS[0], held[1])]
         good &= check('  %s: 3 placements changed: two rocks drop %s, Mido\'s chest a checking chest for the '
-                      'ocarinas' % (CHILD_MAP.split('/')[-1].split('.')[0], turns[0]),
-                      changed(CHILD_MAP) == ([('Obj_LiftRock', turns[0])] * 2, chest, [], 3))
+                      'ocarinas' % (CHILD_MAP.split('/')[-1].split('.')[0], onces[0]),
+                      changed(CHILD_MAP) == ([('Obj_LiftRock', onces[0])] * 2, chest, [], 3))
         good &= check('  %s: 3 placements changed: two bushes drop %s, the scrub sells the Fairy Ocarina (the '
-                      'first level)' % (BUSH_MAP.split('/')[-1].split('.')[0], turns[2]),
-                      changed(BUSH_MAP) == ([('Obj_Plant_Grass', turns[2])] * 2, [], [OCARINAS[0]], 3))
+                      'first level)' % (BUSH_MAP.split('/')[-1].split('.')[0], onces[2]),
+                      changed(BUSH_MAP) == ([('Obj_Plant_Grass', onces[2])] * 2, [], [OCARINAS[0]], 3))
         good &= check('  the adult maps and the Lost Woods: only the chest and the scrub\'s other three placements '
                       '(the child rocks and bushes are in no other map)',
                       changed(ADULT_MAP) == ([], chest, [], 1)
@@ -420,16 +427,24 @@ def main(romfs):
                       got['second'] == OCARINAS[1] and got['sells'][0]['Price'] == 40
                       and texts.get(build_mod.SCRUB_LABEL) == build_mod.SCRUB_LINE)
         packs = True
-        for n, (family, level) in zip(turns, [(SCALES, 0), (SCALES, 1), (HOOKS, 0), (HOOKS, 1)]):
+        for n, (family, level) in zip(turns, [(SCALES, 1), (HOOKS, 1)]):
             want_name, want_pack, _, _, _ = turn_items.build(family, level, plain, table_rows, model)
             packs &= want_name == n and mod(base, ground_items.pack_path(n)) == want_pack
         t1 = restbl.Restbl.read(mod(base, RESTBL))
         rows = {t: {r['__RowId'] for r in byml.loads(mod(base, ground_items.table_path(t))).root}
                 for t in ground_items.TABLES}
-        good &= check('  the four turning items are the ones tools/turn_items.py makes (as on freestanding items), '
+        good &= check('  the two turning items are the ones tools/turn_items.py makes (as on freestanding items), '
                       'each with its three rows and a size entry',
                       packs and all(n in rows[t] for n in turns for t in ground_items.TABLES)
                       and all(t1.get(ground_items.pack_path(n)) for n in turns))
+        packs = True
+        for n, (family, level) in zip(onces, [(SCALES, 0), (SCALES, 1), (HOOKS, 0), (HOOKS, 1)]):
+            want_name, want_pack, _, _, _ = once_items.build(family, level, plain, table_rows, model)
+            packs &= want_name == n and mod(base, ground_items.pack_path(n)) == want_pack
+        good &= check('  the four one-time versions are the ones tools/once_items.py makes (tests/one_time_check.py), '
+                      'each with its three rows and a size entry',
+                      packs and all(n in rows[t] for n in onces for t in ground_items.TABLES)
+                      and all(t1.get(ground_items.pack_path(n)) for n in onces))
         print('\n'.join('  ' + line[:200] for line in said.splitlines()
                         if line.startswith(ROCKS + BUSHES + (SCRUB, 'scrub flow'))))
 

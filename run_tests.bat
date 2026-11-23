@@ -47,6 +47,15 @@ echo.
 echo === Progressive families check ===
 %PY% tests\families_check.py "%ROMFS%"
 echo.
+echo === Gossip stone text check ===
+%PY% tests\gossip_check.py "%ROMFS%"
+echo.
+echo === Progressive families on Gold Skulltulas check ===
+%PY% tests\skulltula_prog_check.py "%ROMFS%"
+echo.
+echo === One-time drops (rocks, bushes, pots) check ===
+%PY% tests\one_time_check.py "%ROMFS%"
+echo.
 echo === Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence) ===
 %PY% tests\roundtrip.py "%ROMFS%" Event RSDB Mals GameData Pack System AI Logic Sequence --report report.txt
 echo.

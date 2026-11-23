@@ -127,11 +127,14 @@ def main(romfs):
                   and build_mod.gift_pair_kind(world, 'KF_RUPEE_NEAR_MIDO_ITEM') is False)
     good &= check('refused: Saria\'s cutscene gift, gifts with no flow data, a song',
                   all(refused(build_mod.gift_pair_kind, world, c) for c in NO_DATA))
-    good &= check('not gifts: a scrub (its own way: tests/pairs_more_check.py); refused as before: a shelf, a pot',
+    good &= check('not gifts: a scrub (its own way: tests/pairs_more_check.py), a pot (a turning item: '
+                  'tests/one_time_check.py); refused as before: a shelf',
                   build_mod.gift_pair_kind(world, 'LW_NEAR_BRIDGE_SCRUB') is False
                   and build_mod.scrub_pair_kind(world, 'LW_NEAR_BRIDGE_SCRUB') is True
-                  and all(build_mod.gift_pair_kind(world, c) is False and refused(build_mod.pair_kind, world, c)
-                          for c in ('KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01')))
+                  and build_mod.gift_pair_kind(world, 'KF_HOUSE_OF_TWINS_CHILD_POT_01') is False
+                  and build_mod.pair_kind(world, 'KF_HOUSE_OF_TWINS_CHILD_POT_01') == 'pot'
+                  and build_mod.gift_pair_kind(world, 'KF_KOKIRI_CHILD_SHOP_01') is False
+                  and refused(build_mod.pair_kind, world, 'KF_KOKIRI_CHILD_SHOP_01'))
 
     # the Kokiri's flow with the pair
     old = plain(FLOW)

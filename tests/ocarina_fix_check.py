@@ -60,7 +60,9 @@ BASE_TABLE = 'GameParameter/GameParameterTable/Obj_Item_Base.engine__actor__Game
 UNCHANGED = {
     ('Item_Boomerang', 'ground'): '559db1535a330d78aff7e46f07c7f1d837bbef5212b4595652896ae0446926f2',
     ('Item_DinFire', 'ground'): 'cc4c1c77d27130586d2d82ddf87be129505ccb762383187d16ee35fb9d4e7aff',
-    ('Item_Hookshot', 'ground'): '28069e5994bb72356bc33abb6acd654c230df1a730ed77556ddfd46ea0e52735',
+    # the hookshots lie on a lifted copy since 2026-11-22 (their packs name it; before: 28069e59..., and the turning
+    # pair's 87e88d14..., db409c16...): taken again then, nothing else in them changed
+    ('Item_Hookshot', 'ground'): '5923a0f6d378d3e48dea9392f91f7e3b686962ff0cb50537f95a38b95ce0d24f',
     ('Item_AgonyStone', 'ground'): 'b914d2e1abe4d9aedd05aed688be6823083414fbe17e26c69e3dcf6a29693392',   # Echo Gem
     ('Item_Boomerang', 'held'): '335116612313ed3ace03035386af7a8fa16e2aa3f9f26d66b028e35785f1c1b5',
     (FAIRY, 'held'): '1d07eb872a0fcae4d78cd5878c7cd48de3397224b3ae89423a89dc9b7479dcff',
@@ -71,8 +73,8 @@ UNCHANGED = {
 UNCHANGED_TURN = {
     ('Item_Scale_Silver', 'Item_Scale_Gold'): ('adb112f27dbb74fbef2e5a6defd838b1426c95511d5338a1b057c95ad979eed7',
                                                'cf67efacd12111be18754c734acfe3f5dfbb2d90a7c58e136ab9b3f35f8f8f0c'),
-    ('Item_Hookshot', 'Item_Longshot'): ('87e88d14e68e96e7575b13e8ae72a4afa527f92169ab568fc491f67308b95b78',
-                                         'db409c16dc1fc4e3887677926921c7f5367f75c484dcd9cc64da1dd67d36a5e1'),
+    ('Item_Hookshot', 'Item_Longshot'): ('d4fd33c0af779f1eab2000613e95fc032030ea252bc1dc2b1ecac97538ccc622',
+                                         '9cacf9932d5d8b70a459dc4d22dcee2d986dc21dfc31e2921fc35b533d986de0'),
 }
 # the ocarinas' ground and turning versions as they were before (contents: the names and sha256 of the pack's
 # files, see contents): with the two new files and the one new setting taken out again, each must hold exactly

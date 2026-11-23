@@ -611,20 +611,23 @@ def describe(data):
     return out
 
 
-def build(family, level, read_pack, read_table_rows, model_exists=lambda project: False, bundle_for=None):
+def build(family, level, read_pack, read_table_rows, model_exists=lambda project: False, bundle_for=None,
+          version=VERSION, ai=None):
     """the turning item of level `level` (0 = the first) of `family` (the items' own names, in order; two or
     three levels). bundle_for: for the first level, the name the inventory knows it by when the game's chests
     give more with it (a first weapon: its small bag and ammunition, first_get): the turning item gives the same.
     Returns (name, pack data, {inner path: (data, the game file it is made from: its size entry's reference)}
-    for the files new to the game, {table: new row}, loose files as ground_items.build)."""
+    for the files new to the game, {table: new row}, loose files as ground_items.build).
+    version, ai: the kind of version in ground_items.VERSIONS it is built as and the name of its AI, for a
+    variant under another name (tools/once_items.py); what it drops is always the next level's turning item."""
     if len(family) not in (2, 3) or len(set(family)) != len(family):
         raise SystemExit('%s: only families of two or three levels' % '>'.join(family))
     if bundle_for and level:
         raise SystemExit('%s: only a first level gives more with itself' % family[level])
     item = family[level]
     last = level == len(family) - 1
-    name, pack, ground_new, rows, loose = ground_items.build(item, read_pack, read_table_rows, model_exists, VERSION)
-    if name != turn_name(item):
+    name, pack, ground_new, rows, loose = ground_items.build(item, read_pack, read_table_rows, model_exists, version)
+    if name != ground_items.ground_name(item, version):
         raise SystemExit('%s: name not as intended' % name)
     arc = sarc.Sarc.read(pack)
     files = dict(arc.files)
@@ -641,7 +644,7 @@ def build(family, level, read_pack, read_table_rows, model_exists=lambda project
     idoc = byml.loads(files[base_info])
     if dict(idoc.root) != {'RootAIRef': 'Work/AI/Root/%s.root.ain' % BASE_AI}:
         raise SystemExit('%s not as expected' % base_info)
-    ai = ai_name(item)
+    ai = ai or ai_name(item)
     idoc.root = type(idoc.root)(idoc.root)
     idoc.root['RootAIRef'] = type(idoc.root['RootAIRef'])('Work/AI/Root/%s.root.ain' % ai)
     shared = sarc.Sarc.read(read_pack(AI_PACK)).files
