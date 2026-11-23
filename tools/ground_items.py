@@ -164,6 +164,18 @@ model and animation, and nothing that built before changes (masks, Poes and othe
 stay refused).
 What the pick-up adds stays the item itself: the ground version's own settings name it (`PouchActor`), and its
 count is in the item's own actor and table row, which the ground version does not touch.
+
+Items whose ground pose places many bones (2026-11-22): the Fairy Slingshot, Fairy Bow, Silver and Golden
+Gauntlets, the first Bomb Bag, the Hookshot and the Longshot. Their models hang on many bones (skinned: one vertex on
+up to eight bones), and their `Pose_Common` places every bone (19, 10, 77, 73, 5, 19), so neither the box nor the
+vertices on `Skl_Root` say where they are, and HELD_BASE (two bones) cannot stand for their pose. Measured with the
+whole skeleton posed (item_pose.posed_points; skeleton_low): every vertex hangs on `Skl_Root` or a bone below it,
+and the pose leaves `Root` still, so raising `Skl_Root` raises the whole model and nothing else. Lowest vertex in
+the game's pose, with the spin: slingshot -0.149, bow -0.378, gauntlets -0.163, first bomb bag -0.143, Hookshot and
+Longshot -0.200 (one model, one project, the lowest vertex on the body both show). The copy is the item's own
+project renamed (same length) with one skeletal animation added, `Pose_GetDemo`, a copy of its `Pose_Common` as the
+game has it, every bone (item_pose.add_pose_copy), and then only the height of `Skl_Root` in `Pose_Common` changed
+(lifted_with_held). Held up, `Rotate_GetDemo` shows `Pose_GetDemo` first: the game's pose, bone for bone.
 """
 import copy
 import math
@@ -200,6 +212,11 @@ VERSIONS = {
     # a level of a progressive family on the ground: the ground version under another name, which
     # tools/turn_items.py gives an AI of its own (and a drop part)
     'turn': (TEMPLATE, TEMPLATE_ITEM, 'Obj_NX2P_', TEMPLATE_ONLY, True, TEMPLATE_ITEM + '_Animation'),
+    # the one-time drop of a rock, a bush or a pot: the ground version ('once') or the turning version
+    # ('once_turn') under another name, which tools/once_items.py gives the mark that makes its dropper drop
+    # nothing again
+    'once': (TEMPLATE, TEMPLATE_ITEM, 'Obj_NX2O_', TEMPLATE_ONLY, True, TEMPLATE_ITEM + '_Animation'),
+    'once_turn': (TEMPLATE, TEMPLATE_ITEM, 'Obj_NX2Q_', TEMPLATE_ONLY, True, TEMPLATE_ITEM + '_Animation'),
 }
 TOKEN = 'Obj_Token_Gold'
 # what marks the skulltula done when its drop is picked up: checked to be in a 'token' version (build)
@@ -354,12 +371,18 @@ GROUND_LIFT = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP', 'Item_Scale_Silver',
                # these lie too high: lowered
                'Item_Arrow_Fire', 'Item_Arrow_Ice', 'TBox_ArrowBundle_Small',
                # on the Fire Arrow's project, but its model needs another height: a copy of its own (2026-11-20)
-               'Item_Arrow_Light')
+               'Item_Arrow_Light',
+               # their ground pose places many bones: measured with every bone posed, held up by a copy of the
+               # game's pose added to their own project (2026-11-22, see the notes at the top)
+               'Item_Range_SlingShot', 'Item_Range_Bow', 'Item_Gauntlet_Silver', 'Item_Gauntlet_Gold',
+               'Item_BombBag_Small', 'Item_Hookshot', 'Item_Longshot')
 # items that share an animation project with another listed item: the one copy is measured on that item
 GROUND_LIFT_AS = {'Item_FairyBless_MPDouble': 'Item_FairyBless_MP',
                   'Item_FairyBless_DefenseDouble': 'Item_FairyBless_MP',
                   'Item_FaroreWind': 'Item_DinFire', 'Item_NayruLove': 'Item_DinFire',
-                  'Item_Arrow_Ice': 'Item_Arrow_Fire'}
+                  'Item_Arrow_Ice': 'Item_Arrow_Fire',
+                  # one model and one project; the lowest vertex is on the body both show
+                  'Item_Longshot': 'Item_Hookshot'}
 # items that share an animation project with another listed item but need another height than its copy gives:
 # a copy of their own, measured on their own model, under this name (as long as the project's, new to the game).
 # Only for a project with a held-up pose of its own (the copy is the project itself)
@@ -373,7 +396,7 @@ GROUND_GAP = 0.05                            # the lowest point above the ground
 GROUND_NEAR = 0.02                           # an item this near GROUND_GAP already is left as it is
 GROUND_SHARED = 0.01                         # how far from GROUND_GAP an item on another item's copy may lie
 # the lifted copy's name: the project's with its first letters changed (same length)
-LIFTED_NAMES = (('Item', 'NX2G'), ('Weapon', 'NX2Gnd'), ('Obj_', 'NX2G'))
+LIFTED_NAMES = (('Item', 'NX2G'), ('Weapon', 'NX2Gnd'), ('Obj_', 'NX2G'), ('Armor', 'NX2GA'))
 COMMON_ANIM = 'Item_Common_Animation'
 # held up, an item is shown in its Pose_GetDemo, and in its Pose_Common only when its project has none (see "Held
 # up" in the notes at the top). A project without one gets its lifted copy made of HELD_BASE instead of itself: a
@@ -392,12 +415,18 @@ def has_held_pose(anim):
     return HELD_POSE in item_pose.animations(anim)
 
 
+def many_bones(anim):
+    """whether an animation project's ground pose places other bones than Root and Skl_Root (HELD_BASE then
+    cannot stand for it)"""
+    return sorted(item_pose.animations(anim).get(GROUND_POSE, ())) != sorted((item_pose.ROOT, POSE_BONE))
+
+
 def lifted_project(project, anim, item=None):
     """the name of the lifted copy of an item's animation project (`anim`: its file). A project with a held-up
-    pose of its own is copied as it is: its name with its first letters changed (same length). One without is
-    made of HELD_BASE: HELD_NAME, the project's name without its first word and '_Animation', filled with '_' to
-    the length of HELD_BASE's name. `item`: the item the copy is for; one in GROUND_LIFT_OWN has a copy of its
-    own, under the name given there."""
+    pose of its own, or whose ground pose places many bones (many_bones), is copied from itself: its name with its
+    first letters changed (same length). One without is made of HELD_BASE: HELD_NAME, the project's name without
+    its first word and '_Animation', filled with '_' to the length of HELD_BASE's name. `item`: the item the copy
+    is for; one in GROUND_LIFT_OWN has a copy of its own, under the name given there."""
     if item in GROUND_LIFT_OWN:
         name = GROUND_LIFT_OWN[item]
         shared = [n for o, n in LIFTED_NAMES if project.startswith(o)]
@@ -408,7 +437,7 @@ def lifted_project(project, anim, item=None):
                              'name as long, not the name of the shared copy, used once)'
                              % (item, name, project, HELD_POSE))
         return name
-    if has_held_pose(anim):
+    if has_held_pose(anim) or many_bones(anim):
         for old, new in LIFTED_NAMES:
             if project.startswith(old):
                 return new + project[len(old):]
@@ -433,10 +462,8 @@ def pose_bone(data, anim, bone):
     name at +8, bone animations at +0x28, bone count at +0x4c; a bone animation is 0x38 bytes: name, curves,
     base values, flags at +0x28; base values: scale 3 floats, rotation 4, translation 3, each only when its flag
     0x8 / 0x10 / 0x20 is set)"""
-    i = 0
-    while True:
-        i = data.find(b'FSKA', i + 1)
-        if i < 0:
+    for i in item_pose.fska_list(data) + [None]:      # as the file's header lists them (one may be added)
+        if i is None:
             raise SystemExit('animation %s not found' % anim)
         if _str_at(data, struct.unpack_from('<Q', data, i + 8)[0]) != anim:
             continue
@@ -497,6 +524,24 @@ def vertex_low(data, model, height=0.0):
     return item_pose.extent(points, bind, pose['scale'], pose['rot'], move)[0][1]
 
 
+def skeleton_low(data, model, height=0.0):
+    """the lowest vertex of a model whose ground pose places many bones (many_bones), with every bone posed
+    (item_pose.posed_points) and Skl_Root at `height` (None: the pose's own). Every vertex must hang on Skl_Root or
+    a bone below it, Skl_Root on Root, and the pose must leave Root still: then the height of Skl_Root moves the
+    whole model up or down and nothing else. Every shape counts, hidden ones too (for the seven items listed here
+    they never lie lower than the shown ones; tests/ground_lift_check.py checks it)."""
+    if item_pose.read_pose(data, GROUND_POSE, item_pose.ROOT)['flags'] != item_pose.STILL:
+        raise SystemExit('the ground pose moves the bone %s' % item_pose.ROOT)
+    bones, _ = item_pose.skeleton(model)
+    names = [b['name'] for b in bones]
+    points, used = item_pose.posed_points(model, data, GROUND_POSE, height)
+    if POSE_BONE not in names or bones[names.index(POSE_BONE)]['parent'] != names.index(item_pose.ROOT) \
+            or bones[names.index(item_pose.ROOT)]['parent'] >= 0 \
+            or [u for u in used if not item_pose.under(model, u, POSE_BONE)]:
+        raise SystemExit('model: not every vertex hangs on %s or below it, on %s' % (POSE_BONE, item_pose.ROOT))
+    return min(p[1] for p in points)
+
+
 def lifted_animation(data, project, low, read_base=None, item=None):
     """the lifted copy of an item's animation project (`data`: its file): the ground pose's height of Skl_Root set
     so the model's lowest point is GROUND_GAP above the ground (higher, or lower for an item that lies too high);
@@ -505,7 +550,10 @@ def lifted_animation(data, project, low, read_base=None, item=None):
     - a project with a held-up pose of its own (HELD_POSE): the project itself renamed (lifted_project), only the
       ground pose's height changed;
     - one without (held up, the game shows its ground pose): HELD_BASE renamed, with the lifted pose as its ground
-      pose and the item's own, untouched ground pose as its held-up pose. `read_base(path)` reads HELD_BASE.
+      pose and the item's own, untouched ground pose as its held-up pose. `read_base(path)` reads HELD_BASE;
+    - one without whose ground pose places many bones (many_bones): the project itself renamed, with a held-up
+      pose added that is its ground pose as the game has it, then the ground pose's height changed
+      (lifted_with_held).
     `item`: the item the copy is for, when it has a copy of its own (GROUND_LIFT_OWN: its own name).
     Returns (new data, old height, new height, the game file the copy is made of)"""
     o, flags, base = pose_bone(data, GROUND_POSE, POSE_BONE)
@@ -522,6 +570,8 @@ def lifted_animation(data, project, low, read_base=None, item=None):
         return lifted_in_place(data, project, new_h, new_project), old, new_h, model_path(project)
     if item in GROUND_LIFT_OWN:
         raise SystemExit('%s: a copy of its own only of a project with a %s' % (item, HELD_POSE))
+    if many_bones(data):
+        return lifted_with_held(data, project, new_h), old, new_h, model_path(project)
     if read_base is None:
         raise SystemExit('%s: no %s of its own, and no way to read %s' % (project, HELD_POSE, HELD_BASE))
     return lifted_on_base(read_base(model_path(HELD_BASE)), data, project, new_h), old, new_h, model_path(HELD_BASE)
@@ -548,6 +598,24 @@ def lifted_in_place(data, project, new_h, new_project=None):
     o2, f2, b2 = pose_bone(out, GROUND_POSE, POSE_BONE)
     if abs(struct.unpack_from('<f', out, _pose(out, b2, f2)[2] + 4)[0] - new_h) > 1e-6 or f2 & 0x8000000:
         raise SystemExit('read-back: %s lifted pose' % project)
+    return out
+
+
+def lifted_with_held(data, project, new_h):
+    """a project with no held-up pose of its own whose ground pose places many bones (many_bones): its own file
+    renamed (same length), with one skeletal animation added, HELD_POSE, a copy of its ground pose as the game has
+    it, every bone, with values of its own (item_pose.add_pose_copy); then the ground pose's height of Skl_Root set
+    to `new_h` (lifted_in_place). Held up the game shows HELD_POSE: the game's pose, bone for bone."""
+    new_project = lifted_project(project, data)
+    out = lifted_in_place(item_pose.add_pose_copy(data, GROUND_POSE, HELD_POSE), project, new_h, new_project)
+    # read-back: held up every bone as the game's ground pose; lying every bone as it, but Skl_Root's height
+    game = item_pose.animations(data)[GROUND_POSE]
+    for bone in game:
+        held, lies, was = (item_pose.read_pose(x, p, bone) for x, p in ((out, HELD_POSE), (out, GROUND_POSE),
+                                                                        (data, GROUND_POSE)))
+        fields = ('scale', 'rot', 'move', 'flags', 'curves')
+        if any(held[f] != was[f] for f in fields) or (bone != POSE_BONE and any(lies[f] != was[f] for f in fields)):
+            raise SystemExit('read-back: %s bone %s' % (new_project, bone))
     return out
 
 
@@ -639,7 +707,7 @@ def can_hold_up(read, item):
 # the ground" in the notes at the top), as the ground shield names his shield. The ocarinas are known by their
 # settings (OcarinaParam in their parameter table); the component and row fields that name the equipment
 OCARINA_PARAM = 'OcarinaParam'
-OCARINA_VERSIONS = ('ground', 'turn')
+OCARINA_VERSIONS = ('ground', 'turn', 'once', 'once_turn')
 EQUIP_COMPONENT = 'PlayerEquipmentActor'
 EQUIP_ROW = ('AdultEquipment', 'ChildEquipment')
 
@@ -798,7 +866,7 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         files[anim_param_path(name)] = byml.dumps(tdoc)
         comp['AnimationRef'] = '?' + anim_param_path(name)
     loose = {}
-    if item in GROUND_LIFT and version in ('ground', 'token', 'turn'):
+    if item in GROUND_LIFT and version in ('ground', 'token', 'turn', 'once', 'once_turn'):
         # lies too low: its own animation project replaced by a lifted copy (see the notes at the top)
         adoc = byml.loads(files[_ref_path(comp['AnimationRef'])])
         res = [dict(x) for x in adoc.root['AnimationResources']]
@@ -819,15 +887,17 @@ def build(item, read_pack, read_table_rows, model_exists=lambda project: False, 
         def model_of(r):
             return read_pack('Model/%s.%s.bfres' % (r['ModelProjectName'], r['FmdbName']))
 
+        # a model on many bones is measured with every bone posed, the others on Skl_Root alone
+        measure = skeleton_low if many_bones(src) else vertex_low
         if first in GROUND_LIFT_BOX:
             low = box_low(src, info[first]['ModelAabbMin'], info[first]['ModelAabbMax'])
         else:
-            low = vertex_low(src, model_of(info[first]))
+            low = measure(src, model_of(info[first]))
         data, old_h, new_h, like = lifted_animation(src, own[0], low, read_pack, item)
         new_project = lifted_project(own[0], src, item)
         if item not in GROUND_LIFT_BOX:
             # on its own copy: exactly; on another item's: near enough
-            off = vertex_low(data, model_of(row), None) + SPIN_ROOT_LIFT - GROUND_GAP
+            off = measure(data, model_of(row), None) + SPIN_ROOT_LIFT - GROUND_GAP
             if abs(off) > (1e-5 if first == item else GROUND_SHARED):
                 raise SystemExit('read-back: %s does not lie %.2f above the ground (%+.4f)' % (item, GROUND_GAP, off))
         loose[model_path(new_project)] = (data, like, old_h, new_h, model_path(own[0]))

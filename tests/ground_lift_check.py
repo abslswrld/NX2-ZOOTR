@@ -5,6 +5,7 @@ items the game never gives are refused. Reads only; writes nothing.
     python tests/ground_lift_check.py "C:\\...\\romfs"
 """
 import hashlib
+import json
 import os
 import struct
 import sys
@@ -40,8 +41,30 @@ LEFT_OUT = ('Sword_Giant', 'Sword_Biggoron', 'Sword_BrokenGiant', 'BrokenSword',
             'EyeDrop', 'Prescription', 'PoacherSaw', 'OddMushroom', 'OddPowder', 'Cucco', 'PocketEgg', 'WeirdEgg',
             'ZeldaLetter', 'Mask_')
 # not listed, so no copy: an item that lies right, one whose project another item's copy is made of, one with
-# vertices on more bones than Skl_Root
-NOT_LIFTED = ('Item_Boomerang', 'TBox_ArrowBundle_Large', 'Item_BombBag_Small')
+# vertices on more bones than Skl_Root (the compass's needle; the first bomb bag was this one until 2026-11-22)
+NOT_LIFTED = ('Item_Boomerang', 'TBox_ArrowBundle_Large', 'Item_Dungeon_Compass')
+# the seven whose ground pose places many bones (2026-11-22): {item: (its project, how many bones the pose places,
+# lowest vertex in the game's pose with the spin, measured with every bone posed)}. Their copy is their own project
+# with Pose_GetDemo added (a copy of the game's Pose_Common) and the height of Skl_Root changed in Pose_Common
+MANY = {'Item_Range_SlingShot': ('Weapon_Range_SlingShot_Animation', 19, -0.1485),
+        'Item_Range_Bow': ('Weapon_Range_Bow_Animation', 10, -0.3779),
+        'Item_Gauntlet_Silver': ('Armor_Adult_Gauntlet_Silver_Animation', 77, -0.1625),
+        'Item_Gauntlet_Gold': ('Armor_Adult_Gauntlet_Gold_Animation', 73, -0.1626),
+        'Item_BombBag_Small': ('Item_BombBag_Small_Animation', 5, -0.1427),
+        'Item_Hookshot': ('Item_Hookshot_Animation', 19, -0.2004),
+        'Item_Longshot': ('Item_Hookshot_Animation', 19, -0.2004)}
+# their copies, as first made: {copy: checksum}
+MANY_COPIES = {
+    'NX2Gnd_Range_SlingShot_Animation': 'af3c4c621bd64ebfa9f3f1ac50f1616f21b05f0cae0e7324cfcc5b8adb5e62e9',
+    'NX2Gnd_Range_Bow_Animation': 'ab38045c6f341aefc7140d76580b62ffe1842c596057e41fbf754dfcb210ef3d',
+    'NX2GA_Adult_Gauntlet_Silver_Animation': 'b0b906184b78b7ea4fd29b260ddddbce02a85e6ab142bd80eb1f66c8dd3b09ae',
+    'NX2GA_Adult_Gauntlet_Gold_Animation': 'fb9e79f5a566171fc6d33384a95eef12d9f5f3411fb69f58bbe1a2cf8b8a5947',
+    'NX2G_BombBag_Small_Animation': '3ff2c34632fe4649ed4bd7cdf1f8299ebf3cbc6d4ad855dff2d471ce9cf8e405',
+    'NX2G_Hookshot_Animation': 'd5d25a50521d96bf0b521dc78cdd0f65f2d9ae04d4983d1c6fad21cb28ab0b96'}
+# every other item, every version (ground, token, turn, held), as ground_items.build made them before 2026-11-22
+# (taken with the builder of main 68e5e89): how many built or stopped, and one checksum over them all (see
+# fingerprint below). Only the seven's ground, token and turn versions differ
+OTHERS = (1559, '9be0344f9860c6e77b56e0511249f836cd330cebc30e3e116d2dff450c7ff555')
 # the Fire Arrow's copy (also the Ice Arrow's) as it was before the Light Arrow got a copy of its own of the same
 # project (2026-11-20): its name and checksum, and the checksums of the four packs that name it
 ARROW_COPY = ('NX2G_Arrow_Fire_Animation', '882e3ca4009701ff166c7fa06a43bcd906ea49792c672ae9422b4c84f3f212d7')
@@ -108,6 +131,48 @@ def vertex_bones(data):
     return out
 
 
+def fingerprint(item, plain, table_rows, has_model, version):
+    """one line for a version as ground_items.build makes it: a checksum of the pack, the files new to the game, the
+    table rows and the lifted copies, or why it stopped"""
+    try:
+        name, pack, new_inner, rows, loose = ground_items.build(item, plain, table_rows, has_model, version)
+    except SystemExit as e:
+        return 'EXIT ' + str(e)[:80]
+    except Exception as e:                             # noqa: BLE001 (as when the checksum was taken)
+        return 'ERR ' + repr(e)[:80]
+    h = hashlib.sha256(pack)
+    for p in sorted(new_inner):
+        h.update(p.encode())
+        h.update(new_inner[p])
+    h.update(json.dumps(rows, sort_keys=True, default=str).encode())
+    for p in sorted(loose):
+        data, like, _, _, own = loose[p]
+        for x in (p.encode(), data, like.encode(), own.encode()):
+            h.update(x)
+    return h.hexdigest() + ' ' + ','.join(sorted(loose))
+
+
+def shown(read, item, model):
+    """the bones whose shapes the game hides for an item: those its model hides, as its ModelInfo's variation
+    animations change them (a bone a curve changes counts as shown)"""
+    files = sarc.Sarc.read(read(ground_items.pack_path(item))).files
+    info = byml.loads(files[ground_items._ref_path(
+        ground_items.resolved_components(files, item)['ModelInfoRef'])]).root
+    bones, _ = item_pose.skeleton(model)
+    hidden = {b['name'] for b in bones if not b['flags'] & 1}
+    for v in info.get('ModelVariationAnims') or []:
+        parts = v['Fmab'].split('/')
+        if not parts[-1].endswith('.fvbb'):
+            continue
+        for bone, on in item_pose.bone_visibility(read('Model/%s.anim.bfres' % parts[-3]),
+                                                  parts[-1][:-len('.fvbb')]).items():
+            if on is False:
+                hidden.add(bone)
+            else:
+                hidden.discard(bone)
+    return hidden
+
+
 def main(romfs):
     d = zstd.Dictionaries.from_pack(open(os.path.join(romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
     plain = lambda path: zstd.decompress(open(os.path.join(romfs, *path.split('/')) + '.zs', 'rb').read(), d)  # noqa: E731
@@ -127,7 +192,8 @@ def main(romfs):
 
     copies = {}                                        # path -> (data, the game file, first item)
     built = one = names = only = poses = lows = sure = packs = entries = same = helds = bases = True
-    tested, kinds = {}, {True: set(), False: set()}
+    tested, kinds = {}, {'own': set(), 'many': set(), 'jar': set()}
+    many_seen = {}                                     # item -> (copy, game project, model, low, was)
     arrow_packs, light = {}, {}
     said = []
     for item in lift:
@@ -145,19 +211,34 @@ def main(romfs):
             game, made_of = plain(own_path), plain(like)
             own = own_path[len('Model/'):-len('.anim.bfres')]
             own_held = ground_items.has_held_pose(game)
-            kinds[own_held].add(own)
+            many = not own_held and ground_items.many_bones(game)
+            kinds['own' if own_held else 'many' if many else 'jar'].add(own)
             lifted_name = ground_items.lifted_project(own, game, item)
             # the copy: a name new to the game, as long as the name of the game file it is made of
             names &= path == ground_items.model_path(lifted_name) and len(path) == len(like) \
                 and lifted_name.startswith('NX2G') and not os.path.exists(os.path.join(romfs, *path.split('/')) + '.zs')
             # made of the item's own project when that has a held-up pose (only the name, a flag and the height
-            # differ), else of HELD_BASE (only the name and its two poses' values and flags differ)
-            bases &= like == (own_path if own_held else ground_items.model_path(ground_items.HELD_BASE)) \
-                and own_held == (own in OWN_HELD)
+            # differ) or its pose places many bones, else of HELD_BASE (only the name and its two poses' values and
+            # flags differ)
+            bases &= like == (own_path if own_held or many else ground_items.model_path(ground_items.HELD_BASE)) \
+                and own_held == (own in OWN_HELD) and many == (item in MANY)
             differ = [i for i in range(len(made_of)) if i >= len(x) or x[i] != made_of[i]]
             if own_held:
                 only &= len(x) == len(made_of) and len(differ) <= 12 \
                     and item_pose.animations(x).keys() == item_pose.animations(game).keys()
+            elif many:
+                # the game file's bytes up to its relocation table: only the name, Skl_Root's flag and height in
+                # the ground pose, and the header's values for the list of animations, the table and the size;
+                # one animation more, Pose_GetDemo
+                r = item_pose.relocations(made_of)[0]
+                at = item_pose.read_pose(made_of, ground_items.GROUND_POSE)
+                k = made_of.find(own.encode())
+                spots = set(range(k, k + len(own))) | set(range(at['at'] + 0x28, at['at'] + 0x2c)) \
+                    | set(range(at['base'] + 32, at['base'] + 36)) | set(range(0x18, 0x20)) \
+                    | set(range(item_pose.FSKA_LIST, item_pose.FSKA_LIST + 16)) \
+                    | {item_pose.FSKA_COUNT, item_pose.FSKA_COUNT + 1}
+                only &= len(x) > len(made_of) and {i for i in differ if i < r} <= spots \
+                    and list(item_pose.animations(x)) == list(item_pose.animations(game)) + [ground_items.HELD_POSE]
             else:
                 spots = set()
                 for anim in (ground_items.GROUND_POSE, ground_items.HELD_POSE):
@@ -173,6 +254,14 @@ def main(romfs):
             now_held = item_pose.read_pose(x, ground_items.HELD_POSE)
             helds &= all(now_held[f] == was_held[f] for f in ('scale', 'rot', 'move')) \
                 and item_pose.read_pose(x, ground_items.HELD_POSE, item_pose.ROOT)['flags'] == item_pose.STILL
+            fields = ('scale', 'rot', 'move', 'flags', 'curves')
+            if many:
+                # every bone, held up: the game's ground pose; lying: the same but Skl_Root's height
+                for bone in item_pose.animations(game)[ground_items.GROUND_POSE]:
+                    was = item_pose.read_pose(game, ground_items.GROUND_POSE, bone)
+                    helds &= all(item_pose.read_pose(x, ground_items.HELD_POSE, bone)[f] == was[f] for f in fields)
+                    poses &= bone == item_pose.BONE or all(
+                        item_pose.read_pose(x, ground_items.GROUND_POSE, bone)[f] == was[f] for f in fields)
             if own in TESTED and own not in tested:
                 # the ground pose is the one of the copy seen in game
                 then = ground_items.lifted_in_place(game, own, new_h, TESTED[own][0])
@@ -183,9 +272,12 @@ def main(romfs):
                 == (old_pose['scale'], old_pose['rot'], old_pose['move'][0], old_pose['move'][2]) \
                 and abs(pose['move'][1] - new_h) < 1e-6 and abs(old_pose['move'][1] - old_h) < 1e-6 \
                 and item_pose.read_pose(x, bone=item_pose.ROOT)['flags'] == item_pose.STILL
-            # where the item lies with it, by its own model's vertices
-            low = ground_items.vertex_low(x, model, None) + spin
-            was = ground_items.vertex_low(game, model, None) + spin
+            # where the item lies with it, by its own model's vertices (on many bones: every bone posed)
+            measure = ground_items.skeleton_low if many else ground_items.vertex_low
+            low = measure(x, model, None) + spin
+            was = measure(game, model, None) + spin
+            if many:
+                many_seen[item] = (x, game, model, low, was)
             if item in box:
                 lows &= low > gap - 1e-5                # as tested in game (the bracelet 0.074)
             elif item in shared:
@@ -193,8 +285,11 @@ def main(romfs):
             else:
                 lows &= abs(low - gap) < 1e-5
             lows &= abs(was - gap) > ground_items.GROUND_NEAR
-            # the measure is sure: every vertex hangs on Skl_Root
-            sure &= list(vertex_bones(model)) == [item_pose.BONE]
+            # the measure is sure: every vertex hangs on Skl_Root (on many bones: on Skl_Root or below it)
+            if many:
+                sure &= all(item_pose.under(model, b) for b in item_pose.posed_points(model)[1])
+            else:
+                sure &= list(vertex_bones(model)) == [item_pose.BONE]
             # the pack and the row name the copy
             files = sarc.Sarc.read(pack).files
             comp = ground_items.resolved_components(files, name)
@@ -208,7 +303,11 @@ def main(romfs):
                 copies[path] = (x, like, item)
                 out.add(path, x, like, made_of)         # the size entry, made as the build makes it
                 need = sizes.rule(path, x)
-                entries &= out.table.get(path) == out.table.get(like) and (need is None or out.table.get(path) >= need)
+                # the game file's headroom (a copy with one animation more is larger by what it adds)
+                e = out.table.get(like)
+                entries &= out.table.get(path) == max(e - len(made_of) + len(x),
+                                                      e - sizes.size32(len(made_of)) + sizes.size32(len(x))) \
+                    and (need is None or out.table.get(path) >= need)
             if (item, version) in ARROW_PACKS:
                 arrow_packs[item, version] = (hashlib.sha256(pack).hexdigest(), path, hashlib.sha256(x).hexdigest())
             if item == LIGHT:
@@ -217,26 +316,31 @@ def main(romfs):
                 said.append('  %-30s height %+.4f -> %+.4f (%+.3f), lowest vertex %+.4f -> %+.4f  %s' % (
                     item, old_h, new_h, new_h - old_h, was, low,
                     'on the copy of ' + shared[item] if item in shared else 'by the box' if item in box
-                    else 'on a copy of its own' if item in ground_items.GROUND_LIFT_OWN else ''))
+                    else 'on a copy of its own' if item in ground_items.GROUND_LIFT_OWN
+                    else 'every bone posed' if many else ''))
         built &= versions > 0
     good &= check('every listed item (%d) builds in at least one version, each with one lifted copy' % len(lift),
                   built and one)
     good &= check('the copy\'s name starts with NX2G, is as long as the game file\'s it is made of, new to the game',
                   names)
-    good &= check('made of the item\'s own project when it has a %s (%d), else of %s (%d)'
-                  % (ground_items.HELD_POSE, len(kinds[True]), ground_items.HELD_BASE, len(kinds[False])),
-                  bases and kinds[True] == set(OWN_HELD) and len(kinds[False]) > 0)
-    good &= check('only the name and the poses\' values differ from that file; the ground pose only in its height',
-                  only and poses)
-    good &= check('held up (%s): size, turn and place exactly the game\'s, for every copy' % ground_items.HELD_POSE,
-                  helds)
+    good &= check('made of the item\'s own project when it has a %s (%d) or places many bones (%d), else of %s (%d)'
+                  % (ground_items.HELD_POSE, len(kinds['own']), len(kinds['many']), ground_items.HELD_BASE,
+                     len(kinds['jar'])),
+                  bases and kinds['own'] == set(OWN_HELD) and kinds['many'] == {v[0] for v in MANY.values()}
+                  and len(kinds['jar']) > 0)
+    good &= check('only the name and the poses\' values differ from that file (on many bones: and %s added); the '
+                  'ground pose only in its height' % ground_items.HELD_POSE, only and poses)
+    good &= check('held up (%s): size, turn and place exactly the game\'s, for every copy (on many bones: every '
+                  'bone)' % ground_items.HELD_POSE, helds)
     good &= check('lowest vertex %.2f above the ground (shared copies: within %.2f); it was more than %.2f off'
                   % (gap, ground_items.GROUND_SHARED, ground_items.GROUND_NEAR), lows)
-    good &= check('every vertex of every listed model hangs on %s' % item_pose.BONE, sure)
+    good &= check('every vertex of every listed model hangs on %s (on many bones: on it or below it)'
+                  % item_pose.BONE, sure)
     good &= check('the pack and the table row name the copy', packs)
     good &= check('one copy for a project (%d copies), the same bytes whichever item or version is built'
                   % len(copies), same)
-    good &= check('each copy\'s size entry is the game file\'s (same length) and meets the rules', entries)
+    good &= check('each copy\'s size entry is the game file\'s (same length; on many bones: with its headroom) and '
+                  'meets the rules', entries)
     good &= check('the ground pose of the copies seen right in game is as then (bracelet, magic, both scales)',
                   sorted(tested) == sorted(TESTED) and all(tested.values()))
     for item, first in sorted(shared.items()):
@@ -285,6 +389,80 @@ def main(romfs):
         for version in ('ground', 'token'):
             none &= not ground_items.build(item, plain, table_rows, has_model, version)[4]
     good &= check('items not listed get no copy (%s)' % ', '.join(NOT_LIFTED), none)
+
+    # the seven whose ground pose places many bones (2026-11-22)
+    good &= check('the seven on many bones are listed (%s); the Longshot lies on the Hookshot\'s copy'
+                  % ', '.join(MANY), set(MANY) <= set(lift) and sorted(many_seen) == sorted(MANY)
+                  and shared.get('Item_Longshot') == 'Item_Hookshot' and not set(MANY) & set(box))
+    bones_ok = read_ok = shown_ok = low_ok = dic_ok = True
+    lines = []
+    for item, (project, n_bones, want) in sorted(MANY.items()):
+        x, game, model, low, was = many_seen[item]
+        row = info[item]
+        pose = item_pose.animations(game)[ground_items.GROUND_POSE]
+        bones_ok &= ground_items.own_projects(plain, item) == [project] and len(pose) == n_bones \
+            and not ground_items.has_held_pose(game) and ground_items.many_bones(game)
+        # the model read right: as built, the shapes the game shows fit exactly the box of ActorInfo
+        hidden = shown(plain, item, model)
+        built_pts = item_pose.posed_points(model, hidden=hidden)[0]
+        box_min, box_max = row['ModelAabbMin'], row['ModelAabbMax']
+        read_ok &= all(abs(min(q[i] for q in built_pts) - box_min[a]) < 1e-4
+                       and abs(max(q[i] for q in built_pts) - box_max[a]) < 1e-4 for i, a in enumerate('XYZ'))
+        # posed: the hidden shapes never lie lower than the shown ones, so counting them all is exact
+        shown_low = min(q[1] for q in item_pose.posed_points(model, game, hidden=hidden)[0]) + spin
+        shown_ok &= abs(shown_low - was) < 1e-6
+        low_ok &= abs(was - want) < 5e-5 and abs(low - gap) < 1e-5
+        # the game finds every animation of the copy by name, and the relocation table lists the new offsets
+        r, _, _, old_places = item_pose.relocations(game)
+        new_r, _, _, places = item_pose.relocations(x)
+        dic = struct.unpack_from('<Q', x, item_pose.FSKA_DIC)[0]
+        anims = list(item_pose.animations(x))
+        dic_ok &= [item_pose.dict_find(x, dic, a) for a in anims] == list(range(len(anims))) \
+            and set(old_places) <= set(places) and all(r <= p < new_r for p in set(places) - set(old_places)) \
+            and item_pose.dict_find(x, dic, 'Pose_GetDemo_') is None
+        lines.append('  %-22s %2d bones, %d of %d shapes\' bones hidden; lowest vertex %+.4f -> %+.4f'
+                     % (item, n_bones, len(hidden), len(item_pose.skeleton(model)[0]), was, low))
+    good &= check('  their projects place many bones in %s and have no %s of their own'
+                  % (ground_items.GROUND_POSE, ground_items.HELD_POSE), bones_ok)
+    good &= check('  their models are read right: as built, the shapes the game shows fit the box of ActorInfo', read_ok)
+    good &= check('  posed, the shapes the game hides never lie lower than those it shows (every vertex counts)',
+                  shown_ok)
+    good &= check('  lowest vertex in the game\'s pose as measured (%s), %.2f above the ground on the copy'
+                  % (', '.join('%+.3f' % v[2] for v in MANY.values()), gap), low_ok)
+    good &= check('  every animation of a copy is found by name; the relocation table lists the new offsets', dic_ok)
+    many_copies = {c[len('Model/'):-len('.anim.bfres')]: hashlib.sha256(d).hexdigest()
+                   for c, (d, _, i) in copies.items() if i in MANY}
+    good &= check('  their copies (%d), byte for byte as first made' % len(MANY_COPIES), many_copies == MANY_COPIES)
+    # the new measure gives every other listed item measured by its vertices the lowest vertex it had
+    agree = True
+    for item in lift:
+        own = ground_items.own_projects(plain, item)
+        if item in MANY or item in box or not own:
+            continue
+        game = plain(ground_items.model_path(own[0]))
+        model = plain('Model/%s.%s.bfres' % (info[item]['ModelProjectName'], info[item]['FmdbName']))
+        agree &= abs(min(q[1] for q in item_pose.posed_points(model, game, height=0.0)[0])
+                     - ground_items.vertex_low(game, model)) < 1e-6
+    good &= check('  measured that way, every other listed item lies where its vertices on %s say' % item_pose.BONE,
+                  agree)
+    # nothing else changes: every other item, every version, as before
+    rows_cache = {}
+
+    def cached_rows(t):
+        if t not in rows_cache:
+            rows_cache[t] = table_rows(t)
+        return rows_cache[t]
+
+    others = {}                                        # 'item|version' -> fingerprint
+    for item in sorted(r['__RowId'] for r in cached_rows('PouchActorInfo')):
+        for version in ('ground', 'token', 'turn', 'held'):
+            if item in MANY and version != 'held':
+                continue
+            others['%s|%s' % (item, version)] = fingerprint(item, plain, cached_rows, has_model, version)
+    digest = hashlib.sha256(''.join('%s=%s\n' % (k, others[k]) for k in sorted(others)).encode()).hexdigest()
+    good &= check('  every other item\'s versions (%d: the seven held up too) are built as before, byte for byte'
+                  % len(others), (len(others), digest) == OTHERS)
+    print('\n'.join(lines))
 
     # items whose item settings are the ones of the actor they inherit from (the medium and large bags, quivers
     # and wallets): a ground version that gives the item itself

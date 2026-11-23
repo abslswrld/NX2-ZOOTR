@@ -1,6 +1,6 @@
 """Progressive families test: every upgrade family of tools/build_mod.py (FAMILIES) on every kind of check a
-progressive form can be placed on: small chests, freestanding items, rocks, bushes, a Deku Scrub that sells once
-and a gift with flow data. Checked on the game's own files: what the game gives with a first Fairy Slingshot and
+progressive form can be placed on: small chests, freestanding items, rocks, bushes, pots, a Deku Scrub that sells
+once and a gift with flow data. Checked on the game's own files: what the game gives with a first Fairy Slingshot and
 Fairy Bow, how each level is shown, the turning items of two and three levels, the three-level chests, the
 questions in the gift's and the scrub's flow, and what every form gives for every order its checks are taken in
 (no level skipped, none given twice). Only reads the game; the builds it runs go to a temporary folder that is
@@ -25,6 +25,7 @@ import ground_items  # noqa: E402
 import shop_items  # noqa: E402
 import three_chest  # noqa: E402
 import turn_items  # noqa: E402
+import once_items  # noqa: E402
 from formats import zstd, byml, sarc, evfl, ainb  # noqa: E402
 from logic.world import World  # noqa: E402
 
@@ -51,10 +52,9 @@ FLOW_NAMES = {'Item_Range_SlingShot': 'Weapon_Range_SlingShot', 'Item_Range_Bow'
               'Item_Gauntlet_Goron': 'Armor_Child_Gauntlet_Goron', 'Item_Gauntlet_Silver': 'Armor_Adult_Gauntlet_Silver',
               'Item_Gauntlet_Gold': 'Armor_Adult_Gauntlet_Gold'}
 ASKED_BY_GAME = ('Weapon_Range_Bow', 'Armor_Child_Gauntlet_Goron', 'Armor_Adult_Gauntlet_Silver')
-# levels whose ground version keeps the game's pose (no lifted copy: their models hang on more bones than the one
-# the pose places, or the pose places more bones, so the lift cannot be measured or made)
-NOT_LIFTED = ('Item_Range_SlingShot', 'Item_Range_Bow', 'Item_Gauntlet_Silver', 'Item_Gauntlet_Gold',
-              'Item_BombBag_Small', 'Item_Hookshot', 'Item_Longshot')
+# levels whose ground version keeps the game's pose (no lifted copy). None since 2026-11-22: the seven on many
+# bones (slingshot, bow, silver and golden gauntlets, first bomb bag, hookshot, longshot) are lifted too
+NOT_LIFTED = ()
 GIFT, GIFT_FLOW, GIFT_EVENT = 'KF_CIRCLE_KOKIRI_GIFT', 'Event/EventFlow/Npc_Kokiri_008_Child.bfevfl', 'Event224'
 SCRUB, SCRUB_TALK, SCRUB_WAS = 'LW_NEAR_BRIDGE_SCRUB', 'Enemy_Scrub_Business_DekuStickPouch_01', 'Item_StickBag_Medium'
 CHESTS = ('KF_MIDO_CHEST_01', 'KF_MIDO_CHEST_02', 'KF_MIDO_CHEST_03', 'KF_MIDO_CHEST_04', 'KF_STORMS_GROTTO_CHEST',
@@ -69,8 +69,11 @@ ROCKS = ('KF_WEST_OF_MIDOS_HOUSE_CHILD_ROCK_01', 'KF_WEST_OF_MIDOS_HOUSE_CHILD_R
          'KF_CIRCLE_CHILD_ROCK_02', 'KF_CIRCLE_CHILD_ROCK_04', 'KF_CIRCLE_CHILD_ROCK_05', 'KF_CIRCLE_CHILD_ROCK_07')
 BUSHES = tuple('KF_%s_CHILD_BUSH_%02d' % (where, n) for where in ('NEAR_SARIAS_HOUSE', 'BESIDE_MIDOS_HOUSE',
                                                                    'BEHIND_SHOP') for n in (1, 2, 3))
-REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT',
-           'Song from Saria')
+# the eight pots of Kokiri Forest (the child's and the adult's maps place their own): a family is a turning item
+# that is given once (tools/once_items.py, tests/one_time_check.py)
+POTS = tuple('KF_%s_%s_POT_%02d' % (house, age, n) for age in ('CHILD', 'ADULT')
+             for house in ('HOUSE_OF_TWINS', 'KNOW_IT_ALL_HOUSE') for n in (1, 2))
+REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT', 'Song from Saria')
 BIG_CHEST = 'KF_KOKIRI_SWORD_CHEST'
 CIRCLE_FIX = ['--fix', 'kokiri_circle_after_dungeons']
 SCRUB_BUILDS = ('BulletBag', 'Gauntlet', 'Wallet', 'StickBag')     # the scrub's whole builds (each writes every
@@ -212,7 +215,7 @@ def main(romfs):
     good &= check('every level has a ground version, a turning version and a way a chest holds it up (itself; the '
                   'ocarinas as held-up versions)', ok)
     good &= check('  %d levels lie on a lifted copy of their pose; %d keep the game\'s pose (%s)'
-                  % (len(levels_all) - len(NOT_LIFTED), len(NOT_LIFTED), ', '.join(NOT_LIFTED)), lift_ok)
+                  % (len(levels_all) - len(NOT_LIFTED), len(NOT_LIFTED), ', '.join(NOT_LIFTED) or 'none'), lift_ok)
 
     # ------------------------------------------------------------------------------------ the turning items
     sources = [ainb.loads(shared[shop_items.ai_path(turn_items.BASE_AI)])] \
@@ -448,13 +451,18 @@ def main(romfs):
     text = {n: '>'.join(f) for n, f in FAMILIES.items()}
     ok = True
     for n, f in FAMILIES.items():
-        for c in REFUSED[:3]:
+        for c in REFUSED[:2]:
             asked_ = [(c, text[n])]
-            ok &= refused(build_mod.three_level_parse, world, asked_) if len(f) == 3 \
-                else refused(build_mod.pair_kind, world, c)
-        ok &= refused(build_mod.gift_pair_kind, world, REFUSED[3]) and refused(build_mod.gift_pair_kind, world,
-                                                                               REFUSED[4])
-    good &= check('refused for every family: a shelf, a pot, a Gold Skulltula, a cutscene gift, a song', ok)
+            # (a Gold Skulltula takes the families in a form of its own since 2026-11-22: no turning item there,
+            # tests/skulltula_prog_check.py)
+            ok &= (refused(build_mod.three_level_parse, world, asked_) != build_mod.skulltula_pair_kind(world, c)) \
+                if len(f) == 3 else refused(build_mod.pair_kind, world, c)
+        ok &= refused(build_mod.gift_pair_kind, world, REFUSED[2]) and refused(build_mod.gift_pair_kind, world,
+                                                                               REFUSED[3])
+        ok &= (build_mod.pair_kind(world, POTS[0]) == 'pot' if len(f) == 2
+               else build_mod.three_level_parse(world, [(POTS[0], text[n])]) == {})
+    good &= check('refused for every family: a shelf, a cutscene gift, a song; no turning item on a Gold '
+                  'Skulltula; a pot takes it', ok)
 
     # ------------------------------------------------------------------------------------- whole builds
     names = list(FAMILIES)
@@ -494,21 +502,37 @@ def main(romfs):
         good &= check('  refused: a three-level family in a big chest (it has no checking version)',
                       refused(run, 'no', '%s=%s' % (BIG_CHEST, text['Quiver'])))
 
-        # freestanding items, rocks, bushes: every family as a turning item
+        # freestanding items, rocks, bushes, pots: every family as a turning item (on a rock, a bush or a pot:
+        # its version that is given once, which turns into the next level's turning item)
         for kind, spots, parts in (('freestanding items', GROUND, (names,)), ('rocks', ROCKS, (names,)),
-                                   ('bushes', BUSHES, (names[:9], names[9:]))):
+                                   ('bushes', BUSHES, (names[:9], names[9:])),
+                                   ('pots', POTS, (names[:8], names[8:]))):
             ok, count = True, 0
             for part in parts:
                 said, files = run('turn', *(['%s=%s' % (c, text[n]) for c, n in zip(spots, part)] + CIRCLE_FIX))
-                ok &= turn_actors(part) <= packs(files)
+                free = kind.startswith('free')
+                # on a rock, a bush or a pot the first level lies there only as its one-time version: no first-level
+                # turning item is made
+                firsts = set() if free else {turn_items.turn_name(FAMILIES[n][0]) for n in part}
+                ok &= turn_actors(part) - firsts <= packs(files) and not firsts & packs(files)
+                if not free:
+                    ok &= {once_items.once_name(x) for n in part for x in FAMILIES[n]} <= packs(files)
                 for n in part:
                     f = FAMILIES[n]
                     ok &= 'a turning item%s: %s on the ground while Link has no %s, then %s' % (
                         '' if kind.startswith('free') else ' as the %s\'s drop' % kind[:-1].replace('bushe', 'bush'),
                         f[0], f[0], f[1]) in said
                     for k, x in enumerate(f):
+                        if k == 0 and not free:
+                            continue
                         ok &= ('once Link owns %s it drops %s and deletes itself' % (x, turn_items.turn_name(f[k + 1]))
                                if k + 1 < len(f) else 'once Link owns %s it deletes itself' % x) in said
+                    if not kind.startswith('free'):
+                        for k, x in enumerate(f):
+                            ok &= 'once   version %-22s for %s' % (once_items.once_name(x), x) in said
+                        # the dropper names no other level (writing its Drop__DropActor stops the game, 2026-11-22)
+                        ok &= ' instead of Obj_NX2Q_' not in said
+                        ok &= 'given once: picked up, it marks this %s' % kind[:-1].replace('bushe', 'bush') in said
                     if f[0] in FIRST_GET:
                         ok &= 'it gives what a chest gives with %s (%s) when it is picked up' % (
                             FIRST_GET[f[0]][0], ', '.join('%d %s' % (c, x) for x, c in FIRST_GET[f[0]][1])) in said
@@ -546,7 +570,8 @@ def main(romfs):
         good &= check('built: the slingshot\'s family on a chest, a rock and the gift of one build: no note about '
                       'the number of checks',
                       'note:' not in said and 'Obj_TBox_NX2_BulletBag' in packs(files)
-                      and turn_actors(['BulletBag']) <= packs(files))
+                      and turn_actors(['BulletBag']) - {turn_items.turn_name(f[0])} <= packs(files)
+                      and once_items.once_name(f[0]) in packs(files))
         said, _ = run('mix', '%s=%s' % (CHESTS[0], text['BulletBag']), '%s=%s' % (ROCKS[0], text['BulletBag']))
         good &= check('  on two checks only, the build says that the last level cannot be reached',
                       'is on 2 checks, not 3: the last level cannot be reached' in said)

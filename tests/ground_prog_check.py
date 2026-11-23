@@ -25,10 +25,10 @@ SPOTS = ('KF_RUPEE_NEAR_MIDO_ITEM', 'KF_RUPEE_NEAR_FADO_ITEM_01')    # two frees
 PAIR = ('Item_Scale_Silver', 'Item_Scale_Gold')
 GUARDS = ['QueryDeathIsDead', 'QueryEventMemberIsEventMemberSomeReason', 'QueryIsPlayingMainEvent']
 ASKED = 'QueryPouchContentIsRequestingGetEvent'    # the item's own pick-up asked for, its scene not yet begun
-# one check of each kind a turning item (or a checking chest) is refused on. Rocks and bushes are accepted
-# (tests/pairs_more_check.py); a gift and a scrub have their own ways (gift_pair_kind, scrub_pair_kind)
-REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_HOUSE_OF_TWINS_CHILD_POT_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT',
-           'LW_NEAR_BRIDGE_SCRUB')
+# one check of each kind a turning item (or a checking chest) is refused on. Rocks, bushes and pots are
+# accepted (tests/pairs_more_check.py, tests/one_time_check.py); a gift and a scrub have their own ways
+# (gift_pair_kind, scrub_pair_kind)
+REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT', 'LW_NEAR_BRIDGE_SCRUB')
 CLOSE = ('KF_SARIAS_HOUSE_HEART_ITEM_03', 'KF_SARIAS_HOUSE_HEART_ITEM_04')     # 1.4 m apart
 TESTED_PAIRS = (('Item_Scale_Silver', 'Item_Scale_Gold'), ('Item_Hookshot', 'Item_Longshot'),
                 ('Item_Ocarina_Fairy', 'Item_Ocarina_Time'))
@@ -87,8 +87,9 @@ def main(romfs):
     good &= check('a pair on a freestanding item is a turning item, in a chest a checking chest',
                   [build_mod.pair_kind(world, c) for c in SPOTS + ('KF_MIDO_CHEST_01',)]
                   == ['freestanding', 'freestanding', 'chest'])
-    good &= check('a turning item is refused on a shelf, a pot, a Gold Skulltula, a gift and a scrub',
-                  all(refused(build_mod.pair_kind, world, c) for c in REFUSED))
+    good &= check('a turning item is refused on a shelf, a Gold Skulltula, a gift and a scrub; a pot takes one',
+                  all(refused(build_mod.pair_kind, world, c) for c in REFUSED)
+                  and build_mod.pair_kind(world, 'KF_HOUSE_OF_TWINS_CHILD_POT_01') == 'pot')
     good &= check('only the listed pairs, first level first',
                   all(len(p) == 2 and p[::-1] not in build_mod.PROGRESSIVE_PAIRS
                       for p in build_mod.PROGRESSIVE_PAIRS) and PAIR in build_mod.PROGRESSIVE_PAIRS)
@@ -234,8 +235,11 @@ def main(romfs):
                 made_of, game = plain(like), plain(own_path)
                 own = own_path[len('Model/'):-len('.anim.bfres')]
                 model_file = plain('Model/%s.%s.bfres' % (a['ModelProjectName'], a['FmdbName']))
-                low = ground_items.vertex_low(x, model_file, None) + ground_items.SPIN_ROOT_LIFT
-                was = ground_items.vertex_low(game, model_file, None) + ground_items.SPIN_ROOT_LIFT
+                # a model on many bones (the hookshots, 2026-11-22): every bone posed, the copy one animation more
+                many = ground_items.many_bones(game) and not ground_items.has_held_pose(game)
+                measure = ground_items.skeleton_low if many else ground_items.vertex_low
+                low = measure(x, model_file, None) + ground_items.SPIN_ROOT_LIFT
+                was = measure(game, model_file, None) + ground_items.SPIN_ROOT_LIFT
                 pose, old_pose = item_pose.read_pose(x), item_pose.read_pose(game)
                 # held up: the game's own pose (its Pose_GetDemo, or its Pose_Common when it has none)
                 was_held = ground_items.HELD_POSE if ground_items.has_held_pose(game) else ground_items.GROUND_POSE
@@ -244,10 +248,10 @@ def main(romfs):
                 lift_ok &= path == 'Model/%s.anim.bfres' % lifted_name \
                     and not os.path.exists(os.path.join(romfs, *path.split('/')) + '.zs') \
                     and projects == [ground_items.COMMON_ANIM, lifted_name] \
-                    and like == (own_path if was_held == ground_items.HELD_POSE
+                    and like == (own_path if was_held == ground_items.HELD_POSE or many
                                  else ground_items.model_path(ground_items.HELD_BASE)) \
-                    and len(x) == len(made_of) and len(path) == len(like) \
-                    and (like != own_path or sum(i != j for i, j in zip(x, made_of)) <= 12) \
+                    and (len(x) == len(made_of) or many) and len(path) == len(like) \
+                    and (like != own_path or many or sum(i != j for i, j in zip(x, made_of)) <= 12) \
                     and (pose['scale'], pose['rot'], pose['move'][0], pose['move'][2]) \
                     == (old_pose['scale'], old_pose['rot'], old_pose['move'][0], old_pose['move'][2]) \
                     and abs(pose['move'][1] - new_h) < 1e-6 and abs(old_pose['move'][1] - old_h) < 1e-6 \
@@ -257,7 +261,9 @@ def main(romfs):
                 if path not in lifted:                    # one copy for an item's versions, as the build does
                     lifted.add(path)
                     out.add(path, x, like, made_of)
-                    lift_ok &= out.table.get(path) == out.table.get(like)
+                    e = out.table.get(like)                # the game file's headroom
+                    lift_ok &= out.table.get(path) == max(e - len(made_of) + len(x),
+                                                          e - sizes.size32(len(made_of)) + sizes.size32(len(x)))
                 if family == PAIR:
                     said.append('  %s: pose height %.4f -> %.4f, lowest vertex %.4f -> %.4f above the ground (%s)'
                                 % (item, old_h, new_h, was, low, path))

@@ -41,16 +41,17 @@ The same on a freestanding item (to test in game): the placement becomes First's
 (tools/turn_items.py): a ground item of First that, once Link owns First, drops Second's in its place and removes
 itself; Second's removes itself once Link owns Second. Two freestanding items with the same pair give First then
 Second in either order.
-The same on a liftable rock or a solid bush (to test in game): its drop (Drop__DropActor) becomes First's turning
-item, so what comes out is First while Link doesn't own it, else Second, decided where it lies and not when the
-rock breaks. Not on shelves, pots or Gold Skulltulas yet.
+The same on a liftable rock, a solid bush, a pot or a Gold Skulltula (to test in game): its drop
+(Drop__DropActor) names the last level's drop, and the game's drop code drops the lowest level Link never got
+in its place, before anything comes out (tools/skulltula_items.py). What comes out marks what dropped it when
+picked up (given once). Not on shelves yet.
 Three-level family (to test in game): CHECK_ID=First>Second>Third on a small chest makes it a chest of our own
 (tools/three_chest.py: the checking chest with a third held item and a second question) that gives Third when
 Link has Second, else Second when Link has First, else First; only the families in THREE_LEVEL_FAMILIES:
 
     python tools/build_mod.py ... "KF_MIDO_CHEST_01=Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large"
 
-Three levels go wherever a pair goes (to test in game): on a freestanding item, a rock or a bush the turning
+Three levels go wherever a pair goes (to test in game): on a freestanding item the turning
 item has three levels (the first turns into the second, the second into the third); a gift and a Deku Scrub ask
 two questions ("has Second?" then "has First?"). Not in a big chest (it has no checking version).
 The first level of the seed bags and the quivers is the weapon (Item_Range_SlingShot, Item_Range_Bow). The game's
@@ -68,6 +69,14 @@ the scrub's price (scrub_flow_edit, point 4).
 A later level of an upgrade family placed on its own (Item_Scale_Gold, Item_Longshot, a bigger bag...) stops the
 build before anything is written: Link could take it before the level in front of it (UPGRADE_FAMILIES,
 skip_level_guard). The message names the First>Second or First>Second>Third form to use when there is one.
+
+Gossip stone text (to test in game): --gossip STONE=TEXT (repeatable) sets what a stone says, in every language
+(English text everywhere). STONE is the stone's check ID or its name in the map. In TEXT, \\n is a new line, \\p a
+new page and {...} is highlighted; longer lines are wrapped and full pages continue on a new page, as the game's
+rumours are laid out. The chosen stones speak without the Mask of Truth, at both ages; the others are unchanged
+(see gossip_flow_edit):
+
+    python tools/build_mod.py ... --gossip "KF_NEAR_LOST_WOODS_GOSSIP=They say {Kokiri Forest} is on the way."
 
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
@@ -99,6 +108,7 @@ or shared (out/ is ignored by git).
 """
 import argparse
 import collections
+import copy
 import os
 import shutil
 import struct
@@ -108,9 +118,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
+import drop_tables  # noqa: E402
 import ground_items  # noqa: E402
 import harp_colors  # noqa: E402
+import once_items  # noqa: E402
 import shop_items  # noqa: E402
+import skulltula_items  # noqa: E402
 import sizes  # noqa: E402
 import three_chest  # noqa: E402
 import turn_items  # noqa: E402
@@ -205,15 +218,15 @@ if any(len(levels) not in (2, 3) for levels in FAMILIES.values()) \
         or len({x for levels in FAMILIES.values() for x in levels}) != sum(len(v) for v in FAMILIES.values()):
     raise SystemExit('FAMILIES: every family has two or three levels, and no item is in two families')
 # where the progressive forms can be placed (said in messages)
-PROGRESSIVE_WHERE = ('on a small chest, a freestanding item, a rock, a bush, a Deku Scrub that sells once or a '
-                     'gift with flow data')
+PROGRESSIVE_WHERE = ('on a small chest, a freestanding item, a rock, a bush, a pot, a Gold Skulltula, a Deku Scrub '
+                     'that sells once or a gift with flow data')
 
 
 def three_level_parse(world, assignments):
     """takes the three-level families (CHECK_ID=First>Second>Third) in chests out of `assignments`: each becomes
     (CHECK_ID, First), as a pair's; returns {check id: family}. Stops the build for a family that is not in
-    THREE_LEVEL_FAMILIES, and for a check of a kind no progressive form can be put on (a shelf, a pot, a Gold
-    Skulltula). A family on a freestanding item, a rock, a bush, a scrub or a gift is left as it is: sorted out
+    THREE_LEVEL_FAMILIES, and for a check of a kind no progressive form can be put on (a shelf). A family
+    on a freestanding item, a rock, a bush, a pot, a Gold Skulltula, a scrub or a gift is left as it is: sorted out
     with the pairs (main). A big chest is refused when its map is changed (patch_file)."""
     out = {}
     for k, (cid, item) in enumerate(assignments):
@@ -225,8 +238,9 @@ def three_level_parse(world, assignments):
                 '>'.join(x) for x in sorted(THREE_LEVEL_FAMILIES))))
         r, name, loc = find_check(world, cid)
         kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
-        if not kinds or kinds == {'scrub'} or (len(kinds) == 1 and kinds <= set(TURN_KINDS)):
-            continue                                   # a gift, a scrub, a turning item: with the pairs
+        if not kinds or kinds == {'scrub'} or (len(kinds) == 1 and kinds <= set(TURN_KINDS + DROP_KINDS)) \
+                or kinds == {'skulltula'}:
+            continue                                   # a gift, a scrub, a turning item, a drop: with the pairs
         if kinds != {'chest'}:
             raise SystemExit('%s: a three-level family (First>Second>Third) can only be put %s (this check: %s)'
                              % (cid, PROGRESSIVE_WHERE, ', '.join(sorted(kinds))))
@@ -246,19 +260,35 @@ def checking_chest(gyaml, family=None):
 
 
 # Where a progressive pair can be placed: a small chest (the checking chest), a freestanding item (a turning
-# item, tools/turn_items.py), or a liftable rock or solid bush (its drop is the turning item: rocks, bushes and
-# pots drop through the same drop part, Component/DropParam/Drop_ResourceSupply_00, whatever their placement's
-# Drop__DropActor names, and a turning item made by a drop is what the second level of every pair already is).
-# Not yet: shelves (the shop version has no such AI), pots (the user: not started), Gold Skulltulas (what they
-# drop must carry the skulltula's flag on: no game node hands it from one drop to the next), songs (events).
+# item, tools/turn_items.py), or a liftable rock, solid bush or pot. Rocks, bushes and pots (2026-11-22, after
+# the crash): the Gold Skulltulas' way below, not a turning item (a turning item showed the level Link already
+# had for a moment before turning). What a rock, a bush or a pot drops for us is given once
+# (tools/once_items.py): picked up, it sets its two saved flags as a token sets its Gold Skulltula's (that this
+# keeps it from coming back is to be tested in game).
+# Not yet: shelves (the shop version has no such AI), Gold Skulltulas (what they drop must carry the
+# skulltula's flag on: no game node hands it from one drop to the next), songs (events).
 # Gifts: gift_pair_kind, gift_pair_edit. Scrubs: scrub_pair_kind, scrub_flow_edit.
-PAIR_KINDS = ('chest', 'freestanding', 'rock', 'bush')
-TURN_KINDS = ('freestanding', 'rock', 'bush')     # the kinds whose pair is a turning item
+# Gold Skulltulas (2026-11-22): still no turning item, for the reason above. The game's drop code chooses the
+# level before anything is dropped (skulltula_pair_kind, tools/skulltula_items.py).
+GS_KINDS = {'skulltula'}
+PAIR_KINDS = ('chest', 'freestanding', 'rock', 'bush', 'pot')
+TURN_KINDS = ('freestanding', 'rock', 'bush', 'pot')   # the kinds whose pair is a turning item
+# a family chosen by the drop code, as on a Gold Skulltula: none. Tried for rocks, bushes and pots on
+# 2026-11-22 (drop tables of ours, the lower levels loaded): the game never put the lower level in place, and
+# nothing came out where one was needed. They are turning items again (the user's choice)
+DROP_KINDS = ()
 # Two turning items of one family must not lie where Link can touch both at once: the second could be picked up
 # in the frame the first's scene ends, before it has turned (it would give the first level again). Metres,
 # between their map positions (for a rock or a bush: where it stands; a rock carried and thrown next to another
 # item of its family is not covered).
 TURN_MIN_DISTANCE = 2.0
+
+
+def skulltula_pair_kind(world, cid):
+    """whether a progressive form on this check is a Gold Skulltula's: every placement of the check is one"""
+    r, name, loc = find_check(world, cid)
+    kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
+    return kinds == GS_KINDS
 
 
 def pair_kind(world, cid):
@@ -268,7 +298,7 @@ def pair_kind(world, cid):
     kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
     if len(kinds) != 1 or not kinds <= set(PAIR_KINDS):
         raise SystemExit('%s: a progressive pair (First>Second) can only be put in a chest, on a freestanding '
-                         'item, or on a rock or a bush (this check: %s)'
+                         'item, or on a rock, a bush or a pot (this check: %s)'
                          % (cid, ', '.join(sorted(kinds)) or 'an event, no map placement'))
     return kinds.pop()
 
@@ -361,11 +391,12 @@ def _right_actor(kind, actor):
 
 
 def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: item,
-         on_shelf=lambda item, shelf_actor: item, gs_drop=lambda item: item):
+         on_shelf=lambda item, shelf_actor: item, gs_drop=lambda item: item, once_drop=None):
     """{map file path in romfs: {placement hash: (check id, new item, old item, kind)}}.
     on_ground(item): the actor to use where the item lies on the ground (freestanding items, pot drops);
     in_chest(item): the actor a chest gives (and shows held up); on_shelf(item, actor now on the shelf): the
-    shelf actor that sells the item; gs_drop(item): the actor a Gold Skulltula drops"""
+    shelf actor that sells the item; gs_drop(item): the actor a Gold Skulltula drops; once_drop(item): the
+    actor a rock, a bush or a pot drops once (once_items.KINDS; without it: as on_ground)"""
     files = {}
     for cid, item_given in assignments:
         r, name, loc = find_check(world, cid)
@@ -380,6 +411,8 @@ def plan(world, assignments, on_ground=lambda item: item, in_chest=lambda item: 
                 raise SystemExit('%s is a %s: only %s supported yet' % (cid, spot['kind'], ', '.join(sorted(SUPPORTED))))
             if spot['kind'] == 'skulltula':
                 item = gs_drop(item_given)
+            elif spot['kind'] in once_items.KINDS and once_drop is not None:
+                item = once_drop(item_given)
             elif spot['kind'] in DROP_ON_GROUND:
                 item = on_ground(item_given)
             elif spot['kind'] == 'chest':
@@ -1514,7 +1547,314 @@ def scrub_messages(out, romfs, lines):
         out.write(path, src, old, new)
 
 
-def patch_file(data, changes, checking=None, three=None, wrap=None):
+# ---------------------------------------------------------------------------------------------- gossip stones
+# --gossip STONE=TEXT: what a gossip stone says (a test of the groundwork for hints). From the game's files:
+# - every stone runs the flow GossipStone, entry Talk. The stone's own rumour is one step: Npc_EventStarter (the
+#   stone talked to) EventTalkWithInstanceNameLabel {MstxtName: GossipStone}: the text of
+#   EventFlowMsg/GossipStone.msbt whose label is the stone's name in the map (GOSSIP_KOKIRI_FOREST_01...). So
+#   a stone's text is changed by changing that one text, in every language's archive (English everywhere, as
+#   the scrub lines);
+# - the rumour is only reached with the Mask of Truth owned and worn (two questions at the start of Talk;
+#   without it Navi talks instead), the mask is a child's, and the stone first says an opening line about the
+#   mask. Nothing depends on the time of day. The stone's own event AI answers a question no game flow asks,
+#   EventQueryGossipStoneCheckInstanceName: a number per stone name (GOSSIP_DEATH_MOUNTAIN_CRATER_01 = 0 ...
+#   GOSSIP_ZORA_RIVER_03 = 39, any other name 40; read from the AI by gossip_query_values). The builder puts that
+#   question in front of Talk: a chosen stone goes to the talk set-up the stone uses with the mask
+#   (InitTalk_GossipStone), its text, and the end (no mask questions, no opening or closing line, no "first
+#   time" flag); every other answer goes to the game's own first step, so other stones are unchanged.
+GOSSIP_FLOW = 'Event/EventFlow/GossipStone.bfevfl'
+GOSSIP_ENTRY = 'Talk'
+GOSSIP_MSG_FILE = 'EventFlowMsg/GossipStone.msbt'
+GOSSIP_PACK = 'Pack/Actor/Obj_GossipStone_A_01.pack'
+GOSSIP_AI = 'AI/GossipStone.event.root.ainb'
+GOSSIP_QUERY = 'EventQueryGossipStoneCheckInstanceName'
+GOSSIP_TALKER = 'Npc_EventStarter'
+GOSSIP_SAY = 'EventTalkWithInstanceNameLabel'
+GOSSIP_INIT = ('InitTalk', 'InitTalk_GossipStone')
+GOSSIP_PREFIX = 'GOSSIP_'
+# Layout, as the game's rumours (every one of the 40, every language): colour 1 and size 80 % for the whole text,
+# then the dialogue start tag; a new page is (0,4) followed by the size and colour again (GOSSIP_LOST_WOOD_01,
+# the one rumour with pages); lines are broken by hand ('\n'). A highlighted word is colour 0, the colour the
+# game uses for highlights (about 3,000 times), switched back to colour 1 after it (not to the default, 0xffff,
+# which would end the rumour's colour).
+GOSSIP_START = _msg_tag(0, 3, b'\x01\x00') + _msg_tag(0, 2, b'\x50\x00') + _msg_tag(3, 0, b'\x0f\x00\x00')
+GOSSIP_PAGE = _msg_tag(0, 4) + _msg_tag(0, 2, b'\x50\x00') + _msg_tag(0, 3, b'\x01\x00')
+GOSSIP_HIGHLIGHT, GOSSIP_NORMAL = _msg_tag(0, 3, b'\x00\x00'), _msg_tag(0, 3, b'\x01\x00')
+GOSSIP_WIDTH = 65         # characters per line: the longest line of the game's English rumours (65)
+GOSSIP_LINES = 2          # lines per page: every rumour of the game has 1 or 2
+GOSSIP_PAGES = 8          # pages: the most any message of the game has (8)
+GOSSIP_LANG = 'Mals/USen.Product.110.sarc'   # the text's characters must be ones the game's English text uses
+
+
+def gossip_parse(world, specs):
+    """--gossip STONE=TEXT -> {stone name in the map (= its message label): (what was given, text)}. STONE is the
+    stone's check ID (KF_NEAR_LOST_WOODS_GOSSIP) or its name in the map (GOSSIP_KOKIRI_FOREST_01)"""
+    out = {}
+    for spec in specs:
+        stone, sep, text = spec.partition('=')
+        if not sep or not stone or not text.strip():
+            raise SystemExit('--gossip %r: write STONE=TEXT (a check ID or the stone\'s name in the map)' % spec)
+        if stone.startswith(GOSSIP_PREFIX):
+            names = {stone}
+        else:
+            r, _, loc = find_check(world, stone)
+            ps = list(world.placements_of(r, loc))
+            kinds = {world.checks[sc][sp]['kind'] for sc, sp, _ in ps}
+            if kinds != {'gossip'}:
+                raise SystemExit('--gossip %s: not a gossip stone (%s)'
+                                 % (stone, ', '.join(sorted(kinds)) or 'no placement'))
+            names = {p.get('name_in_map') for _, _, p in ps}
+            if len(names) != 1 or None in names:
+                raise SystemExit('--gossip %s: its placements do not have one name in the map (%s)' % (stone, names))
+        name, = names
+        if name in out:
+            raise SystemExit('--gossip: %s (%s) is given twice' % (stone, name))
+        out[name] = (stone, text)
+    return out
+
+
+def gossip_layout(text, chars):
+    """the user's text -> pages of lines of (character, highlighted). '\\n' (backslash n, or a real line feed):
+    a line break; '\\p': a new page; {...}: highlighted. Lines longer than GOSSIP_WIDTH are wrapped at spaces,
+    pages with more than GOSSIP_LINES lines continue on a new page. chars: the characters allowed"""
+    pages, lines, line, hl, i = [], [], [], False, 0
+    while i < len(text):
+        c = text[i]
+        if c == '\\':
+            k = text[i + 1:i + 2]
+            if k not in ('n', 'p'):
+                raise SystemExit('--gossip: unknown escape \\%s (\\n: new line, \\p: new page)' % k)
+            lines.append(line)
+            line = []
+            if k == 'p':
+                pages.append(lines)
+                lines = []
+            i += 2
+            continue
+        if c == '\n':
+            lines.append(line)
+            line = []
+        elif c == '{' and not hl:
+            hl = True
+        elif c == '}' and hl:
+            hl = False
+        elif c in '{}':
+            raise SystemExit('--gossip: %r: braces must come in pairs, {highlighted}' % text)
+        elif c not in chars:
+            raise SystemExit('--gossip: %r: the character %r is not used anywhere in the game\'s English text'
+                             % (text, c))
+        else:
+            line.append((c, hl))
+        i += 1
+    if hl:
+        raise SystemExit('--gossip: %r: a { is not closed' % text)
+    lines.append(line)
+    pages.append(lines)
+    out = []
+    for given in pages:
+        wrapped = []
+        for ln in given:
+            words, w = [], []
+            for c in ln:
+                if c[0] == ' ':
+                    if w:
+                        words.append(w)
+                    w = []
+                else:
+                    w.append(c)
+            if w:
+                words.append(w)
+            cur = []
+            for w in words:
+                if len(w) > GOSSIP_WIDTH:
+                    raise SystemExit('--gossip: the word %r is longer than a line (%d characters)'
+                                     % (''.join(c for c, _ in w), GOSSIP_WIDTH))
+                if cur and len(cur) + 1 + len(w) > GOSSIP_WIDTH:
+                    wrapped.append(cur)
+                    cur = []
+                if cur:
+                    # the space takes the highlight of the words on both sides of it, else none
+                    cur.append((' ', cur[-1][1] and w[0][1]))
+                cur += w
+            wrapped.append(cur)
+        while len(wrapped) > 1 and not wrapped[-1]:
+            wrapped.pop()                               # a line break at the end of a page
+        out += [wrapped[k:k + GOSSIP_LINES] for k in range(0, len(wrapped), GOSSIP_LINES)]
+    if not any(c for page in out for ln in page for c in ln):
+        raise SystemExit('--gossip: %r: no text' % text)
+    if len(out) > GOSSIP_PAGES:
+        raise SystemExit('--gossip: %r takes %d pages (at most %d, %d lines of %d characters each)'
+                         % (text, len(out), GOSSIP_PAGES, GOSSIP_LINES, GOSSIP_WIDTH))
+    return out
+
+
+def gossip_message(pages):
+    """pages of lines of (character, highlighted) -> the message, with the game's tags (GOSSIP_START...)"""
+    msg = GOSSIP_START
+    for n, page in enumerate(pages):
+        if n:
+            msg += GOSSIP_PAGE
+        hl = False
+        for k, ln in enumerate(page):
+            if k:
+                msg += '\n'
+            for c, h in ln:
+                if h != hl:
+                    msg += GOSSIP_HIGHLIGHT if h else GOSSIP_NORMAL
+                    hl = h
+                msg += c
+        if hl:
+            msg += GOSSIP_NORMAL
+    return msg + '\x00'
+
+
+def gossip_chars(arc_data):
+    """the characters the game's messages in a language archive use (plain text, not tags or line feeds)"""
+    chars = set()
+    for f, data in sarc.Sarc.read(arc_data).files.items():
+        if f.endswith('.msbt'):
+            m = msbt.Msbt.read(data)
+            for t in m.texts.values():
+                chars.update(c for x in msbt.tags(t, m.encoding) if isinstance(x, str) for c in x)
+    return chars - set('\n\x00\\{}')
+
+
+def gossip_query_values(ai_data):
+    """what EventQueryGossipStoneCheckInstanceName answers, from the stone's event AI: ({stone name: number},
+    the number for any other name). The question runs a string selector on the stone's own name in the map,
+    each case setting the answer (ExecuteEventSetQueryValue)"""
+    a = ainb.Ainb.read(ai_data)
+    cmd = [c for c in a.commands if c.name == GOSSIP_QUERY]
+    if len(cmd) != 1:
+        raise SystemExit('%s: no command %s' % (GOSSIP_AI, GOSSIP_QUERY))
+    start = a.nodes[cmd[0].left]
+    sel = [a.nodes[x.node] for x in start.links[2]]
+    if len(sel) != 1 or sel[0].type_name != 'Element_StringSelector':
+        raise SystemExit('%s: %s does not run one string selector' % (GOSSIP_AI, GOSSIP_QUERY))
+    names, other = {}, []
+    for x in sel[0].links[2]:
+        node = a.nodes[x.node]
+        ins = {i.name: i for t in ('int', 'string') for i in node.inputs[t]}
+        if node.name != 'ExecuteEventSetQueryValue' or 'Value' not in ins or ins['Value'].node != -1:
+            raise SystemExit('%s: a case of %s does not set a fixed answer' % (GOSSIP_AI, GOSSIP_QUERY))
+        case = a.string_at(x.extra[1]) if len(x.extra) > 1 else ''
+        if case.startswith(GOSSIP_PREFIX):
+            if ins['Label'].value != case or case in names:
+                raise SystemExit('%s: %s: case %s not as expected' % (GOSSIP_AI, GOSSIP_QUERY, case))
+            names[case] = ins['Value'].value
+        else:
+            other.append(ins['Value'].value)
+    if len(other) != 1 or len(set(names.values()) | set(other)) != len(names) + 1:
+        raise SystemExit('%s: %s: the answers are not one per stone and one for any other name'
+                         % (GOSSIP_AI, GOSSIP_QUERY))
+    return names, other[0]
+
+
+def gossip_flow_edit(fc, values, other, stones):
+    """GossipStone, entry Talk (flowchart, edited in place): first ask the stone its number (GOSSIP_QUERY, on the
+    stone talked to): for the chosen stones (names), the talk set-up (subflow InitTalk_GossipStone, as with the
+    mask), the stone's text (a copy of the game's step), end; for every other answer the game's own first step.
+    Returns lines saying what changed"""
+    ep = fc.entry_point(GOSSIP_ENTRY)
+    first = ep.main
+    reach = fc.reachable(first)
+    inits = [i for i in reach if fc.events[i].type == 'subflow'
+             and (fc.events[i].flowchart, fc.events[i].entry) == GOSSIP_INIT]
+    says = [i for i in reach if fc.events[i].type == 'action' and fc.actors[fc.events[i].actor].name == GOSSIP_TALKER
+            and _action_name(fc, fc.events[i]) == GOSSIP_SAY]
+    if len(inits) != 1 or len(says) != 1 or (fc.events[says[0]].params or {}).get('MstxtName') != 'GossipStone':
+        raise SystemExit('%s: entry %s: not one %s step and one %s step as expected'
+                         % (GOSSIP_FLOW, GOSSIP_ENTRY, '/'.join(GOSSIP_INIT), GOSSIP_SAY))
+    unknown = sorted(set(stones) - set(values))
+    if unknown:
+        raise SystemExit('%s: the stone\'s question %s has no answer for %s'
+                         % (GOSSIP_FLOW, GOSSIP_QUERY, ', '.join(unknown)))
+    say = fc.add_action(GOSSIP_TALKER, GOSSIP_SAY, copy.deepcopy(fc.events[says[0]].params), next=None)
+    init = fc.add_subflow(GOSSIP_INIT[0], GOSSIP_INIT[1], copy.deepcopy(fc.events[inits[0]].params), next=say)
+    chosen = {values[s] for s in stones}
+    cases = [(v, init if v in chosen else first) for v in sorted(set(values.values()) | {other})]
+    ask = fc.add_switch(GOSSIP_TALKER, GOSSIP_QUERY, cases)
+    ep.main = ask
+    fc.update_entry_points()
+    return ['entry %s starts with %s (event %d, %d answers): %s -> set-up %s (event %d), the stone\'s text (event '
+            '%d, a copy of %s), end; every other answer -> the game\'s first step (event %d)'
+            % (GOSSIP_ENTRY, GOSSIP_QUERY, ask, len(cases),
+               ', '.join('%s (%d)' % (s, values[s]) for s in sorted(stones)), GOSSIP_INIT[1], init, say,
+               fc.events[says[0]].name, first)]
+
+
+def gossip_messages(out, romfs, texts):
+    """replace the texts {label: message} of GossipStone.msbt in every language's message archive; every
+    other text stays as it is. Returns {archive: characters of the text its own messages never use}"""
+    unseen = {}
+    for fn in sorted(os.listdir(os.path.join(romfs, 'Mals'))):
+        if not fn.endswith('.sarc.zs'):
+            continue
+        path = 'Mals/' + fn[:-3]
+        src, old = out.read(path)
+        arc = sarc.Sarc.read(old)
+        m = msbt.Msbt.read(arc.files[GOSSIP_MSG_FILE])
+        if m.write() != arc.files[GOSSIP_MSG_FILE] or not set(texts) <= set(m.texts):
+            raise SystemExit('%s: %s does not round-trip or has no text %s'
+                             % (path, GOSSIP_MSG_FILE, sorted(set(texts) - set(m.texts))))
+        before = dict(m.texts)
+        m.texts.update(texts)
+        new_msg = m.write()
+        back = msbt.Msbt.read(new_msg).texts
+        if back != m.texts or list(back) != list(before) \
+                or any(back[k] != v for k, v in before.items() if k not in texts):
+            raise SystemExit('read-back: %s in %s' % (GOSSIP_MSG_FILE, path))
+        arc.files[GOSSIP_MSG_FILE] = new_msg
+        new = arc.write()
+        back = sarc.Sarc.read(new)
+        if set(back.files) != set(arc.files) or any(back.files[k] != v for k, v in arc.files.items()):
+            raise SystemExit('read-back: %s differs from what was intended' % path)
+        out.write(path, src, old, new)
+        used = {c for t in texts.values() for x in msbt.tags(t) if isinstance(x, str) for c in x} - set('\n\x00')
+        missing = used - gossip_chars(old)
+        if missing:
+            unseen[path] = ''.join(sorted(missing))
+    return unseen
+
+
+def gossip_plan(out, world, specs):
+    """--gossip, worked out before anything is written: (stones {name: (given, text)}, their messages, their
+    layouts, the stone's question's answers {name: number}, the answer for any other name)"""
+    stones = gossip_parse(world, specs)
+    chars = gossip_chars(out.read(GOSSIP_LANG)[1])
+    texts, layouts = {}, {}
+    for name, (given, text) in stones.items():
+        layouts[name] = gossip_layout(text, chars)
+        texts[name] = gossip_message(layouts[name])
+    values, other = gossip_query_values(sarc.Sarc.read(out.read(GOSSIP_PACK)[1]).files[GOSSIP_AI])
+    unknown = sorted(set(stones) - set(values))
+    if unknown:
+        raise SystemExit('--gossip: %s: not a stone the game knows (%s answers no number for it)'
+                         % (', '.join(unknown), GOSSIP_QUERY))
+    return stones, texts, layouts, values, other
+
+
+def gossip_build(out, romfs, plan):
+    """--gossip: the texts in every language and the stones' talk flow (see GOSSIP_FLOW); plan: gossip_plan"""
+    stones, texts, layouts, values, other = plan
+    src, old = out.read(GOSSIP_FLOW)
+    ef = evfl.loads(old)
+    said = gossip_flow_edit(ef.flowchart, values, other, sorted(stones))
+    out.write(GOSSIP_FLOW, src, old, flow_write_checked(ef))
+    for line in said:
+        print('gossip flow        %s' % line)
+    unseen = gossip_messages(out, romfs, texts)
+    for name, (given, text) in sorted(stones.items()):
+        pages = layouts[name]
+        shown = ' / '.join(' | '.join(''.join(c for c, _ in ln) for ln in page) for page in pages)
+        print('gossip             %s (%s): %d page%s: %s' % (given, name, len(pages), 's' * (len(pages) > 1), shown))
+    print('gossip lines       %s replaced in %s (every language, English text)'
+          % (', '.join(sorted(texts)), GOSSIP_MSG_FILE))
+    for path, missing in sorted(unseen.items()):
+        print('  note: %s: its own messages never use %r (check that its font shows them)' % (path, missing))
+
+
+def patch_file(data, changes, checking=None, three=None, wrap=None, tables=None):
     """change what the actors with these hashes give: chests and pots through their Drop__DropActor (chests'
     special opening events handled by CHEST_EVENTS), freestanding items by their actor type (Gyaml);
     checking: {hash: (item to look for, item given when Link has it)}: that small chest becomes the game's
@@ -1524,7 +1864,11 @@ def patch_file(data, changes, checking=None, three=None, wrap=None):
     instead (checking_chest), with the same settings;
     wrap: {hash: f}: that chest gets an opening event of our own, GetEventName = f(the chest's actor, the event
     its placement names or None): for chests that hold an ocarina (tbox_sync_event);
+    tables: {hash: a drop table of ours}: that rock, bush, pot or Gold Skulltula names the table
+    (Drop__DropTable) and no actor (tools/drop_tables.py); its old item is what it named before (an actor, a
+    table, or None);
     returns (new data, {hash: old item}, {hash: new Dynamic as intended})"""
+    tables = tables or {}
     checking = checking or {}
     three = three or {}
     wrap = wrap or {}
@@ -1535,6 +1879,15 @@ def patch_file(data, changes, checking=None, three=None, wrap=None):
         if h in changes and changes[h][3] in REPLACED:
             found[h] = a['Gyaml']
             a['Gyaml'] = changes[h][1]
+            continue
+        if h in tables:
+            dyn = a.get('Dynamic')
+            dyn = type(dyn)(dyn) if dyn is not None else {}
+            found[h] = dyn.get('Drop__DropActor', dyn.get('Drop__DropTable'))
+            dyn.pop('Drop__DropActor', None)
+            dyn['Drop__DropTable'] = tables[h]
+            a['Dynamic'] = dyn
+            intended[h] = dict(dyn)
             continue
         if h in changes:
             dyn = a.get('Dynamic')
@@ -1580,7 +1933,7 @@ def patch_file(data, changes, checking=None, three=None, wrap=None):
                 dyn[TBOX_EVENT_KEY] = wrap[h](a['Gyaml'], dyn.get(TBOX_EVENT_KEY))
             a['Dynamic'] = dyn
             intended[h] = dict(dyn)
-    missing = set(changes) - set(found)
+    missing = (set(changes) | set(tables)) - set(found)
     if missing:
         raise SystemExit('placements not found: %s' % ', '.join(sorted(missing)))
     return byml.dumps(doc), found, intended
@@ -2681,23 +3034,29 @@ def main(argv):
                     choices=sorted(set(FIXES) | set(FILE_FIXES) | set(TABLE_FIXES)
                                    | {'kokiri_shop_full_stock', 'kokiri_circle_after_dungeons'}),
                     help='a game fix (see FIXES, FILE_FIXES, TABLE_FIXES)')
+    ap.add_argument('--gossip', action='append', default=[], metavar='STONE=TEXT',
+                    help='what a gossip stone says (STONE: its check ID or its name in the map; in TEXT \\n is a '
+                         'new line, \\p a new page, {...} highlighted); see gossip_parse')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
-    if not a.assign and not a.fix:
-        ap.error('nothing to do: give CHECK_ID=Item assignments and/or --fix')
+    if not a.assign and not a.fix and not a.gossip:
+        ap.error('nothing to do: give CHECK_ID=Item assignments, --fix and/or --gossip')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
     never_given(assignments)
     skip_level_guard(assignments)                      # a later level of an upgrade family, alone
     # CHECK_ID=First>Second: a progressive pair (PROGRESSIVE_PAIRS). In a small chest: planned as First, the
-    # chest made a checking chest further down. On a freestanding item, a rock or a bush: planned as First's
-    # turning item (tools/turn_items.py; the rock's or bush's drop). On a gift with flow data: planned as First,
+    # chest made a checking chest further down. On a freestanding item: planned as First's turning item
+    # (tools/turn_items.py). On a rock, a bush, a pot or a Gold Skulltula: planned as the last level's drop
+    # (tools/skulltula_items.py), given once (tools/once_items.py). On a gift with flow data: planned as First,
     # the question added further down (gift_pair_kind). On a scrub: planned as First, the question added in
     # the scrub's branch of the scrub flow (scrub_pair_kind). Nowhere else yet (pair_kind).
     # (first, second) below is (first, second, third) for a three-level family on anything but a chest
     steps = {}                                         # check id -> (first, second): chests
     turning = {}                                       # check id -> (first, second): turning items (TURN_KINDS)
+    once_turning = {}                                  # those of `turning` on a rock, a bush or a pot: given once
     gift_pairs = {}                                    # check id -> (first, second): gifts (gift_pair_edit)
     scrub_pairs = {}                                   # check id -> (first, second): scrubs (scrub_flow_edit)
+    gs_families = {}                                   # check id -> the family: Gold Skulltulas, rocks, bushes, pots
     world = World()
     # CHECK_ID=First>Second>Third: a three-level family (THREE_LEVEL_FAMILIES). In a small chest: planned as
     # First, the chest made the family's own chest further down (tools/three_chest.py). Anywhere else a pair can
@@ -2715,19 +3074,37 @@ def main(argv):
             elif scrub_pair_kind(world, cid):
                 scrub_pairs[cid] = pair            # planned as First; the question goes in the scrub's branch
                 assignments[k] = (cid, pair[0])
+            elif skulltula_pair_kind(world, cid):
+                # the one-time turning item a rock drops (tools/once_items.py): the skulltula hands its flag to
+                # what it drops as it does to its token, and the item marks it as the token does. It comes out
+                # as the first level and turns into the next one on the ground once Link owns it. (The drop
+                # code's rows, gs_families, never put a lower level in place in game, 2026-11-22)
+                turning[cid] = pair
+                once_turning[cid] = pair
+                assignments[k] = (cid, once_items.once_name(pair[0]))
             elif pair_kind(world, cid) == 'chest':
                 steps[cid] = pair
                 assignments[k] = (cid, pair[0])
+            elif pair_kind(world, cid) in once_items.KINDS:
+                # a turning item that marks the rock, bush or pot it came from: it comes out as the first
+                # level and turns into the next one on the ground once Link owns it (tools/once_items.py)
+                turning[cid] = pair
+                once_turning[cid] = pair
+                assignments[k] = (cid, once_items.once_name(pair[0]))
             else:
                 turning[cid] = pair
                 assignments[k] = (cid, turn_items.turn_name(pair[0]))
-    placed = collections.Counter(list(triples.values()) + [f for forms in (turning, gift_pairs, scrub_pairs)
+    placed = collections.Counter(list(triples.values()) + [f for forms in (turning, gift_pairs, scrub_pairs,
+                                                                         gs_families)
                                                            for f in forms.values() if len(f) == 3])
     for family, n in sorted(placed.items()):
         if n != len(family):
             print('  note: %s is on %d checks, not %d: %s' % ('>'.join(family), n, len(family), (
                 'the last level cannot be reached' if n < len(family) else 'the last level is given more than once')))
-    for cid, cid2, d in turn_spacing(world, turning):
+    # (and two drops of one family on rocks, bushes or pots: the second could be picked up in the frame the
+    # first's scene ends, before it has removed itself)
+    for cid, cid2, d in turn_spacing(world, dict(turning, **{c: f for c, f in gs_families.items()
+                                                             if not skulltula_pair_kind(world, c)})):
         print('%-18s and %s: the same progressive family, %.1f m apart' % (cid, cid2, d))
     # a small seed bag or quiver placed alone means its weapon: the check shows and gives the slingshot / bow,
     # and the small bag comes with it (the user's rule: never the bag first)
@@ -2742,6 +3119,7 @@ def main(argv):
         shutil.rmtree(mod_romfs)
         print('earlier build removed:', mod_romfs)
     out = Output(a.romfs, mod_romfs, dicts)
+    gossip = gossip_plan(out, world, a.gossip) if a.gossip else None    # refused here, before anything is written
 
     shop_fix = 'kokiri_shop_full_stock' in a.fix
     for cid, _ in assignments:
@@ -2858,8 +3236,19 @@ def main(argv):
     def plain(path):
         return out.read(path)[1]
 
+    once_plain = {}                                    # item -> its ground version with the one-time mark
+
+    def once_drop(item):
+        """what a rock, a bush or a pot drops once: a version of the item that marks it when picked up"""
+        if item.startswith((once_items.PREFIX, skulltula_items.PREFIX)) or item == ground_items.TOKEN:
+            return item                                # a family's level (built further down); a real token
+        kind = ground_items.kind_of(plain, item)
+        if kind in ('item', 'equipment'):
+            return once_plain.setdefault(item, once_items.plain_name(item))
+        return gs_drop(item)                           # a ground actor of the game: its token-built version
+
     def on_ground(item):
-        if item.startswith(turn_items.PREFIX):
+        if item.startswith((turn_items.PREFIX, once_items.PREFIX)):
             return item                                # a turning item (a progressive pair): built further down
         kind = ground_items.kind_of(plain, item)
         if kind == 'ground':
@@ -2876,6 +3265,8 @@ def main(argv):
     def gs_drop(item):
         if item == ground_items.TOKEN:
             return item                                # its own token
+        if item.startswith((skulltula_items.PREFIX, once_items.PREFIX)):
+            return item                                # a level of a family (a progressive form): built further down
         if ground_items.kind_of(plain, item) in ('ground', 'item', 'equipment'):
             return grounds.setdefault((item, 'token'), ground_items.ground_name(item, 'token'))
         raise SystemExit('%s: not something a Gold Skulltula can drop (no version of it can be made from the '
@@ -2943,17 +3334,18 @@ def main(argv):
             shelf_lift[name] = shop_items.SHELF_LIFT[item]
         return name
 
-    planned = plan(world, assignments, on_ground, in_chest, on_shelf, gs_drop)
+    planned = plan(world, assignments, on_ground, in_chest, on_shelf, gs_drop, once_drop)
     # a weapon placed alone where it lies on the ground: nothing there gives its small bag (only chests do, and
     # the first level of its family's turning item; a gift, a scrub and a cutscene add it)
     for cid, item, kind in sorted({(c, i, k) for changes in planned.values() for c, i, _, k in changes.values()}):
         alone = next((x for x in SCRUB_COMPANIONS if kind in DROP_ON_GROUND and item in (
-            x, ground_items.ground_name(x), ground_items.ground_name(x, 'token'))), None)
+            x, ground_items.ground_name(x), ground_items.ground_name(x, 'token'), once_items.plain_name(x))), None)
         if alone:
             print('  NOTE: %s: %s alone on a %s comes without %s (only a chest gives it with the weapon)%s'
                   % (cid, alone, kind, ', '.join(SCRUB_COMPANIONS[alone]),
                      ': place its family there instead (%s=%s)' % (cid, '>'.join(next(
-                         f for f in FAMILIES.values() if f[0] == alone))) if kind in TURN_KINDS else ''))
+                         f for f in FAMILIES.values() if f[0] == alone)))
+                     if kind in TURN_KINDS or kind in GS_KINDS or kind in DROP_KINDS else ''))
     # shelves: which shelf (ShopItemIndex; the Heart has none: 0) and age each placement is, for the lists
     shelf_of = {p['hash']: (p['ages'], int(p.get('params', {}).get('ShopItemIndex', 0)))
                 for spots in world.checks.values() for sp in spots.values() if sp['kind'] == 'shop'
@@ -2977,6 +3369,35 @@ def main(argv):
         if not planned[path]:
             del planned[path]
 
+    # what rocks, bushes and pots drop is given once (tools/once_items.py): the placements it is for. Each must
+    # have the two saved flags the token's node sets: the one that is reset (its hash) and hash ^ 2 (never
+    # reset), and its actor must have a drop part (the prop rock of the rock circle has none)
+    once_spots = {}                                    # placement hash -> (check id, the drop, its actor)
+    actor_of = {p['hash']: p['actor'] for spots in world.checks.values() for sp in spots.values()
+                for p in sp['placements']}
+    once_no_drop = {}                                  # actor -> whether it has no drop part (read once)
+    for path, changes in sorted(planned.items()):
+        for h, (cid, item, _, kind) in sorted(changes.items()):
+            if kind not in once_items.KINDS:
+                continue
+            actor = actor_of[h]
+            if actor not in once_no_drop:
+                once_no_drop[actor] = not once_items.has_drop(
+                    sarc.Sarc.read(plain(ground_items.pack_path(actor))).files, actor)
+            if once_no_drop[actor]:
+                continue                               # it drops nothing, whatever its placement names
+            if not item.startswith(once_items.OURS):
+                print('  NOTE: %s: %s on a %s is not given once (it comes out again when the %s is back)'
+                      % (cid, item, kind, kind))
+                continue
+            once_spots[h] = (cid, item, actor)
+    if once_spots:
+        flags = placement_flags(plain(GAME_DATA))
+        for h, (cid, item, actor) in sorted(once_spots.items()):
+            if flags.get(h) != once_items.FLAG_RESET or flags.get(str(int(h) ^ 2)) != FLAG_KEPT:
+                raise SystemExit('%s: placement %s (%s) does not have the two saved flags a one-time drop needs '
+                                 '(%s and %s)' % (cid, h, actor, flags.get(h), flags.get(str(int(h) ^ 2))))
+
     # progressive pairs: in chests (the chest itself chooses) and on freestanding items, rocks and bushes (a
     # turning item), as sorted out above (pair_kind); checked again on what was planned
     stepped = {cid for changes in planned.values() for cid, _, _, kind in changes.values() if kind == 'chest'}
@@ -2988,9 +3409,12 @@ def main(argv):
     three_used = {}                                    # (family name, _NoBake twin) -> (second, third as held)
     for changes in planned.values():
         for cid, item, _, kind in changes.values():
-            if (cid in turning) != item.startswith(turn_items.PREFIX) or (cid in turning and kind not in TURN_KINDS):
-                raise SystemExit('%s: a turning item (%s) planned on a %s: only freestanding items, rocks and '
-                                 'bushes yet' % (cid, item, kind))
+            if (cid in turning) != item.startswith((turn_items.PREFIX, once_items.PREFIX)) \
+                    or (cid in turning and kind not in TURN_KINDS + tuple(GS_KINDS)) \
+                    or (cid in once_turning) != item.startswith(once_items.PREFIX) \
+                    or (cid in once_turning and kind not in once_items.KINDS + tuple(GS_KINDS)):
+                raise SystemExit('%s: a turning item (%s) planned on a %s: only freestanding items, rocks, '
+                                 'bushes, pots and Gold Skulltulas' % (cid, item, kind))
 
     for path, changes in sorted(planned.items()):
         src, old = out.read(path)
@@ -3005,15 +3429,26 @@ def main(argv):
         checking.update({h: pair_check(triples[cid][:2], in_chest) for h, (cid, _, _, kind) in changes.items()
                          if cid in triples})
         wrap = {h: tbox_event for h, (cid, _, _, kind) in changes.items() if kind == 'chest' and holds_ocarina(cid)}
-        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three, wrap)
+        # families on rocks, bushes, pots and Gold Skulltulas: the placement names a drop table of ours
+        tables = {h: drop_tables.table_name(gs_families[cid], kind == 'skulltula')
+                  for h, (cid, _, _, kind) in changes.items() if cid in gs_families}
+        for h in tables:
+            if changes[h][3] == 'skulltula' and actor_of[h] != drop_tables.SKULLTULA:
+                raise SystemExit('%s: placement %s is a %s: only %s gets the drop tables of ours'
+                                 % (changes[h][0], h, actor_of[h], drop_tables.SKULLTULA))
+        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three, wrap, tables)
         for h, (cid, item, expected_old, kind) in changes.items():
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
-            print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item))
+            print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item if h not in tables else
+                                             'drop table %s (one item: %s)' % (tables[h], item)))
             if cid in turning:
                 print('%-18s   a turning item%s: %s on the ground while Link has no %s, then %s'
                       % (cid, '' if kind == 'freestanding' else ' as the %s\'s drop' % kind, turning[cid][0],
                          turning[cid][0], turning[cid][1]))
+            if h in once_spots:
+                print('%-18s   given once: picked up, it marks this %s as the token marks its Gold Skulltula'
+                      % (cid, kind))
         # read back: only the changed values differ (worked out again here from the original, not from
         # what patch_file did)
         before = {str(int(x['Hash'])): x for x in byml.loads(old).root['Actors']}
@@ -3023,7 +3458,10 @@ def main(argv):
         for act in back:
             h = str(int(act['Hash']))
             want = dict(before[h])
-            if h in changes and changes[h][3] in REPLACED:
+            if h in tables:
+                dyn = {k: v for k, v in (want.get('Dynamic') or {}).items() if k != 'Drop__DropActor'}
+                want['Dynamic'] = dict(dyn, Drop__DropTable=tables[h])
+            elif h in changes and changes[h][3] in REPLACED:
                 want['Gyaml'] = changes[h][1]
             elif h in changes:
                 dyn = dict(want.get('Dynamic') or {}, Drop__DropActor=changes[h][1])
@@ -3184,8 +3622,10 @@ def main(argv):
     # scrubs: their map setting, one branch each in the shared flow, the generic line
     scrubs = plan_scrubs(world, assignments)
     # a slingshot given anywhere may come without its seed bag: the scrubs' seed sales then refuse
-    guard = any(item in ('Item_Range_SlingShot', turn_items.turn_name('Item_Range_SlingShot'))
+    guard = any(item in ('Item_Range_SlingShot', turn_items.turn_name('Item_Range_SlingShot'),
+                         once_items.once_name('Item_Range_SlingShot'))
                 for _, item in assignments)
+    guard = guard or any(f[0] == 'Item_Range_SlingShot' for f in gs_families.values())
     if scrubs or guard:
         maps = {}
         for cid, item, rows in scrubs:
@@ -3363,8 +3803,13 @@ def main(argv):
         }.get(version, '')))
     # turning items: every level of each family placed on a freestanding item, a rock or a bush
     # (tools/turn_items.py)
+    # (a family only on rocks, bushes and pots: its first level lies there only as its one-time version, which
+    # turns into the second level's turning item; the first level's turning item is not made)
+    ground_families = {f for cid, f in turning.items() if cid not in once_turning}
     for family in sorted(set(turning.values())):
         for level, item in enumerate(family):
+            if level == 0 and family not in ground_families:
+                continue
             # a first level the game's chests give more with (the weapons: SCRUB_COMPANIONS) gives the same
             bundle_for = flow_name(item) if level == 0 and item in SCRUB_COMPANIONS else None
             got, pack, new_inner, rows, loose = turn_items.build(
@@ -3411,6 +3856,215 @@ def main(argv):
                      '; while Link has no %s it gives what a chest gives with %s (%s) when it is picked up'
                      % (what['bundle']['bag'], bundle_for, ', '.join('%d %s' % (n, x) for x, n in gives))
                      if bundle_for else ''))
+    # families on Gold Skulltulas, rocks, bushes and pots (tools/skulltula_items.py): every level as a token
+    # version of its own; the game's drop code is told which level to drop (its two lists)
+    if gs_families:
+        families = sorted(set(gs_families.values()))
+        game_data = plain(skulltula_items.GAME_DATA)
+        tpl_pack_path = ground_items.pack_path(skulltula_items.TOKEN)
+        like_files = dict(sarc.Sarc.read(plain(tpl_pack_path)).files)
+        chains = []
+        for family in families:
+            for level, item in enumerate(family):
+                bundle_for = flow_name(item) if level == 0 and item in SCRUB_COMPANIONS else None
+                got, pack, new_inner, rows, loose = skulltula_items.build(
+                    family, level, plain, table_rows,
+                    lambda project: os.path.exists(os.path.join(a.romfs, 'Model', project + '.anim.bfres.zs')),
+                    bundle_for)
+                name = skulltula_items.drop_name(item)
+                assert got == name
+                path = ground_items.pack_path(name)
+                out.write_new(path, pack, like=tpl_pack_path)
+                out.add(path, pack, tpl_pack_path, plain(tpl_pack_path))
+                for inner, (data, like) in new_inner.items():
+                    out.add(inner, data, like, like_files[like])
+                for inner in sarc.Sarc.read(pack).files:  # every file of the pack has a size entry
+                    if out.table.get(inner) is None:
+                        raise SystemExit('%s: %s has no resource size entry' % (name, inner))
+                for t, row in rows.items():
+                    new_rows.setdefault(t, []).append(row)
+                for path, (data, like, old_h, new_h, _) in sorted(loose.items()):
+                    if lifted_before(path, data):
+                        continue
+                    out.write_new(path, data, like)
+                    out.add(path, data, like, plain(like))
+                    print('%-6s %s: lies %.3f %s on the ground (pose height %.3f -> %.3f, %s)'
+                          % ('gs', item, abs(new_h - old_h), 'higher' if new_h > old_h else 'lower', old_h, new_h,
+                             path))
+                what = skulltula_items.describe(sarc.Sarc.read(pack).files[shop_items.ai_path(
+                    skulltula_items.ai_name(item))])
+                gives = []
+                if bundle_for:
+                    gives = [(turn_items._actor_of(x), n) for x, n in what['bundle']['gives']]
+                    if [x for x, _ in gives][:len(SCRUB_COMPANIONS[item])] != SCRUB_COMPANIONS[item] \
+                            or what['bundle']['bag'] != SCRUB_COMPANIONS[item][0]:
+                        raise SystemExit('%s: the game\'s chests give %r with %s, not %s first as expected'
+                                         % (name, gives, bundle_for, SCRUB_COMPANIONS[item]))
+                print('gs     version %-22s for %s (%d bytes): a family drop (marks what dropped it when '
+                      'picked up); its AI %s (%d nodes more than the token\'s)%s: deletes itself once Link owns %s%s'
+                      % (name, item, len(pack), skulltula_items.ai_name(item), what['new'],
+                         ': deletes itself while Link does not own %s' % what['previous'] if what['previous'] else '',
+                         ' or '.join(what['taken']),
+                         ': while Link has no %s it gives what a chest gives with %s (%s) when it is picked up'
+                         % (what['bundle']['bag'], bundle_for, ', '.join('%d %s' % (n, x) for x, n in gives))
+                         if bundle_for else ''))
+            ch = skulltula_items.chain(family, flow_name)
+            for _, flag in ch[:-1]:
+                skulltula_items.got_flag(game_data, flag[len(skulltula_items.GOT):])
+            chains.append(ch)
+        src, old = out.read(skulltula_items.DROP_GLOBAL)
+        new, added = skulltula_items.drop_rows(old, chains)
+        out.write(skulltula_items.DROP_GLOBAL, src, old, new)
+        for actor, (flag, lower) in added.items():
+            print('%-18s %s: %s is dropped once %s is true, until then %s in its place'
+                  % ('drop code', skulltula_items.DROP_GLOBAL.split('/')[-1], actor, flag, lower[0][1]))
+        for cid, family in sorted(gs_families.items()):
+            kind = pair_kind(world, cid) if not skulltula_pair_kind(world, cid) else 'Gold Skulltula'
+            print('%-18s a %s: drops the lowest level of %s Link never got (%s), which marks the %s when picked '
+                  'up' % (cid, kind, '>'.join(family), ' / '.join(x for x, _ in next(
+                      c for c, f in zip(chains, families) if f == family)), kind))
+    # one-time drops (tools/once_items.py): the versions with the mark, then the rocks, bushes and pots
+    once_src = once_items.sources(plain) if once_spots else None
+    once_shared = {}                                   # new files that are the same in every pack of these
+    model_there = lambda project: os.path.exists(os.path.join(a.romfs, 'Model', project + '.anim.bfres.zs'))  # noqa
+
+    def once_write(name, pack, new_inner, rows, loose, item, said):
+        tpl_pack_path = ground_items.pack_path(ground_items.template_of(name))
+        path = ground_items.pack_path(name)
+        out.write_new(path, pack, like=tpl_pack_path)
+        out.add(path, pack, tpl_pack_path, plain(tpl_pack_path))
+        like_files = dict(sarc.Sarc.read(plain(turn_items.AI_PACK)).files)
+        for actor in (ground_items.template_of(name), turn_items.DROP_TEMPLATE, once_items.HEART):
+            like_files.update(sarc.Sarc.read(plain(ground_items.pack_path(actor))).files)
+        for inner, (data, like) in new_inner.items():
+            if inner in once_shared:                   # the same file in every such pack (the number's table)
+                if once_shared[inner] != data:
+                    raise SystemExit('%s: %s differs from the one in another one-time version' % (name, inner))
+                continue
+            if not inner.split('/')[-1].startswith((name + '.', once_items.ai_name(item) + '.')):
+                once_shared[inner] = data
+            out.add(inner, data, like, like_files[like])
+        for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
+            if out.table.get(inner) is None:
+                raise SystemExit('%s: %s has no resource size entry' % (name, inner))
+        for t, row in rows.items():
+            new_rows.setdefault(t, []).append(row)
+        for path, (data, like, old_h, new_h, _) in sorted(loose.items()):
+            if lifted_before(path, data):
+                continue
+            out.write_new(path, data, like)
+            out.add(path, data, like, plain(like))
+            print('%-6s %s: lies %.3f %s on the ground (pose height %.3f -> %.3f, %s)'
+                  % ('once', item, abs(new_h - old_h), 'higher' if new_h > old_h else 'lower', old_h, new_h, path))
+        print('once   version %-22s for %s (%d bytes): %s' % (name, item, len(pack), said))
+
+    for item, name in sorted(once_plain.items()):
+        got, pack, new_inner, rows, loose = once_items.build_plain(item, plain, table_rows, model_there, once_src)
+        assert got == name
+        once_write(name, pack, new_inner, rows, loose, item,
+                   'its ground version with the AI %s: picked up, it marks what dropped it' % once_items.PLAIN_AI)
+    for family in sorted(set(once_turning.values())):
+        for level, item in enumerate(family):
+            bundle_for = flow_name(item) if level == 0 and item in SCRUB_COMPANIONS else None
+            name, pack, new_inner, rows, loose = once_items.build(
+                family, level, plain, table_rows, model_there, bundle_for, once_src)
+            ai_data = sarc.Sarc.read(pack).files[shop_items.ai_path(once_items.ai_name(item))]
+            what = once_items.marks_of(ai_data)
+            bundle = turn_items.describe(once_items.unmarked(ai_data))['bundle'] if bundle_for else None
+            if bundle_for and (not bundle or bundle['bag'] != SCRUB_COMPANIONS[item][0]):
+                raise SystemExit('%s: does not give %s with itself as expected' % (name, SCRUB_COMPANIONS[item][0]))
+            once_write(name, pack, new_inner, rows, loose, item,
+                       'its turning item with the AI %s: it marks what dropped it when it is picked up%s%s'
+                       % (once_items.ai_name(item), ' and when it turns into %s' % turn_items.turn_name(
+                           family[level + 1]) if what['turns'] else '',
+                          '; while Link has no %s it gives what a chest gives with %s (%s) when it is picked up'
+                          % (bundle['bag'], bundle_for, ', '.join('%d %s' % (n, turn_items._actor_of(x))
+                                                                  for x, n in bundle['gives']))
+                          if bundle_for else ''))
+    # the rocks, bushes and pots themselves: an AI of our own name for each actor that drops for us. It only
+    # hands its placement's number to its drop: it does not name another level's version (Drop__DropActor is
+    # an instance parameter, and writing one stops the game: tools/once_items.py, seen 2026-11-22)
+    # the drop tables of ours (tools/drop_tables.py): {table name: the actor it drops}, for the droppers and
+    # for the Gold Skulltula
+    # and the lower levels each table lists with chance 0, so that the area loads them with it
+    drop_kind_tables, gs_tables, table_lower = {}, {}, {}
+    for cid, family in gs_families.items():
+        gs = skulltula_pair_kind(world, cid)
+        (gs_tables if gs else drop_kind_tables)[drop_tables.table_name(family, gs)] = \
+            skulltula_items.drop_name(family[-1])
+        table_lower[drop_tables.table_name(family, gs)] = [skulltula_items.drop_name(x) for x in family[-2::-1]]
+    rock_files = sarc.Sarc.read(plain(ground_items.pack_path(drop_tables.ROCK))).files if drop_kind_tables else None
+    drop_like = {}                                     # game files our drop tables are made from: their data
+    once_actors = {}                                   # actor -> the game's AI it runs
+    for h, (cid, item, actor) in sorted(once_spots.items()):
+        if actor not in once_actors:
+            once_actors[actor] = once_items.root_ai_of(
+                sarc.Sarc.read(plain(ground_items.pack_path(actor))).files, actor)[0]
+    for actor, root in sorted(once_actors.items()):
+        ap = ground_items.ap_path(actor)
+        own_files = sarc.Sarc.read(plain(ground_items.pack_path(actor))).files
+        _, new, changed = once_items.dropper_files(own_files, actor, once_src)
+        if drop_kind_tables:
+            # (an actor whose drop part has no table of one named actor to copy: the rock's)
+            data, more = drop_tables.build(own_files, actor, changed[2], drop_kind_tables,
+                                           (rock_files, drop_tables.part_of(rock_files, drop_tables.ROCK)),
+                                           table_lower)
+            changed = (changed[0], changed[1], data)
+            new = dict(new, **{p: (d, like) for p, (d, like, _) in more.items()})
+            drop_like.update({like: x for _, like, x in more.values()})
+        held = [x for x in once_items.holders(a.romfs, actor)
+                if ap in sarc.Sarc.read(plain(ground_items.pack_path(x))).files]
+        if actor not in held:
+            raise SystemExit('%s: its own pack is not among the packs that hold its file' % actor)
+        for holder in held:
+            path = ground_items.pack_path(holder)
+            src, old = out.read(path)
+            out.write(path, src, old, once_items.patch_pack(old, new, changed))
+        out.size(changed[0], changed[1], changed[2])
+        for inner, (data, like) in sorted(new.items()):
+            if inner in once_shared:
+                if once_shared[inner] != data:
+                    raise SystemExit('%s: %s differs from the one made for another actor' % (actor, inner))
+                continue
+            once_shared[inner] = data
+            out.add(inner, data, like, drop_like.get(like, own_files.get(like)))
+        if drop_kind_tables:
+            print('once   %-22s drop part %s: the game\'s tables and %s'
+                  % (actor, drop_tables.own_part_path(drop_tables.part_of(own_files, actor)).split('/')[-1],
+                     ', '.join('%s (%s; loaded with it: %s)' % (n, x, ', '.join(table_lower[n]))
+                               for n, x in sorted(drop_kind_tables.items()))))
+        what = once_items.dropper_of(new[shop_items.ai_path(once_items.dropper_ai_name(root))][0])
+        written = [k for _, k in once_items.actor_writes(new[shop_items.ai_path(once_items.dropper_ai_name(root))][0])
+                   if k in once_items.instance_keys(own_files)]
+        if what['steps'] or written:
+            raise SystemExit('%s: its AI writes an instance parameter of its blackboard (%s): that stops the game'
+                             % (actor, ', '.join(written) or once_items.DROP_KEY))
+        print('once   %-22s runs the AI %s (%d nodes more than %s): for a drop of ours it hands its placement\'s '
+              'number to it (%s)%s; in %d pack%s: %s'
+              % (actor, what['name'], what['new'], root, what['key'],
+                 ''.join('; Link owns %s: %s instead of %s' % (i, to, frm) for frm, i, to in what['steps']),
+                 len(held), '' if len(held) == 1 else 's', ', '.join(held)))
+    # Gold Skulltulas with a family: the drop part of our own with the tables, in every pack that holds the
+    # skulltula's file (tools/drop_tables.py)
+    if gs_tables:
+        gs_actor = drop_tables.SKULLTULA
+        ap = ground_items.ap_path(gs_actor)
+        own_files = sarc.Sarc.read(plain(ground_items.pack_path(gs_actor))).files
+        data, more = drop_tables.build(own_files, gs_actor, own_files[ap], gs_tables, loaded=table_lower)
+        new = {p: (d, like) for p, (d, like, _) in more.items()}
+        changed = (ap, own_files[ap], data)
+        held = [x for x in once_items.holders(a.romfs, gs_actor)
+                if ap in sarc.Sarc.read(plain(ground_items.pack_path(x))).files]
+        for holder in held:
+            path = ground_items.pack_path(holder)
+            src, old = out.read(path)
+            out.write(path, src, old, once_items.patch_pack(old, new, changed))
+        out.size(changed[0], changed[1], changed[2])
+        for inner, (d, like) in sorted(new.items()):
+            out.add(inner, d, like, own_files[like])
+        print('gs     %-22s drop part %s: the game\'s table and %s; in %d packs: %s'
+              % (gs_actor, drop_tables.own_part_path(drop_tables.part_of(own_files, gs_actor)).split('/')[-1],
+                 ', '.join('%s (%s)' % x for x in sorted(gs_tables.items())), len(held), ', '.join(held)))
     # three-level chests: one actor per family placed, and its _NoBake twin where a placement is one
     # (tools/three_chest.py); the twin's pack holds the same new files
     three_shared = {}
@@ -3494,6 +4148,9 @@ def main(argv):
         src, old = out.read(path)
         out.write(path, src, old, ground_items.add_rows(old, rws))
         print('table %-16s %d rows added' % (t, len(rws)))
+
+    if a.gossip:
+        gossip_build(out, a.romfs, gossip)
 
     out.finish()
     print('mod folder:', os.path.join(a.out, a.name))

@@ -66,14 +66,27 @@ def _str_at(data, off):
 
 
 def animations(data):
-    """{animation name: {bone name: offset of its bone animation}}"""
-    out, i = {}, data.find(b'FSKA')
-    while i >= 0:
+    """{animation name: {bone name: offset of its bone animation}}, in the order of the file's list of skeletal
+    animations (FSKA_LIST)"""
+    out = {}
+    for i in fska_list(data):
         bones = struct.unpack_from('<Q', data, i + 0x28)[0]
         out[_str_at(data, struct.unpack_from('<Q', data, i + 8)[0])] = {
             _str_at(data, struct.unpack_from('<Q', data, bones + 0x38 * b)[0]): bones + 0x38 * b
             for b in range(struct.unpack_from('<H', data, i + 0x4c)[0])}
-        i = data.find(b'FSKA', i + 1)
+    return out
+
+
+# the file header's list of skeletal animations: where it is, where its dictionary is, how many (u16)
+FSKA_LIST, FSKA_DIC, FSKA_COUNT, FSKA_SIZE = 0x58, 0x60, 0xe2, 0x50
+
+
+def fska_list(data):
+    """the offsets of the skeletal animations (FSKA) of an animation file, as its header lists them"""
+    at, n = struct.unpack_from('<Q', data, FSKA_LIST)[0], struct.unpack_from('<H', data, FSKA_COUNT)[0]
+    out = [at + FSKA_SIZE * k for k in range(n)]
+    if any(data[i:i + 4] != b'FSKA' for i in out):
+        raise SystemExit('animation file: its list of skeletal animations is not where its header says')
     return out
 
 
@@ -265,4 +278,337 @@ def shelf_copy(base, base_project, new_project, item_anim, shop, held_lower=0.0)
     want = struct.unpack('<9f', struct.pack('<9f', scale, scale, scale, *rot, *move))
     if back['scale'] + back['rot'] + back['move'] != want or sorted(animations(out)) != sorted(SHELF_POSES):
         raise SystemExit('read-back: %s %s' % (new_project, SHELF_POSES[2]))
+    return out
+
+
+# --- a whole skeleton posed (2026-11-22) ---------------------------------------------------------------------------
+# Items whose model hangs on many bones (the slingshot, bow, gauntlets, hookshot, first bomb bag) are measured with
+# every bone posed. Found in the game's files: their skeletons use Maya's scale mode (FSKL flags 0x200) and nearly
+# every bone below Skl_Root has "segment scale compensate" (bone flag SSC): the parent's size is undone before the
+# bone's own turn and size, so a child sized 1.4 of a bone sized 1.4 is 1.4 in all, not 1.96 (without it the
+# gauntlets' pose puts them 2.3 m under the ground; with it they fit in a box of 0.44 m). A bone's place: parent's
+# place * its place * (1 / parent's size, with SSC) * its turn * its size. A vertex on one bone (or a whole shape on
+# its bone) is stored in that bone; a vertex on several bones (up to eight: _i0/_w0, _i1/_w1) is stored in the model
+# and moves with each bone, by its weight, from the bone's built place to its posed place. Checked: with no pose
+# this gives exactly the box of ActorInfo for all seven models (with the shapes their visibility shows).
+SSC = 0x800000
+_INDEX = {'0302': 1, '0309': 2, '030b': 4}           # bone index formats: one, two, four bytes
+_WEIGHT = {'0109': 2, '010b': 4}                      # weights: two or four bytes, 0..255
+
+
+def skeleton(data):
+    """([{'name', 'parent', 'flags', 'scale', 'rot', 'move'}] in the skeleton's order, the matrix-to-bone list) of a
+    model"""
+    sk = data.find(b'FSKL')
+    mode = struct.unpack_from('<I', data, sk + 4)[0] & 0x3300 if sk >= 0 else None
+    if mode not in (0x1100, 0x1200):
+        raise SystemExit("model: no skeleton with angles (X, Y, Z) and the standard or Maya's scale mode")
+    bones, to_bone = struct.unpack_from('<QQ', data, sk + 0x10)
+    n, smooth, rigid = struct.unpack_from('<3H', data, sk + 0x38)
+    out = []
+    for b in range(n):
+        o = bones + 0x58 * b
+        out.append({'name': _str_at(data, struct.unpack_from('<Q', data, o)[0]),
+                    'parent': struct.unpack_from('<h', data, o + 0x22)[0],
+                    'flags': struct.unpack_from('<I', data, o + 0x2c)[0],
+                    'scale': struct.unpack_from('<3f', data, o + 0x30), 'rot': struct.unpack_from('<3f', data, o + 0x3c),
+                    'move': struct.unpack_from('<3f', data, o + 0x4c)})
+        if out[-1]['parent'] >= b:
+            raise SystemExit('model: bone %s comes before its parent' % out[-1]['name'])
+        if mode != 0x1200 and out[-1]['flags'] & SSC:
+            raise SystemExit("model: bone %s undoes its parent's size outside Maya's scale mode" % out[-1]['name'])
+    return out, struct.unpack_from('<%dH' % (smooth + rigid), data, to_bone)
+
+
+def _places(bones, local):
+    """every bone's place in the model; local[b] = (scale, rot, move, segment scale compensate)"""
+    one = ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
+    out = []
+    for b, bone in enumerate(bones):
+        scale, rot, move, ssc = local[b]
+        m = _matrix(scale, rot, move)
+        if ssc and bone['parent'] >= 0:
+            ps = local[bone['parent']][0]
+            undo = (((1 / ps[0], 0.0, 0.0), (0.0, 1 / ps[1], 0.0), (0.0, 0.0, 1 / ps[2])), (0.0, 0.0, 0.0))
+            m = _mul(_mul((one, tuple(move)), undo), _matrix(scale, rot, (0.0, 0.0, 0.0)))
+        out.append(m if bone['parent'] < 0 else _mul(out[bone['parent']], m))
+    return out
+
+
+def posed_points(model, anim=None, pose=POSE, height=None, hidden=()):
+    """(every vertex of a model with its whole skeleton posed by `pose` of the animation project `anim` (its file;
+    None: the model as built), the names of the bones vertices hang on). Bones the pose does not name stay as
+    built; `height`: the height of Skl_Root instead of the pose's own (None: the pose's). Shapes on a bone named in
+    `hidden` are left out. Only still poses (no curves)."""
+    bones, table = skeleton(model)
+    names = [b['name'] for b in bones]
+    built = _places(bones, [(b['scale'], b['rot'], b['move'], b['flags'] & SSC) for b in bones])
+    named = animations(anim).get(pose) if anim is not None else {}
+    if named is None:
+        raise SystemExit('animation %s not found' % pose)
+    local = []
+    for b in bones:
+        if b['name'] not in named:
+            local.append((b['scale'], b['rot'], b['move'], b['flags'] & SSC))
+            continue
+        p = read_pose(anim, pose, b['name'])
+        if p['curves']:
+            raise SystemExit('%s: bone %s is not still' % (pose, b['name']))
+        move = p['move'] if height is None or b['name'] != BONE else (p['move'][0], height, p['move'][2])
+        local.append((p['scale'], p['rot'], move, p['flags'] & SSC))
+    places = _places(bones, local)
+    skin = [_mul(places[i], _inverse(built[i])) for i in range(len(bones))]
+    pool = struct.unpack_from('<Q', model, struct.unpack_from('<Q', model, 0xb0)[0] + 8)[0]
+    fm = model.find(b'FMDL')
+    shapes = struct.unpack_from('<Q', model, fm + 0x28)[0]
+    points, used = [], set()
+    for s in range(struct.unpack_from('<H', model, fm + 0x6a)[0]):
+        o = shapes + 0x60 * s
+        vtx = struct.unpack_from('<Q', model, o + 0x10)[0]
+        if model[o:o + 4] != b'FSHP' or model[vtx:vtx + 4] != b'FVTX':
+            raise SystemExit('model: shape %d not understood' % s)
+        shape_bone, per_vertex = struct.unpack_from('<H', model, o + 0x54)[0], model[o + 0x5a]
+        if names[shape_bone] in hidden:
+            continue
+        attrs, strides = (struct.unpack_from('<Q', model, vtx + k)[0] for k in (8, 0x38))
+        at, count, n_vtx = struct.unpack_from('<IB3xI', model, vtx + 0x48)
+        attr = {}
+        for a in range(count):
+            q = attrs + 0x10 * a
+            attr[_str_at(model, struct.unpack_from('<Q', model, q)[0])] = (
+                model[q + 8:q + 10].hex(), struct.unpack_from('<H', model, q + 0xc)[0],
+                struct.unpack_from('<H', model, q + 0xe)[0])
+        fmt, off, buf = attr['_p0']
+        sets = [k for k in '01' if '_i' + k in attr]
+        ok = fmt in ('0518', '0515') and buf == 0 and all(attr['_i' + k][0] in _INDEX and attr['_i' + k][2] == 0
+                                                          for k in sets)
+        if per_vertex > 1:
+            ok = ok and all(attr.get('_w' + k, ('', 0, 1))[0] in _WEIGHT and attr['_w' + k][2] == 0 for k in sets)
+        if not ok or (per_vertex and per_vertex > sum(_INDEX[attr['_i' + k][0]] for k in sets)):
+            raise SystemExit('model: vertices of shape %d not understood' % s)
+        stride = struct.unpack_from('<I', model, strides)[0]
+        for v in range(n_vtx):
+            p = pool + at + stride * v
+            pos = struct.unpack_from('<3e' if fmt == '0515' else '<3f', model, p + off)
+            if per_vertex == 0:                        # the whole shape on its bone, stored in it
+                used.add(shape_bone)
+                points.append(_apply(places[shape_bone], pos))
+                continue
+            idx, wts = [], []
+            for k in sets:
+                f, io, _ = attr['_i' + k]
+                idx += list(model[p + io:p + io + _INDEX[f]])
+                if per_vertex > 1:
+                    f, wo, _ = attr['_w' + k]
+                    wts += [x / 255.0 for x in model[p + wo:p + wo + _WEIGHT[f]]]
+            if per_vertex == 1:                        # on one bone, stored in it
+                used.add(table[idx[0]])
+                points.append(_apply(places[table[idx[0]]], pos))
+                continue
+            acc = [0.0, 0.0, 0.0]                      # on several: stored in the model
+            for i, w in zip(idx[:per_vertex], wts[:per_vertex]):
+                if w:
+                    used.add(table[i])
+                    q = _apply(skin[table[i]], pos)
+                    acc = [acc[c] + w * q[c] for c in range(3)]
+            points.append(tuple(acc))
+    if not points:
+        raise SystemExit('model: no vertices')
+    return points, sorted({names[u] for u in used}, key=names.index)
+
+
+def under(model, name, top=BONE):
+    """whether bone `name` of a model is `top` or below it"""
+    bones, _ = skeleton(model)
+    names = [b['name'] for b in bones]
+    i = names.index(name)
+    while i >= 0 and names[i] != top:
+        i = bones[i]['parent']
+    return i >= 0
+
+
+def bone_visibility(data, name):
+    """{bone: shown (True / False), or None where a curve changes it} of the bone visibility animation `name`
+    (FBVS: name at +8, curves at +0x28, the shown bits at +0x30, bone names at +0x38, counts at +0x58) of an
+    animation file"""
+    i = data.find(b'FBVS')
+    while i >= 0:
+        if _str_at(data, struct.unpack_from('<Q', data, i + 8)[0]) == name:
+            n, n_curves = struct.unpack_from('<2H', data, i + 0x58)
+            curves, bits, names = struct.unpack_from('<3Q', data, i + 0x28)
+            shown = int.from_bytes(data[bits:bits + (n + 7) // 8], 'little')
+            out = {_str_at(data, struct.unpack_from('<Q', data, names + 8 * k)[0]): bool(shown >> k & 1)
+                   for k in range(n)}
+            keys = list(out)
+            for c in range(n_curves):                  # a curve (0x30 bytes) names its bone at +0x14
+                out[keys[struct.unpack_from('<I', data, curves + 0x30 * c + 0x14)[0]]] = None
+            return out
+        i = data.find(b'FBVS', i + 1)
+    raise SystemExit('bone visibility animation %s not found' % name)
+
+
+# --- one skeletal animation more (2026-11-22) ------------------------------------------------------------------------
+# The file layout (the game's animation files, all alike): the header lists the skeletal animations (FSKA_LIST,
+# FSKA_DIC, FSKA_COUNT), has at +0x18 the offset of the relocation table (_RLT, at the end of the file) and at +0x1c
+# the file's size. The relocation table lists every place in the file that holds an offset (made an address when
+# the file is loaded): '_RLT', its own offset, the number of sections, then the sections (0x18 bytes: offset, size,
+# first entry, number of entries; only the first holds anything) and the entries (8 bytes: offset, number of
+# structs, offsets per struct, 8-byte words skipped after them). A dictionary (the names of a list, found by a radix
+# tree over their bits) is 8 bytes (0, count) and count + 1 nodes of 16 bytes (bit, left, right, offset of the
+# name), the first node with no name; formats/evfl.py builds the same tree for event flows, and it gives back the
+# game's dictionaries of these files exactly. An animation's name, path and bone list are offsets: two animations
+# may share them.
+
+def relocations(data):
+    """(offset of the relocation table, its sections [(offset, size, first entry, entries)], its entries
+    [(offset, structs, offsets per struct, words skipped)], every place listed)"""
+    r = struct.unpack_from('<I', data, 0x18)[0]
+    if data[r:r + 4] != b'_RLT' or struct.unpack_from('<I', data, r + 4)[0] != r:
+        raise SystemExit('animation file: no relocation table where its header says')
+    n = struct.unpack_from('<I', data, r + 8)[0]
+    sections = [struct.unpack_from('<8xIIII', data, r + 0x10 + 0x18 * k) for k in range(n)]
+    first = r + 0x10 + 0x18 * n
+    entries = [struct.unpack_from('<IHBB', data, first + 8 * k) for k in range(sum(s[3] for s in sections))]
+    places = [o + s * (k + skip) * 8 + 8 * j for o, structs, k, skip in entries for s in range(structs)
+              for j in range(k)]
+    if first + 8 * len(entries) != len(data) or struct.unpack_from('<I', data, 0x1c)[0] != len(data):
+        raise SystemExit('animation file: its relocation table does not end the file')
+    return r, sections, entries, places
+
+
+def dict_names(data, at):
+    """the names of a dictionary, in order"""
+    n = struct.unpack_from('<I', data, at + 4)[0]
+    return [_str_at(data, struct.unpack_from('<Q', data, at + 8 + 16 * k + 8)[0]) for k in range(1, n + 1)]
+
+
+def dict_find(data, at, name):
+    """the index of `name` in a dictionary, found the way the game finds it (down its radix tree), or None"""
+    raw = name.encode('ascii')
+
+    def node(k):
+        ref, left, right, key = struct.unpack_from('<iHHQ', data, at + 8 + 16 * k)
+        return ref, left, right, key
+
+    prev, k = node(0), node(0)[1]
+    while prev[0] < node(k)[0]:
+        prev = node(k)
+        ref = prev[0]
+        bit = raw[len(raw) - 1 - (ref >> 3)] >> (ref & 7) & 1 if ref >> 3 < len(raw) else 0
+        k = prev[2] if bit else prev[1]
+    return k - 1 if k and _str_at(data, node(k)[3]) == name else None
+
+
+def _base_size(flags):
+    return 12 * bool(flags & 8) + 16 * bool(flags & 0x10) + 12 * bool(flags & 0x20)
+
+
+def add_pose_copy(data, src=POSE, new='Pose_GetDemo'):
+    """the animation file `data` with one skeletal animation more, `new`: a copy of the still pose `src` with
+    values of its own (so `src` can be changed and `new` stays the game's). Nothing in the file moves: the new
+    parts are put between the strings and the relocation table, with a new list of the skeletal animations (the
+    old ones, then the new one) and its dictionary; the header then names those, and the relocation table lists
+    the offsets in them too. Everything else, the old list and dictionary too, stays where and what it was."""
+    from formats.evfl import _dic_tree
+    r, sections, entries, places = relocations(data)
+    listed = set(places)
+    if r % 8 or sections[0][0] != 0 or sections[0][2] != 0 or any(s[1] or s[3] for s in sections[1:]):
+        raise SystemExit('animation file: relocation sections not as expected')
+    old = fska_list(data)
+    dic = struct.unpack_from('<Q', data, FSKA_DIC)[0]
+    names = [_str_at(data, struct.unpack_from('<Q', data, i + 8)[0]) for i in old]
+    if dict_names(data, dic) != names or src not in names or new in names \
+            or [struct.unpack_from('<IHH', data, dic + 8 + 16 * k) for k in range(len(names) + 1)] \
+            != [tuple(n[:3]) for n in _dic_tree(names)]:
+        raise SystemExit('animation file: its animations are not %s, with a %s, no %s and the usual dictionary'
+                         % (names, src, new))
+    head = old[names.index(src)]
+    bind, bones = struct.unpack_from('<QQ', data, head + 0x20)
+    n_bones = struct.unpack_from('<H', data, head + 0x4c)[0]
+    block, more = bytearray(), []                 # the new parts (at r), the places in them that hold offsets
+
+    def put(raw):
+        while len(block) % 8:
+            block.append(0)
+        at = r + len(block)
+        block.extend(raw)
+        return at
+
+    def copy_struct(at, size):
+        """a struct copied as it is, its offsets listed as the original's are"""
+        to = put(data[at:at + size])
+        more.extend(to + p - at for p in sorted(listed) if at <= p < at + size)
+        return to
+
+    raw = new.encode('ascii')
+    name_at = put(struct.pack('<H', len(raw)) + raw + b'\0')
+    bases = []
+    for b in range(n_bones):
+        o = bones + 0x38 * b
+        curves, base = struct.unpack_from('<QQ', data, o + 8)
+        if curves:
+            raise SystemExit('%s: not a still pose' % src)
+        bases.append(put(data[base:base + _base_size(struct.unpack_from('<I', data, o + 0x28)[0])]))
+    bind_at = put(data[bind:bind + 2 * n_bones])
+    bones_at = None
+    for b in range(n_bones):
+        to = copy_struct(bones + 0x38 * b, 0x38)
+        bones_at = bones_at or to
+        block[to - r + 0x10:to - r + 0x18] = struct.pack('<Q', bases[b])
+    list_at = to = None
+    for i in old + [head]:
+        to = copy_struct(i, FSKA_SIZE)
+        list_at = list_at or to
+    block[to - r + 8:to - r + 0x10] = struct.pack('<Q', name_at)
+    block[to - r + 0x20:to - r + 0x30] = struct.pack('<QQ', bind_at, bones_at)
+    keys = [struct.unpack_from('<Q', data, i + 8)[0] for i in old] + [name_at]
+    dic_at = put(data[dic:dic + 4] + struct.pack('<I', len(names) + 1))
+    root_key = struct.unpack_from('<Q', data, dic + 0x10)[0]
+    for k, (ref, left, right, _) in enumerate(_dic_tree(names + [new])):
+        at = put(struct.pack('<IHHQ', ref, left, right, root_key if k == 0 else keys[k - 1]))
+        more.append(at + 8)
+    while len(block) % 8:
+        block.append(0)
+    # the relocation table: the new places as runs of offsets one after another, after the old entries
+    runs = []
+    for p in sorted(more):
+        if runs and runs[-1][0] + 8 * runs[-1][1] == p and runs[-1][1] < 255:
+            runs[-1][1] += 1
+        else:
+            runs.append([p, 1])
+    new_r = r + len(block)
+    entries2 = entries + [(p, 1, k, 0) for p, k in runs]
+    rlt = bytearray(data[r:r + 0x10])
+    struct.pack_into('<I', rlt, 4, new_r)
+    for k in range(len(sections)):
+        values = (0, new_r, 0, len(entries2)) if k == 0 else (new_r, 0, len(entries2), 0)
+        rlt += data[r + 0x10 + 0x18 * k:r + 0x18 + 0x18 * k] + struct.pack('<IIII', *values)
+    for e in entries2:
+        rlt += struct.pack('<IHBB', *e)
+    out = bytearray(data[:r] + bytes(block) + bytes(rlt))
+    struct.pack_into('<II', out, 0x18, new_r, len(out))
+    struct.pack_into('<QQ', out, FSKA_LIST, list_at, dic_at)
+    struct.pack_into('<H', out, FSKA_COUNT, len(names) + 1)
+    out = bytes(out)
+    # read back: the old bytes unchanged but the header's values; every old place still listed, the new ones too,
+    # each holding an offset into the file or none; the animations found by name as the game finds them; the new
+    # one has the old one's values, bone for bone, in places of its own; every other animation as it was
+    head_spots = set(range(0x18, 0x20)) | set(range(FSKA_LIST, FSKA_LIST + 16)) | {FSKA_COUNT, FSKA_COUNT + 1}
+    _, _, _, back = relocations(out)
+    if [i for i in range(r) if out[i] != data[i] and i not in head_spots] or sorted(back) != sorted(places + more) \
+            or any(struct.unpack_from('<Q', out, p)[0] >= len(out) for p in more):
+        raise SystemExit('read-back: %s with %s added' % (names, new))
+    if dict_names(out, dic_at) != names + [new] \
+            or [dict_find(out, dic_at, x) for x in names + [new]] != list(range(len(names) + 1)) \
+            or dict_find(out, dic_at, new + '_') is not None:
+        raise SystemExit('read-back: the dictionary of %s with %s added' % (names, new))
+    mine, theirs = animations(out), animations(data)
+    if list(mine) != names + [new] or list(mine[new]) != list(theirs[src]) \
+            or any(list(mine[a]) != list(theirs[a]) for a in names):
+        raise SystemExit('read-back: animations of %s with %s added' % (names, new))
+    for a, b in [(new, src)] + [(x, x) for x in names]:
+        for bone in theirs[b]:
+            p, q = read_pose(out, a, bone), read_pose(data, b, bone)
+            if any(p[f] != q[f] for f in ('scale', 'rot', 'move', 'flags', 'curves')) or (a != b and p['base'] < r):
+                raise SystemExit('read-back: %s bone %s' % (a, bone))
     return out
