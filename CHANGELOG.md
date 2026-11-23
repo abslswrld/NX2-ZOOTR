@@ -2,6 +2,29 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-23
+
+### Tidy-up: the drop-table code is removed
+The code for the way that never worked in game (the game's drop code choosing the level of a family before
+anything is dropped, 2026-11-22) is removed. Nothing a build makes changes because of it; every family on a rock,
+bush, pot or Gold Skulltula is the one-time turning item that passed in game.
+- **Removed:** `tools/drop_tables.py` and `tools/skulltula_items.py` (the `Obj_NX2S_` drops, the drop code's two
+  lists); in `tools/build_mod.py` `DROP_KINDS`, `gs_families`, the drop tables a placement could name
+  (`patch_file`'s `tables`) and the two sections that wrote the tables, the `Obj_NX2S_` drops and the drop code's
+  lists; in `tools/sizes.py` the three drop-table size rules and the `GROWTH` part (only the drop code's settings
+  used it); in `tests/size_check.py` the exception for the game's test drop table.
+- **The rocks', bushes' and pots' AI** (`tools/once_items.py`) loses the branch "the drop table my placement
+  names starts with NX2_ -> hand my number to what I drop". No placement names such a table any more, so the
+  branch never ran. The AI is now exactly the one of `claude/pots-one-time` (passed in game on 2026-11-22 with
+  the Boomerang pot and the rocks).
+- **Tests:** `tests/skulltula_prog_check.py` keeps its checks of the game (the token marks its skulltula, the
+  skulltula hands its flag over, every skulltula placement's two flags) and its whole builds; the checks of the
+  removed drops and lists are gone. Its "the drop code's settings are not in the mod" check now looks for the
+  file under its real name in the mod (with `.zs`): before, it looked for a name no file has, so it could never
+  fail.
+- The research and the four in-game tries stay in this changelog (2026-11-22) and in
+  `out/RESEARCH_drop_tables.md`.
+
 ## 2026-11-22
 
 ### Families on Gold Skulltulas are turning items too (passed in game)

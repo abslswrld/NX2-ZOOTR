@@ -41,10 +41,10 @@ The same on a freestanding item (to test in game): the placement becomes First's
 (tools/turn_items.py): a ground item of First that, once Link owns First, drops Second's in its place and removes
 itself; Second's removes itself once Link owns Second. Two freestanding items with the same pair give First then
 Second in either order.
-The same on a liftable rock, a solid bush, a pot or a Gold Skulltula (to test in game): its drop
-(Drop__DropActor) names the last level's drop, and the game's drop code drops the lowest level Link never got
-in its place, before anything comes out (tools/skulltula_items.py). What comes out marks what dropped it when
-picked up (given once). Not on shelves yet.
+The same on a liftable rock, a solid bush, a pot or a Gold Skulltula (passed in game, 2026-11-22/23): its drop
+(Drop__DropActor) names the first level's one-time turning item (tools/once_items.py). It turns into the next
+level on the ground once Link owns its own, and marks what dropped it when it turns or is picked up (given
+once). Not on shelves yet.
 Three-level family (to test in game): CHECK_ID=First>Second>Third on a small chest makes it a chest of our own
 (tools/three_chest.py: the checking chest with a third held item and a second question) that gives Third when
 Link has Second, else Second when Link has First, else First; only the families in THREE_LEVEL_FAMILIES:
@@ -118,12 +118,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
-import drop_tables  # noqa: E402
 import ground_items  # noqa: E402
 import harp_colors  # noqa: E402
 import once_items  # noqa: E402
 import shop_items  # noqa: E402
-import skulltula_items  # noqa: E402
 import sizes  # noqa: E402
 import three_chest  # noqa: E402
 import turn_items  # noqa: E402
@@ -238,9 +236,9 @@ def three_level_parse(world, assignments):
                 '>'.join(x) for x in sorted(THREE_LEVEL_FAMILIES))))
         r, name, loc = find_check(world, cid)
         kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
-        if not kinds or kinds == {'scrub'} or (len(kinds) == 1 and kinds <= set(TURN_KINDS + DROP_KINDS)) \
-                or kinds == {'skulltula'}:
-            continue                                   # a gift, a scrub, a turning item, a drop: with the pairs
+        if not kinds or kinds == {'scrub'} or (len(kinds) == 1 and kinds <= set(TURN_KINDS)) \
+                or kinds == GS_KINDS:
+            continue                                   # a gift, a scrub, a turning item: with the pairs
         if kinds != {'chest'}:
             raise SystemExit('%s: a three-level family (First>Second>Third) can only be put %s (this check: %s)'
                              % (cid, PROGRESSIVE_WHERE, ', '.join(sorted(kinds))))
@@ -260,23 +258,18 @@ def checking_chest(gyaml, family=None):
 
 
 # Where a progressive pair can be placed: a small chest (the checking chest), a freestanding item (a turning
-# item, tools/turn_items.py), or a liftable rock, solid bush or pot. Rocks, bushes and pots (2026-11-22, after
-# the crash): the Gold Skulltulas' way below, not a turning item (a turning item showed the level Link already
-# had for a moment before turning). What a rock, a bush or a pot drops for us is given once
-# (tools/once_items.py): picked up, it sets its two saved flags as a token sets its Gold Skulltula's (that this
-# keeps it from coming back is to be tested in game).
-# Not yet: shelves (the shop version has no such AI), Gold Skulltulas (what they drop must carry the
-# skulltula's flag on: no game node hands it from one drop to the next), songs (events).
+# item, tools/turn_items.py), or a liftable rock, solid bush, pot or Gold Skulltula. What a rock, a bush or a pot
+# drops for us is given once (tools/once_items.py): it is the first level's one-time turning item, which turns on
+# the ground and, when it turns or is picked up, sets its dropper's two saved flags as a token sets its Gold
+# Skulltula's (passed in game, 2026-11-22). A Gold Skulltula drops the same one-time turning item: it hands its
+# own flag to what it drops, as it does to its token (passed in game, 2026-11-23; skulltula_pair_kind).
+# (The other way, the game's drop code choosing the level before anything is dropped, never put a lower level
+# in place in game, 2026-11-22: its code was removed on 2026-11-23.)
+# Not yet: shelves (the shop version has no such AI).
 # Gifts: gift_pair_kind, gift_pair_edit. Scrubs: scrub_pair_kind, scrub_flow_edit.
-# Gold Skulltulas (2026-11-22): still no turning item, for the reason above. The game's drop code chooses the
-# level before anything is dropped (skulltula_pair_kind, tools/skulltula_items.py).
 GS_KINDS = {'skulltula'}
 PAIR_KINDS = ('chest', 'freestanding', 'rock', 'bush', 'pot')
 TURN_KINDS = ('freestanding', 'rock', 'bush', 'pot')   # the kinds whose pair is a turning item
-# a family chosen by the drop code, as on a Gold Skulltula: none. Tried for rocks, bushes and pots on
-# 2026-11-22 (drop tables of ours, the lower levels loaded): the game never put the lower level in place, and
-# nothing came out where one was needed. They are turning items again (the user's choice)
-DROP_KINDS = ()
 # Two turning items of one family must not lie where Link can touch both at once: the second could be picked up
 # in the frame the first's scene ends, before it has turned (it would give the first level again). Metres,
 # between their map positions (for a rock or a bush: where it stands; a rock carried and thrown next to another
@@ -1854,7 +1847,7 @@ def gossip_build(out, romfs, plan):
         print('  note: %s: its own messages never use %r (check that its font shows them)' % (path, missing))
 
 
-def patch_file(data, changes, checking=None, three=None, wrap=None, tables=None):
+def patch_file(data, changes, checking=None, three=None, wrap=None):
     """change what the actors with these hashes give: chests and pots through their Drop__DropActor (chests'
     special opening events handled by CHEST_EVENTS), freestanding items by their actor type (Gyaml);
     checking: {hash: (item to look for, item given when Link has it)}: that small chest becomes the game's
@@ -1864,11 +1857,7 @@ def patch_file(data, changes, checking=None, three=None, wrap=None, tables=None)
     instead (checking_chest), with the same settings;
     wrap: {hash: f}: that chest gets an opening event of our own, GetEventName = f(the chest's actor, the event
     its placement names or None): for chests that hold an ocarina (tbox_sync_event);
-    tables: {hash: a drop table of ours}: that rock, bush, pot or Gold Skulltula names the table
-    (Drop__DropTable) and no actor (tools/drop_tables.py); its old item is what it named before (an actor, a
-    table, or None);
     returns (new data, {hash: old item}, {hash: new Dynamic as intended})"""
-    tables = tables or {}
     checking = checking or {}
     three = three or {}
     wrap = wrap or {}
@@ -1879,15 +1868,6 @@ def patch_file(data, changes, checking=None, three=None, wrap=None, tables=None)
         if h in changes and changes[h][3] in REPLACED:
             found[h] = a['Gyaml']
             a['Gyaml'] = changes[h][1]
-            continue
-        if h in tables:
-            dyn = a.get('Dynamic')
-            dyn = type(dyn)(dyn) if dyn is not None else {}
-            found[h] = dyn.get('Drop__DropActor', dyn.get('Drop__DropTable'))
-            dyn.pop('Drop__DropActor', None)
-            dyn['Drop__DropTable'] = tables[h]
-            a['Dynamic'] = dyn
-            intended[h] = dict(dyn)
             continue
         if h in changes:
             dyn = a.get('Dynamic')
@@ -1933,7 +1913,7 @@ def patch_file(data, changes, checking=None, three=None, wrap=None, tables=None)
                 dyn[TBOX_EVENT_KEY] = wrap[h](a['Gyaml'], dyn.get(TBOX_EVENT_KEY))
             a['Dynamic'] = dyn
             intended[h] = dict(dyn)
-    missing = (set(changes) | set(tables)) - set(found)
+    missing = set(changes) - set(found)
     if missing:
         raise SystemExit('placements not found: %s' % ', '.join(sorted(missing)))
     return byml.dumps(doc), found, intended
@@ -3046,17 +3026,16 @@ def main(argv):
     skip_level_guard(assignments)                      # a later level of an upgrade family, alone
     # CHECK_ID=First>Second: a progressive pair (PROGRESSIVE_PAIRS). In a small chest: planned as First, the
     # chest made a checking chest further down. On a freestanding item: planned as First's turning item
-    # (tools/turn_items.py). On a rock, a bush, a pot or a Gold Skulltula: planned as the last level's drop
-    # (tools/skulltula_items.py), given once (tools/once_items.py). On a gift with flow data: planned as First,
+    # (tools/turn_items.py). On a rock, a bush, a pot or a Gold Skulltula: planned as First's one-time turning
+    # item, its drop (tools/once_items.py). On a gift with flow data: planned as First,
     # the question added further down (gift_pair_kind). On a scrub: planned as First, the question added in
     # the scrub's branch of the scrub flow (scrub_pair_kind). Nowhere else yet (pair_kind).
     # (first, second) below is (first, second, third) for a three-level family on anything but a chest
     steps = {}                                         # check id -> (first, second): chests
     turning = {}                                       # check id -> (first, second): turning items (TURN_KINDS)
-    once_turning = {}                                  # those of `turning` on a rock, a bush or a pot: given once
+    once_turning = {}                                  # those of `turning` dropped: rocks, bushes, pots, skulltulas
     gift_pairs = {}                                    # check id -> (first, second): gifts (gift_pair_edit)
     scrub_pairs = {}                                   # check id -> (first, second): scrubs (scrub_flow_edit)
-    gs_families = {}                                   # check id -> the family: Gold Skulltulas, rocks, bushes, pots
     world = World()
     # CHECK_ID=First>Second>Third: a three-level family (THREE_LEVEL_FAMILIES). In a small chest: planned as
     # First, the chest made the family's own chest further down (tools/three_chest.py). Anywhere else a pair can
@@ -3077,8 +3056,7 @@ def main(argv):
             elif skulltula_pair_kind(world, cid):
                 # the one-time turning item a rock drops (tools/once_items.py): the skulltula hands its flag to
                 # what it drops as it does to its token, and the item marks it as the token does. It comes out
-                # as the first level and turns into the next one on the ground once Link owns it. (The drop
-                # code's rows, gs_families, never put a lower level in place in game, 2026-11-22)
+                # as the first level and turns into the next one on the ground once Link owns it
                 turning[cid] = pair
                 once_turning[cid] = pair
                 assignments[k] = (cid, once_items.once_name(pair[0]))
@@ -3094,8 +3072,7 @@ def main(argv):
             else:
                 turning[cid] = pair
                 assignments[k] = (cid, turn_items.turn_name(pair[0]))
-    placed = collections.Counter(list(triples.values()) + [f for forms in (turning, gift_pairs, scrub_pairs,
-                                                                         gs_families)
+    placed = collections.Counter(list(triples.values()) + [f for forms in (turning, gift_pairs, scrub_pairs)
                                                            for f in forms.values() if len(f) == 3])
     for family, n in sorted(placed.items()):
         if n != len(family):
@@ -3103,8 +3080,7 @@ def main(argv):
                 'the last level cannot be reached' if n < len(family) else 'the last level is given more than once')))
     # (and two drops of one family on rocks, bushes or pots: the second could be picked up in the frame the
     # first's scene ends, before it has removed itself)
-    for cid, cid2, d in turn_spacing(world, dict(turning, **{c: f for c, f in gs_families.items()
-                                                             if not skulltula_pair_kind(world, c)})):
+    for cid, cid2, d in turn_spacing(world, turning):
         print('%-18s and %s: the same progressive family, %.1f m apart' % (cid, cid2, d))
     # a small seed bag or quiver placed alone means its weapon: the check shows and gives the slingshot / bow,
     # and the small bag comes with it (the user's rule: never the bag first)
@@ -3240,7 +3216,7 @@ def main(argv):
 
     def once_drop(item):
         """what a rock, a bush or a pot drops once: a version of the item that marks it when picked up"""
-        if item.startswith((once_items.PREFIX, skulltula_items.PREFIX)) or item == ground_items.TOKEN:
+        if item.startswith(once_items.PREFIX) or item == ground_items.TOKEN:
             return item                                # a family's level (built further down); a real token
         kind = ground_items.kind_of(plain, item)
         if kind in ('item', 'equipment'):
@@ -3265,7 +3241,7 @@ def main(argv):
     def gs_drop(item):
         if item == ground_items.TOKEN:
             return item                                # its own token
-        if item.startswith((skulltula_items.PREFIX, once_items.PREFIX)):
+        if item.startswith(once_items.PREFIX):
             return item                                # a level of a family (a progressive form): built further down
         if ground_items.kind_of(plain, item) in ('ground', 'item', 'equipment'):
             return grounds.setdefault((item, 'token'), ground_items.ground_name(item, 'token'))
@@ -3345,7 +3321,7 @@ def main(argv):
                   % (cid, alone, kind, ', '.join(SCRUB_COMPANIONS[alone]),
                      ': place its family there instead (%s=%s)' % (cid, '>'.join(next(
                          f for f in FAMILIES.values() if f[0] == alone)))
-                     if kind in TURN_KINDS or kind in GS_KINDS or kind in DROP_KINDS else ''))
+                     if kind in TURN_KINDS or kind in GS_KINDS else ''))
     # shelves: which shelf (ShopItemIndex; the Heart has none: 0) and age each placement is, for the lists
     shelf_of = {p['hash']: (p['ages'], int(p.get('params', {}).get('ShopItemIndex', 0)))
                 for spots in world.checks.values() for sp in spots.values() if sp['kind'] == 'shop'
@@ -3429,19 +3405,11 @@ def main(argv):
         checking.update({h: pair_check(triples[cid][:2], in_chest) for h, (cid, _, _, kind) in changes.items()
                          if cid in triples})
         wrap = {h: tbox_event for h, (cid, _, _, kind) in changes.items() if kind == 'chest' and holds_ocarina(cid)}
-        # families on rocks, bushes, pots and Gold Skulltulas: the placement names a drop table of ours
-        tables = {h: drop_tables.table_name(gs_families[cid], kind == 'skulltula')
-                  for h, (cid, _, _, kind) in changes.items() if cid in gs_families}
-        for h in tables:
-            if changes[h][3] == 'skulltula' and actor_of[h] != drop_tables.SKULLTULA:
-                raise SystemExit('%s: placement %s is a %s: only %s gets the drop tables of ours'
-                                 % (changes[h][0], h, actor_of[h], drop_tables.SKULLTULA))
-        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three, wrap, tables)
+        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three, wrap)
         for h, (cid, item, expected_old, kind) in changes.items():
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
-            print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item if h not in tables else
-                                             'drop table %s (one item: %s)' % (tables[h], item)))
+            print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item))
             if cid in turning:
                 print('%-18s   a turning item%s: %s on the ground while Link has no %s, then %s'
                       % (cid, '' if kind == 'freestanding' else ' as the %s\'s drop' % kind, turning[cid][0],
@@ -3458,10 +3426,7 @@ def main(argv):
         for act in back:
             h = str(int(act['Hash']))
             want = dict(before[h])
-            if h in tables:
-                dyn = {k: v for k, v in (want.get('Dynamic') or {}).items() if k != 'Drop__DropActor'}
-                want['Dynamic'] = dict(dyn, Drop__DropTable=tables[h])
-            elif h in changes and changes[h][3] in REPLACED:
+            if h in changes and changes[h][3] in REPLACED:
                 want['Gyaml'] = changes[h][1]
             elif h in changes:
                 dyn = dict(want.get('Dynamic') or {}, Drop__DropActor=changes[h][1])
@@ -3625,7 +3590,6 @@ def main(argv):
     guard = any(item in ('Item_Range_SlingShot', turn_items.turn_name('Item_Range_SlingShot'),
                          once_items.once_name('Item_Range_SlingShot'))
                 for _, item in assignments)
-    guard = guard or any(f[0] == 'Item_Range_SlingShot' for f in gs_families.values())
     if scrubs or guard:
         maps = {}
         for cid, item, rows in scrubs:
@@ -3856,73 +3820,6 @@ def main(argv):
                      '; while Link has no %s it gives what a chest gives with %s (%s) when it is picked up'
                      % (what['bundle']['bag'], bundle_for, ', '.join('%d %s' % (n, x) for x, n in gives))
                      if bundle_for else ''))
-    # families on Gold Skulltulas, rocks, bushes and pots (tools/skulltula_items.py): every level as a token
-    # version of its own; the game's drop code is told which level to drop (its two lists)
-    if gs_families:
-        families = sorted(set(gs_families.values()))
-        game_data = plain(skulltula_items.GAME_DATA)
-        tpl_pack_path = ground_items.pack_path(skulltula_items.TOKEN)
-        like_files = dict(sarc.Sarc.read(plain(tpl_pack_path)).files)
-        chains = []
-        for family in families:
-            for level, item in enumerate(family):
-                bundle_for = flow_name(item) if level == 0 and item in SCRUB_COMPANIONS else None
-                got, pack, new_inner, rows, loose = skulltula_items.build(
-                    family, level, plain, table_rows,
-                    lambda project: os.path.exists(os.path.join(a.romfs, 'Model', project + '.anim.bfres.zs')),
-                    bundle_for)
-                name = skulltula_items.drop_name(item)
-                assert got == name
-                path = ground_items.pack_path(name)
-                out.write_new(path, pack, like=tpl_pack_path)
-                out.add(path, pack, tpl_pack_path, plain(tpl_pack_path))
-                for inner, (data, like) in new_inner.items():
-                    out.add(inner, data, like, like_files[like])
-                for inner in sarc.Sarc.read(pack).files:  # every file of the pack has a size entry
-                    if out.table.get(inner) is None:
-                        raise SystemExit('%s: %s has no resource size entry' % (name, inner))
-                for t, row in rows.items():
-                    new_rows.setdefault(t, []).append(row)
-                for path, (data, like, old_h, new_h, _) in sorted(loose.items()):
-                    if lifted_before(path, data):
-                        continue
-                    out.write_new(path, data, like)
-                    out.add(path, data, like, plain(like))
-                    print('%-6s %s: lies %.3f %s on the ground (pose height %.3f -> %.3f, %s)'
-                          % ('gs', item, abs(new_h - old_h), 'higher' if new_h > old_h else 'lower', old_h, new_h,
-                             path))
-                what = skulltula_items.describe(sarc.Sarc.read(pack).files[shop_items.ai_path(
-                    skulltula_items.ai_name(item))])
-                gives = []
-                if bundle_for:
-                    gives = [(turn_items._actor_of(x), n) for x, n in what['bundle']['gives']]
-                    if [x for x, _ in gives][:len(SCRUB_COMPANIONS[item])] != SCRUB_COMPANIONS[item] \
-                            or what['bundle']['bag'] != SCRUB_COMPANIONS[item][0]:
-                        raise SystemExit('%s: the game\'s chests give %r with %s, not %s first as expected'
-                                         % (name, gives, bundle_for, SCRUB_COMPANIONS[item]))
-                print('gs     version %-22s for %s (%d bytes): a family drop (marks what dropped it when '
-                      'picked up); its AI %s (%d nodes more than the token\'s)%s: deletes itself once Link owns %s%s'
-                      % (name, item, len(pack), skulltula_items.ai_name(item), what['new'],
-                         ': deletes itself while Link does not own %s' % what['previous'] if what['previous'] else '',
-                         ' or '.join(what['taken']),
-                         ': while Link has no %s it gives what a chest gives with %s (%s) when it is picked up'
-                         % (what['bundle']['bag'], bundle_for, ', '.join('%d %s' % (n, x) for x, n in gives))
-                         if bundle_for else ''))
-            ch = skulltula_items.chain(family, flow_name)
-            for _, flag in ch[:-1]:
-                skulltula_items.got_flag(game_data, flag[len(skulltula_items.GOT):])
-            chains.append(ch)
-        src, old = out.read(skulltula_items.DROP_GLOBAL)
-        new, added = skulltula_items.drop_rows(old, chains)
-        out.write(skulltula_items.DROP_GLOBAL, src, old, new)
-        for actor, (flag, lower) in added.items():
-            print('%-18s %s: %s is dropped once %s is true, until then %s in its place'
-                  % ('drop code', skulltula_items.DROP_GLOBAL.split('/')[-1], actor, flag, lower[0][1]))
-        for cid, family in sorted(gs_families.items()):
-            kind = pair_kind(world, cid) if not skulltula_pair_kind(world, cid) else 'Gold Skulltula'
-            print('%-18s a %s: drops the lowest level of %s Link never got (%s), which marks the %s when picked '
-                  'up' % (cid, kind, '>'.join(family), ' / '.join(x for x, _ in next(
-                      c for c, f in zip(chains, families) if f == family)), kind))
     # one-time drops (tools/once_items.py): the versions with the mark, then the rocks, bushes and pots
     once_src = once_items.sources(plain) if once_spots else None
     once_shared = {}                                   # new files that are the same in every pack of these
@@ -3984,17 +3881,6 @@ def main(argv):
     # the rocks, bushes and pots themselves: an AI of our own name for each actor that drops for us. It only
     # hands its placement's number to its drop: it does not name another level's version (Drop__DropActor is
     # an instance parameter, and writing one stops the game: tools/once_items.py, seen 2026-11-22)
-    # the drop tables of ours (tools/drop_tables.py): {table name: the actor it drops}, for the droppers and
-    # for the Gold Skulltula
-    # and the lower levels each table lists with chance 0, so that the area loads them with it
-    drop_kind_tables, gs_tables, table_lower = {}, {}, {}
-    for cid, family in gs_families.items():
-        gs = skulltula_pair_kind(world, cid)
-        (gs_tables if gs else drop_kind_tables)[drop_tables.table_name(family, gs)] = \
-            skulltula_items.drop_name(family[-1])
-        table_lower[drop_tables.table_name(family, gs)] = [skulltula_items.drop_name(x) for x in family[-2::-1]]
-    rock_files = sarc.Sarc.read(plain(ground_items.pack_path(drop_tables.ROCK))).files if drop_kind_tables else None
-    drop_like = {}                                     # game files our drop tables are made from: their data
     once_actors = {}                                   # actor -> the game's AI it runs
     for h, (cid, item, actor) in sorted(once_spots.items()):
         if actor not in once_actors:
@@ -4004,14 +3890,6 @@ def main(argv):
         ap = ground_items.ap_path(actor)
         own_files = sarc.Sarc.read(plain(ground_items.pack_path(actor))).files
         _, new, changed = once_items.dropper_files(own_files, actor, once_src)
-        if drop_kind_tables:
-            # (an actor whose drop part has no table of one named actor to copy: the rock's)
-            data, more = drop_tables.build(own_files, actor, changed[2], drop_kind_tables,
-                                           (rock_files, drop_tables.part_of(rock_files, drop_tables.ROCK)),
-                                           table_lower)
-            changed = (changed[0], changed[1], data)
-            new = dict(new, **{p: (d, like) for p, (d, like, _) in more.items()})
-            drop_like.update({like: x for _, like, x in more.values()})
         held = [x for x in once_items.holders(a.romfs, actor)
                 if ap in sarc.Sarc.read(plain(ground_items.pack_path(x))).files]
         if actor not in held:
@@ -4027,12 +3905,7 @@ def main(argv):
                     raise SystemExit('%s: %s differs from the one made for another actor' % (actor, inner))
                 continue
             once_shared[inner] = data
-            out.add(inner, data, like, drop_like.get(like, own_files.get(like)))
-        if drop_kind_tables:
-            print('once   %-22s drop part %s: the game\'s tables and %s'
-                  % (actor, drop_tables.own_part_path(drop_tables.part_of(own_files, actor)).split('/')[-1],
-                     ', '.join('%s (%s; loaded with it: %s)' % (n, x, ', '.join(table_lower[n]))
-                               for n, x in sorted(drop_kind_tables.items()))))
+            out.add(inner, data, like, own_files[like])
         what = once_items.dropper_of(new[shop_items.ai_path(once_items.dropper_ai_name(root))][0])
         written = [k for _, k in once_items.actor_writes(new[shop_items.ai_path(once_items.dropper_ai_name(root))][0])
                    if k in once_items.instance_keys(own_files)]
@@ -4044,27 +3917,6 @@ def main(argv):
               % (actor, what['name'], what['new'], root, what['key'],
                  ''.join('; Link owns %s: %s instead of %s' % (i, to, frm) for frm, i, to in what['steps']),
                  len(held), '' if len(held) == 1 else 's', ', '.join(held)))
-    # Gold Skulltulas with a family: the drop part of our own with the tables, in every pack that holds the
-    # skulltula's file (tools/drop_tables.py)
-    if gs_tables:
-        gs_actor = drop_tables.SKULLTULA
-        ap = ground_items.ap_path(gs_actor)
-        own_files = sarc.Sarc.read(plain(ground_items.pack_path(gs_actor))).files
-        data, more = drop_tables.build(own_files, gs_actor, own_files[ap], gs_tables, loaded=table_lower)
-        new = {p: (d, like) for p, (d, like, _) in more.items()}
-        changed = (ap, own_files[ap], data)
-        held = [x for x in once_items.holders(a.romfs, gs_actor)
-                if ap in sarc.Sarc.read(plain(ground_items.pack_path(x))).files]
-        for holder in held:
-            path = ground_items.pack_path(holder)
-            src, old = out.read(path)
-            out.write(path, src, old, once_items.patch_pack(old, new, changed))
-        out.size(changed[0], changed[1], changed[2])
-        for inner, (d, like) in sorted(new.items()):
-            out.add(inner, d, like, own_files[like])
-        print('gs     %-22s drop part %s: the game\'s table and %s; in %d packs: %s'
-              % (gs_actor, drop_tables.own_part_path(drop_tables.part_of(own_files, gs_actor)).split('/')[-1],
-                 ', '.join('%s (%s)' % x for x in sorted(gs_tables.items())), len(held), ', '.join(held)))
     # three-level chests: one actor per family placed, and its _NoBake twin where a placement is one
     # (tools/three_chest.py); the twin's pack holds the same new files
     three_shared = {}

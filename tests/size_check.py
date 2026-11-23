@@ -24,7 +24,6 @@ TABLE = 'System/Resource/ResourceSizeTable.Product.111.Nin_Ounce_NVN2.rsizetable
 LARGER = {
     'Effect/static.Nin_Ounce_NVN2.vsetb.byml': 3872,
     'RSDB/ActorInfo.Product.111.rstbl.byml': 2800,
-    'Drop/DropSubTable/Drop_Test_Pot_Normal.game__drop__DropSubTable.bgyml': 4,
 }
 
 
