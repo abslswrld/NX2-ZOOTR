@@ -80,7 +80,7 @@ Each area's settings and cutscenes are built with the area, so nothing is left o
   by D15 in every area.
 - **Area checklist template**, so each area's test list has the same shape.
 - **Unknowns to settle here:** does a small key placed outside its dungeon count for the right dungeon? Does
-  "start with" keys work? Can the starting state set flags as well as items? Does the debug-menu warp leave the temple untouched (locked doors, keys not taken)?
+  "start with" keys work? Can the starting state set flags as well as items? (The debug-menu warp was checked on 2026-11-23: it leaves the temple untouched.)
 - **Milestone M1:** the Forest Temple is done, and the dungeon-item settings work in one dungeon.
 
 ### Phase 2: Finish the forest, and the Deku Tree
@@ -189,7 +189,7 @@ models; barren and "always" hints; trade quest items.
 |---|---|
 | Starting state: setting flags as well as items on a new file | 1 |
 | Keys placed outside their dungeon; "start with" keys | 1 |
-| Debug-menu warp leaves areas untouched | 1 |
+| Debug-menu warp leaves areas untouched | **Settled 2026-11-23:** a new file warped into the Forest Temple keeps its doors locked and 0 small keys |
 | Shortening each cutscene and keeping what it sets | 1 (list), then every area |
 | Shop families: shelves that appear only while a flag holds | 2 |
 | Scrubs (15) and shop shelves (44) look low next to the N64 game | 2-3, as those areas are mapped |
