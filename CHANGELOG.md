@@ -10,6 +10,7 @@ Newest first. Dates are when the work was done.
 - `docs/ROADMAP_DECISIONS.md`: the 37 decisions of the planning session.
 - `docs/RESEARCH_check_count.md`: a read-only count of check-like objects in every map (1,286 spots; exactly 100
   Gold Skulltulas, which confirms every area was read). Nothing was mapped.
+- `CLAUDE.md`: the project's standing working rules, read by every session (including worktrees).
 
 ### In-game results of the morning test (bombs and Boomerang retest, gossip hints, Saria's bridge family)
 All three runs done, everything passed.
