@@ -78,6 +78,13 @@ rumours are laid out. The chosen stones speak without the Mask of Truth, at both
 
     python tools/build_mod.py ... --gossip "KF_NEAR_LOST_WOODS_GOSSIP=They say {Kokiri Forest} is on the way."
 
+Hints (to test in game): --hint STONE=ITEM or --hint STONE=@CHECK_ID (repeatable) makes the stone say where an item
+of this build is, as a --gossip text worded from the placements and the game's own names (hint_specs):
+
+    python tools/build_mod.py ... KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02=Item_Boomerang
+        --hint KF_NEAR_LOST_WOODS_GOSSIP=Item_Boomerang
+    -> "They say the {Boomerang} can be found in a pot in the {House of the Know-It-All Brothers} in {Kokiri Forest}."
+
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
                              Deku Tree (the "low on stock" set is removed, every shelf is open from the
@@ -110,6 +117,7 @@ import argparse
 import collections
 import copy
 import os
+import re
 import shutil
 import struct
 import sys
@@ -1847,6 +1855,172 @@ def gossip_build(out, romfs, plan):
         print('  note: %s: its own messages never use %r (check that its font shows them)' % (path, missing))
 
 
+# ----------------------------------------------------------------------------------------------- hints
+# --hint STONE=ITEM or STONE=@CHECK_ID: the stone says where an item of this build is, worded from the build's own
+# placements, as a --gossip text (the stone's text and talk flow above, passed in game):
+#     They say {the Boomerang} can be found in a pot in the {House of the Know-It-All Brothers} in {Kokiri Forest}.
+# Every name is the game's own English text (the remake's names, never the N64 game's): the item's name and its
+# article from ActorMsg/PouchContent.msbt (<name>_Name; the article as its get message has it, "You found the
+# Boomerang!"); the area from LocationMsg/Location.msbt (the label is the map's name); a house or a shop from the
+# first line of its signboard (EventFlowMsg/SignboardWood.msbt, HINT_PLACES); Gold Skulltulas and Business Scrubs
+# from ActorMsg/Enemy.msbt. Only the joining words are ours (HINT_KINDS, "They say ... can be found").
+HINT_NAMES = 'ActorMsg/PouchContent.msbt'
+HINT_AREAS = 'LocationMsg/Location.msbt'
+HINT_SIGNS = 'EventFlowMsg/SignboardWood.msbt'
+HINT_ENEMIES = 'ActorMsg/Enemy.msbt'
+# region -> (signboard label, the words in front of it): the place inside the area, named by its sign (the first line,
+# before any comma). Regions without a sign of their own are named by their area alone.
+HINT_PLACES = {
+    'KF Links House': ('KokiriForest_005', 'in'),                # Link's House
+    'KF Midos House': ('KokiriForest_010', 'in the'),            # Mansion of the Great Mido
+    'KF Sarias House': ('KokiriForest_013', 'in'),               # Saria's House
+    'KF House of Twins': ('KokiriForest_012', 'in the'),         # House of the Twins
+    'KF Know It All House': ('KokiriForest_011', 'in the'),      # House of the Know-It-All Brothers
+    'KF Shop': ('KokiriForest_004', 'in the'),                   # Kokiri Shop
+    'KF Training Area': ('KokiriForest_001', 'at the'),          # Training Grounds
+    'Deku Theater': ('LostWood_001', 'at the'),                  # Forest Stage
+}
+# regions under the ground (a hole leads down to them; the game's text has no word for them): "underground"
+HINT_UNDERGROUND = {'KF Storms Grotto', 'LW Scrubs Grotto', 'SFM Wolfos Grotto', 'SFM Upper Grotto'}
+# area (map) -> the article English puts in front of its name ("in the Lost Woods")
+HINT_AREA_ARTICLE = {'LostWood': 'the', 'SacredForestMeadow': 'the'}
+# kind of check -> how the item is found there; {gs} and {scrub} are the game's names for them
+HINT_KINDS = {
+    'chest': 'in a chest',
+    'freestanding': 'lying on the ground',
+    'pot': 'in a pot',
+    'rock': 'under a rock',
+    'bush': 'under a bush',
+    'boulder': 'inside a boulder',
+    'skulltula': 'on a {gs}',
+    'scrub': 'sold by a {scrub}',
+    'shop': 'for sale',
+    'gift': 'as a gift',
+    'song': 'as a gift',
+}
+HINT_GS, HINT_SCRUB = 'Enemy_Skulltula_Gold_Name', 'Enemy_Scrub_Business_Name'
+HINT_GET = re.compile(r'^You [^!]*?\b(the|a|an) ')                   # the article of a get message
+
+
+def msg_plain(text, encoding=0):
+    """a message's text without its tags and its end; a new page (tag 0,4) is a line break"""
+    return ''.join(x if isinstance(x, str) else '\n' if tuple(x[:2]) == (0, 4) else ''
+                   for x in msbt.tags(text, encoding)).rstrip('\x00')
+
+
+def hint_texts(lang_arc):
+    """{msbt file: {label: plain text}} of the files hints read, from a language archive (its data)"""
+    files = sarc.Sarc.read(lang_arc).files
+    out = {}
+    for f in (HINT_NAMES, HINT_AREAS, HINT_SIGNS, HINT_ENEMIES):
+        m = msbt.Msbt.read(files[f])
+        out[f] = {k: msg_plain(v, m.encoding) for k, v in m.texts.items()}
+    return out
+
+
+def hint_item_name(item, texts, known_as):
+    """(article, name) of an item as the game's English text names it: <name>_Name in PouchContent.msbt, for the
+    item itself or the name the inventory knows it by (ActorInfo ActorName: Weapon_Range_SlingShot for
+    Item_Range_SlingShot); the article from its get message ('' when it has none)"""
+    names = texts[HINT_NAMES]
+    for label in (item, known_as(item)):
+        if label and label + '_Name' in names:
+            name = names[label + '_Name'].strip()
+            m = HINT_GET.match(names.get(label + '_GetMessage', ''))
+            return (m.group(1) if m else ''), name
+    raise SystemExit('--hint: %s has no name in the game\'s text (%s)' % (item, HINT_NAMES))
+
+
+def hint_sign(texts, label):
+    """a place's name: its signboard's first line, before any comma"""
+    t = texts[HINT_SIGNS].get(label)
+    if not t:
+        raise SystemExit('--hint: no signboard text %s in %s' % (label, HINT_SIGNS))
+    return t.replace('　', ' ').split('\n')[0].split(',')[0].strip()
+
+
+def check_kind(world, cid):
+    """the kind of a check: its map placements' (one kind), or an event's (gift, song)"""
+    r, name, loc = find_check(world, cid)
+    kinds = {world.checks[sc][sp]['kind'] for sc, sp, _ in world.placements_of(r, loc)}
+    if len(kinds) > 1:
+        raise SystemExit('%s: placements of more than one kind (%s)' % (cid, ', '.join(sorted(kinds))))
+    if kinds:
+        return kinds.pop()
+    if loc.get('song'):
+        return 'song'
+    if loc.get('gift') or loc.get('cutscene'):
+        return 'gift'
+    raise SystemExit('%s: neither a map placement nor an event' % cid)
+
+
+def hint_where(world, cid, texts):
+    """how and where the item of a check is found, as hint text: 'in a pot in the {House of the Know-It-All
+    Brothers} in {Kokiri Forest}'"""
+    r, name, loc = find_check(world, cid)
+    kind = check_kind(world, cid)
+    if kind not in HINT_KINDS:
+        raise SystemExit('--hint: %s is a %s: no hint wording for it' % (cid, kind))
+    enemies = texts[HINT_ENEMIES]
+    how = HINT_KINDS[kind].format(gs=enemies[HINT_GS].strip(), scrub=' '.join(enemies[HINT_SCRUB].split()))
+    area = texts[HINT_AREAS].get(r.scene)
+    if not area:
+        raise SystemExit('--hint: %s: its area %s has no name in %s' % (cid, r.scene, HINT_AREAS))
+    where = how + (' underground' if r.name in HINT_UNDERGROUND else '')
+    if r.name in HINT_PLACES:
+        label, prep = HINT_PLACES[r.name]
+        where += ' %s {%s}' % (prep, hint_sign(texts, label))
+    article = HINT_AREA_ARTICLE.get(r.scene)
+    return where + ' in %s{%s}' % (article + ' ' if article else '', area)
+
+
+def hint_specs(world, specs, assignments, texts, known_as):
+    """--hint STONE=ITEM or STONE=@CHECK_ID -> ([STONE=TEXT, as --gossip takes it], lines saying what each
+    stone hints). assignments: the build's (check id, item as given: an item, or a family First>Second...). ITEM
+    is an item as given in an assignment, or the first level of a family: it must be placed on exactly one check
+    (else name the check: @CHECK_ID). A family is named by its first level, "or an upgrade of it"."""
+    placed = {}                                        # item or first level -> [(check id, family or None)]
+    by_check = {}
+    for cid, given in assignments:
+        levels = given.split('>')
+        item = FAMILY_ALIASES.get(levels[0], levels[0]) if len(levels) == 1 else levels[0]
+        fam = tuple(levels) if len(levels) > 1 else None
+        placed.setdefault(item, []).append((cid, fam))
+        if len(levels) == 1 and levels[0] != item:
+            placed.setdefault(levels[0], []).append((cid, fam))
+        by_check[cid] = (item, fam)
+    out, said = [], []
+    for spec in specs:
+        stone, sep, what = spec.partition('=')
+        if not sep or not stone or not what:
+            raise SystemExit('--hint %r: write STONE=ITEM or STONE=@CHECK_ID' % spec)
+        if what.startswith('@'):
+            cid = what[1:]
+            find_check(world, cid)
+            if cid not in by_check:
+                raise SystemExit('--hint %s: %s is given nothing in this build' % (stone, cid))
+            item, fam = by_check[cid]
+        else:
+            if '>' in what:
+                raise SystemExit('--hint %s: name a family by its first level (%s)' % (stone, what.split('>')[0]))
+            spots = placed.get(what, [])
+            if len(spots) != 1:
+                raise SystemExit('--hint %s: %s is on %s in this build: name the check instead (%s=@CHECK_ID)'
+                                 % (stone, what, '%d checks (%s)' % (len(spots), ', '.join(c for c, _ in spots))
+                                    if spots else 'no check', stone))
+            cid, fam = spots[0]
+            item = by_check[cid][0]                    # a small seed bag or quiver alone: its weapon
+        article, name = hint_item_name(item, texts, known_as)
+        thing = '%s{%s}' % (article + ' ' if article else '', name)
+        if fam:
+            thing += ' or an upgrade of it'
+        text = 'They say %s can be found %s.' % (thing, hint_where(world, cid, texts))
+        out.append('%s=%s' % (stone, text))
+        said.append('hint               %s -> %s (%s): %s' % (stone, cid, '>'.join(fam) if fam else item,
+                                                              text.replace('{', '').replace('}', '')))
+    return out, said
+
+
 def patch_file(data, changes, checking=None, three=None, wrap=None):
     """change what the actors with these hashes give: chests and pots through their Drop__DropActor (chests'
     special opening events handled by CHEST_EVENTS), freestanding items by their actor type (Gyaml);
@@ -3017,11 +3191,17 @@ def main(argv):
     ap.add_argument('--gossip', action='append', default=[], metavar='STONE=TEXT',
                     help='what a gossip stone says (STONE: its check ID or its name in the map; in TEXT \\n is a '
                          'new line, \\p a new page, {...} highlighted); see gossip_parse')
+    ap.add_argument('--hint', action='append', default=[], metavar='STONE=ITEM',
+                    help='a gossip stone says where an item of this build is (ITEM: an item as assigned, or a '
+                         'family\'s first level; or @CHECK_ID for the item of that check); see hint_specs')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
     if not a.assign and not a.fix and not a.gossip:
         ap.error('nothing to do: give CHECK_ID=Item assignments, --fix and/or --gossip')
+    if a.hint and not a.assign:
+        ap.error('--hint: nothing is placed to hint at (give CHECK_ID=Item assignments)')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
+    given = list(assignments)                          # as given, for --hint
     never_given(assignments)
     skip_level_guard(assignments)                      # a later level of an upgrade family, alone
     # CHECK_ID=First>Second: a progressive pair (PROGRESSIVE_PAIRS). In a small chest: planned as First, the
@@ -3095,6 +3275,14 @@ def main(argv):
         shutil.rmtree(mod_romfs)
         print('earlier build removed:', mod_romfs)
     out = Output(a.romfs, mod_romfs, dicts)
+    if a.hint:                                         # hints become gossip texts (hint_specs)
+        hint_known = {r['__RowId']: r.get('ActorName') for r in byml.loads(
+            out.read(ground_items.table_path('ActorInfo'))[1]).root}
+        hinted, hint_said = hint_specs(world, a.hint, given, hint_texts(out.read(GOSSIP_LANG)[1]),
+                                       lambda item: hint_known.get(item))
+        a.gossip = a.gossip + hinted
+        for line in hint_said:
+            print(line)
     gossip = gossip_plan(out, world, a.gossip) if a.gossip else None    # refused here, before anything is written
 
     shop_fix = 'kokiri_shop_full_stock' in a.fix

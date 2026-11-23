@@ -4,6 +4,38 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
+### Gossip stone hints made from the placements (to test in game)
+`--hint STONE=ITEM` (or `STONE=@CHECK_ID`, repeatable) makes a stone say where an item of the build is. The
+sentence is made from the build's own placements and handed to the stone as a `--gossip` text, so it uses the
+stone text and talk flow that passed in game (2026-11-22). Example:
+`They say the {Boomerang} can be found in a pot in the {House of the Know-It-All Brothers} in {Kokiri Forest}.`
+- **Every name is the game's own English text** (the remake's names, never the N64 game's):
+  - the item: `<name>_Name` in `ActorMsg/PouchContent.msbt`, for the item or the name the inventory knows it by
+    (`Weapon_Range_SlingShot` for `Item_Range_SlingShot`). Its article comes from its get message: "You found
+    **the** Boomerang!" gives "the Boomerang", "You found **a** bomb bag!" gives "a Bomb Bag";
+  - the area: `LocationMsg/Location.msbt`, whose labels are the maps' names: Kokiri Forest, Lost Woods, and
+    **Sacred Grove** (the remake's name for the Sacred Forest Meadow);
+  - a house, the shop, the training grounds and the theater: the first line of their signboard
+    (`EventFlowMsg/SignboardWood.msbt`): Link's House, Mansion of the Great Mido, Saria's House, House of the
+    Twins, House of the Know-It-All Brothers, Kokiri Shop, Training Grounds, Forest Stage;
+  - Gold Skulltula and Business Scrub: `ActorMsg/Enemy.msbt`.
+- **Our own words** are only the joins: "They say ... can be found", how it is found (in a chest, lying on the
+  ground, in a pot, under a rock, under a bush, inside a boulder, on a Gold Skulltula, sold by a Business Scrub,
+  for sale, as a gift), "underground" for the grottos (the game's text has no word for them), "the" in front of
+  the Lost Woods and the Sacred Grove.
+- **A family** is named by its first level, "or an upgrade of it" (`They say a {Silver Scale} or an upgrade of
+  it can be found on a Gold Skulltula in the {Lost Woods}.`). A small seed bag placed alone is named as the
+  Fairy Slingshot it gives.
+- **Refused before anything is written:** an item on no check, an item or family on two or more checks (name
+  the check with `@CHECK_ID` instead), a family written out in full, `@` a check given nothing, a stone that
+  also has a `--gossip` text, a "stone" that is not one, `--hint` without assignments.
+- **Known:** the bridge to Hyrule Field is part of the Kokiri Forest map, so its chest, Saria's gift there and
+  the scrub by it are said to be "in Kokiri Forest".
+- **Tests:** new `tests/hint_check.py` (in `run_tests.bat`): every level of every family and 19 other items
+  have a name (with the ones read by hand), every place and area has its name, all 146 checks that can hold an
+  item get a wording, the longest item name as a family fits a stone on every check (two pages at most), what
+  `--hint` takes and refuses, and a whole build read back in all 16 languages. ALL OK.
+
 ### Tidy-up: the drop-table code is removed
 The code for the way that never worked in game (the game's drop code choosing the level of a family before
 anything is dropped, 2026-11-22) is removed. Nothing a build makes changes because of it; every family on a rock,

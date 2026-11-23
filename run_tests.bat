@@ -50,6 +50,9 @@ echo.
 echo === Gossip stone text check ===
 %PY% tests\gossip_check.py "%ROMFS%"
 echo.
+echo === Gossip stone hints check ===
+%PY% tests\hint_check.py "%ROMFS%"
+echo.
 echo === Progressive families on Gold Skulltulas check ===
 %PY% tests\skulltula_prog_check.py "%ROMFS%"
 echo.
