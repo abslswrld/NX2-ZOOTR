@@ -4,6 +4,27 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
+### In-game results of the morning test (bombs and Boomerang retest, gossip hints, Saria's bridge family)
+All three runs done, everything passed.
+- **Bombs and Boomerang, retest: passed.** Run 1 (inside first): the Bomb Bag on Saria's floor and the Boomerang
+  in the Know-It-All pot work inside the house, before leaving; the rock behind Saria's house then gives the
+  bigger bomb bag; the House of Twins pot gives the Silver Scale. Run 2 (outside first): the rock's Bomb Bag
+  and the shop bushes' Fairy Slingshot work right there; Saria's floor then gives the bigger bomb bag, usable
+  inside. So last time's "unusable until a scene change" was not reproduced: most likely something in that
+  build, not houses.
+- **Gossip hints: the wording passed** on all four stones, word for word as built (Lost Woods entrance:
+  Boomerang; the two Deku Tree stones: Bomb Bag, Silver Scale; the bridge stone: the Silver Scale gift).
+  - **Colour bug:** everything after "They say the" shows red, not only the highlighted names. Cause, read
+    from the game's English text: the game ends a highlight with colour `0xFFFF` (3,046 times), never with
+    colour 1, which the builder used. Not fixed yet. The 2026-11-22 stone test had the same tag after
+    "{Lost Woods}".
+  - The user may want "progressive Bomb Bag"-style wording instead of "a Bomb Bag or an upgrade of it";
+    undecided.
+- **Saria's bridge family: passed.** Without the Silver Scale: window and item Silver Scale. With it: the window
+  says Gold Scale and the Gold Scale is given; Link holds the Silver Scale's model, as expected (one model in
+  the scene). A scale held by young Link looks oversized; accepted, a fix would be item by item.
+- **Young Link's Bow:** left as it is for now (the user's choice).
+
 ### Not built: families on shop shelves, and young Link's Bow (researched, a decision first)
 Both were on the overnight list. Both need a choice or in-game rounds before code, so they were researched
 instead; the write-up with the measurements and the options is `out/RESEARCH_shelf_families_and_child_bow.md`.
