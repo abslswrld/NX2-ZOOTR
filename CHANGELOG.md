@@ -4,6 +4,20 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
+### Not built: families on shop shelves, and young Link's Bow (researched, a decision first)
+Both were on the overnight list. Both need a choice or in-game rounds before code, so they were researched
+instead; the write-up with the measurements and the options is `out/RESEARCH_shelf_families_and_child_bow.md`.
+- **Shelves:** the shop never names the item it gives in a flow we could put a question in front of. The shelf
+  actor puts itself into the inventory (`EventTriggerShopItemPutInPouch` in `DisplayShop`), and which actor
+  stands on a shelf is fixed in the map. The likeliest way is the game's own: a shelf placed only while a flag
+  holds (the Market's bug shelf), with one placement per level. That means adding placements to a map, which
+  the builder has never done: first one shelf and one pair, in game. A family on a shelf is still refused.
+- **Young Link's Bow:** measured, the Bow held up is 0.86 m tall, centred on the game's show point; the items the
+  game gives young Link are 0.31 to 0.59 m. It isn't held higher than other items, it's much bigger, and the
+  game's chest Bow looks the same (Run 2). A fix for young Link only needs a young-Link copy of every Bow version
+  (five builders, none of which knows ages today); a fix for both ages is small but changes adult Link's Bow
+  too. Left as it is until one is chosen.
+
 ### Upgrade families on song checks and on Saria's bridge gift (to test in game)
 `CHECK_ID=First>Second[>Third]` is now accepted on a song check (`Song from Saria`) and on the cutscene gift
 on the bridge (`LW_SARIA_GIFT`). Before, both refused a family.
@@ -26,7 +40,8 @@ on the bridge (`LW_SARIA_GIFT`). Before, both refused a family.
 - **Read-backs:** the song (`song_skip_check`, new: before, a song had none) and the bridge cutscene
   (`cutscene_family_check`) are read back against the original: original events unchanged, every number of
   levels owned leads to the right window, add or get, and what follows each.
-- **Still refused:** a family on a gift with no flow data (the Skull Kids, the Deku Theater), on a shelf (below).
+- **Still refused:** a family on a gift with no flow data (the Skull Kids, the Deku Theater), on a shelf (see
+  the entry above).
 - **Tests:** new `tests/event_families_check.py` (in `run_tests.bat`): all 11 families on the song and on the
   bridge gift, for every number of levels owned; what follows each get; the read-backs, and that they refuse a
   swapped question, a later window that does not lead on and a link left on the add; a cutscene whose window
