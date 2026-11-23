@@ -7,6 +7,8 @@ These are the project owner's standing rules. Every session follows them, in thi
 - **The plan is `docs/ROADMAP.md`**, in its priority order. The decisions in `docs/ROADMAP_DECISIONS.md` are
   settled: don't reopen them unless the user does. Keep both files up to date when a decision is made or a
   phase moves on.
+- **Work in parts:** one part of a phase = one test round = one PR. Never start a part before the one before it
+  has passed `run_tests.bat` and the user's in-game test.
 - **Don't make changes the user didn't ask for.** Suggest them instead.
 - **Ask before anything hard to undo, and before any change in the game's folder** (the romfs, the Longshot
   folder). Builds write only to the project's `out` folder.

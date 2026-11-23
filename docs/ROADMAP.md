@@ -1,7 +1,7 @@
 # NX2-ZOOTR roadmap to the public beta
 
 Approved 2026-11-23, from the planning session: a plan of action in priority order, without dates. The decisions
-it rests on are in `docs/ROADMAP_DECISIONS.md` (numbered 1-37 below as **D1**...). The sizes come from
+it rests on are in `docs/ROADMAP_DECISIONS.md` (numbered 1-38 below as **D1**...). The sizes come from
 `docs/RESEARCH_check_count.md`.
 
 ## The short version
@@ -65,22 +65,41 @@ Each area's settings and cutscenes are built with the area, so nothing is left o
 | Rainbow Bridge (D12); Ganon's Boss Key (D13); Light Arrow cutscene | Ganon's Castle (last) |
 | Cutscenes skippable / shortened (D15) | Each area its own scenes, from the cutscene list (phase 1) |
 
+## How a phase is worked: in parts (D38)
+- **One part = one test round:** one build, one short checklist, one sitting of in-game tests.
+- **One part = one PR,** so a part that breaks something can be undone on its own.
+- **Never two untested parts stacked:** a part starts only after the one before it passes `run_tests.bat` and its
+  in-game test.
+- **Only the current phase is broken into parts.** The next phase gets its parts when we reach it, from what the
+  phase before it showed.
+- Research and paperwork with no game changes can run alongside, while the user tests a part.
+
 ## Phases
 
 ### Phase 1: Forest Temple, and two lists
-- **Starting state on a new file** (groundwork), first: one system that gives starting items and sets flags when
-  a file is created. "Start with" keys need it here; later Zelda's Letter and Impa's item (D18), starting as
-  adult, full wallets and the open options use the same system.
-- **Forest Temple** (D25, D26): 12 chests, 5 Gold Skulltulas, 28 pots, 1 loose item, plus the boss heart and the
-  Medallion. First test of small keys, the boss key, the map and compass, locked doors and the boss door, with
-  each of own dungeon / anywhere / start with.
-- **Which dungeon a key belongs to:** with keys "anywhere", the get message and the pause menu say which dungeon
-  a key, boss key, map or compass is for (unique key models stay after the beta).
-- **Cutscene list** (research, no game changes): every story cutscene, how long, what it sets and gives. Needed
-  by D15 in every area.
-- **Area checklist template**, so each area's test list has the same shape.
-- **Unknowns to settle here:** does a small key placed outside its dungeon count for the right dungeon? Does
-  "start with" keys work? Can the starting state set flags as well as items? (The debug-menu warp was checked on 2026-11-23: it leaves the temple untouched.)
+Parts, in order:
+1. **Starting state on a new file** (groundwork): one system that gives starting items and sets flags when a file
+   is created. Tested in the forest: a new file that already has a chosen item and flag. Later used by "start
+   with" keys, Zelda's Letter and Impa's item (D18), starting as adult, full wallets and the open options.
+   Unknown settled here: can it set flags as well as items?
+2. **The Forest Temple's data** (D25, D26): check IDs, regions and logic rules for its 46 spots (12 chests, 5 Gold
+   Skulltulas, 28 pots, 1 loose item) plus the boss heart and the Medallion. No game changes: test scripts only.
+3. **Items on the Forest Temple's checks:** random items in its chests, pots, Gold Skulltulas and loose item, keys
+   still where the game puts them. In game: a sample in the temple.
+4. **Small keys in their own dungeon:** keys moved to other checks in the temple. In game: the locked doors open
+   with keys found in new places, and the key count is right.
+5. **Keys anywhere, and which dungeon a key belongs to:** a Forest Temple key placed in Kokiri Forest; its get
+   message and the pause menu name the temple (unique key models stay after the beta). In game: pick it up
+   outside, use it inside. Unknown settled here: does a key found outside count for the right dungeon?
+6. **Start with:** keys, the map and the compass given at the start, through part 1.
+7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
+   "anywhere" (D11).
+
+Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
+needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.
+
+(The debug-menu warp was checked on 2026-11-23: it leaves the temple untouched.)
+
 - **Milestone M1:** the Forest Temple is done, and the dungeon-item settings work in one dungeon.
 
 ### Phase 2: Finish the forest, and the Deku Tree

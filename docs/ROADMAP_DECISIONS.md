@@ -101,6 +101,8 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     none to all). The shelves not randomized keep the game's own items, so ammo stays for sale where the game sells
     it.
 33. **The four settings gaps are settled:** D34-D37.
+38. **Each phase is worked in parts:** one part = one test round = one PR; never two untested parts stacked;
+    only the current phase is broken into parts. Phase 1's seven parts are in the roadmap.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".
