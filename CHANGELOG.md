@@ -2,6 +2,128 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-23
+
+### In-game results of the morning test (bombs and Boomerang retest, gossip hints, Saria's bridge family)
+All three runs done, everything passed.
+- **Bombs and Boomerang, retest: passed.** Run 1 (inside first): the Bomb Bag on Saria's floor and the Boomerang
+  in the Know-It-All pot work inside the house, before leaving; the rock behind Saria's house then gives the
+  bigger bomb bag; the House of Twins pot gives the Silver Scale. Run 2 (outside first): the rock's Bomb Bag
+  and the shop bushes' Fairy Slingshot work right there; Saria's floor then gives the bigger bomb bag, usable
+  inside. So last time's "unusable until a scene change" was not reproduced: most likely something in that
+  build, not houses.
+- **Gossip hints: the wording passed** on all four stones, word for word as built (Lost Woods entrance:
+  Boomerang; the two Deku Tree stones: Bomb Bag, Silver Scale; the bridge stone: the Silver Scale gift).
+  - **Colour bug:** everything after "They say the" shows red, not only the highlighted names. Cause, read
+    from the game's English text: the game ends a highlight with colour `0xFFFF` (3,046 times), never with
+    colour 1, which the builder used. Not fixed yet. The 2026-11-22 stone test had the same tag after
+    "{Lost Woods}".
+  - The user may want "progressive Bomb Bag"-style wording instead of "a Bomb Bag or an upgrade of it";
+    undecided.
+- **Saria's bridge family: passed.** Without the Silver Scale: window and item Silver Scale. With it: the window
+  says Gold Scale and the Gold Scale is given; Link holds the Silver Scale's model, as expected (one model in
+  the scene). A scale held by young Link looks oversized; accepted, a fix would be item by item.
+- **Young Link's Bow:** left as it is for now (the user's choice).
+
+### Not built: families on shop shelves, and young Link's Bow (researched, a decision first)
+Both were on the overnight list. Both need a choice or in-game rounds before code, so they were researched
+instead; the write-up with the measurements and the options is `out/RESEARCH_shelf_families_and_child_bow.md`.
+- **Shelves:** the shop never names the item it gives in a flow we could put a question in front of. The shelf
+  actor puts itself into the inventory (`EventTriggerShopItemPutInPouch` in `DisplayShop`), and which actor
+  stands on a shelf is fixed in the map. The likeliest way is the game's own: a shelf placed only while a flag
+  holds (the Market's bug shelf), with one placement per level. That means adding placements to a map, which
+  the builder has never done: first one shelf and one pair, in game. A family on a shelf is still refused.
+- **Young Link's Bow:** measured, the Bow held up is 0.86 m tall, centred on the game's show point; the items the
+  game gives young Link are 0.31 to 0.59 m. It isn't held higher than other items, it's much bigger, and the
+  game's chest Bow looks the same (Run 2). A fix for young Link only needs a young-Link copy of every Bow version
+  (five builders, none of which knows ages today); a fix for both ages is small but changes adult Link's Bow
+  too. Left as it is until one is chosen.
+
+### Upgrade families on song checks and on Saria's bridge gift (to test in game)
+`CHECK_ID=First>Second[>Third]` is now accepted on a song check (`Song from Saria`) and on the cutscene gift
+on the bridge (`LW_SARIA_GIFT`). Before, both refused a family.
+- **How it decides:** with the game's own inventory question, the one gifts with a family already use (the Deku
+  Theater's `PouchSystemActor.EventQueryIsExistInPouch`): "has Second?" yes -> Third, no -> "has First?" yes ->
+  Second, no -> First. With every level owned it gives the last again, as a gift with a family does. It asks for
+  the names the inventory knows the levels by (`Weapon_Range_SlingShot`...).
+- **Song check** (`song_skip`): the song cutscene still only fades in and hands over the item (passed in game
+  2026-11-17), now with one get per level behind the questions. Each get leads on to what its level needs: the
+  first level's seed bag or quiver, an ocarina's sync steps (so it can be played at once), then the end.
+- **Saria's bridge gift** (`cutscene_family_edit`): the cutscene shows the get window (Event77) before it adds the
+  item (Event68, a branch of a fork). The questions go in front of both, with a copy of the window and of the
+  add per later level. Both are asked before anything is added, so both give the same level. A later level's add
+  leads on to what the add led on to (the seed bag and quiver come with the first level only).
+- **Known look:** Link holds one actor in the bridge cutscene, whatever the level: the first level when it is an
+  item actor (the Fairy Slingshot), otherwise Saria's ocarina. The window and the item given are right.
+- **Bug fixed (found by the new test, it was in main):** a Fairy Slingshot or Fairy Bow alone on a song check
+  stopped the build (`no actor 'PouchSystemActor'`): the song cutscene has no inventory actor for the seed bag
+  step. It is now copied from the Deku Theater's flow, as gifts do.
+- **Read-backs:** the song (`song_skip_check`, new: before, a song had none) and the bridge cutscene
+  (`cutscene_family_check`) are read back against the original: original events unchanged, every number of
+  levels owned leads to the right window, add or get, and what follows each.
+- **Still refused:** a family on a gift with no flow data (the Skull Kids, the Deku Theater), on a shelf (see
+  the entry above).
+- **Tests:** new `tests/event_families_check.py` (in `run_tests.bat`): all 11 families on the song and on the
+  bridge gift, for every number of levels owned; what follows each get; the read-backs, and that they refuse a
+  swapped question, a later window that does not lead on and a link left on the add; a cutscene whose window
+  does not come first is refused; whole builds. `tests/gift_check.py`, `tests/families_check.py` and
+  `tests/pairs_more_check.py` no longer expect the song and the bridge gift to refuse a family.
+- **In game:** the bridge gift can be tested on a new file. Saria's song needs Zelda's letter, which a new file
+  can't reach yet, so the song is only tested by the tests above.
+
+### Gossip stone hints made from the placements (to test in game)
+`--hint STONE=ITEM` (or `STONE=@CHECK_ID`, repeatable) makes a stone say where an item of the build is. The
+sentence is made from the build's own placements and handed to the stone as a `--gossip` text, so it uses the
+stone text and talk flow that passed in game (2026-11-22). Example:
+`They say the {Boomerang} can be found in a pot in the {House of the Know-It-All Brothers} in {Kokiri Forest}.`
+- **Every name is the game's own English text** (the remake's names, never the N64 game's):
+  - the item: `<name>_Name` in `ActorMsg/PouchContent.msbt`, for the item or the name the inventory knows it by
+    (`Weapon_Range_SlingShot` for `Item_Range_SlingShot`). Its article comes from its get message: "You found
+    **the** Boomerang!" gives "the Boomerang", "You found **a** bomb bag!" gives "a Bomb Bag";
+  - the area: `LocationMsg/Location.msbt`, whose labels are the maps' names: Kokiri Forest, Lost Woods, and
+    **Sacred Grove** (the remake's name for the Sacred Forest Meadow);
+  - a house, the shop, the training grounds and the theater: the first line of their signboard
+    (`EventFlowMsg/SignboardWood.msbt`): Link's House, Mansion of the Great Mido, Saria's House, House of the
+    Twins, House of the Know-It-All Brothers, Kokiri Shop, Training Grounds, Forest Stage;
+  - Gold Skulltula and Business Scrub: `ActorMsg/Enemy.msbt`.
+- **Our own words** are only the joins: "They say ... can be found", how it is found (in a chest, lying on the
+  ground, in a pot, under a rock, under a bush, inside a boulder, on a Gold Skulltula, sold by a Business Scrub,
+  for sale, as a gift), "underground" for the grottos (the game's text has no word for them), "the" in front of
+  the Lost Woods and the Sacred Grove.
+- **A family** is named by its first level, "or an upgrade of it" (`They say a {Silver Scale} or an upgrade of
+  it can be found on a Gold Skulltula in the {Lost Woods}.`). A small seed bag placed alone is named as the
+  Fairy Slingshot it gives.
+- **Refused before anything is written:** an item on no check, an item or family on two or more checks (name
+  the check with `@CHECK_ID` instead), a family written out in full, `@` a check given nothing, a stone that
+  also has a `--gossip` text, a "stone" that is not one, `--hint` without assignments.
+- **Known:** the bridge to Hyrule Field is part of the Kokiri Forest map, so its chest, Saria's gift there and
+  the scrub by it are said to be "in Kokiri Forest".
+- **Tests:** new `tests/hint_check.py` (in `run_tests.bat`): every level of every family and 19 other items
+  have a name (with the ones read by hand), every place and area has its name, all 146 checks that can hold an
+  item get a wording, the longest item name as a family fits a stone on every check (two pages at most), what
+  `--hint` takes and refuses, and a whole build read back in all 16 languages. ALL OK.
+
+### Tidy-up: the drop-table code is removed
+The code for the way that never worked in game (the game's drop code choosing the level of a family before
+anything is dropped, 2026-11-22) is removed. Nothing a build makes changes because of it; every family on a rock,
+bush, pot or Gold Skulltula is the one-time turning item that passed in game.
+- **Removed:** `tools/drop_tables.py` and `tools/skulltula_items.py` (the `Obj_NX2S_` drops, the drop code's two
+  lists); in `tools/build_mod.py` `DROP_KINDS`, `gs_families`, the drop tables a placement could name
+  (`patch_file`'s `tables`) and the two sections that wrote the tables, the `Obj_NX2S_` drops and the drop code's
+  lists; in `tools/sizes.py` the three drop-table size rules and the `GROWTH` part (only the drop code's settings
+  used it); in `tests/size_check.py` the exception for the game's test drop table.
+- **The rocks', bushes' and pots' AI** (`tools/once_items.py`) loses the branch "the drop table my placement
+  names starts with NX2_ -> hand my number to what I drop". No placement names such a table any more, so the
+  branch never ran. The AI is now exactly the one of `claude/pots-one-time` (passed in game on 2026-11-22 with
+  the Boomerang pot and the rocks).
+- **Tests:** `tests/skulltula_prog_check.py` keeps its checks of the game (the token marks its skulltula, the
+  skulltula hands its flag over, every skulltula placement's two flags) and its whole builds; the checks of the
+  removed drops and lists are gone. Its "the drop code's settings are not in the mod" check now looks for the
+  file under its real name in the mod (with `.zs`): before, it looked for a name no file has, so it could never
+  fail.
+- The research and the four in-game tries stay in this changelog (2026-11-22) and in
+  `out/RESEARCH_drop_tables.md`.
+
 ## 2026-11-22
 
 ### Families on Gold Skulltulas are turning items too (passed in game)

@@ -41,10 +41,10 @@ The same on a freestanding item (to test in game): the placement becomes First's
 (tools/turn_items.py): a ground item of First that, once Link owns First, drops Second's in its place and removes
 itself; Second's removes itself once Link owns Second. Two freestanding items with the same pair give First then
 Second in either order.
-The same on a liftable rock, a solid bush, a pot or a Gold Skulltula (to test in game): its drop
-(Drop__DropActor) names the last level's drop, and the game's drop code drops the lowest level Link never got
-in its place, before anything comes out (tools/skulltula_items.py). What comes out marks what dropped it when
-picked up (given once). Not on shelves yet.
+The same on a liftable rock, a solid bush, a pot or a Gold Skulltula (passed in game, 2026-11-22/23): its drop
+(Drop__DropActor) names the first level's one-time turning item (tools/once_items.py). It turns into the next
+level on the ground once Link owns its own, and marks what dropped it when it turns or is picked up (given
+once). Not on shelves yet.
 Three-level family (to test in game): CHECK_ID=First>Second>Third on a small chest makes it a chest of our own
 (tools/three_chest.py: the checking chest with a third held item and a second question) that gives Third when
 Link has Second, else Second when Link has First, else First; only the families in THREE_LEVEL_FAMILIES:
@@ -78,6 +78,13 @@ rumours are laid out. The chosen stones speak without the Mask of Truth, at both
 
     python tools/build_mod.py ... --gossip "KF_NEAR_LOST_WOODS_GOSSIP=They say {Kokiri Forest} is on the way."
 
+Hints (to test in game): --hint STONE=ITEM or --hint STONE=@CHECK_ID (repeatable) makes the stone say where an item
+of this build is, as a --gossip text worded from the placements and the game's own names (hint_specs):
+
+    python tools/build_mod.py ... KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02=Item_Boomerang
+        --hint KF_NEAR_LOST_WOODS_GOSSIP=Item_Boomerang
+    -> "They say the {Boomerang} can be found in a pot in the {House of the Know-It-All Brothers} in {Kokiri Forest}."
+
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
                              Deku Tree (the "low on stock" set is removed, every shelf is open from the
@@ -110,6 +117,7 @@ import argparse
 import collections
 import copy
 import os
+import re
 import shutil
 import struct
 import sys
@@ -118,12 +126,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
-import drop_tables  # noqa: E402
 import ground_items  # noqa: E402
 import harp_colors  # noqa: E402
 import once_items  # noqa: E402
 import shop_items  # noqa: E402
-import skulltula_items  # noqa: E402
 import sizes  # noqa: E402
 import three_chest  # noqa: E402
 import turn_items  # noqa: E402
@@ -238,9 +244,9 @@ def three_level_parse(world, assignments):
                 '>'.join(x) for x in sorted(THREE_LEVEL_FAMILIES))))
         r, name, loc = find_check(world, cid)
         kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
-        if not kinds or kinds == {'scrub'} or (len(kinds) == 1 and kinds <= set(TURN_KINDS + DROP_KINDS)) \
-                or kinds == {'skulltula'}:
-            continue                                   # a gift, a scrub, a turning item, a drop: with the pairs
+        if not kinds or kinds == {'scrub'} or (len(kinds) == 1 and kinds <= set(TURN_KINDS)) \
+                or kinds == GS_KINDS:
+            continue                                   # a gift, a scrub, a turning item: with the pairs
         if kinds != {'chest'}:
             raise SystemExit('%s: a three-level family (First>Second>Third) can only be put %s (this check: %s)'
                              % (cid, PROGRESSIVE_WHERE, ', '.join(sorted(kinds))))
@@ -260,23 +266,18 @@ def checking_chest(gyaml, family=None):
 
 
 # Where a progressive pair can be placed: a small chest (the checking chest), a freestanding item (a turning
-# item, tools/turn_items.py), or a liftable rock, solid bush or pot. Rocks, bushes and pots (2026-11-22, after
-# the crash): the Gold Skulltulas' way below, not a turning item (a turning item showed the level Link already
-# had for a moment before turning). What a rock, a bush or a pot drops for us is given once
-# (tools/once_items.py): picked up, it sets its two saved flags as a token sets its Gold Skulltula's (that this
-# keeps it from coming back is to be tested in game).
-# Not yet: shelves (the shop version has no such AI), Gold Skulltulas (what they drop must carry the
-# skulltula's flag on: no game node hands it from one drop to the next), songs (events).
+# item, tools/turn_items.py), or a liftable rock, solid bush, pot or Gold Skulltula. What a rock, a bush or a pot
+# drops for us is given once (tools/once_items.py): it is the first level's one-time turning item, which turns on
+# the ground and, when it turns or is picked up, sets its dropper's two saved flags as a token sets its Gold
+# Skulltula's (passed in game, 2026-11-22). A Gold Skulltula drops the same one-time turning item: it hands its
+# own flag to what it drops, as it does to its token (passed in game, 2026-11-23; skulltula_pair_kind).
+# (The other way, the game's drop code choosing the level before anything is dropped, never put a lower level
+# in place in game, 2026-11-22: its code was removed on 2026-11-23.)
+# Not yet: shelves (the shop version has no such AI).
 # Gifts: gift_pair_kind, gift_pair_edit. Scrubs: scrub_pair_kind, scrub_flow_edit.
-# Gold Skulltulas (2026-11-22): still no turning item, for the reason above. The game's drop code chooses the
-# level before anything is dropped (skulltula_pair_kind, tools/skulltula_items.py).
 GS_KINDS = {'skulltula'}
 PAIR_KINDS = ('chest', 'freestanding', 'rock', 'bush', 'pot')
 TURN_KINDS = ('freestanding', 'rock', 'bush', 'pot')   # the kinds whose pair is a turning item
-# a family chosen by the drop code, as on a Gold Skulltula: none. Tried for rocks, bushes and pots on
-# 2026-11-22 (drop tables of ours, the lower levels loaded): the game never put the lower level in place, and
-# nothing came out where one was needed. They are turning items again (the user's choice)
-DROP_KINDS = ()
 # Two turning items of one family must not lie where Link can touch both at once: the second could be picked up
 # in the frame the first's scene ends, before it has turned (it would give the first level again). Metres,
 # between their map positions (for a rock or a bush: where it stands; a rock carried and thrown next to another
@@ -695,13 +696,21 @@ def plan_songs(world, assignments):
     return out
 
 
-def song_skip(fc, cid, item, song, sync=None):
+def song_skip(fc, cid, item, song, sync=None, levels=None, template=None, asked=None):
     """the song cutscene (Dm_MelodyGet_*) is still started as before, so the game records it as played (that
     is what keeps its trigger from coming back, e.g. SacredForestMeadow_Child_Prefab_bbc3: "Dm_MelodyGet_Saria"
     not played), but its first entry point now only fades in, hands over the item the way the cutscene hands
     over the song (GetPouchContent<GetPouchContentByActorName>: "You got ..." window, then the item; plus what the
-    item needs, SCRUB_COMPANIONS) and ends: no lesson, no song. sync: the sync steps (sync_template) to run
-    after the get, for an ocarina. Returns lines saying what was changed."""
+    item needs, SCRUB_COMPANIONS) and ends: no lesson, no song. sync: {item: the sync steps (sync_template) to run
+    after its get}, for an ocarina (a list alone: for `item`).
+    levels: a family (First, Second[, Third]; `item` is First): one get per level, with the game's inventory
+    questions in front of them (level_switch; template: gift_pair_template, asked: the name the inventory knows
+    an item by), as a gift with a family asks them. Returns lines saying what was changed."""
+    levels = tuple(levels or (item,))
+    if levels[0] != item:
+        raise SystemExit('%s: the family %s does not start with %s' % (cid, '>'.join(levels), item))
+    if not isinstance(sync, dict):
+        sync = {item: sync} if sync else {}
     gives = [e for e in fc.events if e.type == 'subflow' and e.flowchart == 'GetPouchContent'
              and isinstance(e.params, dict) and e.params.get('ActorName') == song]
     if len(gives) != 1:
@@ -715,18 +724,94 @@ def song_skip(fc, cid, item, song, sync=None):
         raise SystemExit('%s: no fade-in found in the cutscene' % cid)
     params = evfl.Params(fade.params)
     params['IsWaitEnd'] = True
-    nxt = sync_steps(fc, sync) if sync else None
-    for companion in reversed(SCRUB_COMPANIONS.get(item, [])):
-        nxt = fc.add_action('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent',
-                            evfl.Params(Num=1, Actor=companion, IsGetEvent=False,
-                                        IsSetMessageTargetActorName=False, IsEquipDIrect=False), next=nxt)
-    get = fc.add_subflow(SONG_GET[0], SONG_GET[1], evfl.Params(ActorName=item), next=nxt)
-    first = fc.add_action(fade.actor, 'EventEventFadeIn', params, next=get)
+    gets = []
+    for k, level in enumerate(levels):
+        if k and SCRUB_COMPANIONS.get(level):
+            raise SystemExit('%s: %s: a later level that needs another item given with it is not supported on a '
+                             'song' % (cid, '>'.join(levels)))
+        nxt = sync_steps(fc, sync[level]) if sync.get(level) else None
+        for companion in (reversed(SCRUB_COMPANIONS.get(level, [])) if k == 0 else ()):
+            # the song cutscenes have no PouchSystemActor of their own (Dm_MelodyGet_Saria): it is added as the
+            # Deku Theater's flow has it (template), as gift_pair_edit adds it (found 2026-11-23: a slingshot
+            # alone on a song stopped the build with "no actor 'PouchSystemActor'")
+            if template is None:
+                raise SystemExit('%s: %s comes with %s: the song needs the PouchSystemActor (template)'
+                                 % (cid, companion, level))
+            nxt = fc.add_action(flow_copy_actor(fc, template[0]), CUTSCENE_ADD[1],
+                                evfl.Params(Num=1, Actor=companion, IsGetEvent=False,
+                                            IsSetMessageTargetActorName=False, IsEquipDIrect=False), next=nxt)
+        gets.append(fc.add_subflow(SONG_GET[0], SONG_GET[1], evfl.Params(ActorName=level), next=nxt))
+    if len(levels) > 1 and template is None:
+        raise SystemExit('%s: a family on a song needs the game\'s inventory question (template)' % cid)
+    top, questions = level_switch(fc, levels, gets, template, asked or (lambda x: x)) if len(levels) > 1 \
+        else (gets[0], [])
+    first = fc.add_action(fade.actor, 'EventEventFadeIn', params, next=top)
     was = fc.events[ep.main].name
     ep.main = first
     fc.update_entry_points()
-    return ['%-18s cutscene starts with the get of %s instead of the song lesson (%s; was %s)'
-            % (cid, item, fc.events[first].name, was)]
+    said = ['%-18s cutscene starts with the get of %s instead of the song lesson (%s; was %s)'
+            % (cid, item if len(levels) == 1 else ' or '.join(levels), fc.events[first].name, was)]
+    for k, q in enumerate(questions, 1):
+        said.append('%-18s   asks %s (%s.%s %s): yes -> %s gives %s, no -> %s'
+                    % (cid, fc.events[q].name, GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY, dict(fc.events[q].params),
+                       fc.events[gets[k]].name, levels[k], fc.events[dict(fc.events[q].cases)[template[3]]].name))
+    return said
+
+
+def song_skip_check(orig, back, cid, levels, sync, template=None, asked=None):
+    """read-back of song_skip: every event, actor entry point of the original cutscene is as it was but for
+    EntryPoint0's start (and the entry points' lists of calls); the new start fades in, then for every number of
+    levels Link may own the game's questions lead to the get of the next level (all owned: the last again), which
+    leads on to its companions (first level), its sync steps (an ocarina) and the end. Stops the build otherwise."""
+    def bad(what):
+        raise SystemExit('read-back: %s: %s' % (cid, what))
+
+    asked = asked or (lambda x: x)
+    n = len(orig.events)
+    if len(back.events) < n or len(back.actors) < len(orig.actors):
+        bad('events or actors are missing')
+    for o, e in zip(orig.events, back.events):
+        if vars(o) != vars(e):
+            bad('event %s differs from the original' % o.name)
+    for a, b in zip(orig.actors, back.actors):
+        va, vb = dict(vars(a)), dict(vars(b))
+        if vb['actions'][:len(va['actions'])] != va['actions'] or vb['queries'][:len(va['queries'])] != va['queries']:
+            bad('actor %s lost an action or a query' % a.name)
+        va.pop('actions'), va.pop('queries'), vb.pop('actions'), vb.pop('queries')
+        if va != vb:
+            bad('actor %s differs from the original' % a.name)
+    if [p.name for p in orig.entry_points] != [p.name for p in back.entry_points]:
+        bad('entry points differ')
+    for o, p in zip(orig.entry_points, back.entry_points):
+        if p.name != 'EntryPoint0' and p.main != o.main:
+            bad('entry point %s starts elsewhere' % p.name)
+    ep = next(p for p in back.entry_points if p.name == 'EntryPoint0')
+    fade = back.events[ep.main]
+    if ep.main < n or fade.type != 'action' or back.actors[fade.actor].actions[fade.action] != 'EventEventFadeIn':
+        bad('EntryPoint0 does not start with a new fade-in')
+    if len(levels) > 1 and template is None:
+        bad('no question template for a family')
+    for r in range(len(levels) + 1):
+        owned = {asked(x) for x in levels[:r]}
+        i = level_reached(back, fade.next, owned, template) if template else fade.next
+        want = levels[min(r, len(levels) - 1)]
+        g = back.events[i]
+        if i < n or g.type != 'subflow' or (g.flowchart, g.entry) != SONG_GET or dict(g.params) != {'ActorName': want}:
+            bad('owning %s, the cutscene does not give %s' % (', '.join(levels[:r]) or 'nothing', want))
+        steps = [(CUTSCENE_ADD[0], CUTSCENE_ADD[1], {'Num': 1, 'Actor': c, 'IsGetEvent': False,
+                                                     'IsSetMessageTargetActorName': False, 'IsEquipDIrect': False})
+                 for c in (SCRUB_COMPANIONS.get(want, []) if want == levels[0] else [])]
+        steps += [(a.name, act, dict(p) if p is not None else None) for a, act, p in (sync.get(want) or [])]
+        j = g.next
+        for actor, action, params in steps:
+            x = back.events[j] if j is not None else None
+            if x is None or j < n or x.type != 'action' or back.actors[x.actor].name != actor \
+                    or back.actors[x.actor].actions[x.action] != action \
+                    or (dict(x.params) if x.params is not None else None) != params:
+                bad('after the get of %s: not %s.%s as intended' % (want, actor, action))
+            j = x.next
+        if j is not None:
+            bad('after the get of %s the cutscene does not end' % want)
 
 
 def gift_edit(fc, events, direct=(), sync=None):
@@ -843,6 +928,118 @@ def cutscene_gift_edit(fc, cid, g, item, show, companions=()):
         said.append('%-18s %s comes with it (%s)' % (cid, companion, fc.events[nxt].name))
     add.next = nxt
     return said, [e.name for e in fc.events[first_new:]]
+
+
+def cutscene_family_edit(fc, cid, g, levels, template, asked, companions=()):
+    """a family (First, Second[, Third]) on a cutscene gift whose get window comes before its add step (Saria's
+    bridge cutscene: Event77 shows the window, then a fork's branch runs Event68, the add). After
+    cutscene_gift_edit has made both give First (and chained First's companions after the add), the game's
+    inventory questions (level_switch) go in front of each, with a copy of the window and of the add per later
+    level. A window copy leads on as the window does; an add copy leads on to what the add led on to before
+    First's companions (they are First's alone). Both questions are asked before anything is added, so both get
+    the same answers. Every link to the window or the add (a step, a fork's branch) goes to its first question.
+    Link holds one actor in the cutscene whatever the level (cutscene_gift_edit). Returns lines saying what was
+    changed."""
+    by_name = {e.name: k for k, e in enumerate(fc.events)}
+    win_i, add_i = by_name[g['window']], by_name[g['add']]
+    if add_i not in fc.reachable(win_i) or win_i in fc.reachable(add_i):
+        raise SystemExit('%s: the get window does not come before the add step: a family cannot be put here'
+                         % cid)
+    win, add = fc.events[win_i], fc.events[add_i]
+    if win.params.get('ActorName') != levels[0] or add.params.get('Actor') != levels[0]:
+        raise SystemExit('%s: the cutscene does not give %s (cutscene_gift_edit first)' % (cid, levels[0]))
+    for level in levels[1:]:
+        if SCRUB_COMPANIONS.get(level):
+            raise SystemExit('%s: %s: a later level that needs another item given with it is not supported on a '
+                             'cutscene gift' % (cid, '>'.join(levels)))
+    lead = add.next                                    # past First's companions: what the add led on to
+    for _ in companions:
+        lead = fc.events[lead].next
+    said = []
+    for what, i, key, nxt in (('window', win_i, 'ActorName', win.next), ('add', add_i, 'Actor', lead)):
+        e = fc.events[i]
+        copies = []
+        for level in levels[1:]:
+            p = evfl.Params(e.params)
+            p[key] = level
+            if e.type == 'subflow':
+                copies.append(fc.add_subflow(e.flowchart, e.entry, p, next=nxt))
+            else:
+                copies.append(fc.add_action(e.actor, CUTSCENE_ADD[1], p, next=nxt))
+        top, questions = level_switch(fc, levels, [i] + copies, template, asked)
+        moved = fc.repoint(i, top, keep=questions)
+        if not moved:
+            raise SystemExit('%s: nothing leads to %s' % (cid, e.name))
+        said.append('%-18s %s (the %s): asks first %s; %s; %d link%s moved to the questions'
+                    % (cid, e.name, what, ', then '.join('%s (has %s?)' % (fc.events[q].name, fc.events[q].params['Actor'])
+                                                         for q in reversed(questions)),
+                       ', '.join('%s gives %s' % (fc.events[c].name, lv) for c, lv in zip([i] + copies, levels)),
+                       moved, '' if moved == 1 else 's'))
+    fc.update_entry_points()
+    return said
+
+
+def cutscene_family_check(orig, back, cid, g, levels, template, asked, show, companions=()):
+    """read-back of a family on a cutscene gift (cutscene_family_edit): no original event links to the window or
+    the add any more but through one question each; for every number of levels Link may own, the questions lead
+    to the window and the add of the same level (all owned: the last again); a later level's window leads on as
+    the window does, its add to what the add led on to. With the questions and the later levels taken out again,
+    the cutscene is what cutscene_gift_check wants for First. Stops the build otherwise."""
+    def bad(what):
+        raise SystemExit('read-back: %s: %s' % (cid, what))
+
+    n = len(orig.events)
+    by_name = {e.name: k for k, e in enumerate(back.events)}
+    win_i, add_i = by_name[g['window']], by_name[g['add']]
+    lead = orig.events[[e.name for e in orig.events].index(g['add'])].next
+    tops = {}
+    for what, i in (('window', win_i), ('add', add_i)):
+        into = [k for k, e in enumerate(back.events[:n]) if e.next == i or i in e.forks or i in [c for _, c in e.cases]
+                or e.join == i] + [p.name for p in back.entry_points if p.main == i]
+        firsts = [k for k in range(n, len(back.events)) if back.events[k].type == 'switch'
+                  and (any(e.next == k or k in e.forks or k in [c for _, c in e.cases] for e in back.events[:n])
+                       or any(p.main == k for p in back.entry_points))]
+        tops[what] = [k for k in firsts if level_reached(back, k, set(), template) == i]
+        if len(tops[what]) != 1 or into:
+            bad('the links to the %s do not all go to one question in front of it' % what)
+    adds = set()
+    for r in range(len(levels) + 1):
+        owned = {asked(x) for x in levels[:r]}
+        want = levels[min(r, len(levels) - 1)]
+        wi = level_reached(back, tops['window'][0], owned, template)
+        ai = level_reached(back, tops['add'][0], owned, template)
+        w, a = back.events[wi], back.events[ai]
+        if w.type != 'subflow' or (w.flowchart, w.entry) != CUTSCENE_WINDOW \
+                or dict(w.params) != dict(back.events[win_i].params, ActorName=want) or w.next != back.events[win_i].next:
+            bad('owning %s, the window does not name %s as intended' % (', '.join(levels[:r]) or 'nothing', want))
+        if a.type != 'action' or (back.actors[a.actor].name, _action_name(back, a)) != CUTSCENE_ADD \
+                or dict(a.params) != dict(back.events[add_i].params, Actor=want) \
+                or (ai != add_i and a.next != lead):
+            bad('owning %s, the cutscene does not add %s as intended' % (', '.join(levels[:r]) or 'nothing', want))
+        if (wi == win_i) != (want == levels[0]) or (ai == add_i) != (want == levels[0]):
+            bad('the first level is not given by the original window and add')
+        adds.add(ai)
+    # the questions and the later levels taken out again: what cutscene_gift_check wants for First
+    flat = copy.deepcopy(back)
+    to = {tops['window'][0]: win_i, tops['add'][0]: add_i}
+    for e in flat.events[:n]:
+        e.next, e.join = to.get(e.next, e.next), to.get(e.join, e.join)
+        e.forks = [to.get(f, f) for f in e.forks]
+        e.cases = [(v, to.get(c, c)) for v, c in e.cases]
+    for p in flat.entry_points:
+        p.main = to.get(p.main, p.main)
+    first_new = [k for k in range(n, len(back.events)) if back.events[k].type == 'action' and k not in adds]
+    if first_new != list(range(n, n + len(companions))):
+        bad('the companions are not the first new events')
+    flat.events = flat.events[:n + len(companions)]
+    for p, o in zip(flat.entry_points, orig.entry_points):
+        p.subflows = list(o.subflows)
+    for a, o in zip(flat.actors, orig.actors):
+        extra = a.queries[len(o.queries):]
+        if a.queries[:len(o.queries)] == o.queries and set(extra) <= {GIFT_PAIR_QUERY}:
+            a.queries = list(o.queries)
+    flat.actors = flat.actors[:len(orig.actors)]
+    cutscene_gift_check(orig, flat, cid, g, levels[0], show, [back.events[k].name for k in first_new])
 
 
 def cutscene_gift_check(orig, back, cid, g, item, show, added=()):
@@ -1854,7 +2051,173 @@ def gossip_build(out, romfs, plan):
         print('  note: %s: its own messages never use %r (check that its font shows them)' % (path, missing))
 
 
-def patch_file(data, changes, checking=None, three=None, wrap=None, tables=None):
+# ----------------------------------------------------------------------------------------------- hints
+# --hint STONE=ITEM or STONE=@CHECK_ID: the stone says where an item of this build is, worded from the build's own
+# placements, as a --gossip text (the stone's text and talk flow above, passed in game):
+#     They say {the Boomerang} can be found in a pot in the {House of the Know-It-All Brothers} in {Kokiri Forest}.
+# Every name is the game's own English text (the remake's names, never the N64 game's): the item's name and its
+# article from ActorMsg/PouchContent.msbt (<name>_Name; the article as its get message has it, "You found the
+# Boomerang!"); the area from LocationMsg/Location.msbt (the label is the map's name); a house or a shop from the
+# first line of its signboard (EventFlowMsg/SignboardWood.msbt, HINT_PLACES); Gold Skulltulas and Business Scrubs
+# from ActorMsg/Enemy.msbt. Only the joining words are ours (HINT_KINDS, "They say ... can be found").
+HINT_NAMES = 'ActorMsg/PouchContent.msbt'
+HINT_AREAS = 'LocationMsg/Location.msbt'
+HINT_SIGNS = 'EventFlowMsg/SignboardWood.msbt'
+HINT_ENEMIES = 'ActorMsg/Enemy.msbt'
+# region -> (signboard label, the words in front of it): the place inside the area, named by its sign (the first line,
+# before any comma). Regions without a sign of their own are named by their area alone.
+HINT_PLACES = {
+    'KF Links House': ('KokiriForest_005', 'in'),                # Link's House
+    'KF Midos House': ('KokiriForest_010', 'in the'),            # Mansion of the Great Mido
+    'KF Sarias House': ('KokiriForest_013', 'in'),               # Saria's House
+    'KF House of Twins': ('KokiriForest_012', 'in the'),         # House of the Twins
+    'KF Know It All House': ('KokiriForest_011', 'in the'),      # House of the Know-It-All Brothers
+    'KF Shop': ('KokiriForest_004', 'in the'),                   # Kokiri Shop
+    'KF Training Area': ('KokiriForest_001', 'at the'),          # Training Grounds
+    'Deku Theater': ('LostWood_001', 'at the'),                  # Forest Stage
+}
+# regions under the ground (a hole leads down to them; the game's text has no word for them): "underground"
+HINT_UNDERGROUND = {'KF Storms Grotto', 'LW Scrubs Grotto', 'SFM Wolfos Grotto', 'SFM Upper Grotto'}
+# area (map) -> the article English puts in front of its name ("in the Lost Woods")
+HINT_AREA_ARTICLE = {'LostWood': 'the', 'SacredForestMeadow': 'the'}
+# kind of check -> how the item is found there; {gs} and {scrub} are the game's names for them
+HINT_KINDS = {
+    'chest': 'in a chest',
+    'freestanding': 'lying on the ground',
+    'pot': 'in a pot',
+    'rock': 'under a rock',
+    'bush': 'under a bush',
+    'boulder': 'inside a boulder',
+    'skulltula': 'on a {gs}',
+    'scrub': 'sold by a {scrub}',
+    'shop': 'for sale',
+    'gift': 'as a gift',
+    'song': 'as a gift',
+}
+HINT_GS, HINT_SCRUB = 'Enemy_Skulltula_Gold_Name', 'Enemy_Scrub_Business_Name'
+HINT_GET = re.compile(r'^You [^!]*?\b(the|a|an) ')                   # the article of a get message
+
+
+def msg_plain(text, encoding=0):
+    """a message's text without its tags and its end; a new page (tag 0,4) is a line break"""
+    return ''.join(x if isinstance(x, str) else '\n' if tuple(x[:2]) == (0, 4) else ''
+                   for x in msbt.tags(text, encoding)).rstrip('\x00')
+
+
+def hint_texts(lang_arc):
+    """{msbt file: {label: plain text}} of the files hints read, from a language archive (its data)"""
+    files = sarc.Sarc.read(lang_arc).files
+    out = {}
+    for f in (HINT_NAMES, HINT_AREAS, HINT_SIGNS, HINT_ENEMIES):
+        m = msbt.Msbt.read(files[f])
+        out[f] = {k: msg_plain(v, m.encoding) for k, v in m.texts.items()}
+    return out
+
+
+def hint_item_name(item, texts, known_as):
+    """(article, name) of an item as the game's English text names it: <name>_Name in PouchContent.msbt, for the
+    item itself or the name the inventory knows it by (ActorInfo ActorName: Weapon_Range_SlingShot for
+    Item_Range_SlingShot); the article from its get message ('' when it has none)"""
+    names = texts[HINT_NAMES]
+    for label in (item, known_as(item)):
+        if label and label + '_Name' in names:
+            name = names[label + '_Name'].strip()
+            m = HINT_GET.match(names.get(label + '_GetMessage', ''))
+            return (m.group(1) if m else ''), name
+    raise SystemExit('--hint: %s has no name in the game\'s text (%s)' % (item, HINT_NAMES))
+
+
+def hint_sign(texts, label):
+    """a place's name: its signboard's first line, before any comma"""
+    t = texts[HINT_SIGNS].get(label)
+    if not t:
+        raise SystemExit('--hint: no signboard text %s in %s' % (label, HINT_SIGNS))
+    return t.replace('　', ' ').split('\n')[0].split(',')[0].strip()
+
+
+def check_kind(world, cid):
+    """the kind of a check: its map placements' (one kind), or an event's (gift, song)"""
+    r, name, loc = find_check(world, cid)
+    kinds = {world.checks[sc][sp]['kind'] for sc, sp, _ in world.placements_of(r, loc)}
+    if len(kinds) > 1:
+        raise SystemExit('%s: placements of more than one kind (%s)' % (cid, ', '.join(sorted(kinds))))
+    if kinds:
+        return kinds.pop()
+    if loc.get('song'):
+        return 'song'
+    if loc.get('gift') or loc.get('cutscene'):
+        return 'gift'
+    raise SystemExit('%s: neither a map placement nor an event' % cid)
+
+
+def hint_where(world, cid, texts):
+    """how and where the item of a check is found, as hint text: 'in a pot in the {House of the Know-It-All
+    Brothers} in {Kokiri Forest}'"""
+    r, name, loc = find_check(world, cid)
+    kind = check_kind(world, cid)
+    if kind not in HINT_KINDS:
+        raise SystemExit('--hint: %s is a %s: no hint wording for it' % (cid, kind))
+    enemies = texts[HINT_ENEMIES]
+    how = HINT_KINDS[kind].format(gs=enemies[HINT_GS].strip(), scrub=' '.join(enemies[HINT_SCRUB].split()))
+    area = texts[HINT_AREAS].get(r.scene)
+    if not area:
+        raise SystemExit('--hint: %s: its area %s has no name in %s' % (cid, r.scene, HINT_AREAS))
+    where = how + (' underground' if r.name in HINT_UNDERGROUND else '')
+    if r.name in HINT_PLACES:
+        label, prep = HINT_PLACES[r.name]
+        where += ' %s {%s}' % (prep, hint_sign(texts, label))
+    article = HINT_AREA_ARTICLE.get(r.scene)
+    return where + ' in %s{%s}' % (article + ' ' if article else '', area)
+
+
+def hint_specs(world, specs, assignments, texts, known_as):
+    """--hint STONE=ITEM or STONE=@CHECK_ID -> ([STONE=TEXT, as --gossip takes it], lines saying what each
+    stone hints). assignments: the build's (check id, item as given: an item, or a family First>Second...). ITEM
+    is an item as given in an assignment, or the first level of a family: it must be placed on exactly one check
+    (else name the check: @CHECK_ID). A family is named by its first level, "or an upgrade of it"."""
+    placed = {}                                        # item or first level -> [(check id, family or None)]
+    by_check = {}
+    for cid, given in assignments:
+        levels = given.split('>')
+        item = FAMILY_ALIASES.get(levels[0], levels[0]) if len(levels) == 1 else levels[0]
+        fam = tuple(levels) if len(levels) > 1 else None
+        placed.setdefault(item, []).append((cid, fam))
+        if len(levels) == 1 and levels[0] != item:
+            placed.setdefault(levels[0], []).append((cid, fam))
+        by_check[cid] = (item, fam)
+    out, said = [], []
+    for spec in specs:
+        stone, sep, what = spec.partition('=')
+        if not sep or not stone or not what:
+            raise SystemExit('--hint %r: write STONE=ITEM or STONE=@CHECK_ID' % spec)
+        if what.startswith('@'):
+            cid = what[1:]
+            find_check(world, cid)
+            if cid not in by_check:
+                raise SystemExit('--hint %s: %s is given nothing in this build' % (stone, cid))
+            item, fam = by_check[cid]
+        else:
+            if '>' in what:
+                raise SystemExit('--hint %s: name a family by its first level (%s)' % (stone, what.split('>')[0]))
+            spots = placed.get(what, [])
+            if len(spots) != 1:
+                raise SystemExit('--hint %s: %s is on %s in this build: name the check instead (%s=@CHECK_ID)'
+                                 % (stone, what, '%d checks (%s)' % (len(spots), ', '.join(c for c, _ in spots))
+                                    if spots else 'no check', stone))
+            cid, fam = spots[0]
+            item = by_check[cid][0]                    # a small seed bag or quiver alone: its weapon
+        article, name = hint_item_name(item, texts, known_as)
+        thing = '%s{%s}' % (article + ' ' if article else '', name)
+        if fam:
+            thing += ' or an upgrade of it'
+        text = 'They say %s can be found %s.' % (thing, hint_where(world, cid, texts))
+        out.append('%s=%s' % (stone, text))
+        said.append('hint               %s -> %s (%s): %s' % (stone, cid, '>'.join(fam) if fam else item,
+                                                              text.replace('{', '').replace('}', '')))
+    return out, said
+
+
+def patch_file(data, changes, checking=None, three=None, wrap=None):
     """change what the actors with these hashes give: chests and pots through their Drop__DropActor (chests'
     special opening events handled by CHEST_EVENTS), freestanding items by their actor type (Gyaml);
     checking: {hash: (item to look for, item given when Link has it)}: that small chest becomes the game's
@@ -1864,11 +2227,7 @@ def patch_file(data, changes, checking=None, three=None, wrap=None, tables=None)
     instead (checking_chest), with the same settings;
     wrap: {hash: f}: that chest gets an opening event of our own, GetEventName = f(the chest's actor, the event
     its placement names or None): for chests that hold an ocarina (tbox_sync_event);
-    tables: {hash: a drop table of ours}: that rock, bush, pot or Gold Skulltula names the table
-    (Drop__DropTable) and no actor (tools/drop_tables.py); its old item is what it named before (an actor, a
-    table, or None);
     returns (new data, {hash: old item}, {hash: new Dynamic as intended})"""
-    tables = tables or {}
     checking = checking or {}
     three = three or {}
     wrap = wrap or {}
@@ -1879,15 +2238,6 @@ def patch_file(data, changes, checking=None, three=None, wrap=None, tables=None)
         if h in changes and changes[h][3] in REPLACED:
             found[h] = a['Gyaml']
             a['Gyaml'] = changes[h][1]
-            continue
-        if h in tables:
-            dyn = a.get('Dynamic')
-            dyn = type(dyn)(dyn) if dyn is not None else {}
-            found[h] = dyn.get('Drop__DropActor', dyn.get('Drop__DropTable'))
-            dyn.pop('Drop__DropActor', None)
-            dyn['Drop__DropTable'] = tables[h]
-            a['Dynamic'] = dyn
-            intended[h] = dict(dyn)
             continue
         if h in changes:
             dyn = a.get('Dynamic')
@@ -1933,7 +2283,7 @@ def patch_file(data, changes, checking=None, three=None, wrap=None, tables=None)
                 dyn[TBOX_EVENT_KEY] = wrap[h](a['Gyaml'], dyn.get(TBOX_EVENT_KEY))
             a['Dynamic'] = dyn
             intended[h] = dict(dyn)
-    missing = (set(changes) | set(tables)) - set(found)
+    missing = set(changes) - set(found)
     if missing:
         raise SystemExit('placements not found: %s' % ', '.join(sorted(missing)))
     return byml.dumps(doc), found, intended
@@ -1986,16 +2336,31 @@ GIFT_PAIR_QUERY = 'EventQueryIsExistInPouch'
 
 def gift_pair_kind(world, cid):
     """True for a check a progressive pair can be placed on as a gift: an event (no map placement) with "gift"
-    data (the flow and the event that hand the item over). Gifts without that data (cutscene gifts: the builder
-    has no flow step to put the question in front of) and songs stop the build"""
+    data (the flow and the event that hand the item over). Songs and cutscene gifts are not (song_pair_kind,
+    cutscene_pair_kind); an event with none of that data (the Skull Kids, the Deku Theater: no step of the
+    giver's own flow to put the inventory question in front of) stops the build"""
     r, name, loc = find_check(world, cid)
-    if world.spots_of(r, loc):
+    if world.spots_of(r, loc) or loc.get('song') or loc.get('cutscene'):
         return False
-    if loc.get('song') or not loc.get('gift'):
+    if not loc.get('gift'):
         raise SystemExit('%s: a progressive pair (First>Second) cannot be put on this gift: the builder has no '
                          'flow data for it ("gift": flow, event, item), so there is no step of the giver\'s own '
                          'flow to put the inventory question in front of' % cid)
     return True
+
+
+def song_pair_kind(world, cid):
+    """True for a song check (an event with "song" data): a family there is given by the song cutscene's own get,
+    with the inventory questions in front of it (song_skip)"""
+    r, name, loc = find_check(world, cid)
+    return not world.spots_of(r, loc) and bool(loc.get('song'))
+
+
+def cutscene_pair_kind(world, cid):
+    """True for a cutscene gift (an event with "cutscene" data): a family there is asked about in front of the
+    cutscene's get window and its add step (cutscene_family_edit)"""
+    r, name, loc = find_check(world, cid)
+    return not world.spots_of(r, loc) and bool(loc.get('cutscene'))
 
 
 def gift_pair_template(fc):
@@ -2018,6 +2383,37 @@ def gift_pair_template(fc):
             return fc.actors[e.actor], evfl.Params(e.params), 0, 1
     raise SystemExit('%s: no %s.%s switch between two calls of %s found (game files differ from what this was '
                      'made for)' % (GIFT_PAIR_FLOW, GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY, GIFT_FLOW))
+
+
+def level_switch(fc, levels, gives, template, asked):
+    """the game's inventory questions (template: gift_pair_template) in front of one event per level of a family,
+    gives[k] giving levels[k], asked as gift_pair_edit asks them: "has Second?" yes -> Third's event, no -> "has
+    First?" yes -> Second's, no -> First's. asked(item): the name the inventory knows it by. Returns (the question
+    asked first, or gives[0] for one level; the questions, the lowest level's first)"""
+    actor, params, has, has_not = template
+    top, questions = gives[0], []
+    for k in range(1, len(levels)):
+        ask = evfl.Params(params)
+        ask['Actor'] = asked(levels[k - 1])
+        top = fc.add_switch(flow_copy_actor(fc, actor), GIFT_PAIR_QUERY, [(has, gives[k]), (has_not, top)], ask)
+        questions.append(top)
+    return top, questions
+
+
+def level_reached(fc, start, owned, template):
+    """the event the game's inventory questions from `start` lead to while Link owns `owned` (the names the
+    inventory knows the items by): follows every PouchSystemActor.EventQueryIsExistInPouch switch it meets"""
+    _, _, has, has_not = template
+    i, seen = start, set()
+    while i is not None and fc.events[i].type == 'switch' \
+            and fc.actors[fc.events[i].actor].name == GIFT_PAIR_ACTOR \
+            and fc.actors[fc.events[i].actor].queries[fc.events[i].query] == GIFT_PAIR_QUERY:
+        if i in seen:
+            raise SystemExit('the questions from event %s go round in a circle' % fc.events[start].name)
+        seen.add(i)
+        e = fc.events[i]
+        i = dict(e.cases)[has if e.params.get('Actor') in owned else has_not]
+    return i
 
 
 def gift_pair_edit(fc, events, template, direct=(), asked=None):
@@ -3037,26 +3433,35 @@ def main(argv):
     ap.add_argument('--gossip', action='append', default=[], metavar='STONE=TEXT',
                     help='what a gossip stone says (STONE: its check ID or its name in the map; in TEXT \\n is a '
                          'new line, \\p a new page, {...} highlighted); see gossip_parse')
+    ap.add_argument('--hint', action='append', default=[], metavar='STONE=ITEM',
+                    help='a gossip stone says where an item of this build is (ITEM: an item as assigned, or a '
+                         'family\'s first level; or @CHECK_ID for the item of that check); see hint_specs')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
     if not a.assign and not a.fix and not a.gossip:
         ap.error('nothing to do: give CHECK_ID=Item assignments, --fix and/or --gossip')
+    if a.hint and not a.assign:
+        ap.error('--hint: nothing is placed to hint at (give CHECK_ID=Item assignments)')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
+    given = list(assignments)                          # as given, for --hint
     never_given(assignments)
     skip_level_guard(assignments)                      # a later level of an upgrade family, alone
     # CHECK_ID=First>Second: a progressive pair (PROGRESSIVE_PAIRS). In a small chest: planned as First, the
     # chest made a checking chest further down. On a freestanding item: planned as First's turning item
-    # (tools/turn_items.py). On a rock, a bush, a pot or a Gold Skulltula: planned as the last level's drop
-    # (tools/skulltula_items.py), given once (tools/once_items.py). On a gift with flow data: planned as First,
-    # the question added further down (gift_pair_kind). On a scrub: planned as First, the question added in
+    # (tools/turn_items.py). On a rock, a bush, a pot or a Gold Skulltula: planned as First's one-time turning
+    # item, its drop (tools/once_items.py). On a gift with flow data: planned as First,
+    # the question added further down (gift_pair_kind). On a song: planned as First, the questions in front of
+    # the song cutscene's get (song_pair_kind). On a cutscene gift: planned as First, the questions in front of
+    # its window and its add step (cutscene_pair_kind). On a scrub: planned as First, the question added in
     # the scrub's branch of the scrub flow (scrub_pair_kind). Nowhere else yet (pair_kind).
     # (first, second) below is (first, second, third) for a three-level family on anything but a chest
     steps = {}                                         # check id -> (first, second): chests
     turning = {}                                       # check id -> (first, second): turning items (TURN_KINDS)
-    once_turning = {}                                  # those of `turning` on a rock, a bush or a pot: given once
+    once_turning = {}                                  # those of `turning` dropped: rocks, bushes, pots, skulltulas
     gift_pairs = {}                                    # check id -> (first, second): gifts (gift_pair_edit)
+    song_pairs = {}                                    # check id -> (first, second): song checks (song_skip)
+    cutscene_pairs = {}                                # check id -> (first, second): cutscene gifts
     scrub_pairs = {}                                   # check id -> (first, second): scrubs (scrub_flow_edit)
-    gs_families = {}                                   # check id -> the family: Gold Skulltulas, rocks, bushes, pots
     world = World()
     # CHECK_ID=First>Second>Third: a three-level family (THREE_LEVEL_FAMILIES). In a small chest: planned as
     # First, the chest made the family's own chest further down (tools/three_chest.py). Anywhere else a pair can
@@ -3068,7 +3473,13 @@ def main(argv):
             if pair not in PROGRESSIVE_PAIRS and pair not in THREE_LEVEL_FAMILIES:
                 raise SystemExit('%s: %s is not a progressive pair the builder knows (%s)' % (cid, item, ', '.join(
                     '>'.join(x) for x in sorted(PROGRESSIVE_PAIRS))))
-            if gift_pair_kind(world, cid):
+            if song_pair_kind(world, cid):
+                song_pairs[cid] = pair             # planned as First; the questions go in the song cutscene
+                assignments[k] = (cid, pair[0])
+            elif cutscene_pair_kind(world, cid):
+                cutscene_pairs[cid] = pair         # planned as First; the questions go in the cutscene
+                assignments[k] = (cid, pair[0])
+            elif gift_pair_kind(world, cid):
                 gift_pairs[cid] = pair             # planned as First; the question is added further down
                 assignments[k] = (cid, pair[0])
             elif scrub_pair_kind(world, cid):
@@ -3077,8 +3488,7 @@ def main(argv):
             elif skulltula_pair_kind(world, cid):
                 # the one-time turning item a rock drops (tools/once_items.py): the skulltula hands its flag to
                 # what it drops as it does to its token, and the item marks it as the token does. It comes out
-                # as the first level and turns into the next one on the ground once Link owns it. (The drop
-                # code's rows, gs_families, never put a lower level in place in game, 2026-11-22)
+                # as the first level and turns into the next one on the ground once Link owns it
                 turning[cid] = pair
                 once_turning[cid] = pair
                 assignments[k] = (cid, once_items.once_name(pair[0]))
@@ -3095,7 +3505,7 @@ def main(argv):
                 turning[cid] = pair
                 assignments[k] = (cid, turn_items.turn_name(pair[0]))
     placed = collections.Counter(list(triples.values()) + [f for forms in (turning, gift_pairs, scrub_pairs,
-                                                                         gs_families)
+                                                                         song_pairs, cutscene_pairs)
                                                            for f in forms.values() if len(f) == 3])
     for family, n in sorted(placed.items()):
         if n != len(family):
@@ -3103,8 +3513,7 @@ def main(argv):
                 'the last level cannot be reached' if n < len(family) else 'the last level is given more than once')))
     # (and two drops of one family on rocks, bushes or pots: the second could be picked up in the frame the
     # first's scene ends, before it has removed itself)
-    for cid, cid2, d in turn_spacing(world, dict(turning, **{c: f for c, f in gs_families.items()
-                                                             if not skulltula_pair_kind(world, c)})):
+    for cid, cid2, d in turn_spacing(world, turning):
         print('%-18s and %s: the same progressive family, %.1f m apart' % (cid, cid2, d))
     # a small seed bag or quiver placed alone means its weapon: the check shows and gives the slingshot / bow,
     # and the small bag comes with it (the user's rule: never the bag first)
@@ -3119,6 +3528,14 @@ def main(argv):
         shutil.rmtree(mod_romfs)
         print('earlier build removed:', mod_romfs)
     out = Output(a.romfs, mod_romfs, dicts)
+    if a.hint:                                         # hints become gossip texts (hint_specs)
+        hint_known = {r['__RowId']: r.get('ActorName') for r in byml.loads(
+            out.read(ground_items.table_path('ActorInfo'))[1]).root}
+        hinted, hint_said = hint_specs(world, a.hint, given, hint_texts(out.read(GOSSIP_LANG)[1]),
+                                       lambda item: hint_known.get(item))
+        a.gossip = a.gossip + hinted
+        for line in hint_said:
+            print(line)
     gossip = gossip_plan(out, world, a.gossip) if a.gossip else None    # refused here, before anything is written
 
     shop_fix = 'kokiri_shop_full_stock' in a.fix
@@ -3240,7 +3657,7 @@ def main(argv):
 
     def once_drop(item):
         """what a rock, a bush or a pot drops once: a version of the item that marks it when picked up"""
-        if item.startswith((once_items.PREFIX, skulltula_items.PREFIX)) or item == ground_items.TOKEN:
+        if item.startswith(once_items.PREFIX) or item == ground_items.TOKEN:
             return item                                # a family's level (built further down); a real token
         kind = ground_items.kind_of(plain, item)
         if kind in ('item', 'equipment'):
@@ -3265,7 +3682,7 @@ def main(argv):
     def gs_drop(item):
         if item == ground_items.TOKEN:
             return item                                # its own token
-        if item.startswith((skulltula_items.PREFIX, once_items.PREFIX)):
+        if item.startswith(once_items.PREFIX):
             return item                                # a level of a family (a progressive form): built further down
         if ground_items.kind_of(plain, item) in ('ground', 'item', 'equipment'):
             return grounds.setdefault((item, 'token'), ground_items.ground_name(item, 'token'))
@@ -3345,7 +3762,7 @@ def main(argv):
                   % (cid, alone, kind, ', '.join(SCRUB_COMPANIONS[alone]),
                      ': place its family there instead (%s=%s)' % (cid, '>'.join(next(
                          f for f in FAMILIES.values() if f[0] == alone)))
-                     if kind in TURN_KINDS or kind in GS_KINDS or kind in DROP_KINDS else ''))
+                     if kind in TURN_KINDS or kind in GS_KINDS else ''))
     # shelves: which shelf (ShopItemIndex; the Heart has none: 0) and age each placement is, for the lists
     shelf_of = {p['hash']: (p['ages'], int(p.get('params', {}).get('ShopItemIndex', 0)))
                 for spots in world.checks.values() for sp in spots.values() if sp['kind'] == 'shop'
@@ -3429,19 +3846,11 @@ def main(argv):
         checking.update({h: pair_check(triples[cid][:2], in_chest) for h, (cid, _, _, kind) in changes.items()
                          if cid in triples})
         wrap = {h: tbox_event for h, (cid, _, _, kind) in changes.items() if kind == 'chest' and holds_ocarina(cid)}
-        # families on rocks, bushes, pots and Gold Skulltulas: the placement names a drop table of ours
-        tables = {h: drop_tables.table_name(gs_families[cid], kind == 'skulltula')
-                  for h, (cid, _, _, kind) in changes.items() if cid in gs_families}
-        for h in tables:
-            if changes[h][3] == 'skulltula' and actor_of[h] != drop_tables.SKULLTULA:
-                raise SystemExit('%s: placement %s is a %s: only %s gets the drop tables of ours'
-                                 % (changes[h][0], h, actor_of[h], drop_tables.SKULLTULA))
-        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three, wrap, tables)
+        new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three, wrap)
         for h, (cid, item, expected_old, kind) in changes.items():
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
-            print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item if h not in tables else
-                                             'drop table %s (one item: %s)' % (tables[h], item)))
+            print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item))
             if cid in turning:
                 print('%-18s   a turning item%s: %s on the ground while Link has no %s, then %s'
                       % (cid, '' if kind == 'freestanding' else ' as the %s\'s drop' % kind, turning[cid][0],
@@ -3458,10 +3867,7 @@ def main(argv):
         for act in back:
             h = str(int(act['Hash']))
             want = dict(before[h])
-            if h in tables:
-                dyn = {k: v for k, v in (want.get('Dynamic') or {}).items() if k != 'Drop__DropActor'}
-                want['Dynamic'] = dict(dyn, Drop__DropTable=tables[h])
-            elif h in changes and changes[h][3] in REPLACED:
+            if h in changes and changes[h][3] in REPLACED:
                 want['Gyaml'] = changes[h][1]
             elif h in changes:
                 dyn = dict(want.get('Dynamic') or {}, Drop__DropActor=changes[h][1])
@@ -3531,12 +3937,18 @@ def main(argv):
             print('%-18s %s: entry point and event %s: %s' % ('ocarina chests', flow_path(TBOX_SYNC_FLOW), name, said))
         print('%-18s %d rows added to %s and %s' % ('ocarina chests', len(tbox_usuals), EVENT_SETTING, EVENT_INFO))
 
-    # songs: the cutscene only hands over the item
+    # songs: the cutscene only hands over the item (a family: the inventory questions in front of one get per
+    # level); read back against the original
     for path, (cid, item, song) in sorted(plan_songs(world, assignments).items()):
         src, old = out.read(path)
         ef = evfl.loads(old)
-        said = song_skip(ef.flowchart, cid, item, song, get_plan([item])[1].get(item))
-        out.write(path, src, old, flow_write_checked(ef))
+        levels = song_pairs.get(cid, (item,))
+        sync = get_plan(list(levels))[1]
+        template = gift_pair_template(evfl.loads(plain(GIFT_PAIR_FLOW)).flowchart)
+        said = song_skip(ef.flowchart, cid, item, song, sync, levels, template, flow_name)
+        new = flow_write_checked(ef)
+        song_skip_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, cid, levels, sync, template, flow_name)
+        out.write(path, src, old, new)
         for line in said:
             print(line, '(%s)' % path.split('/')[-1])
 
@@ -3612,9 +4024,21 @@ def main(argv):
         if item not in {r['__RowId'] for r in byml.loads(plain(ground_items.table_path('PouchActorInfo'))).root}:
             raise SystemExit('%s has no row in PouchActorInfo: not an item' % item)
         show = item == g['item'] or ground_items.kind_of(plain, item) == CUTSCENE_SHOWN_KIND
-        said, added = cutscene_gift_edit(ef.flowchart, cid, g, item, show, SCRUB_COMPANIONS.get(item, ()))
-        new = flow_write_checked(ef)
-        cutscene_gift_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, cid, g, item, show, added)
+        companions = SCRUB_COMPANIONS.get(item, ())
+        said, added = cutscene_gift_edit(ef.flowchart, cid, g, item, show, companions)
+        levels = cutscene_pairs.get(cid)
+        if levels:                                     # a family: the questions in front of the window and the add
+            template = gift_pair_template(evfl.loads(plain(GIFT_PAIR_FLOW)).flowchart)
+            said += cutscene_family_edit(ef.flowchart, cid, g, levels, template, flow_name, companions)
+            new = flow_write_checked(ef)
+            cutscene_family_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, cid, g, levels, template,
+                                  flow_name, show, companions)
+            if show:
+                said.append('%-18s   Link holds %s in the cutscene whichever level is given (one actor)'
+                            % (cid, item))
+        else:
+            new = flow_write_checked(ef)
+            cutscene_gift_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, cid, g, item, show, added)
         out.write(path, src, old, new)
         for line in said:
             print(line, '(%s)' % path.split('/')[-1])
@@ -3625,7 +4049,6 @@ def main(argv):
     guard = any(item in ('Item_Range_SlingShot', turn_items.turn_name('Item_Range_SlingShot'),
                          once_items.once_name('Item_Range_SlingShot'))
                 for _, item in assignments)
-    guard = guard or any(f[0] == 'Item_Range_SlingShot' for f in gs_families.values())
     if scrubs or guard:
         maps = {}
         for cid, item, rows in scrubs:
@@ -3856,73 +4279,6 @@ def main(argv):
                      '; while Link has no %s it gives what a chest gives with %s (%s) when it is picked up'
                      % (what['bundle']['bag'], bundle_for, ', '.join('%d %s' % (n, x) for x, n in gives))
                      if bundle_for else ''))
-    # families on Gold Skulltulas, rocks, bushes and pots (tools/skulltula_items.py): every level as a token
-    # version of its own; the game's drop code is told which level to drop (its two lists)
-    if gs_families:
-        families = sorted(set(gs_families.values()))
-        game_data = plain(skulltula_items.GAME_DATA)
-        tpl_pack_path = ground_items.pack_path(skulltula_items.TOKEN)
-        like_files = dict(sarc.Sarc.read(plain(tpl_pack_path)).files)
-        chains = []
-        for family in families:
-            for level, item in enumerate(family):
-                bundle_for = flow_name(item) if level == 0 and item in SCRUB_COMPANIONS else None
-                got, pack, new_inner, rows, loose = skulltula_items.build(
-                    family, level, plain, table_rows,
-                    lambda project: os.path.exists(os.path.join(a.romfs, 'Model', project + '.anim.bfres.zs')),
-                    bundle_for)
-                name = skulltula_items.drop_name(item)
-                assert got == name
-                path = ground_items.pack_path(name)
-                out.write_new(path, pack, like=tpl_pack_path)
-                out.add(path, pack, tpl_pack_path, plain(tpl_pack_path))
-                for inner, (data, like) in new_inner.items():
-                    out.add(inner, data, like, like_files[like])
-                for inner in sarc.Sarc.read(pack).files:  # every file of the pack has a size entry
-                    if out.table.get(inner) is None:
-                        raise SystemExit('%s: %s has no resource size entry' % (name, inner))
-                for t, row in rows.items():
-                    new_rows.setdefault(t, []).append(row)
-                for path, (data, like, old_h, new_h, _) in sorted(loose.items()):
-                    if lifted_before(path, data):
-                        continue
-                    out.write_new(path, data, like)
-                    out.add(path, data, like, plain(like))
-                    print('%-6s %s: lies %.3f %s on the ground (pose height %.3f -> %.3f, %s)'
-                          % ('gs', item, abs(new_h - old_h), 'higher' if new_h > old_h else 'lower', old_h, new_h,
-                             path))
-                what = skulltula_items.describe(sarc.Sarc.read(pack).files[shop_items.ai_path(
-                    skulltula_items.ai_name(item))])
-                gives = []
-                if bundle_for:
-                    gives = [(turn_items._actor_of(x), n) for x, n in what['bundle']['gives']]
-                    if [x for x, _ in gives][:len(SCRUB_COMPANIONS[item])] != SCRUB_COMPANIONS[item] \
-                            or what['bundle']['bag'] != SCRUB_COMPANIONS[item][0]:
-                        raise SystemExit('%s: the game\'s chests give %r with %s, not %s first as expected'
-                                         % (name, gives, bundle_for, SCRUB_COMPANIONS[item]))
-                print('gs     version %-22s for %s (%d bytes): a family drop (marks what dropped it when '
-                      'picked up); its AI %s (%d nodes more than the token\'s)%s: deletes itself once Link owns %s%s'
-                      % (name, item, len(pack), skulltula_items.ai_name(item), what['new'],
-                         ': deletes itself while Link does not own %s' % what['previous'] if what['previous'] else '',
-                         ' or '.join(what['taken']),
-                         ': while Link has no %s it gives what a chest gives with %s (%s) when it is picked up'
-                         % (what['bundle']['bag'], bundle_for, ', '.join('%d %s' % (n, x) for x, n in gives))
-                         if bundle_for else ''))
-            ch = skulltula_items.chain(family, flow_name)
-            for _, flag in ch[:-1]:
-                skulltula_items.got_flag(game_data, flag[len(skulltula_items.GOT):])
-            chains.append(ch)
-        src, old = out.read(skulltula_items.DROP_GLOBAL)
-        new, added = skulltula_items.drop_rows(old, chains)
-        out.write(skulltula_items.DROP_GLOBAL, src, old, new)
-        for actor, (flag, lower) in added.items():
-            print('%-18s %s: %s is dropped once %s is true, until then %s in its place'
-                  % ('drop code', skulltula_items.DROP_GLOBAL.split('/')[-1], actor, flag, lower[0][1]))
-        for cid, family in sorted(gs_families.items()):
-            kind = pair_kind(world, cid) if not skulltula_pair_kind(world, cid) else 'Gold Skulltula'
-            print('%-18s a %s: drops the lowest level of %s Link never got (%s), which marks the %s when picked '
-                  'up' % (cid, kind, '>'.join(family), ' / '.join(x for x, _ in next(
-                      c for c, f in zip(chains, families) if f == family)), kind))
     # one-time drops (tools/once_items.py): the versions with the mark, then the rocks, bushes and pots
     once_src = once_items.sources(plain) if once_spots else None
     once_shared = {}                                   # new files that are the same in every pack of these
@@ -3984,17 +4340,6 @@ def main(argv):
     # the rocks, bushes and pots themselves: an AI of our own name for each actor that drops for us. It only
     # hands its placement's number to its drop: it does not name another level's version (Drop__DropActor is
     # an instance parameter, and writing one stops the game: tools/once_items.py, seen 2026-11-22)
-    # the drop tables of ours (tools/drop_tables.py): {table name: the actor it drops}, for the droppers and
-    # for the Gold Skulltula
-    # and the lower levels each table lists with chance 0, so that the area loads them with it
-    drop_kind_tables, gs_tables, table_lower = {}, {}, {}
-    for cid, family in gs_families.items():
-        gs = skulltula_pair_kind(world, cid)
-        (gs_tables if gs else drop_kind_tables)[drop_tables.table_name(family, gs)] = \
-            skulltula_items.drop_name(family[-1])
-        table_lower[drop_tables.table_name(family, gs)] = [skulltula_items.drop_name(x) for x in family[-2::-1]]
-    rock_files = sarc.Sarc.read(plain(ground_items.pack_path(drop_tables.ROCK))).files if drop_kind_tables else None
-    drop_like = {}                                     # game files our drop tables are made from: their data
     once_actors = {}                                   # actor -> the game's AI it runs
     for h, (cid, item, actor) in sorted(once_spots.items()):
         if actor not in once_actors:
@@ -4004,14 +4349,6 @@ def main(argv):
         ap = ground_items.ap_path(actor)
         own_files = sarc.Sarc.read(plain(ground_items.pack_path(actor))).files
         _, new, changed = once_items.dropper_files(own_files, actor, once_src)
-        if drop_kind_tables:
-            # (an actor whose drop part has no table of one named actor to copy: the rock's)
-            data, more = drop_tables.build(own_files, actor, changed[2], drop_kind_tables,
-                                           (rock_files, drop_tables.part_of(rock_files, drop_tables.ROCK)),
-                                           table_lower)
-            changed = (changed[0], changed[1], data)
-            new = dict(new, **{p: (d, like) for p, (d, like, _) in more.items()})
-            drop_like.update({like: x for _, like, x in more.values()})
         held = [x for x in once_items.holders(a.romfs, actor)
                 if ap in sarc.Sarc.read(plain(ground_items.pack_path(x))).files]
         if actor not in held:
@@ -4027,12 +4364,7 @@ def main(argv):
                     raise SystemExit('%s: %s differs from the one made for another actor' % (actor, inner))
                 continue
             once_shared[inner] = data
-            out.add(inner, data, like, drop_like.get(like, own_files.get(like)))
-        if drop_kind_tables:
-            print('once   %-22s drop part %s: the game\'s tables and %s'
-                  % (actor, drop_tables.own_part_path(drop_tables.part_of(own_files, actor)).split('/')[-1],
-                     ', '.join('%s (%s; loaded with it: %s)' % (n, x, ', '.join(table_lower[n]))
-                               for n, x in sorted(drop_kind_tables.items()))))
+            out.add(inner, data, like, own_files[like])
         what = once_items.dropper_of(new[shop_items.ai_path(once_items.dropper_ai_name(root))][0])
         written = [k for _, k in once_items.actor_writes(new[shop_items.ai_path(once_items.dropper_ai_name(root))][0])
                    if k in once_items.instance_keys(own_files)]
@@ -4044,27 +4376,6 @@ def main(argv):
               % (actor, what['name'], what['new'], root, what['key'],
                  ''.join('; Link owns %s: %s instead of %s' % (i, to, frm) for frm, i, to in what['steps']),
                  len(held), '' if len(held) == 1 else 's', ', '.join(held)))
-    # Gold Skulltulas with a family: the drop part of our own with the tables, in every pack that holds the
-    # skulltula's file (tools/drop_tables.py)
-    if gs_tables:
-        gs_actor = drop_tables.SKULLTULA
-        ap = ground_items.ap_path(gs_actor)
-        own_files = sarc.Sarc.read(plain(ground_items.pack_path(gs_actor))).files
-        data, more = drop_tables.build(own_files, gs_actor, own_files[ap], gs_tables, loaded=table_lower)
-        new = {p: (d, like) for p, (d, like, _) in more.items()}
-        changed = (ap, own_files[ap], data)
-        held = [x for x in once_items.holders(a.romfs, gs_actor)
-                if ap in sarc.Sarc.read(plain(ground_items.pack_path(x))).files]
-        for holder in held:
-            path = ground_items.pack_path(holder)
-            src, old = out.read(path)
-            out.write(path, src, old, once_items.patch_pack(old, new, changed))
-        out.size(changed[0], changed[1], changed[2])
-        for inner, (d, like) in sorted(new.items()):
-            out.add(inner, d, like, own_files[like])
-        print('gs     %-22s drop part %s: the game\'s table and %s; in %d packs: %s'
-              % (gs_actor, drop_tables.own_part_path(drop_tables.part_of(own_files, gs_actor)).split('/')[-1],
-                 ', '.join('%s (%s)' % x for x in sorted(gs_tables.items())), len(held), ', '.join(held)))
     # three-level chests: one actor per family placed, and its _NoBake twin where a placement is one
     # (tools/three_chest.py); the twin's pack holds the same new files
     three_shared = {}

@@ -63,16 +63,6 @@ BGYML = {
         '/ActorHoldSettings/*/ModelBindSettings[]': 104, '/ActorHoldSettings/*/ModelBindSettings[]{}': 0,
         '/ActorHoldSettings/*/ModelBindSettings[]/RotOffset{}': 0,
         '/ActorHoldSettings/*/ModelBindSettings[]/TransOffset{}': 0}),
-    # an actor's drop part: 8 per drop table listed (exact for the game's 65 files)
-    'game__component__DropParam': (5136, {'{}': 0, '/DropTableResourceList[]': 8, '/DropOffsetPos{}': 0}),
-    # a drop table: 8 per sub-table listed, its members cost nothing (exact for the game's 102 files)
-    'game__drop__DropTable': (5112, {'{}': 0, '/SubTableList[]': 8}),
-    # a drop sub-table: 136 per item, 88 per second candidate, 4 per depleted resource an item names, its
-    # members cost nothing (exact for the game's files but one, a test table of the game's with 4 more)
-    'game__drop__DropSubTable': (5336, {'{}': 0, '/Items[]': 136, '/Items[]{}': 0,
-                                        '/Items[]/MostDepletedResource[]': 4, '/Items_Max_FirstCandidate{}': 0,
-                                        '/Items_Max_SecondCandidate[]': 88, '/Items_Max_SecondCandidate[]{}': 0,
-                                        '/Items_Max_ThirdCandidate{}': 0}),
     # the lights on actors' bones, one list per group: 160 per actor (exact for the game's 17 files)
     'game__gfx__LocationalLightRigGroupSetting': (5096, {'{}': 0, '/LightRigSettingList[]': 160,
                                                          '/LightRigSettingList[]{}': 0}),
@@ -90,21 +80,6 @@ FREE_KEYS = {
 STRUCTS = {
     'game__component__AIScheduleParam',      # 502 files
     'game__component__ShopParam',            # 11 files
-}
-
-# .bgyml types with no rule above and one game file only, so that nothing can be fitted: what each element MORE
-# than the game's file has is taken to cost, per container. Not measured: an upper bound. The dearest list
-# element fitted above costs 224 (a slot of held actors, a struct of eight members and a list); these rows are
-# structs of two or three members (two names; a number, a name and a list of one {number, name}). An entry that
-# is too large only reserves memory that is not used.
-#   the drop code's settings (tools/skulltula_items.py: a row in each list per level of a family on a Gold
-#   Skulltula)
-GROWTH = {
-    'game__drop__DropGlobalParam': {
-        '/DropLotteryMasterData/DropUnlockCondition[]': 256, '/DropLotteryMasterData/DropUnlockCondition[]{}': 0,
-        '/DropLotteryMasterData/ReplaceSetting[]': 256, '/DropLotteryMasterData/ReplaceSetting[]{}': 0,
-        '/DropLotteryMasterData/ReplaceSetting[]/ReplaceActor[]': 256,
-        '/DropLotteryMasterData/ReplaceSetting[]/ReplaceActor[]{}': 0},
 }
 
 # other kinds: the constant
@@ -212,9 +187,6 @@ def entry(path, data, ref_entry=None, ref_data=None):
         was, now = containers(ref_data), containers(data)
         structs = bgyml_type(path) in STRUCTS
         more = sorted(w for w, n in now.items() if n > was.get(w, 0) and not (structs and w.endswith('{}')))
-        growth = GROWTH.get(bgyml_type(path), {})
-        if more and all(w in growth for w in more):
-            return keep + sum(growth[w] * (now[w] - was.get(w, 0)) for w in more)
         if more:
             raise Unknown('%s: more elements than the game file it comes from (%s) and no size rule for its '
                           'type: add one to tools/sizes.py (BGYML)' % (path, ', '.join(more)))

@@ -95,8 +95,6 @@ PLAIN_AI = 'NX2_Once'                             # the AI of a plain item with 
 DROP_AI_PREFIX = 'NX2_Drop_'                      # the AI of a rock, a bush or a pot that drops once
 KEY = ground_items.TOKEN_KEY                      # GoldTokenGmdHash
 DROP_KEY = 'Drop__DropActor'
-TABLE_KEY = 'Drop__DropTable'                     # a drop table its placement names (families: drop_tables.py)
-TABLE_OURS = 'NX2_'                               # what the name of every drop table of ours starts with
 AI_PACK = turn_items.AI_PACK
 TOKEN_AI = ground_items.TOKEN_FILES[0]            # the token's AI: its "picked up" branch
 TOKEN_TABLE = ground_items.TOKEN_FILES[1]         # its blackboard table: the 64-bit number
@@ -666,9 +664,7 @@ def dropper_ai(base, src, name, steps=()):
                    hand my placement's number to what I drop         (the Gold Skulltula's three nodes)
                    for each step (from, item, to):
                      the drop named starts with `from`? -> Link owns `item`? -> name `to` as my drop
-          no  -> the drop table my placement names starts with "NX2_"?   (a family: tools/drop_tables.py)
-                   yes -> hand my placement's number to what I drop  (the same three nodes, a copy)
-                   no  -> nothing
+          no  -> nothing
 
     steps: [(the version dropped for a level, that level's item, the version for the next level)].
     Read back: the game's nodes are as they were but for the one new link."""
@@ -697,9 +693,8 @@ def dropper_ai(base, src, name, steps=()):
     def idle(what):
         return add.new(t['idle'], 'nothing, ' + what)
 
-    def starts(token, what, named=None):
-        """a yes/no selector on "the drop named (or the table named: `named`) starts with `token`\""""
-        named = named if named is not None else drop_named
+    def starts(token, what):
+        """a yes/no selector on "the drop named starts with `token`\""""
         q = add.new(t['starts'], 'starts ' + what)
         n = add.node(q)
         n.inputs['string'][0].node, n.inputs['string'][0].param = named, 0
@@ -710,8 +705,8 @@ def dropper_ai(base, src, name, steps=()):
         add.ask(sel, q, 0, 'bool')
         return sel
 
-    drop_named = add.new(t['named'], 'drop named')
-    add.node(drop_named).immediates['string'][0].value = DROP_KEY
+    named = add.new(t['named'], 'drop named')
+    add.node(named).immediates['string'][0].value = DROP_KEY
     doing = [hand]
     for k, (frm, item, to) in enumerate(steps):
         own = add.new(t['owned'], 'owned %d' % k)
@@ -727,12 +722,8 @@ def dropper_ai(base, src, name, steps=()):
         doing.append(sel)
     both = add.new(t['all'], 'ours')
     add.flow(both, *doing)
-    table_named = add.new(t['named'], 'table named')
-    add.node(table_named).immediates['string'][0].value = TABLE_KEY
-    table = starts(TABLE_OURS, 'our table', table_named)
-    add.flow(table, add.group(hand_src, chain, 'hand table')[h], idle('not ours'))
     gate = starts(OURS, 'ours')
-    add.flow(gate, both, table)
+    add.flow(gate, both, idle('not ours'))
     added = add.done()
     doc.nodes[at].links[FLOW].append(ainb.Link(gate, '', ()))
     doc.filename = name + '.root'
@@ -750,7 +741,6 @@ def dropper_ai(base, src, name, steps=()):
             raise SystemExit('read-back: node %d of %s differs from what was intended' % (i, ai_path(name)))
     got = dropper_of(out)
     if got is None or got['ours'] != OURS or got['key'] != KEY or got['steps'] != list(steps) \
-            or got['table'] != TABLE_OURS or got['table_key'] != KEY \
             or got['new'] != added:
         raise SystemExit('read-back: the one-time branch of %s is not as intended: %r' % (ai_path(name), got))
     return out
@@ -776,8 +766,7 @@ def dropper_of(data):
     """what the one-time branch of a rock's, a bush's or a pot's AI does, read from the file by following its
     links; None when the file has no such branch. {'name', 'ours' (what the drop named must start with), 'key'
     (the blackboard key its placement's number is handed over in), 'steps' ([(the drop named starts with, the
-    item Link must own, the drop it names then)]), 'table' (what a drop table named must start with for the
-    hand-over, or None), 'table_key' (the key of that hand-over), 'new' (how many nodes the branch has)}"""
+    item Link must own, the drop it names then)]), 'new' (how many nodes the branch has)}"""
     doc = ainb.loads(data)
     nodes = doc.nodes
     try:
@@ -794,9 +783,8 @@ def dropper_of(data):
         seen.add(i)
         return nodes[i]
 
-    def starts(i, key=DROP_KEY):
-        """(the token, the "yes" child, the "no" child) of a selector on "the drop (or with `key`, the drop
-        table) named starts with\""""
+    def starts(i):
+        """(the token, the "yes" child, the "no" child) of a selector on "the drop named starts with\""""
         sel = node(i)
         x = sel.inputs['bool'][0] if sel.type == BOOL_SELECTOR and sel.inputs['bool'] else None
         q = node(x.node) if x is not None and x.node >= 0 else None
@@ -805,7 +793,7 @@ def dropper_of(data):
             return None
         name = node(q.inputs['string'][0].node)
         if name.name != Q_NAMED or name.immediates['int'][0].value != ACTOR_BLACKBOARD \
-                or name.immediates['string'][0].value != key or q.inputs['string'][1].node >= 0:
+                or name.immediates['string'][0].value != DROP_KEY or q.inputs['string'][1].node >= 0:
             bad('a "starts with" question that is not about the drop the placement names')
         return q.inputs['string'][1].value, sel.links[FLOW][0].node, sel.links[FLOW][1].node
 
@@ -820,33 +808,19 @@ def dropper_of(data):
         bad('more than one one-time branch')
     seen.clear()
     ours, yes, no = starts(hits[0])
+    nothing(no)
     both = node(yes)
     if both.type != SIMULTANEOUS:
         bad('the branch does not do its steps at once')
-    out = {'name': doc.filename, 'ours': ours, 'key': None, 'steps': [], 'table': None, 'table_key': None}
-
-    def hand_key(n):
-        a = node(n.inputs['userdefined'][0].node)
-        b = node(a.inputs['userdefined'][0].node)
-        if n.name != N_HAND or a.name != Q_HASH or b.name != Q_MAKE or n.links[FLOW]:
-            bad('the hand-over is not the three nodes expected')
-        return a.immediates['string'][0].value
-
-    if node(no).name == N_IDLE:
-        nothing(no)
-    else:                                          # a drop table of ours named: the hand-over alone
-        table = starts(no, TABLE_KEY)
-        if table is None:
-            bad('"not ours" leads to neither nothing nor the drop table question')
-        out['table'], t_yes, t_no = table
-        nothing(t_no)
-        out['table_key'] = hand_key(node(t_yes))
+    out = {'name': doc.filename, 'ours': ours, 'key': None, 'steps': []}
     for l in both.links[FLOW]:
         n = node(l.node)
         if n.name == N_HAND:
-            if out['key'] is not None:
-                bad('two hand-overs')
-            out['key'] = hand_key(n)
+            a = node(n.inputs['userdefined'][0].node)
+            b = node(a.inputs['userdefined'][0].node)
+            if a.name != Q_HASH or b.name != Q_MAKE or out['key'] is not None:
+                bad('the hand-over is not the three nodes expected')
+            out['key'] = a.immediates['string'][0].value
             continue
         step = starts(l.node)
         if step:

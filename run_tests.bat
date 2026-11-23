@@ -35,6 +35,9 @@ echo.
 echo === Progressive gift check ===
 %PY% tests\gift_check.py "%ROMFS%"
 echo.
+echo === Families on songs and the bridge gift check ===
+%PY% tests\event_families_check.py "%ROMFS%"
+echo.
 echo === Cutscene gift check ===
 %PY% tests\saria_check.py "%ROMFS%"
 echo.
@@ -49,6 +52,9 @@ echo === Progressive families check ===
 echo.
 echo === Gossip stone text check ===
 %PY% tests\gossip_check.py "%ROMFS%"
+echo.
+echo === Gossip stone hints check ===
+%PY% tests\hint_check.py "%ROMFS%"
 echo.
 echo === Progressive families on Gold Skulltulas check ===
 %PY% tests\skulltula_prog_check.py "%ROMFS%"
