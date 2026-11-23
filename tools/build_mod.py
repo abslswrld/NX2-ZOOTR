@@ -696,13 +696,21 @@ def plan_songs(world, assignments):
     return out
 
 
-def song_skip(fc, cid, item, song, sync=None):
+def song_skip(fc, cid, item, song, sync=None, levels=None, template=None, asked=None):
     """the song cutscene (Dm_MelodyGet_*) is still started as before, so the game records it as played (that
     is what keeps its trigger from coming back, e.g. SacredForestMeadow_Child_Prefab_bbc3: "Dm_MelodyGet_Saria"
     not played), but its first entry point now only fades in, hands over the item the way the cutscene hands
     over the song (GetPouchContent<GetPouchContentByActorName>: "You got ..." window, then the item; plus what the
-    item needs, SCRUB_COMPANIONS) and ends: no lesson, no song. sync: the sync steps (sync_template) to run
-    after the get, for an ocarina. Returns lines saying what was changed."""
+    item needs, SCRUB_COMPANIONS) and ends: no lesson, no song. sync: {item: the sync steps (sync_template) to run
+    after its get}, for an ocarina (a list alone: for `item`).
+    levels: a family (First, Second[, Third]; `item` is First): one get per level, with the game's inventory
+    questions in front of them (level_switch; template: gift_pair_template, asked: the name the inventory knows
+    an item by), as a gift with a family asks them. Returns lines saying what was changed."""
+    levels = tuple(levels or (item,))
+    if levels[0] != item:
+        raise SystemExit('%s: the family %s does not start with %s' % (cid, '>'.join(levels), item))
+    if not isinstance(sync, dict):
+        sync = {item: sync} if sync else {}
     gives = [e for e in fc.events if e.type == 'subflow' and e.flowchart == 'GetPouchContent'
              and isinstance(e.params, dict) and e.params.get('ActorName') == song]
     if len(gives) != 1:
@@ -716,18 +724,94 @@ def song_skip(fc, cid, item, song, sync=None):
         raise SystemExit('%s: no fade-in found in the cutscene' % cid)
     params = evfl.Params(fade.params)
     params['IsWaitEnd'] = True
-    nxt = sync_steps(fc, sync) if sync else None
-    for companion in reversed(SCRUB_COMPANIONS.get(item, [])):
-        nxt = fc.add_action('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent',
-                            evfl.Params(Num=1, Actor=companion, IsGetEvent=False,
-                                        IsSetMessageTargetActorName=False, IsEquipDIrect=False), next=nxt)
-    get = fc.add_subflow(SONG_GET[0], SONG_GET[1], evfl.Params(ActorName=item), next=nxt)
-    first = fc.add_action(fade.actor, 'EventEventFadeIn', params, next=get)
+    gets = []
+    for k, level in enumerate(levels):
+        if k and SCRUB_COMPANIONS.get(level):
+            raise SystemExit('%s: %s: a later level that needs another item given with it is not supported on a '
+                             'song' % (cid, '>'.join(levels)))
+        nxt = sync_steps(fc, sync[level]) if sync.get(level) else None
+        for companion in (reversed(SCRUB_COMPANIONS.get(level, [])) if k == 0 else ()):
+            # the song cutscenes have no PouchSystemActor of their own (Dm_MelodyGet_Saria): it is added as the
+            # Deku Theater's flow has it (template), as gift_pair_edit adds it (found 2026-11-23: a slingshot
+            # alone on a song stopped the build with "no actor 'PouchSystemActor'")
+            if template is None:
+                raise SystemExit('%s: %s comes with %s: the song needs the PouchSystemActor (template)'
+                                 % (cid, companion, level))
+            nxt = fc.add_action(flow_copy_actor(fc, template[0]), CUTSCENE_ADD[1],
+                                evfl.Params(Num=1, Actor=companion, IsGetEvent=False,
+                                            IsSetMessageTargetActorName=False, IsEquipDIrect=False), next=nxt)
+        gets.append(fc.add_subflow(SONG_GET[0], SONG_GET[1], evfl.Params(ActorName=level), next=nxt))
+    if len(levels) > 1 and template is None:
+        raise SystemExit('%s: a family on a song needs the game\'s inventory question (template)' % cid)
+    top, questions = level_switch(fc, levels, gets, template, asked or (lambda x: x)) if len(levels) > 1 \
+        else (gets[0], [])
+    first = fc.add_action(fade.actor, 'EventEventFadeIn', params, next=top)
     was = fc.events[ep.main].name
     ep.main = first
     fc.update_entry_points()
-    return ['%-18s cutscene starts with the get of %s instead of the song lesson (%s; was %s)'
-            % (cid, item, fc.events[first].name, was)]
+    said = ['%-18s cutscene starts with the get of %s instead of the song lesson (%s; was %s)'
+            % (cid, item if len(levels) == 1 else ' or '.join(levels), fc.events[first].name, was)]
+    for k, q in enumerate(questions, 1):
+        said.append('%-18s   asks %s (%s.%s %s): yes -> %s gives %s, no -> %s'
+                    % (cid, fc.events[q].name, GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY, dict(fc.events[q].params),
+                       fc.events[gets[k]].name, levels[k], fc.events[dict(fc.events[q].cases)[template[3]]].name))
+    return said
+
+
+def song_skip_check(orig, back, cid, levels, sync, template=None, asked=None):
+    """read-back of song_skip: every event, actor entry point of the original cutscene is as it was but for
+    EntryPoint0's start (and the entry points' lists of calls); the new start fades in, then for every number of
+    levels Link may own the game's questions lead to the get of the next level (all owned: the last again), which
+    leads on to its companions (first level), its sync steps (an ocarina) and the end. Stops the build otherwise."""
+    def bad(what):
+        raise SystemExit('read-back: %s: %s' % (cid, what))
+
+    asked = asked or (lambda x: x)
+    n = len(orig.events)
+    if len(back.events) < n or len(back.actors) < len(orig.actors):
+        bad('events or actors are missing')
+    for o, e in zip(orig.events, back.events):
+        if vars(o) != vars(e):
+            bad('event %s differs from the original' % o.name)
+    for a, b in zip(orig.actors, back.actors):
+        va, vb = dict(vars(a)), dict(vars(b))
+        if vb['actions'][:len(va['actions'])] != va['actions'] or vb['queries'][:len(va['queries'])] != va['queries']:
+            bad('actor %s lost an action or a query' % a.name)
+        va.pop('actions'), va.pop('queries'), vb.pop('actions'), vb.pop('queries')
+        if va != vb:
+            bad('actor %s differs from the original' % a.name)
+    if [p.name for p in orig.entry_points] != [p.name for p in back.entry_points]:
+        bad('entry points differ')
+    for o, p in zip(orig.entry_points, back.entry_points):
+        if p.name != 'EntryPoint0' and p.main != o.main:
+            bad('entry point %s starts elsewhere' % p.name)
+    ep = next(p for p in back.entry_points if p.name == 'EntryPoint0')
+    fade = back.events[ep.main]
+    if ep.main < n or fade.type != 'action' or back.actors[fade.actor].actions[fade.action] != 'EventEventFadeIn':
+        bad('EntryPoint0 does not start with a new fade-in')
+    if len(levels) > 1 and template is None:
+        bad('no question template for a family')
+    for r in range(len(levels) + 1):
+        owned = {asked(x) for x in levels[:r]}
+        i = level_reached(back, fade.next, owned, template) if template else fade.next
+        want = levels[min(r, len(levels) - 1)]
+        g = back.events[i]
+        if i < n or g.type != 'subflow' or (g.flowchart, g.entry) != SONG_GET or dict(g.params) != {'ActorName': want}:
+            bad('owning %s, the cutscene does not give %s' % (', '.join(levels[:r]) or 'nothing', want))
+        steps = [(CUTSCENE_ADD[0], CUTSCENE_ADD[1], {'Num': 1, 'Actor': c, 'IsGetEvent': False,
+                                                     'IsSetMessageTargetActorName': False, 'IsEquipDIrect': False})
+                 for c in (SCRUB_COMPANIONS.get(want, []) if want == levels[0] else [])]
+        steps += [(a.name, act, dict(p) if p is not None else None) for a, act, p in (sync.get(want) or [])]
+        j = g.next
+        for actor, action, params in steps:
+            x = back.events[j] if j is not None else None
+            if x is None or j < n or x.type != 'action' or back.actors[x.actor].name != actor \
+                    or back.actors[x.actor].actions[x.action] != action \
+                    or (dict(x.params) if x.params is not None else None) != params:
+                bad('after the get of %s: not %s.%s as intended' % (want, actor, action))
+            j = x.next
+        if j is not None:
+            bad('after the get of %s the cutscene does not end' % want)
 
 
 def gift_edit(fc, events, direct=(), sync=None):
@@ -844,6 +928,118 @@ def cutscene_gift_edit(fc, cid, g, item, show, companions=()):
         said.append('%-18s %s comes with it (%s)' % (cid, companion, fc.events[nxt].name))
     add.next = nxt
     return said, [e.name for e in fc.events[first_new:]]
+
+
+def cutscene_family_edit(fc, cid, g, levels, template, asked, companions=()):
+    """a family (First, Second[, Third]) on a cutscene gift whose get window comes before its add step (Saria's
+    bridge cutscene: Event77 shows the window, then a fork's branch runs Event68, the add). After
+    cutscene_gift_edit has made both give First (and chained First's companions after the add), the game's
+    inventory questions (level_switch) go in front of each, with a copy of the window and of the add per later
+    level. A window copy leads on as the window does; an add copy leads on to what the add led on to before
+    First's companions (they are First's alone). Both questions are asked before anything is added, so both get
+    the same answers. Every link to the window or the add (a step, a fork's branch) goes to its first question.
+    Link holds one actor in the cutscene whatever the level (cutscene_gift_edit). Returns lines saying what was
+    changed."""
+    by_name = {e.name: k for k, e in enumerate(fc.events)}
+    win_i, add_i = by_name[g['window']], by_name[g['add']]
+    if add_i not in fc.reachable(win_i) or win_i in fc.reachable(add_i):
+        raise SystemExit('%s: the get window does not come before the add step: a family cannot be put here'
+                         % cid)
+    win, add = fc.events[win_i], fc.events[add_i]
+    if win.params.get('ActorName') != levels[0] or add.params.get('Actor') != levels[0]:
+        raise SystemExit('%s: the cutscene does not give %s (cutscene_gift_edit first)' % (cid, levels[0]))
+    for level in levels[1:]:
+        if SCRUB_COMPANIONS.get(level):
+            raise SystemExit('%s: %s: a later level that needs another item given with it is not supported on a '
+                             'cutscene gift' % (cid, '>'.join(levels)))
+    lead = add.next                                    # past First's companions: what the add led on to
+    for _ in companions:
+        lead = fc.events[lead].next
+    said = []
+    for what, i, key, nxt in (('window', win_i, 'ActorName', win.next), ('add', add_i, 'Actor', lead)):
+        e = fc.events[i]
+        copies = []
+        for level in levels[1:]:
+            p = evfl.Params(e.params)
+            p[key] = level
+            if e.type == 'subflow':
+                copies.append(fc.add_subflow(e.flowchart, e.entry, p, next=nxt))
+            else:
+                copies.append(fc.add_action(e.actor, CUTSCENE_ADD[1], p, next=nxt))
+        top, questions = level_switch(fc, levels, [i] + copies, template, asked)
+        moved = fc.repoint(i, top, keep=questions)
+        if not moved:
+            raise SystemExit('%s: nothing leads to %s' % (cid, e.name))
+        said.append('%-18s %s (the %s): asks first %s; %s; %d link%s moved to the questions'
+                    % (cid, e.name, what, ', then '.join('%s (has %s?)' % (fc.events[q].name, fc.events[q].params['Actor'])
+                                                         for q in reversed(questions)),
+                       ', '.join('%s gives %s' % (fc.events[c].name, lv) for c, lv in zip([i] + copies, levels)),
+                       moved, '' if moved == 1 else 's'))
+    fc.update_entry_points()
+    return said
+
+
+def cutscene_family_check(orig, back, cid, g, levels, template, asked, show, companions=()):
+    """read-back of a family on a cutscene gift (cutscene_family_edit): no original event links to the window or
+    the add any more but through one question each; for every number of levels Link may own, the questions lead
+    to the window and the add of the same level (all owned: the last again); a later level's window leads on as
+    the window does, its add to what the add led on to. With the questions and the later levels taken out again,
+    the cutscene is what cutscene_gift_check wants for First. Stops the build otherwise."""
+    def bad(what):
+        raise SystemExit('read-back: %s: %s' % (cid, what))
+
+    n = len(orig.events)
+    by_name = {e.name: k for k, e in enumerate(back.events)}
+    win_i, add_i = by_name[g['window']], by_name[g['add']]
+    lead = orig.events[[e.name for e in orig.events].index(g['add'])].next
+    tops = {}
+    for what, i in (('window', win_i), ('add', add_i)):
+        into = [k for k, e in enumerate(back.events[:n]) if e.next == i or i in e.forks or i in [c for _, c in e.cases]
+                or e.join == i] + [p.name for p in back.entry_points if p.main == i]
+        firsts = [k for k in range(n, len(back.events)) if back.events[k].type == 'switch'
+                  and (any(e.next == k or k in e.forks or k in [c for _, c in e.cases] for e in back.events[:n])
+                       or any(p.main == k for p in back.entry_points))]
+        tops[what] = [k for k in firsts if level_reached(back, k, set(), template) == i]
+        if len(tops[what]) != 1 or into:
+            bad('the links to the %s do not all go to one question in front of it' % what)
+    adds = set()
+    for r in range(len(levels) + 1):
+        owned = {asked(x) for x in levels[:r]}
+        want = levels[min(r, len(levels) - 1)]
+        wi = level_reached(back, tops['window'][0], owned, template)
+        ai = level_reached(back, tops['add'][0], owned, template)
+        w, a = back.events[wi], back.events[ai]
+        if w.type != 'subflow' or (w.flowchart, w.entry) != CUTSCENE_WINDOW \
+                or dict(w.params) != dict(back.events[win_i].params, ActorName=want) or w.next != back.events[win_i].next:
+            bad('owning %s, the window does not name %s as intended' % (', '.join(levels[:r]) or 'nothing', want))
+        if a.type != 'action' or (back.actors[a.actor].name, _action_name(back, a)) != CUTSCENE_ADD \
+                or dict(a.params) != dict(back.events[add_i].params, Actor=want) \
+                or (ai != add_i and a.next != lead):
+            bad('owning %s, the cutscene does not add %s as intended' % (', '.join(levels[:r]) or 'nothing', want))
+        if (wi == win_i) != (want == levels[0]) or (ai == add_i) != (want == levels[0]):
+            bad('the first level is not given by the original window and add')
+        adds.add(ai)
+    # the questions and the later levels taken out again: what cutscene_gift_check wants for First
+    flat = copy.deepcopy(back)
+    to = {tops['window'][0]: win_i, tops['add'][0]: add_i}
+    for e in flat.events[:n]:
+        e.next, e.join = to.get(e.next, e.next), to.get(e.join, e.join)
+        e.forks = [to.get(f, f) for f in e.forks]
+        e.cases = [(v, to.get(c, c)) for v, c in e.cases]
+    for p in flat.entry_points:
+        p.main = to.get(p.main, p.main)
+    first_new = [k for k in range(n, len(back.events)) if back.events[k].type == 'action' and k not in adds]
+    if first_new != list(range(n, n + len(companions))):
+        bad('the companions are not the first new events')
+    flat.events = flat.events[:n + len(companions)]
+    for p, o in zip(flat.entry_points, orig.entry_points):
+        p.subflows = list(o.subflows)
+    for a, o in zip(flat.actors, orig.actors):
+        extra = a.queries[len(o.queries):]
+        if a.queries[:len(o.queries)] == o.queries and set(extra) <= {GIFT_PAIR_QUERY}:
+            a.queries = list(o.queries)
+    flat.actors = flat.actors[:len(orig.actors)]
+    cutscene_gift_check(orig, flat, cid, g, levels[0], show, [back.events[k].name for k in first_new])
 
 
 def cutscene_gift_check(orig, back, cid, g, item, show, added=()):
@@ -2140,16 +2336,31 @@ GIFT_PAIR_QUERY = 'EventQueryIsExistInPouch'
 
 def gift_pair_kind(world, cid):
     """True for a check a progressive pair can be placed on as a gift: an event (no map placement) with "gift"
-    data (the flow and the event that hand the item over). Gifts without that data (cutscene gifts: the builder
-    has no flow step to put the question in front of) and songs stop the build"""
+    data (the flow and the event that hand the item over). Songs and cutscene gifts are not (song_pair_kind,
+    cutscene_pair_kind); an event with none of that data (the Skull Kids, the Deku Theater: no step of the
+    giver's own flow to put the inventory question in front of) stops the build"""
     r, name, loc = find_check(world, cid)
-    if world.spots_of(r, loc):
+    if world.spots_of(r, loc) or loc.get('song') or loc.get('cutscene'):
         return False
-    if loc.get('song') or not loc.get('gift'):
+    if not loc.get('gift'):
         raise SystemExit('%s: a progressive pair (First>Second) cannot be put on this gift: the builder has no '
                          'flow data for it ("gift": flow, event, item), so there is no step of the giver\'s own '
                          'flow to put the inventory question in front of' % cid)
     return True
+
+
+def song_pair_kind(world, cid):
+    """True for a song check (an event with "song" data): a family there is given by the song cutscene's own get,
+    with the inventory questions in front of it (song_skip)"""
+    r, name, loc = find_check(world, cid)
+    return not world.spots_of(r, loc) and bool(loc.get('song'))
+
+
+def cutscene_pair_kind(world, cid):
+    """True for a cutscene gift (an event with "cutscene" data): a family there is asked about in front of the
+    cutscene's get window and its add step (cutscene_family_edit)"""
+    r, name, loc = find_check(world, cid)
+    return not world.spots_of(r, loc) and bool(loc.get('cutscene'))
 
 
 def gift_pair_template(fc):
@@ -2172,6 +2383,37 @@ def gift_pair_template(fc):
             return fc.actors[e.actor], evfl.Params(e.params), 0, 1
     raise SystemExit('%s: no %s.%s switch between two calls of %s found (game files differ from what this was '
                      'made for)' % (GIFT_PAIR_FLOW, GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY, GIFT_FLOW))
+
+
+def level_switch(fc, levels, gives, template, asked):
+    """the game's inventory questions (template: gift_pair_template) in front of one event per level of a family,
+    gives[k] giving levels[k], asked as gift_pair_edit asks them: "has Second?" yes -> Third's event, no -> "has
+    First?" yes -> Second's, no -> First's. asked(item): the name the inventory knows it by. Returns (the question
+    asked first, or gives[0] for one level; the questions, the lowest level's first)"""
+    actor, params, has, has_not = template
+    top, questions = gives[0], []
+    for k in range(1, len(levels)):
+        ask = evfl.Params(params)
+        ask['Actor'] = asked(levels[k - 1])
+        top = fc.add_switch(flow_copy_actor(fc, actor), GIFT_PAIR_QUERY, [(has, gives[k]), (has_not, top)], ask)
+        questions.append(top)
+    return top, questions
+
+
+def level_reached(fc, start, owned, template):
+    """the event the game's inventory questions from `start` lead to while Link owns `owned` (the names the
+    inventory knows the items by): follows every PouchSystemActor.EventQueryIsExistInPouch switch it meets"""
+    _, _, has, has_not = template
+    i, seen = start, set()
+    while i is not None and fc.events[i].type == 'switch' \
+            and fc.actors[fc.events[i].actor].name == GIFT_PAIR_ACTOR \
+            and fc.actors[fc.events[i].actor].queries[fc.events[i].query] == GIFT_PAIR_QUERY:
+        if i in seen:
+            raise SystemExit('the questions from event %s go round in a circle' % fc.events[start].name)
+        seen.add(i)
+        e = fc.events[i]
+        i = dict(e.cases)[has if e.params.get('Actor') in owned else has_not]
+    return i
 
 
 def gift_pair_edit(fc, events, template, direct=(), asked=None):
@@ -3208,13 +3450,17 @@ def main(argv):
     # chest made a checking chest further down. On a freestanding item: planned as First's turning item
     # (tools/turn_items.py). On a rock, a bush, a pot or a Gold Skulltula: planned as First's one-time turning
     # item, its drop (tools/once_items.py). On a gift with flow data: planned as First,
-    # the question added further down (gift_pair_kind). On a scrub: planned as First, the question added in
+    # the question added further down (gift_pair_kind). On a song: planned as First, the questions in front of
+    # the song cutscene's get (song_pair_kind). On a cutscene gift: planned as First, the questions in front of
+    # its window and its add step (cutscene_pair_kind). On a scrub: planned as First, the question added in
     # the scrub's branch of the scrub flow (scrub_pair_kind). Nowhere else yet (pair_kind).
     # (first, second) below is (first, second, third) for a three-level family on anything but a chest
     steps = {}                                         # check id -> (first, second): chests
     turning = {}                                       # check id -> (first, second): turning items (TURN_KINDS)
     once_turning = {}                                  # those of `turning` dropped: rocks, bushes, pots, skulltulas
     gift_pairs = {}                                    # check id -> (first, second): gifts (gift_pair_edit)
+    song_pairs = {}                                    # check id -> (first, second): song checks (song_skip)
+    cutscene_pairs = {}                                # check id -> (first, second): cutscene gifts
     scrub_pairs = {}                                   # check id -> (first, second): scrubs (scrub_flow_edit)
     world = World()
     # CHECK_ID=First>Second>Third: a three-level family (THREE_LEVEL_FAMILIES). In a small chest: planned as
@@ -3227,7 +3473,13 @@ def main(argv):
             if pair not in PROGRESSIVE_PAIRS and pair not in THREE_LEVEL_FAMILIES:
                 raise SystemExit('%s: %s is not a progressive pair the builder knows (%s)' % (cid, item, ', '.join(
                     '>'.join(x) for x in sorted(PROGRESSIVE_PAIRS))))
-            if gift_pair_kind(world, cid):
+            if song_pair_kind(world, cid):
+                song_pairs[cid] = pair             # planned as First; the questions go in the song cutscene
+                assignments[k] = (cid, pair[0])
+            elif cutscene_pair_kind(world, cid):
+                cutscene_pairs[cid] = pair         # planned as First; the questions go in the cutscene
+                assignments[k] = (cid, pair[0])
+            elif gift_pair_kind(world, cid):
                 gift_pairs[cid] = pair             # planned as First; the question is added further down
                 assignments[k] = (cid, pair[0])
             elif scrub_pair_kind(world, cid):
@@ -3252,7 +3504,8 @@ def main(argv):
             else:
                 turning[cid] = pair
                 assignments[k] = (cid, turn_items.turn_name(pair[0]))
-    placed = collections.Counter(list(triples.values()) + [f for forms in (turning, gift_pairs, scrub_pairs)
+    placed = collections.Counter(list(triples.values()) + [f for forms in (turning, gift_pairs, scrub_pairs,
+                                                                         song_pairs, cutscene_pairs)
                                                            for f in forms.values() if len(f) == 3])
     for family, n in sorted(placed.items()):
         if n != len(family):
@@ -3684,12 +3937,18 @@ def main(argv):
             print('%-18s %s: entry point and event %s: %s' % ('ocarina chests', flow_path(TBOX_SYNC_FLOW), name, said))
         print('%-18s %d rows added to %s and %s' % ('ocarina chests', len(tbox_usuals), EVENT_SETTING, EVENT_INFO))
 
-    # songs: the cutscene only hands over the item
+    # songs: the cutscene only hands over the item (a family: the inventory questions in front of one get per
+    # level); read back against the original
     for path, (cid, item, song) in sorted(plan_songs(world, assignments).items()):
         src, old = out.read(path)
         ef = evfl.loads(old)
-        said = song_skip(ef.flowchart, cid, item, song, get_plan([item])[1].get(item))
-        out.write(path, src, old, flow_write_checked(ef))
+        levels = song_pairs.get(cid, (item,))
+        sync = get_plan(list(levels))[1]
+        template = gift_pair_template(evfl.loads(plain(GIFT_PAIR_FLOW)).flowchart)
+        said = song_skip(ef.flowchart, cid, item, song, sync, levels, template, flow_name)
+        new = flow_write_checked(ef)
+        song_skip_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, cid, levels, sync, template, flow_name)
+        out.write(path, src, old, new)
         for line in said:
             print(line, '(%s)' % path.split('/')[-1])
 
@@ -3765,9 +4024,21 @@ def main(argv):
         if item not in {r['__RowId'] for r in byml.loads(plain(ground_items.table_path('PouchActorInfo'))).root}:
             raise SystemExit('%s has no row in PouchActorInfo: not an item' % item)
         show = item == g['item'] or ground_items.kind_of(plain, item) == CUTSCENE_SHOWN_KIND
-        said, added = cutscene_gift_edit(ef.flowchart, cid, g, item, show, SCRUB_COMPANIONS.get(item, ()))
-        new = flow_write_checked(ef)
-        cutscene_gift_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, cid, g, item, show, added)
+        companions = SCRUB_COMPANIONS.get(item, ())
+        said, added = cutscene_gift_edit(ef.flowchart, cid, g, item, show, companions)
+        levels = cutscene_pairs.get(cid)
+        if levels:                                     # a family: the questions in front of the window and the add
+            template = gift_pair_template(evfl.loads(plain(GIFT_PAIR_FLOW)).flowchart)
+            said += cutscene_family_edit(ef.flowchart, cid, g, levels, template, flow_name, companions)
+            new = flow_write_checked(ef)
+            cutscene_family_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, cid, g, levels, template,
+                                  flow_name, show, companions)
+            if show:
+                said.append('%-18s   Link holds %s in the cutscene whichever level is given (one actor)'
+                            % (cid, item))
+        else:
+            new = flow_write_checked(ef)
+            cutscene_gift_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, cid, g, item, show, added)
         out.write(path, src, old, new)
         for line in said:
             print(line, '(%s)' % path.split('/')[-1])

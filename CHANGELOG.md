@@ -4,6 +4,37 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
+### Upgrade families on song checks and on Saria's bridge gift (to test in game)
+`CHECK_ID=First>Second[>Third]` is now accepted on a song check (`Song from Saria`) and on the cutscene gift
+on the bridge (`LW_SARIA_GIFT`). Before, both refused a family.
+- **How it decides:** with the game's own inventory question, the one gifts with a family already use (the Deku
+  Theater's `PouchSystemActor.EventQueryIsExistInPouch`): "has Second?" yes -> Third, no -> "has First?" yes ->
+  Second, no -> First. With every level owned it gives the last again, as a gift with a family does. It asks for
+  the names the inventory knows the levels by (`Weapon_Range_SlingShot`...).
+- **Song check** (`song_skip`): the song cutscene still only fades in and hands over the item (passed in game
+  2026-11-17), now with one get per level behind the questions. Each get leads on to what its level needs: the
+  first level's seed bag or quiver, an ocarina's sync steps (so it can be played at once), then the end.
+- **Saria's bridge gift** (`cutscene_family_edit`): the cutscene shows the get window (Event77) before it adds the
+  item (Event68, a branch of a fork). The questions go in front of both, with a copy of the window and of the
+  add per later level. Both are asked before anything is added, so both give the same level. A later level's add
+  leads on to what the add led on to (the seed bag and quiver come with the first level only).
+- **Known look:** Link holds one actor in the bridge cutscene, whatever the level: the first level when it is an
+  item actor (the Fairy Slingshot), otherwise Saria's ocarina. The window and the item given are right.
+- **Bug fixed (found by the new test, it was in main):** a Fairy Slingshot or Fairy Bow alone on a song check
+  stopped the build (`no actor 'PouchSystemActor'`): the song cutscene has no inventory actor for the seed bag
+  step. It is now copied from the Deku Theater's flow, as gifts do.
+- **Read-backs:** the song (`song_skip_check`, new: before, a song had none) and the bridge cutscene
+  (`cutscene_family_check`) are read back against the original: original events unchanged, every number of
+  levels owned leads to the right window, add or get, and what follows each.
+- **Still refused:** a family on a gift with no flow data (the Skull Kids, the Deku Theater), on a shelf (below).
+- **Tests:** new `tests/event_families_check.py` (in `run_tests.bat`): all 11 families on the song and on the
+  bridge gift, for every number of levels owned; what follows each get; the read-backs, and that they refuse a
+  swapped question, a later window that does not lead on and a link left on the add; a cutscene whose window
+  does not come first is refused; whole builds. `tests/gift_check.py`, `tests/families_check.py` and
+  `tests/pairs_more_check.py` no longer expect the song and the bridge gift to refuse a family.
+- **In game:** the bridge gift can be tested on a new file. Saria's song needs Zelda's letter, which a new file
+  can't reach yet, so the song is only tested by the tests above.
+
 ### Gossip stone hints made from the placements (to test in game)
 `--hint STONE=ITEM` (or `STONE=@CHECK_ID`, repeatable) makes a stone say where an item of the build is. The
 sentence is made from the build's own placements and handed to the stone as a `--gossip` text, so it uses the

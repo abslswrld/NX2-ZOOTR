@@ -42,7 +42,9 @@ CHEST = 'KF_MIDO_CHEST_01'
 SCALES = ('Item_Scale_Silver', 'Item_Scale_Gold')
 HOOKS = ('Item_Hookshot', 'Item_Longshot')
 OCARINAS = ('Item_Ocarina_Fairy', 'Item_Ocarina_Time')
-# still refused: a shelf, a Gold Skulltula, a cutscene gift, a song (pots: tests/one_time_check.py)
+# not a kind a pair is put on by its map placement: a shelf, a Gold Skulltula (its own way:
+# tests/skulltula_prog_check.py), a cutscene gift and a song (events: their own way, tests/event_families_check.py)
+# (pots: tests/one_time_check.py)
 REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT', 'Song from Saria')
 # the packs that hold the rock's and the bush's own actor file: they get the AI that drops once
 ONCE_PACKS = ('Obj_LiftRock_A_01', 'Obj_LiftRock_A_02', 'Obj_LiftRock_A_03',
@@ -104,7 +106,7 @@ def main(romfs):
                   [build_mod.pair_kind(world, c) for c in ROCKS + BUSHES] == ['rock', 'rock', 'bush', 'bush']
                   and all(k in build_mod.TURN_KINDS for k in ('freestanding', 'rock', 'bush'))
                   and 'skulltula' not in build_mod.PAIR_KINDS)
-    good &= check('still refused: a shelf, a Gold Skulltula, a cutscene gift, a song',
+    good &= check('not by its map placement (pair_kind): a shelf, a Gold Skulltula, a cutscene gift, a song',
                   all(refused(build_mod.pair_kind, world, c) for c in REFUSED))
     # what the game's files show: rocks, bushes and pots drop through one drop part, whose settings table holds
     # the placement's Drop__DropActor; the turning item's own drop part is built on the same base and table

@@ -35,6 +35,9 @@ echo.
 echo === Progressive gift check ===
 %PY% tests\gift_check.py "%ROMFS%"
 echo.
+echo === Families on songs and the bridge gift check ===
+%PY% tests\event_families_check.py "%ROMFS%"
+echo.
 echo === Cutscene gift check ===
 %PY% tests\saria_check.py "%ROMFS%"
 echo.

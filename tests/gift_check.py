@@ -33,8 +33,10 @@ OCARINAS = ('Item_Ocarina_Fairy', 'Item_Ocarina_Time')
 RESTBL = build_mod.RESTBL_PATH.replace(os.sep, '/')[:-3]   # the size table, as plain() and mod() name files
 FIXES = ('skippable_opening', 'bombs_without_bracelet', 'magic_is_separate', 'bombchus_without_bag',
          'kokiri_shop_full_stock', 'kokiri_circle_after_dungeons')
-# gifts a pair is refused on: Saria's cutscene gift and two gifts with no flow data, a song
-NO_DATA = ('LW_SARIA_GIFT', 'LW Skull Kid', 'Deku Theater Skull Mask', 'Song from Saria')
+# gifts a pair is refused on: two gifts with no flow data (Saria's cutscene gift and the songs take families
+# their own way since 2026-11-23: tests/event_families_check.py)
+NO_DATA = ('LW Skull Kid', 'Deku Theater Skull Mask')
+OWN_WAY = {'LW_SARIA_GIFT': 'cutscene', 'Song from Saria': 'song'}
 
 
 def check(name, ok):
@@ -125,8 +127,13 @@ def main(romfs):
     good &= check('a chest and a freestanding item are not gifts (their own ways stay)',
                   build_mod.gift_pair_kind(world, CHEST) is False
                   and build_mod.gift_pair_kind(world, 'KF_RUPEE_NEAR_MIDO_ITEM') is False)
-    good &= check('refused: Saria\'s cutscene gift, gifts with no flow data, a song',
-                  all(refused(build_mod.gift_pair_kind, world, c) for c in NO_DATA))
+    good &= check('refused: gifts with no flow data; Saria\'s cutscene gift and a song are not gifts of this '
+                  'kind (they take families their own way)',
+                  all(refused(build_mod.gift_pair_kind, world, c) for c in NO_DATA)
+                  and all(build_mod.gift_pair_kind(world, c) is False
+                          and build_mod.song_pair_kind(world, c) == (k == 'song')
+                          and build_mod.cutscene_pair_kind(world, c) == (k == 'cutscene')
+                          for c, k in OWN_WAY.items()))
     good &= check('not gifts: a scrub (its own way: tests/pairs_more_check.py), a pot (a turning item: '
                   'tests/one_time_check.py); refused as before: a shelf',
                   build_mod.gift_pair_kind(world, 'LW_NEAR_BRIDGE_SCRUB') is False
@@ -271,9 +278,9 @@ def main(romfs):
                                            if os.path.isfile(f)}
 
         pair = '>'.join(PAIR)
-        good &= check('the build refuses: a pair on Saria\'s gift, a pair the builder doesn\'t know, the gift '
-                      'without the rock circle fix',
-                      refused(run, 'no1', 'LW_SARIA_GIFT=' + pair)
+        good &= check('the build refuses: a pair on a gift with no flow data, a pair the builder doesn\'t know, '
+                      'the gift without the rock circle fix',
+                      refused(run, 'no1', NO_DATA[0] + '=' + pair)
                       and refused(run, 'no2', GIFT + '=Item_Scale_Silver>Item_Longshot')
                       and refused(build_mod.main, ['--romfs', romfs, '--out', tmp, '--name', 'no3',
                                                    GIFT + '=' + pair]))

@@ -73,6 +73,8 @@ BUSHES = tuple('KF_%s_CHILD_BUSH_%02d' % (where, n) for where in ('NEAR_SARIAS_H
 # that is given once (tools/once_items.py, tests/one_time_check.py)
 POTS = tuple('KF_%s_%s_POT_%02d' % (house, age, n) for age in ('CHILD', 'ADULT')
              for house in ('HOUSE_OF_TWINS', 'KNOW_IT_ALL_HOUSE') for n in (1, 2))
+# a shelf takes no family yet; Saria's cutscene gift and her song take them their own way (2026-11-23:
+# tests/event_families_check.py)
 REFUSED = ('KF_KOKIRI_CHILD_SHOP_01', 'KF_KNOW_IT_ALL_HOUSE_GS', 'LW_SARIA_GIFT', 'Song from Saria')
 BIG_CHEST = 'KF_KOKIRI_SWORD_CHEST'
 CIRCLE_FIX = ['--fix', 'kokiri_circle_after_dungeons']
@@ -457,12 +459,12 @@ def main(romfs):
             # tests/skulltula_prog_check.py)
             ok &= (refused(build_mod.three_level_parse, world, asked_) != build_mod.skulltula_pair_kind(world, c)) \
                 if len(f) == 3 else refused(build_mod.pair_kind, world, c)
-        ok &= refused(build_mod.gift_pair_kind, world, REFUSED[2]) and refused(build_mod.gift_pair_kind, world,
-                                                                               REFUSED[3])
+        ok &= build_mod.cutscene_pair_kind(world, REFUSED[2]) and build_mod.song_pair_kind(world, REFUSED[3]) \
+            and build_mod.gift_pair_kind(world, REFUSED[2]) is False and build_mod.gift_pair_kind(world, REFUSED[3]) is False
         ok &= (build_mod.pair_kind(world, POTS[0]) == 'pot' if len(f) == 2
                else build_mod.three_level_parse(world, [(POTS[0], text[n])]) == {})
-    good &= check('refused for every family: a shelf, a cutscene gift, a song; no turning item on a Gold '
-                  'Skulltula; a pot takes it', ok)
+    good &= check('refused for every family: a shelf; no turning item on a Gold Skulltula; a pot takes it; a '
+                  'cutscene gift and a song take it their own way', ok)
 
     # ------------------------------------------------------------------------------------- whole builds
     names = list(FAMILIES)
