@@ -5,6 +5,7 @@ it rests on are in `docs/ROADMAP_DECISIONS.md` (numbered 1-38 below as **D1**...
 `docs/RESEARCH_check_count.md`.
 
 ## The short version
+- **Done:** phase 0, the groundwork (2026-11-15 to 2026-11-23).
 - **Order:** the Forest Temple first (dungeon pieces), then the game's areas in game order, one area finished at a
   time (D23, D25). Then the generator and the app (D24). Then your own full seeds, a quiet early stage on Discord
   (D29), and the public beta on GitHub and Discord (D28).
@@ -75,6 +76,21 @@ Each area's settings and cutscenes are built with the area, so nothing is left o
 - Research and paperwork with no game changes can run alongside, while the user tests a part.
 
 ## Phases
+
+### Phase 0: Groundwork (done, 2026-11-15 to 2026-11-23)
+Everything up to the roadmap. Details are in CHANGELOG.md and "Where things stand today" above.
+- **File formats:** our own readers and writers for every format the randomizer edits (Zstandard, SARC, BYML,
+  event flows, MSBT text, RESTBL, AINB), checked byte for byte against the whole game.
+- **Logic:** the region map and its rules; the forest mapped (Kokiri Forest, Lost Woods, Sacred Forest Meadow).
+- **Every kind of check working in game:** chests, ground items, NPC gifts, song checks, Saria's bridge gift,
+  scrubs, shop shelves, pots, rocks, bushes, Gold Skulltula tokens; one-time drops; the items' poses when held.
+- **Upgrade families** on all of them except shop shelves, never skipping a level.
+- **Gossip stones:** custom text, then hints worded from the game's own names.
+- **Fixes:** skippable opening, bombs without the bracelet, magic separate, bombchus without the bag, full Kokiri
+  shop stock, the Kokiri circle after the dungeons, the ocarina fixes.
+- **Tests:** `run_tests.bat` with a check script for each piece.
+- **Outside the repository:** the item tracker (HTML, with OBS overlays).
+- **Planning:** the roadmap, its decisions, the whole-game check count, and `CLAUDE.md`.
 
 ### Phase 1: Forest Temple, and two lists
 Parts, in order:
