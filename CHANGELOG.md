@@ -4,6 +4,13 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
+### Roadmap to the public beta (docs only)
+- `docs/ROADMAP.md`: the approved plan of action, in priority order: the Forest Temple first, then every area in
+  game order, then the generator and the app, your own seeds, a quiet early stage on Discord, and the public beta.
+- `docs/ROADMAP_DECISIONS.md`: the 37 decisions of the planning session.
+- `docs/RESEARCH_check_count.md`: a read-only count of check-like objects in every map (1,286 spots; exactly 100
+  Gold Skulltulas, which confirms every area was read). Nothing was mapped.
+
 ### In-game results of the morning test (bombs and Boomerang retest, gossip hints, Saria's bridge family)
 All three runs done, everything passed.
 - **Bombs and Boomerang, retest: passed.** Run 1 (inside first): the Bomb Bag on Saria's floor and the Boomerang
