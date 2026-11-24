@@ -16,8 +16,8 @@
     "id": "FT_ENTRANCE_GS",
     "spot": "skulltula@11.5,64.0",
     "note": "up at y 119.8 on the east side; there at any time of day (Gimmick_AllDay_Skulltula). In game (user, 2026-11-23): it is grabbed by climbing the vines, no Hookshot needed, so no item rule",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): dropped the Iron Boots instead of its token"
    }
   },
   "exits": {
@@ -36,16 +36,16 @@
     "spot": "pot@-16.5,13.0",
     "kind": "pot",
     "note": "drop table DropTable_Obj_Heart",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Megaton Hammer (its drop table removed: only the item came out), and stayed gone after it was taken"
    },
    "FT Lobby Pot 2": {
     "id": "FT_LOBBY_POT_02",
     "spot": "pot@-15.0,14.5",
     "kind": "pot",
     "note": "no drop table in the map data",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Hover Boots (they lay slightly in the floor), and stayed gone after they were taken"
    },
    "FT Lobby Pot 3": {
     "id": "FT_LOBBY_POT_03",
@@ -84,8 +84,8 @@
     "spot": "skulltula@9.0,-23.5",
     "rule": "can_use(Hookshot)",
     "note": "on a wall at y 109.6 (the hall floor is at 100); Hookshot assumed: check in game",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): dropped a Piece of Heart instead of its token"
    }
   },
   "events": {
@@ -118,8 +118,8 @@
     "spot": "pot@-2.5,-63.5",
     "kind": "pot",
     "note": "drop table DropTable_Obj_Heart",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Lens of Truth"
    },
    "FT First Stalfos Room Pot 2": {
     "id": "FT_FIRST_STALFOS_ROOM_POT_02",
@@ -145,8 +145,8 @@
     "spot": "chest@39.0,-35.5",
     "rule": "can_use(Hookshot)",
     "note": "the game puts the map here. Hookshot assumed (the target next to it); whether it can be reached without is not known: check in game",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Fairy Bow with its quiver and arrows (the chest's own opening event kept)"
    },
    "FT GS East Courtyard": {
     "id": "FT_EAST_COURTYARD_GS",
@@ -260,8 +260,8 @@
     "spot": "pot@-51.5,16.5",
     "kind": "pot",
     "note": "no drop table in the map data",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Mirror Shield"
    },
    "FT Block Room Pot 2": {
     "id": "FT_BLOCK_ROOM_POT_02",
@@ -284,8 +284,8 @@
     "spot": "chest@-53.0,4.0",
     "rule": "can_use(Bow)",
     "note": "falls when the eye switch is shot; the eye switch has isHitHookShot false in the map data: an arrow, not the Hookshot",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Fire Arrow"
    }
   },
   "exits": {
@@ -379,22 +379,22 @@
   "region": "FT Bow Room",
   "scene": "ForestTemple",
   "verified": false,
-  "notes": "Room 17 at (0, 114.5, -59.5). Entering shuts the west shutter; three Stalfos (one, then two), and beating the last two makes the chest appear (Gimmick_DefeatEnemy_Open_ForestTemple_03). The west shutter opens again only when the eye switch at (-13.8, 119.0, -59.5) is shot after that (the eye switch has isHitHookShot false in the map data: an arrow, not the Hookshot). A pot that comes back (Obj_Pot_A_02_Respawn, arrows) stands where pot 1 is, so arrows never run out; it is not a check. The east door (14.5, 114.5, -58.8) has chain locks: small key. WARNING for the randomizer: without the Bow there is no way back out of this room except that locked door, which leads to Beth's room, a dead end without the Bow. Saving and warping are off while the shutter is shut. IN GAME (user, 2026-11-23, unchanged game): the room does need the Bow to leave; the eye switch sits behind bars, so the Hookshot does not reach it; saving is off in the room; dying puts Link back at the temple's beginning, and because nothing was saved, whatever was picked up in the room is lost. So without the Bow nothing found in this room can be kept. DECIDED (user, 2026-11-23, D39): the randomizer reopens the west shutter when the chest appears, so the room no longer needs the Bow. That is a game change, built and tested in part 3; until it is, the rule back out stays can_use(Bow).",
+  "notes": "Room 17 at (0, 114.5, -59.5). Entering shuts the west shutter; three Stalfos (one, then two), and beating the last two makes the chest appear (Gimmick_DefeatEnemy_Open_ForestTemple_03). The west shutter opens again only when the eye switch at (-13.8, 119.0, -59.5) is shot after that (the eye switch has isHitHookShot false in the map data: an arrow, not the Hookshot). A pot that comes back (Obj_Pot_A_02_Respawn, arrows) stands where pot 1 is, so arrows never run out; it is not a check. The east door (14.5, 114.5, -58.8) has chain locks: small key. WARNING for the randomizer: without the Bow there is no way back out of this room except that locked door, which leads to Beth's room, a dead end without the Bow. Saving and warping are off while the shutter is shut. IN GAME (user, 2026-11-23, unchanged game): the room does need the Bow to leave; the eye switch sits behind bars, so the Hookshot does not reach it; saving is off in the room; dying puts Link back at the temple's beginning, and because nothing was saved, whatever was picked up in the room is lost. So without the Bow nothing found in this room can be kept. DECIDED (user, 2026-11-23, D39): the randomizer reopens the west shutter when the chest appears, so the room no longer needs the Bow. Built in part 3 as the game fix forest_temple_bow_room_door (tools/build_mod.py: the shutter's lock follows the chest having appeared, as the first Stalfos room's does), the setting of the same name (on by default); passed in game on 2026-11-23: without the Bow the bars of the west door went up when the chest appeared, saving worked in the room from then on, and the door was still open and the Stalfos gone after leaving and coming back, also after save and reload; shooting the eye switch later showed the door and did nothing more. With the setting off the rule back out is can_use(Bow), as in the unchanged game.",
   "locations": {
    "FT Bow Chest": {
     "id": "FT_BOW_CHEST",
     "spot": "chest@0.0,-68.5",
     "note": "the game puts the Bow here (GetEventName ForestTemple_GetBow, flag ForestTemple_Room06_GetBow); appears when the last two Stalfos are beaten",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Ice Arrow, with no message from Navi about the Bow (its opening event removed)"
    },
    "FT Bow Room Pot 1": {
     "id": "FT_BOW_ROOM_POT_01",
     "spot": "pot@-2.0,-69.0",
     "kind": "pot",
     "note": "drop table DropTable_Obj_Heart",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave Din's Fire"
    },
    "FT Bow Room Pot 2": {
     "id": "FT_BOW_ROOM_POT_02",
@@ -409,8 +409,8 @@
     "spot": "pot@-2.0,-50.0",
     "kind": "pot",
     "note": "drop table DropTable_Obj_Heart",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave Farore's Wind"
    },
    "FT Bow Room Pot 4": {
     "id": "FT_BOW_ROOM_POT_04",
@@ -422,7 +422,7 @@
    }
   },
   "exits": {
-   "FT Joelle Room": "can_use(Bow)",
+   "FT Joelle Room": "forest_temple_bow_room_door or can_use(Bow)",
    "FT Beth Room": "has(ForestTempleSmallKey, 4)"
   }
  },

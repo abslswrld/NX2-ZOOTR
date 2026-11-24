@@ -2,7 +2,9 @@
 
     python tools/build_mod.py --romfs "<romfs>" --out out\\mods --name NX2-ZOOTR KF_MIDO_CHEST_01=Item_Boomerang ...
 
-Supported: chests and pots (their item is their Drop__DropActor in the map file; rocks, bushes and Gold
+Supported: chests and pots (their item is their Drop__DropActor in the map file; a pot that names a drop table
+instead, Drop__DropTable, or nothing at all, as most pots in dungeons do, gets the item and loses the table, the
+form the game's own item pots have; a chest that names nothing gets the item; rocks, bushes and Gold
 Skulltulas get one added: a skulltula then drops the item instead of its token, as a version of the item built
 from the token, which is what marks the skulltula done when picked up: gs_drop, tools/ground_items.py),
 freestanding items
@@ -102,6 +104,11 @@ Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     bombchus_without_bag     Bombchus get a capacity of their own (BOMBCHU_MAX, as in the original game) and
                              no longer need the bomb bag: in the remake their maximum is the bomb bag's, so
                              without one it is 0; bomb bags stop raising and refilling them
+    forest_temple_bow_room_door
+                             the Forest Temple's Bow room unlocks its west shutter as soon as its chest has
+                             appeared (decision 39). In the game it stays locked until the eye switch behind
+                             the bars is shot with an arrow, saving is off in the room, and dying loses what
+                             was picked up there: without the Bow nothing found in the room could be kept
     bombs_without_bracelet   bombs from the bomb bag can be held without the Goron Bracelet: the bomb's lift
                              grade becomes the "no upgrade" grade of rocks, bushes, pots and Bombchus (bomb
                              flowers have their own copy of the setting and still need the bracelet)
@@ -168,6 +175,14 @@ CHEST_EVENTS = {
                                              '(found in game: the sword came with any item; removed and '
                                              'retested 2026-11-16: slingshot only, no sword)'),
     'KokiriForest_TreasureBox_NaviChatOff': ('keep', 'Mido\'s chests: tested in game with four other items, harmless'),
+    # the Forest Temple (read from the flows; in game 2026-11-23: the Bow's chest with the Ice Arrow gave no
+    # message from Navi, the map's chest with the Fairy Bow opened as usual; the compass's not tested)
+    'ForestTemple_GetBow': ('remove', 'SageOfForest / TreasureBoxDM_NaviChat_Bow: the usual opening '
+                                      '(Dm_SY_Treasurebox), then Navi\'s balloon message 476 about the Bow'),
+    'ForesetTemple_GetMap': ('keep', 'NaviChat / TreasureBoxDM_NaviChat_ForestTemple_Map: only the usual opening '
+                                     '(subflow PlayDemo -> Dm_SY_Treasurebox), no message'),
+    'ForesetTemple_GetCompass': ('keep', 'NaviChat / TreasureBoxDM_NaviChat_ForestTemple_Compass: only the usual '
+                                         'opening (subflow PlayDemo -> Dm_SY_Treasurebox), no message'),
 }
 # The game's checking chest (Obj_TBox_A_06, 9 placements) is the ordinary small chest (its settings file has
 # $parent Obj_TBox_A_01: same model, animation, physics and opening event) with its own AI, a second held actor
@@ -178,6 +193,7 @@ CHEST_EVENTS = {
 CHECKING_CHEST = {'Obj_TBox_A_01': 'Obj_TBox_A_06', 'Obj_TBox_A_01_NoBake': 'Obj_TBox_A_06_NoBake'}
 PLAIN_CHEST = {v: k for k, v in CHECKING_CHEST.items()}
 CHECK_SETTINGS = ('Drop__CheckActor', 'Drop__DropActor_Substitute', 'Drop__CheckCondition')
+POT_TABLE_KEY = 'Drop__DropTable'                 # a pot's drop table: removed where we place an item
 # The upgrade families, declared once: name -> the levels as they are placed, lowest first (the user's list,
 # 2026-11-21). Everything else is worked out from this table: the pairs (PROGRESSIVE_PAIRS), the three-level
 # families and the names of their chests (THREE_LEVEL_FAMILIES) and what the skip-level guard refuses alone
@@ -2258,6 +2274,22 @@ def patch_file(data, changes, checking=None, three=None, wrap=None):
                 # rupee by default): set like any chest's
                 dyn = type(dyn)(dyn) if dyn is not None else {}
                 dyn['Drop__DropActor'] = None             # nothing set: found below as None
+            if changes[h][3] == 'pot' and (dyn is None or 'Drop__DropActor' not in dyn
+                                           or POT_TABLE_KEY in dyn):
+                # a pot that drops from a table (DropTable_Obj_Heart...) or names nothing (most pots in
+                # dungeons): it gets the item and loses the table, the form of the game's own item pots
+                # (Drop__DropActor alone: 109 pots). The game's code reads Drop__DropActor before
+                # Drop__DropTable (out/RESEARCH_drop_tables.md); two pots in Dodongo's Cavern name both, and
+                # whether the table still drops there too is not known, so the table goes
+                dyn = type(dyn)(dyn) if dyn is not None else {}
+                dyn.setdefault('Drop__DropActor', None)   # nothing set: found below as None
+                dyn.pop(POT_TABLE_KEY, None)
+            if changes[h][3] == 'chest' and a['Gyaml'] in CHECKING_CHEST \
+                    and (dyn is None or 'Drop__DropActor' not in dyn):
+                # an ordinary small chest with nothing set (the Forest Temple's falling ceiling room): set
+                # like any chest's
+                dyn = type(dyn)(dyn) if dyn is not None else {}
+                dyn['Drop__DropActor'] = None             # nothing set: found below as None
             if changes[h][3] in DROP_ADDED and (dyn is None or 'Drop__DropActor' not in dyn):
                 if dyn is not None and 'Drop__DropTable' in dyn:
                     raise SystemExit('actor %s (%s) drops from a drop table (%s): not supported yet'
@@ -2900,6 +2932,79 @@ def circle_kokiri(data):
     return new
 
 
+# The Forest Temple's Bow room (--fix forest_temple_bow_room_door, decision 39). Its level logic module locks
+# the west shutter (DungeonSwitchShutterWithLockSet, input LockMinusZ) while an OR node is false: the flag
+# Gimmick_DefeatEnemy_Open_ForestTemple_03, or the "focus on gimmick" event that sets it. That event plays when
+# the eye switch is on and the chest has appeared, and the eye switch is behind bars: an arrow only. The OR's
+# second source becomes "the chest has appeared" (the module's own OR of the flag
+# ForestTemple_After_Appearance_TreasureChest and the chest module's EventFinish), so the shutter unlocks with
+# the chest, as the first Stalfos room's does (ForestTemple_Level_Room_06_Prefab_61dc: LockMinusZ from an OR of
+# its chest module's event and its flag). Shooting the eye switch still plays its event and sets its flag.
+BOW_ROOM_LOGIC = 'Logic/ForestTemple_Level_Room_06_Prefab_6b8c.logic.module.ainb'
+BOW_ROOM_OPEN_FLAG = 'Gimmick_DefeatEnemy_Open_ForestTemple_03'
+BOW_ROOM_CHEST_FLAG = 'ForestTemple_After_Appearance_TreasureChest'
+
+
+def _flag_of(node):
+    """the flag a HoldGameDataGetBoolSimple node reads, or None"""
+    if node.name != 'HoldGameDataGetBoolSimple' or not node.inputs['string']:
+        return None
+    return node.inputs['string'][0].value
+
+
+def bow_room_parts(a):
+    """(the OR node the shutter's lock hangs on, the "chest has appeared" node, its True output) of the Bow
+    room's logic module, each found by what it is"""
+    def one(what, found):
+        if len(found) != 1:
+            raise SystemExit('%s: %d %s, expected 1' % (BOW_ROOM_LOGIC, len(found), what))
+        return found[0]
+    shutter = one('shutter modules', [n for n in a.nodes if n.name.startswith('DungeonSwitchShutterWithLockSet')])
+    lock = one('LockMinusZ inputs', [x for x in shutter.inputs['bool'] if x.name == 'LockMinusZ'])
+    if lock.node < 0 or lock.sources is not None or a.nodes[lock.node].name != 'OperateORFixInputTrue' \
+            or [o.name for o in a.nodes[lock.node].outputs['bool']][lock.param] != 'False':
+        raise SystemExit('%s: the shutter\'s lock is not the False output of an OR node' % BOW_ROOM_LOGIC)
+    appeared = one('"chest has appeared" nodes', [
+        i for i, n in enumerate(a.nodes)
+        if n.name == 'OperateOR' and n.inputs['bool'] and n.inputs['bool'][0].sources is not None
+        and len(n.inputs['bool'][0].sources) == 2
+        and _flag_of(a.nodes[n.inputs['bool'][0].sources[0][0]]) == BOW_ROOM_CHEST_FLAG
+        and a.nodes[n.inputs['bool'][0].sources[1][0]].name.startswith('Gimmick_TreasureBoxAppear')
+        and [o.name for o in a.nodes[n.inputs['bool'][0].sources[1][0]].outputs['bool']][
+            n.inputs['bool'][0].sources[1][1]] == 'EventFinish'])
+    return lock.node, appeared, [o.name for o in a.nodes[appeared].outputs['bool']].index('True')
+
+
+def bow_room_door(data):
+    """the shutter's lock: "the flag, or the eye switch's event" becomes "the flag, or the chest has appeared";
+    returns (new data, what was done)"""
+    a = ainb.Ainb.read(data)
+    lock, appeared, true = bow_room_parts(a)
+    n = a.nodes[lock]
+    inp = n.inputs['bool'][0]
+    if inp.name != 'BoolMulti' or inp.sources is None or len(inp.sources) != 2 \
+            or _flag_of(a.nodes[inp.sources[0][0]]) != BOW_ROOM_OPEN_FLAG \
+            or not a.nodes[inp.sources[1][0]].name.startswith('Gimmick_FocusOnGimmick') \
+            or len(n.links[0]) != 1 or n.links[0][0].node != inp.sources[1][0] \
+            or sorted(n.preconditions) != sorted(s[0] for s in inp.sources):
+        raise SystemExit('%s: the lock\'s OR node is not "the flag %s, or the focus event"'
+                         % (BOW_ROOM_LOGIC, BOW_ROOM_OPEN_FLAG))
+    flag, (event, _, flags) = inp.sources
+    inp.sources = [flag, (appeared, true, flags)]
+    n.links[0][0].node = appeared
+    n.preconditions = [appeared if p == event else p for p in n.preconditions]
+    new = a.write()
+    b = ainb.Ainb.read(new)
+    m = b.nodes[lock]
+    if m.inputs['bool'][0].sources != inp.sources or m.links[0][0].node != appeared \
+            or m.preconditions != n.preconditions or len(new) != len(data) or b.write() != new \
+            or len(b.nodes) != len(a.nodes) \
+            or sum(x != y for x, y in zip(new, data)) > 8:
+        raise SystemExit('read-back: %s differs from what was intended' % BOW_ROOM_LOGIC)
+    return new, 'node %d (%s): source %d (%s) -> %d.True (the chest has appeared)' % (
+        lock, n.name, event, a.nodes[event].name, appeared)
+
+
 def remove_entry(data, keys, expected):
     """remove one entry (found by its path of keys) from a BYML file; checks its current value first and that
     nothing else changed"""
@@ -3437,7 +3542,8 @@ def main(argv):
     ap.add_argument('--longshot', help='Longshot folder: also write a launcher .bat next to the mods folder')
     ap.add_argument('--fix', action='append', default=[],
                     choices=sorted(set(FIXES) | set(FILE_FIXES) | set(TABLE_FIXES)
-                                   | {'kokiri_shop_full_stock', 'kokiri_circle_after_dungeons'}),
+                                   | {'kokiri_shop_full_stock', 'kokiri_circle_after_dungeons',
+                                      'forest_temple_bow_room_door'}),
                     help='a game fix (see FIXES, FILE_FIXES, TABLE_FIXES)')
     ap.add_argument('--gossip', action='append', default=[], metavar='STONE=TEXT',
                     help='what a gossip stone says (STONE: its check ID or its name in the map; in TEXT \\n is a '
@@ -3590,6 +3696,12 @@ def main(argv):
             src, old = out.read(CIRCLE_MIDDLE)
             out.write(CIRCLE_MIDDLE, src, old, circle_middle(old))
             print('fix %-28s %s: middle rock: prop never, liftable rock always' % (name, CIRCLE_MIDDLE))
+            continue
+        if name == 'forest_temple_bow_room_door':
+            src, old = out.read(BOW_ROOM_LOGIC)
+            new, said = bow_room_door(old)
+            out.write(BOW_ROOM_LOGIC, src, old, new)
+            print('fix %-28s %s: %s' % (name, BOW_ROOM_LOGIC, said))
             continue
         if name in TABLE_FIXES:
             path, fn = TABLE_FIXES[name]
@@ -3894,6 +4006,8 @@ def main(argv):
                 want['Gyaml'] = changes[h][1]
             elif h in changes:
                 dyn = dict(want.get('Dynamic') or {}, Drop__DropActor=changes[h][1])
+                if changes[h][3] == 'pot' and POT_TABLE_KEY in dyn:
+                    print('%-18s   the pot\'s drop table %s removed' % (changes[h][0], dyn.pop(POT_TABLE_KEY)))
                 ev = dyn.get('GetEventName')
                 if ev is not None and changes[h][1] != found[h] and CHEST_EVENTS[ev][0] == 'remove':
                     del dyn['GetEventName']

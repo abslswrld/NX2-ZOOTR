@@ -155,6 +155,7 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `tools/start_state.py` | the starting state of a new file: adds starting items and starting flags to the game's own list of what a new file has, the sequence module `Sequence/SetPouchAndStatusForGameStart` (used by `build_mod.py --start ITEM[=N]` and `--start-flag NAME=VALUE`) |
 | `tests/start_state_check.py` | the starting state: where the game sets up a new file and what it gives and sets there, read from its own files; items and flags of each type added and read back; what is refused; whole builds (in `run_tests.bat`) |
 | `tests/forest_temple_check.py` | the Forest Temple's data against the game's files: its 46 spots and what the game puts in them, one check and one permanent ID per spot, the five locked doors as the five key rules, the boss lock, the eye switches and the ice, and the temple walked with the items where the game puts them (and without the Bow, the boss key or a key) (in `run_tests.bat`) |
+| `tests/forest_temple_items_check.py` | items on the Forest Temple's chests, pots and Gold Skulltulas, and the Bow room's door: how the temple's pots and chests name what they give, a pot or chest of each form given an item and read back, the chests' opening events, the Bow room's shutter lock before and after `--fix forest_temple_bow_room_door` (one node differs), and a whole build of the test sample read back from the mod folder (in `run_tests.bat`) |
 | `tests/size_check.py` | checks those rules against the entry of every game file they cover (reads every pack: several minutes; not part of `run_tests.bat`) |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):
@@ -187,6 +188,11 @@ boss door asks for `ForestTempleBossKey`. Remake differences found in the files:
 (its key is in the first room's chest), the east courtyard opens with a floor switch, the basement has ice
 over an eye switch, and there is no chest on a raised island (12 chests, not 13). Nothing here is checked in
 game yet: every region is `"verified": false`, and the open questions are in CHANGELOG.md (2026-11-23).
+Items can be placed on its chests (not the boss key's yet), pots and Gold Skulltulas (passed in game
+2026-11-23 with 11 placements). The
+Bow room reopens its door when its chest appears (`--fix forest_temple_bow_room_door`, setting
+`forest_temple_bow_room_door`, on by default: decision 39), so the room needs no Bow to leave (passed in
+game 2026-11-23).
 
 Breakable boulders (`Obj_BrokenRock`) are listed with the rocks (kind "boulder"). Gifts from NPCs (no map
 placement) carry the position of their NPC so they show on the maps.

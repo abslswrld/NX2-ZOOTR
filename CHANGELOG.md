@@ -4,6 +4,60 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
+### Phase 1, part 3: items on the Forest Temple's checks, and the Bow room's door (passed in game)
+The builder now places items on the temple's chests, pots and Gold Skulltulas, and a new game fix reopens the
+Bow room's door when its chest appears (decision 39). The small keys and the boss key stay where the game puts
+them. Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-23): passed.** A new file (it started with the Hookshot), warped to the Sacred Forest
+Meadow with the debug menu, into the temple with the Hookshot.
+- **All 11 placements gave their item:** the two Gold Skulltulas (Iron Boots, Piece of Heart), the six pots
+  (Megaton Hammer, Hover Boots, Lens of Truth, Mirror Shield, Din's Fire, Farore's Wind) and the three chests
+  (Ice Arrow in the Bow's big chest with no message from Navi, the Fairy Bow with quiver and arrows in the
+  map's big chest, the Fire Arrow in the chest the eye switch drops).
+- **Pots:** only the item came out of the pot that had a drop table; the other four lobby pots were as in the
+  game; the two item pots stayed gone after leaving the lobby and coming back.
+- **Keys:** the first room's and the first Stalfos room's chest still gave a small key. The line about the
+  well's chest was left blank.
+- **The Bow room without the Bow:** the door shut, three Stalfos, the chest appeared, and the west door's bars
+  went up by themselves. Saving worked in the room after that. After walking out and back in the door was
+  still open and the Stalfos were gone. With the Bow later, shooting the eye switch behind the bars showed the
+  door and did nothing more.
+- **After save and reload:** items kept, chests open, item pots gone, Gold Skulltulas gone, the door open.
+- **Sides:** left, right and "furthest" in the checklist, worked out from the map's numbers, were right.
+- **Seen, not part of this change:**
+  - the Hover Boots lay slightly in the floor (from a pot). Not fixed yet;
+  - the Lens of Truth gave the magic meter, and the opening could not be skipped: this test build was made
+    without `--fix magic_is_separate` and `--fix skippable_opening`, which earlier test builds had. The fixes
+    themselves are unchanged;
+  - "FPS felt lower than normal?": not looked into yet.
+
+- **Pots.** None of the temple's 28 pots names an item: 21 name a drop table (`Drop__DropTable`: hearts,
+  arrows...) and 7 name nothing. The builder refused both. Now such a pot gets the item (`Drop__DropActor`) and
+  loses its table, which is the form of the game's own item pots (109 in the game). The item is given once, as
+  on the pots of Kokiri Forest: every one of the 28 has the two saved flags that needs.
+- **Chests.** The falling ceiling room's chest names no item; it now gets one like any chest. Three chests
+  have an opening event of their own, read from the event flows:
+  - the Bow's (`ForestTemple_GetBow`): the usual opening, then a message from Navi about the Bow. Removed when
+    the chest holds something else;
+  - the map's and the compass's (`ForesetTemple_GetMap`, `ForesetTemple_GetCompass`): only the usual opening.
+    Kept.
+  The boss key's chest (`ForesetTemple_GetBossKey`) is still refused: part 7.
+- **Gold Skulltulas:** as in the forest (the item's token version), no change needed.
+- **The Bow room's door: `--fix forest_temple_bow_room_door`.** The room's logic file
+  (`Logic/ForestTemple_Level_Room_06_Prefab_6b8c`) locks the west shutter until a flag is set or the eye switch's
+  event has played; that event needs the eye switch on and the chest there. The fix changes one source of one
+  node: the lock now ends when **the chest has appeared**. That is how the game's own first Stalfos room
+  unlocks its shutter. Shooting the eye switch still works as before. The file keeps its length; one node of 36
+  differs.
+  - Logic: new setting `forest_temple_bow_room_door` (on by default). The way out of the Bow room asks for it
+    or the Bow.
+- **Not in this part:** the Heart Container. The "loose item" of the temple's count is the boss's heart, so it
+  belongs to part 7 (boss key, boss door, boss heart, Medallion).
+- **Found, not solved:** a big chest cannot hold a progressive family (the game's checking chest is the small
+  one), and the Bow's chest is a big chest. The Bow alone can be in a big chest. To settle before the generator.
+- **Tests:** `tests/forest_temple_items_check.py` (new, in `run_tests.bat`, 26 checks).
+
 ### Phase 1, part 2: the Forest Temple's data (no game changes)
 The temple's checks, regions and logic rules, read from the game's files. Nothing in the game is changed and there
 is nothing to test in game for this part; the rules are tried in game with part 3's build.

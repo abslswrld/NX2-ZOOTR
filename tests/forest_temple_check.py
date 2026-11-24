@@ -108,9 +108,14 @@ def main(romfs):
               if r['unique_check_id'] in GAME_CHESTS)
           and [r['vanilla_contents']['value'] for r in db if r['check_type'] == 'skulltula']
           == ['GoldSkulltulaToken'] * 5)
-    check('every region of the temple is still "not verified in game", every check "untested"',
-          not any(r.verified for r in regions.values())
-          and all(l.get('randomizable') == 'untested' for _, _, l in locs.values()))
+    changed = sorted(l['id'] for _, _, l in locs.values() if l.get('randomizable') == 'yes')
+    check('every region of the temple is still "not verified in game"; 11 checks were changed in game '
+          '(2026-11-23), the other 36 are "untested"',
+          not any(r.verified for r in regions.values()) and len(changed) == 11
+          and all('changed in game on 2026-11-23' in l['randomizable_note'] for _, _, l in locs.values()
+                  if l['id'] in changed)
+          and all(l.get('randomizable') == 'untested' for _, _, l in locs.values() if l['id'] not in changed),
+          changed)
 
     # ---- locked doors: the map against the rules
     locks = [a for a in actors if a['Gyaml'] == 'Obj_DoorChainLock_A_01']
@@ -183,9 +188,10 @@ def main(romfs):
           len(block) == 1 and near(block[0]['Translate'], (-19.0, 100.0, -19.1))
           and regions['FT Lobby'].exits['FT West Courtyard'][0] == 'can_play(SongOfTime)')
     doc = logic('ForestTemple_Level_Room_06_Prefab_6b8c')
-    check('Bow room: its west shutter waits for the eye switch (logic module), and the rule back out asks for the Bow',
+    check('Bow room: its west shutter waits for the eye switch (logic module), and the rule back out asks for the '
+          'Bow or the door fix (decision 39)',
           {'ForestTemple_Level_Room_06_PressedEyeball', 'ForestTemple_Room06_GetBow'} <= strings(doc)
-          and regions['FT Bow Room'].exits['FT Joelle Room'][0] == 'can_use(Bow)'
+          and regions['FT Bow Room'].exits['FT Joelle Room'][0] == 'forest_temple_bow_room_door or can_use(Bow)'
           and regions['FT Joelle Room'].exits['FT Bow Room'][0] == 'True')
     check('first room: its Gold Skulltula asks for no item (in game 2026-11-23: no Hookshot needed)',
           regions['FT Entrance'].locations['FT GS Entrance'].get('rule', True) is True)
