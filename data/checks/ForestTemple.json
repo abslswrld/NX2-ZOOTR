@@ -1,0 +1,1096 @@
+{
+ "chest@-10.0,64.5": {
+  "kind": "chest",
+  "item": "Item_Dungeon_SmallKey",
+  "ages": [],
+  "pos": [
+   -9.9,
+   117.5,
+   64.4
+  ],
+  "placements": [
+   {
+    "hash": "1171460703078800858",
+    "actor": "Obj_TBox_A_01",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 0,
+     "Drop__DropActor": "Item_Dungeon_SmallKey"
+    }
+   }
+  ]
+ },
+ "chest@-16.5,12.5": {
+  "kind": "chest",
+  "item": "TBox_ArrowBundle_Large",
+  "ages": [],
+  "pos": [
+   -16.3,
+   60.7,
+   12.6
+  ],
+  "placements": [
+   {
+    "hash": "9038700938965170329",
+    "actor": "Obj_TBox_A_01",
+    "ages": [],
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 27,
+     "Drop__DropActor": "TBox_ArrowBundle_Large"
+    }
+   }
+  ]
+ },
+ "chest@-17.0,-63.5": {
+  "kind": "chest",
+  "item": "Item_Dungeon_SmallKey",
+  "ages": [],
+  "pos": [
+   -17.1,
+   114.8,
+   -63.6
+  ],
+  "placements": [
+   {
+    "hash": "3433400840978782007",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 16,
+     "Drop__DropActor": "Item_Dungeon_SmallKey"
+    }
+   }
+  ]
+ },
+ "chest@-49.5,-63.5": {
+  "kind": "chest",
+  "item": "Item_Dungeon_BossKey",
+  "ages": [],
+  "pos": [
+   -49.5,
+   129.5,
+   -63.7
+  ],
+  "placements": [
+   {
+    "hash": "5306318520835485827",
+    "actor": "Obj_TBox_A_03_NoBake",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "Drop__DropActor": "Item_Dungeon_BossKey",
+     "GetEventName": "ForesetTemple_GetBossKey"
+    }
+   }
+  ]
+ },
+ "chest@-53.0,4.0": {
+  "kind": "chest",
+  "item": "TBox_Rupee_Purple",
+  "ages": [],
+  "pos": [
+   -52.8,
+   115.0,
+   4.2
+  ],
+  "placements": [
+   {
+    "hash": "15920957434854338961",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 8,
+     "Drop__DropActor": "TBox_Rupee_Purple",
+     "SpawnType": 1
+    }
+   }
+  ]
+ },
+ "chest@-70.0,-26.5": {
+  "kind": "chest",
+  "item": "Item_Dungeon_SmallKey",
+  "ages": [],
+  "pos": [
+   -70.2,
+   107.1,
+   -26.5
+  ],
+  "placements": [
+   {
+    "hash": "7535137041266964235",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 22,
+     "Drop__DropActor": "Item_Dungeon_SmallKey"
+    }
+   }
+  ]
+ },
+ "chest@0.0,-63.0": {
+  "kind": "chest",
+  "item": "Item_Dungeon_SmallKey",
+  "ages": [],
+  "pos": [
+   0.0,
+   105.8,
+   -62.8
+  ],
+  "placements": [
+   {
+    "hash": "14776684749746592758",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 4,
+     "Drop__DropActor": "Item_Dungeon_SmallKey"
+    }
+   }
+  ]
+ },
+ "chest@0.0,-68.5": {
+  "kind": "chest",
+  "item": "Item_Range_Bow",
+  "ages": [],
+  "pos": [
+   0.2,
+   114.8,
+   -68.5
+  ],
+  "placements": [
+   {
+    "hash": "11082303891540711688",
+    "actor": "Obj_TBox_A_02_NoBake",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 17,
+     "Drop__DropActor": "Item_Range_Bow",
+     "GetEventName": "ForestTemple_GetBow"
+    }
+   }
+  ]
+ },
+ "chest@16.5,-42.5": {
+  "kind": "chest",
+  "item": "Item_Dungeon_SmallKey",
+  "ages": [],
+  "pos": [
+   16.4,
+   88.0,
+   -42.6
+  ],
+  "placements": [
+   {
+    "hash": "6449977980406424425",
+    "actor": "Obj_TBox_A_01",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 15,
+     "Drop__DropActor": "Item_Dungeon_SmallKey"
+    }
+   }
+  ]
+ },
+ "chest@17.0,-63.5": {
+  "kind": "chest",
+  "item": "Item_Dungeon_Compass",
+  "ages": [],
+  "pos": [
+   17.1,
+   114.8,
+   -63.6
+  ],
+  "placements": [
+   {
+    "hash": "6948525240950728236",
+    "actor": "Obj_TBox_A_02_NoBake",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 18,
+     "Drop__DropActor": "Item_Dungeon_Compass",
+     "GetEventName": "ForesetTemple_GetCompass"
+    }
+   }
+  ]
+ },
+ "chest@39.0,-35.5": {
+  "kind": "chest",
+  "item": "Item_Dungeon_Map",
+  "ages": [],
+  "pos": [
+   38.8,
+   101.4,
+   -35.7
+  ],
+  "placements": [
+   {
+    "hash": "3174893090599461927",
+    "actor": "Obj_TBox_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 14,
+     "Drop__DropActor": "Item_Dungeon_Map",
+     "GetEventName": "ForesetTemple_GetMap"
+    }
+   }
+  ]
+ },
+ "chest@56.0,-23.0": {
+  "kind": "chest",
+  "item": null,
+  "ages": [],
+  "pos": [
+   56.0,
+   104.0,
+   -22.8
+  ],
+  "placements": [
+   {
+    "hash": "15117164073907033527",
+    "actor": "Obj_TBox_A_01",
+    "ages": [],
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 24
+    }
+   }
+  ]
+ },
+ "freestanding@-3.0,-64.5": {
+  "kind": "freestanding",
+  "item": "Obj_Heart_Container",
+  "ages": [],
+  "pos": [
+   -3.2,
+   74.7,
+   -64.4
+  ],
+  "placements": [
+   {
+    "hash": "18379569660496940670",
+    "actor": "Obj_Heart_Container",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 29
+    }
+   }
+  ]
+ },
+ "pot@-0.5,21.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -0.6,
+   60.7,
+   20.8
+  ],
+  "placements": [
+   {
+    "hash": "17869964928823963066",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 27,
+     "Drop__DropTable": "Drop_ResourceSupply_BeforeBoss"
+    }
+   }
+  ]
+ },
+ "pot@-1.5,20.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -1.3,
+   60.7,
+   20.1
+  ],
+  "placements": [
+   {
+    "hash": "845052341770025044",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 27,
+     "Drop__DropTable": "Drop_ResourceSupply_BeforeBoss"
+    }
+   }
+  ]
+ },
+ "pot@-13.5,16.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -13.4,
+   101.8,
+   16.2
+  ],
+  "placements": [
+   {
+    "hash": "8229370832781285891",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 2,
+     "Drop__DropTable": "DropTable_RangeWeapon_02"
+    }
+   }
+  ]
+ },
+ "pot@-15.0,14.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -14.9,
+   101.8,
+   14.7
+  ],
+  "placements": [
+   {
+    "hash": "9600596241209359414",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 2
+    }
+   }
+  ]
+ },
+ "pot@-16.5,13.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -16.4,
+   101.8,
+   13.2
+  ],
+  "placements": [
+   {
+    "hash": "139743615625578751",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 2,
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "pot@-2.0,-50.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -2.2,
+   114.5,
+   -49.9
+  ],
+  "placements": [
+   {
+    "hash": "11701653450964348630",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 17,
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "pot@-2.0,-69.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -2.2,
+   114.5,
+   -68.9
+  ],
+  "placements": [
+   {
+    "hash": "13098892055243633233",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 17,
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "pot@-2.5,-63.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -2.5,
+   105.5,
+   -63.5
+  ],
+  "placements": [
+   {
+    "hash": "8740962919121236974",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 4,
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "pot@-47.5,16.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -47.5,
+   103.5,
+   16.3
+  ],
+  "placements": [
+   {
+    "hash": "5080915951880062416",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 6
+    }
+   }
+  ]
+ },
+ "pot@-49.5,16.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -49.4,
+   103.5,
+   16.3
+  ],
+  "placements": [
+   {
+    "hash": "3947004986900705772",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 6
+    }
+   }
+  ]
+ },
+ "pot@-51.5,16.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -51.3,
+   103.5,
+   16.3
+  ],
+  "placements": [
+   {
+    "hash": "14169869109292081997",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 6
+    }
+   }
+  ]
+ },
+ "pot@0.5,21.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   0.6,
+   60.7,
+   20.9
+  ],
+  "placements": [
+   {
+    "hash": "8451893348143348779",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 27,
+     "Drop__DropTable": "Drop_ResourceSupply_BeforeBoss"
+    }
+   }
+  ]
+ },
+ "pot@1.5,20.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   1.3,
+   60.7,
+   20.1
+  ],
+  "placements": [
+   {
+    "hash": "15881257994982213730",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 27,
+     "Drop__DropTable": "Drop_ResourceSupply_BeforeBoss"
+    }
+   }
+  ]
+ },
+ "pot@13.5,16.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   13.4,
+   101.8,
+   16.4
+  ],
+  "placements": [
+   {
+    "hash": "16714728970292620430",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 2,
+     "Drop__DropTable": "DropTable_RangeWeapon_02"
+    }
+   }
+  ]
+ },
+ "pot@14.0,-39.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   13.8,
+   88.0,
+   -39.5
+  ],
+  "placements": [
+   {
+    "hash": "6916546705775293667",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 15
+    }
+   }
+  ]
+ },
+ "pot@15.0,15.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   14.9,
+   101.8,
+   14.9
+  ],
+  "placements": [
+   {
+    "hash": "12190827011300834192",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 2
+    }
+   }
+  ]
+ },
+ "pot@15.5,-39.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   15.7,
+   88.0,
+   -39.5
+  ],
+  "placements": [
+   {
+    "hash": "9611679337718327541",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 15,
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "pot@16.5,13.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   16.4,
+   101.8,
+   13.4
+  ],
+  "placements": [
+   {
+    "hash": "16258156194217221025",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 2,
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "pot@2.5,-50.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   2.7,
+   114.5,
+   -49.9
+  ],
+  "placements": [
+   {
+    "hash": "2110020506516121812",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 17,
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "pot@2.5,-63.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   2.5,
+   105.5,
+   -63.5
+  ],
+  "placements": [
+   {
+    "hash": "2723241463527082223",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 4,
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "pot@2.5,-69.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   2.7,
+   114.5,
+   -68.9
+  ],
+  "placements": [
+   {
+    "hash": "6298504646306157744",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 17,
+     "Drop__DropTable": "DropTable_Obj_Heart"
+    }
+   }
+  ]
+ },
+ "pot@20.0,-67.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   20.2,
+   114.5,
+   -67.7
+  ],
+  "placements": [
+   {
+    "hash": "14344239269960841819",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 18
+    }
+   }
+  ]
+ },
+ "pot@22.0,-67.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   22.2,
+   114.5,
+   -67.7
+  ],
+  "placements": [
+   {
+    "hash": "12084337161955511012",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 18,
+     "Drop__DropTable": "DropTable_RangeWeapon_02"
+    }
+   }
+  ]
+ },
+ "pot@24.0,-67.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   24.1,
+   114.5,
+   -67.7
+  ],
+  "placements": [
+   {
+    "hash": "4243968346728704417",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 18,
+     "Drop__DropTable": "Drop_ResourceSupply_BeforeBoss"
+    }
+   }
+  ]
+ },
+ "pot@46.0,-2.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   45.8,
+   104.9,
+   -2.1
+  ],
+  "placements": [
+   {
+    "hash": "204034068196251074",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 25,
+     "Drop__DropTable": "Drop_ResourceSupply_BeforeBoss"
+    }
+   }
+  ]
+ },
+ "pot@46.0,-3.5": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   45.8,
+   104.9,
+   -3.6
+  ],
+  "placements": [
+   {
+    "hash": "16313270500968203353",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 25,
+     "Drop__DropTable": "DropTable_RangeWeapon_02"
+    }
+   }
+  ]
+ },
+ "pot@55.5,15.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   55.5,
+   123.6,
+   15.0
+  ],
+  "placements": [
+   {
+    "hash": "10045766070541814618",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 23,
+     "Drop__DropTable": "DropTable_RangeWeapon_01"
+    }
+   }
+  ]
+ },
+ "pot@57.5,15.0": {
+  "kind": "pot",
+  "item": null,
+  "ages": [],
+  "pos": [
+   57.5,
+   123.6,
+   14.9
+  ],
+  "placements": [
+   {
+    "hash": "14386060266040640728",
+    "actor": "Obj_Pot_A_02",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 23,
+     "Drop__DropTable": "DropTable_RangeWeapon_01"
+    }
+   }
+  ]
+ },
+ "skulltula@-3.5,17.0": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -3.4,
+   65.6,
+   17.2
+  ],
+  "placements": [
+   {
+    "hash": "3072474196008424241",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 27
+    }
+   }
+  ]
+ },
+ "skulltula@-38.0,-4.5": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [],
+  "pos": [
+   -38.1,
+   112.9,
+   -4.4
+  ],
+  "placements": [
+   {
+    "hash": "10970805784153267902",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 12
+    }
+   }
+  ]
+ },
+ "skulltula@11.5,64.0": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [],
+  "pos": [
+   11.3,
+   119.8,
+   64.0
+  ],
+  "placements": [
+   {
+    "hash": "11081821111317815057",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 0
+    }
+   }
+  ]
+ },
+ "skulltula@44.5,-38.0": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [],
+  "pos": [
+   44.3,
+   112.1,
+   -38.2
+  ],
+  "placements": [
+   {
+    "hash": "2014780391754316762",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 14
+    }
+   }
+  ]
+ },
+ "skulltula@9.0,-23.5": {
+  "kind": "skulltula",
+  "item": null,
+  "ages": [],
+  "pos": [
+   8.8,
+   109.6,
+   -23.6
+  ],
+  "placements": [
+   {
+    "hash": "17612196129225973969",
+    "actor": "Enemy_Skulltula_Gold",
+    "ages": [],
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "params": {
+     "DefaultDungeonRoomIndex": 2
+    }
+   }
+  ]
+ }
+}

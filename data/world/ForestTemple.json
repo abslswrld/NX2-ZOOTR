@@ -1,0 +1,658 @@
+[
+ {
+  "region": "FT Entrance",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 0, from the entrance (0, 101.5, 78.4) to the first door at (0.7, 103.0, 44.5). Four Wolfos appear in two pairs (flags ForestTemple_Room00_AppearWolfos, ForestTemple_Room00_AppearWolfosSwitch). Remake: the first door has a chain lock on each side (Obj_DoorChainLock_A_01), so it takes a small key; the game puts that key in this room's chest. In the N64 game this door was not locked.",
+  "locations": {
+   "FT Entrance Chest": {
+    "id": "FT_ENTRANCE_CHEST",
+    "spot": "chest@-10.0,64.5",
+    "note": "up at y 117.5 (the floor is at 101.5), on the west side; how it is reached (climbing) is not read from the files: check in game",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT GS Entrance": {
+    "id": "FT_ENTRANCE_GS",
+    "spot": "skulltula@11.5,64.0",
+    "note": "up at y 119.8 on the east side; there at any time of day (Gimmick_AllDay_Skulltula). In game (user, 2026-11-23): it is grabbed by climbing the vines, no Hookshot needed, so no item rule",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "SFM Upper": "True",
+   "FT Lobby": "ForestTempleSmallKey"
+  }
+ },
+ {
+  "region": "FT Lobby",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 1 (corridor with a Skulltula) and room 2, the main hall around the elevator at (0, 100, -3.5) with the four torches, plus room 26 behind the east door (26.5, 105.5, -0.7), where Meg's picture hangs. North door (0.7, 105.5, -31.9) to the first Stalfos room. North-east: a floor switch at (17.1, 100, -17.2) opens the shutter (16.2, 99.9, -16.2) in front of the east courtyard door (flag ForestTemple_Room02_GoldEyeSwitch_On; it is a floor switch in the remake, whatever the flag is called). North-west: a Song of Time block (Obj_SongOfTimeBlock_A_01 at (-19.0, 100, -19.1)) stands in front of the west courtyard door. West door (-26.0, 103.5, -0.7): chain locks, small key. Meg appears here once Joelle, Beth and Amy are beaten (ForestTemple_DefeatJoe, ForestTemple_DefeatBeth, ForestTemple_DefeatAmy); beating her (ForestTemple_DefeatMeg) lets the elevator go down to the basement. The shutter between room 26 and Amy's room opens from Amy's side. The Bow for Meg is from the N64 game, not from the files: check in game.",
+  "locations": {
+   "FT Lobby Pot 1": {
+    "id": "FT_LOBBY_POT_01",
+    "spot": "pot@-16.5,13.0",
+    "kind": "pot",
+    "note": "drop table DropTable_Obj_Heart",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Lobby Pot 2": {
+    "id": "FT_LOBBY_POT_02",
+    "spot": "pot@-15.0,14.5",
+    "kind": "pot",
+    "note": "no drop table in the map data",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Lobby Pot 3": {
+    "id": "FT_LOBBY_POT_03",
+    "spot": "pot@-13.5,16.0",
+    "kind": "pot",
+    "note": "drop table DropTable_RangeWeapon_02",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Lobby Pot 4": {
+    "id": "FT_LOBBY_POT_04",
+    "spot": "pot@13.5,16.5",
+    "kind": "pot",
+    "note": "drop table DropTable_RangeWeapon_02",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Lobby Pot 5": {
+    "id": "FT_LOBBY_POT_05",
+    "spot": "pot@15.0,15.0",
+    "kind": "pot",
+    "note": "no drop table in the map data",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Lobby Pot 6": {
+    "id": "FT_LOBBY_POT_06",
+    "spot": "pot@16.5,13.5",
+    "kind": "pot",
+    "note": "drop table DropTable_Obj_Heart",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT GS Lobby": {
+    "id": "FT_LOBBY_GS",
+    "spot": "skulltula@9.0,-23.5",
+    "rule": "can_use(Hookshot)",
+    "note": "on a wall at y 109.6 (the hall floor is at 100); Hookshot assumed: check in game",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "events": {
+   "FT Meg Defeated": "'FT Joelle Defeated' and 'FT Beth Defeated' and 'FT Amy Defeated' and can_use(Bow)"
+  },
+  "exits": {
+   "FT Entrance": "True",
+   "FT First Stalfos Room": "True",
+   "FT East Courtyard": "True",
+   "FT West Courtyard": "can_play(SongOfTime)",
+   "FT Block Room": "has(ForestTempleSmallKey, 2)",
+   "FT Basement": "'FT Meg Defeated'"
+  }
+ },
+ {
+  "region": "FT First Stalfos Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 3 (corridor with a Blue Bubble) and room 4 at (0, 105.5, -55). Entering shuts the shutter (0, 105.5, -47.0) and two Stalfos appear; beating both opens it and makes the chest appear (Gimmick_DefeatEnemy_Open_ForestTemple_01). Saving and warping are off while the shutter is shut (IsDisableSaveAndWarp).",
+  "locations": {
+   "FT First Stalfos Room Chest": {
+    "id": "FT_FIRST_STALFOS_ROOM_CHEST",
+    "spot": "chest@0.0,-63.0",
+    "note": "appears when both Stalfos are beaten",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT First Stalfos Room Pot 1": {
+    "id": "FT_FIRST_STALFOS_ROOM_POT_01",
+    "spot": "pot@-2.5,-63.5",
+    "kind": "pot",
+    "note": "drop table DropTable_Obj_Heart",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT First Stalfos Room Pot 2": {
+    "id": "FT_FIRST_STALFOS_ROOM_POT_02",
+    "spot": "pot@2.5,-63.5",
+    "kind": "pot",
+    "note": "drop table DropTable_Obj_Heart",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT Lobby": "True"
+  }
+ },
+ {
+  "region": "FT East Courtyard",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 14, ground level (water at y 98.5): the well mouth at (15.1, 99.9, -41.0) with a ladder down, two Deku Babas, an Octorok. The chest stands at (38.8, 101.4, -35.8) with a Hookshot target at (34.8, 105.5, -39.9). Higher up on the east side: a ledge at y 105.5 with the door (42.3, 105.5, -40.0) to the falling ceiling room and the block MovableBox_Shortcut (44.7, 105.2, -31.6), and a balcony above it at y 111.9 with Pierre's scarecrow spot (41.3, 113.3, -38.0).",
+  "locations": {
+   "FT East Courtyard Chest": {
+    "id": "FT_EAST_COURTYARD_CHEST",
+    "spot": "chest@39.0,-35.5",
+    "rule": "can_use(Hookshot)",
+    "note": "the game puts the map here. Hookshot assumed (the target next to it); whether it can be reached without is not known: check in game",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT GS East Courtyard": {
+    "id": "FT_EAST_COURTYARD_GS",
+    "spot": "skulltula@44.5,-38.0",
+    "rule": "can_use(Hookshot)",
+    "note": "at y 112.1, level with the balcony above the ledge door; Hookshot assumed: check in game",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT Lobby": "True",
+   "FT Well": "'FT Well Drained' or can_use(IronBoots)"
+  }
+ },
+ {
+  "region": "FT East Courtyard Ledge",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "The ledge at y 105.5 on the east side of the east courtyard, in front of the door (42.3, 105.5, -40.0) that leads to the falling ceiling room. The block MovableBox_Shortcut (flag ForestTemple_Clear_MovableBox_Shortcut) is pushed from here to make a way up from the ground. In the logic the ledge is reached only from the falling ceiling room: whether the Hookshot target at (34.8, 105.5, -39.9) gets Link up here from the ground is not known (check in game).",
+  "exits": {
+   "FT East Courtyard": "True",
+   "FT Falling Ceiling Room": "True"
+  }
+ },
+ {
+  "region": "FT West Courtyard",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 12, ground level: the well mouth at (-32.1, 99.9, -40.9), two Deku Babas, an Octorok. Ivy to climb at (-31.8, 100.3, -43.4) (Land_IvyClimbable_A_11) and at (-9.2, 100, -41.0) (Land_IvyClimbable_A_15, three Skullwalltulas on it), both up to the walkway at y 113.9. The door to the lobby (-20.0, 100, -21.1) has the Song of Time block on its lobby side.",
+  "exits": {
+   "FT Lobby": "can_play(SongOfTime)",
+   "FT West Courtyard Upper": "True",
+   "FT Well": "'FT Well Drained' or can_use(IronBoots)"
+  }
+ },
+ {
+  "region": "FT West Courtyard Upper",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "The walkway at y 113.9 above the west courtyard (Land_ForestTemple_Balcony_A_01 at (-20.6, 113.9, -47.7), Land_ForestTemple_Balcony_A_02 at (-8.0, 113.9, -40.8)), reached by the ivy. The floor switch at (-31.9, 113.9, -50.7) drains the well (flag ForestTemple_Room07_Cleard, event ForestTemple_Room12_WaterLevelDrop). A Blue Bubble at (-26.0, 113.9, -50.1), a Hookshot target at (-20.5, 119.1, -46.9). Whether this walkway joins the balcony at y 107 is not known.",
+  "events": {
+   "FT Well Drained": "True"
+  },
+  "exits": {
+   "FT West Courtyard": "True"
+  }
+ },
+ {
+  "region": "FT West Courtyard Balcony",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "The balcony at y 107 on the west side of the west courtyard, with three shutters: to the block room (-48.3, 107, -12.5), to the Floormaster room (-58.5, 107, -26.5) and to the pool room below the boss key corridor (-53.6, 107, -37.5). In the logic the Floormaster room is entered only from the pool room, as in the N64 game; whether it can be entered straight from the block room's side of this balcony is not known (check in game).",
+  "locations": {
+   "FT GS West Courtyard": {
+    "id": "FT_WEST_COURTYARD_GS",
+    "spot": "skulltula@-38.0,-4.5",
+    "rule": "can_use(Hookshot)",
+    "note": "on the courtyard's south wall at y 112.9, about 14 units from the balcony's corner; the Hookshot's reach from here is not known (the Longshot or another spot may be needed): check in game",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT Block Room": "True",
+   "FT West Courtyard": "True"
+  }
+ },
+ {
+  "region": "FT Well",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 15, the tunnel under the two courtyards (y 88): the chest at its east end with a ladder at (17.8, 88.0, -41.0). Flooded until the well is drained (Obj_WaterPlane_Field_A_01 is there while ForestTemple_Room07_ChangeWaterLevelActor is off). Iron Boots as the other way in is from the N64 game, not from the files: check in game.",
+  "locations": {
+   "FT Well Chest": {
+    "id": "FT_WELL_CHEST",
+    "spot": "chest@16.5,-42.5",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Well Pot 1": {
+    "id": "FT_WELL_POT_01",
+    "spot": "pot@14.0,-39.5",
+    "kind": "pot",
+    "note": "no drop table in the map data",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Well Pot 2": {
+    "id": "FT_WELL_POT_02",
+    "spot": "pot@15.5,-39.5",
+    "kind": "pot",
+    "note": "drop table DropTable_Obj_Heart",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT West Courtyard": "True",
+   "FT East Courtyard": "True"
+  }
+ },
+ {
+  "region": "FT Block Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Rooms 5 to 9: the corridor behind the lobby's locked west door, then the tall room (x -44 to -80, y 103.5 to 128) climbed by pushing blocks (Obj_MovableBox_A_05 on two floors, flags ForestTemple_MovableBox_1F_ClearPosNum and ForestTemple_MovableBox_2F_ClearPosNum). Whether pushing a block needs the Goron Bracelet in the remake is not known. A shutter at (-48.3, 107, -12.5) leads to the west courtyard's balcony. On the second floor an eye switch at (-52.8, 119.5, 5.9) makes a chest fall (ForestTemple_Room08_EyeSwitch_Clear). At the top (y 124.5): the locked door (-55.8, 124.5, -11.4) to the twisted corridor, the eye switch above it at (-56.5, 131.5, -10.8) that twists and untwists the corridor, and a floor switch at (-74.0, 125.5, -1.0) that starts the elevator shortcut (ForestTemple_SageOfForest_ElevatorSwitch_01).",
+  "locations": {
+   "FT Block Room Pot 1": {
+    "id": "FT_BLOCK_ROOM_POT_01",
+    "spot": "pot@-51.5,16.5",
+    "kind": "pot",
+    "note": "no drop table in the map data",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Block Room Pot 2": {
+    "id": "FT_BLOCK_ROOM_POT_02",
+    "spot": "pot@-49.5,16.5",
+    "kind": "pot",
+    "note": "no drop table in the map data",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Block Room Pot 3": {
+    "id": "FT_BLOCK_ROOM_POT_03",
+    "spot": "pot@-47.5,16.5",
+    "kind": "pot",
+    "note": "no drop table in the map data",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Block Room Eye Switch Chest": {
+    "id": "FT_BLOCK_ROOM_EYE_SWITCH_CHEST",
+    "spot": "chest@-53.0,4.0",
+    "rule": "can_use(Bow)",
+    "note": "falls when the eye switch is shot; the eye switch has isHitHookShot false in the map data: an arrow, not the Hookshot",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT Lobby": "True",
+   "FT West Courtyard Balcony": "True",
+   "FT West Twisted Corridor": "has(ForestTempleSmallKey, 3)"
+  }
+ },
+ {
+  "region": "FT West Twisted Corridor",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Rooms 10 and 11 behind the block room's locked door: the corridor (Obj_ForestTemple_TwistedCorridor_A_01) and the room at its end with a Wallmaster. Twisted (as found), the end room's door (-45.9, 124.5, -58.8) leads to Joelle's room. Shooting the eye switch at the top of the block room (Obj_EyeSwitch_A_01, a silver one: it switches back and forth; flag ForestTemple_SageOfForest_TwistedCorridor_A_02) straightens it: the end room then holds the boss key chest and the way down to the pool room.",
+  "exits": {
+   "FT Block Room": "True",
+   "FT Joelle Room": "True",
+   "FT Boss Key Corridor": "can_use(Bow)"
+  }
+ },
+ {
+  "region": "FT Boss Key Corridor",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "The end room of the west twisted corridor once the corridor is straightened.",
+  "locations": {
+   "FT Boss Key Chest": {
+    "id": "FT_BOSS_KEY_CHEST",
+    "spot": "chest@-49.5,-63.5",
+    "note": "the game puts the boss key here (GetEventName ForesetTemple_GetBossKey, flag ForestTemple_Room23_GetBossKey)",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT West Twisted Corridor": "True",
+   "FT Pool Room": "True"
+  }
+ },
+ {
+  "region": "FT Pool Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 21 at (-56.5, 104.4, -59.5), below the boss key corridor: a pool to land in and two Blue Bubbles; beating both opens the shutter (-53.6, 107, -37.5) to the west courtyard's balcony (Gimmick_DefeatEnemy_Open_ForestTemple_05).",
+  "exits": {
+   "FT West Courtyard Balcony": "True",
+   "FT Floormaster Room": "True"
+  }
+ },
+ {
+  "region": "FT Floormaster Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 22 behind the shutter (-58.5, 107, -26.5) on the west courtyard's balcony. The shutter locks on entering; beating the Floormaster makes the chest appear and opens it (Gimmick_DefeatEnemy_Open_ForestTemple_02). Saving and warping are off meanwhile.",
+  "locations": {
+   "FT Floormaster Chest": {
+    "id": "FT_FLOORMASTER_CHEST",
+    "spot": "chest@-70.0,-26.5",
+    "note": "appears when the Floormaster is beaten",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT West Courtyard Balcony": "True"
+  }
+ },
+ {
+  "region": "FT Joelle Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 16: the stairs with Joelle's three pictures (Obj_ForestTemple_GhostPicture_A_01). Shooting the pictures with arrows brings Joelle out; beating her makes the chest appear and lights the torch (flags ForestTemple_Room_12_AppearTreasureChest, ForestTemple_DefeatJoe). A shutter at (-14.5, 114.5, -59.5) leads on to the Bow room.",
+  "locations": {
+   "FT Joelle Chest": {
+    "id": "FT_JOELLE_CHEST",
+    "spot": "chest@-17.0,-63.5",
+    "rule": "can_use(Bow)",
+    "note": "appears when Joelle is beaten; the pictures are shot with arrows",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "events": {
+   "FT Joelle Defeated": "can_use(Bow)"
+  },
+  "exits": {
+   "FT West Twisted Corridor": "True",
+   "FT Bow Room": "True"
+  }
+ },
+ {
+  "region": "FT Bow Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 17 at (0, 114.5, -59.5). Entering shuts the west shutter; three Stalfos (one, then two), and beating the last two makes the chest appear (Gimmick_DefeatEnemy_Open_ForestTemple_03). The west shutter opens again only when the eye switch at (-13.8, 119.0, -59.5) is shot after that (the eye switch has isHitHookShot false in the map data: an arrow, not the Hookshot). A pot that comes back (Obj_Pot_A_02_Respawn, arrows) stands where pot 1 is, so arrows never run out; it is not a check. The east door (14.5, 114.5, -58.8) has chain locks: small key. WARNING for the randomizer: without the Bow there is no way back out of this room except that locked door, which leads to Beth's room, a dead end without the Bow. Saving and warping are off while the shutter is shut. IN GAME (user, 2026-11-23, unchanged game): the room does need the Bow to leave; the eye switch sits behind bars, so the Hookshot does not reach it; saving is off in the room; dying puts Link back at the temple's beginning, and because nothing was saved, whatever was picked up in the room is lost. So without the Bow nothing found in this room can be kept. DECIDED (user, 2026-11-23, D39): the randomizer reopens the west shutter when the chest appears, so the room no longer needs the Bow. That is a game change, built and tested in part 3; until it is, the rule back out stays can_use(Bow).",
+  "locations": {
+   "FT Bow Chest": {
+    "id": "FT_BOW_CHEST",
+    "spot": "chest@0.0,-68.5",
+    "note": "the game puts the Bow here (GetEventName ForestTemple_GetBow, flag ForestTemple_Room06_GetBow); appears when the last two Stalfos are beaten",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Bow Room Pot 1": {
+    "id": "FT_BOW_ROOM_POT_01",
+    "spot": "pot@-2.0,-69.0",
+    "kind": "pot",
+    "note": "drop table DropTable_Obj_Heart",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Bow Room Pot 2": {
+    "id": "FT_BOW_ROOM_POT_02",
+    "spot": "pot@2.5,-69.0",
+    "kind": "pot",
+    "note": "drop table DropTable_Obj_Heart",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Bow Room Pot 3": {
+    "id": "FT_BOW_ROOM_POT_03",
+    "spot": "pot@-2.0,-50.0",
+    "kind": "pot",
+    "note": "drop table DropTable_Obj_Heart",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Bow Room Pot 4": {
+    "id": "FT_BOW_ROOM_POT_04",
+    "spot": "pot@2.5,-50.0",
+    "kind": "pot",
+    "note": "drop table DropTable_Obj_Heart",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT Joelle Room": "can_use(Bow)",
+   "FT Beth Room": "has(ForestTempleSmallKey, 4)"
+  }
+ },
+ {
+  "region": "FT Beth Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 18, the mirror of Joelle's room: Beth's three pictures (Obj_ForestTemple_GhostPicture_A_02). Beating Beth makes the chest appear, lights the torch and opens the shutter (46.0, 124.5, -59.5) at the top of the stairs (flags ForestTemple_Room_13_AppearTreasureChest, ForestTemple_DefeatBeth).",
+  "locations": {
+   "FT Beth Chest": {
+    "id": "FT_BETH_CHEST",
+    "spot": "chest@17.0,-63.5",
+    "rule": "can_use(Bow)",
+    "note": "the game puts the compass here; appears when Beth is beaten; the pictures are shot with arrows",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Beth Room Pot 1": {
+    "id": "FT_BETH_ROOM_POT_01",
+    "spot": "pot@20.0,-67.5",
+    "kind": "pot",
+    "note": "no drop table in the map data",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Beth Room Pot 2": {
+    "id": "FT_BETH_ROOM_POT_02",
+    "spot": "pot@22.0,-67.5",
+    "kind": "pot",
+    "note": "drop table DropTable_RangeWeapon_02",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Beth Room Pot 3": {
+    "id": "FT_BETH_ROOM_POT_03",
+    "spot": "pot@24.0,-67.5",
+    "kind": "pot",
+    "note": "drop table Drop_ResourceSupply_BeforeBoss",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "events": {
+   "FT Beth Defeated": "can_use(Bow)"
+  },
+  "exits": {
+   "FT Bow Room": "True",
+   "FT East Twisted Corridor": "can_use(Bow)"
+  }
+ },
+ {
+  "region": "FT East Twisted Corridor",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Rooms 19 and 20: the room behind Beth's shutter (a Wallmaster, a Sun's Song fairy spot) and the east corridor (Obj_ForestTemple_TwistedCorridor_A_02, two Green Bubbles) to the locked door (57.2, 124.5, -11.5).",
+  "exits": {
+   "FT Beth Room": "True",
+   "FT Frozen Eye Switch Room": "has(ForestTempleSmallKey, 5)"
+  }
+ },
+ {
+  "region": "FT Frozen Eye Switch Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 23 at (56.5, 124.5, 2). The eye switch above the door (Obj_EyeSwitch_A_07 at (56.5, 131.5, -11.0)) is inside a block of ice (Obj_Ice_A_01) and cannot be hit until the ice is gone. A floor switch at (56.5, 124.6, 2.0) lights the torch at (56.5, 125.5, 5.6); the ice melts when an arrow reaches it through the flame (the ice's isArrow output sets ForestTemple_Room14_MeltedIce). Hitting the switch then twists the east corridor (cutscene Dm_ForestTemple_0007), which opens the way down to the falling ceiling room. Whether Din's Fire or Fire Arrows also melt the ice is not read from the files.",
+  "locations": {
+   "FT Frozen Eye Switch Room Pot 1": {
+    "id": "FT_FROZEN_EYE_SWITCH_ROOM_POT_01",
+    "spot": "pot@55.5,15.0",
+    "kind": "pot",
+    "note": "drop table DropTable_RangeWeapon_01",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Frozen Eye Switch Room Pot 2": {
+    "id": "FT_FROZEN_EYE_SWITCH_ROOM_POT_02",
+    "spot": "pot@57.5,15.0",
+    "kind": "pot",
+    "note": "drop table DropTable_RangeWeapon_01",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT East Twisted Corridor": "True",
+   "FT Falling Ceiling Room": "can_use(Bow)"
+  }
+ },
+ {
+  "region": "FT Falling Ceiling Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 24 (x 51 to 58, z -27 to -47, y 104), under the east corridor: the falling ceiling (Obj_ForestTemple_FallingCeiling_A_01) and three Skulltulas. The floor switch at (51.2, 104, -37.2) opens the shutter (56.0, 104, -11.5) to Amy's room (flag ForestTemple_Room15_Cleard). A door leads out to the east courtyard's ledge.",
+  "locations": {
+   "FT Falling Ceiling Room Chest": {
+    "id": "FT_FALLING_CEILING_ROOM_CHEST",
+    "spot": "chest@56.0,-23.0",
+    "note": "its map entry names no item (no Drop__DropActor): what the game gives here is to be seen in game",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT Amy Room": "True",
+   "FT East Courtyard Ledge": "True"
+  }
+ },
+ {
+  "region": "FT Amy Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 25 at (59, 104, 0), under the frozen eye switch room. Amy's picture (Obj_ForestTemple_GhostPicture_A_03) is shot with an arrow, which drops the picture blocks (Obj_ForestTemple_MovableBox_A_01 to _A_05, ForestTemple_MovableBox_Puzzle_Manager); putting them together brings Amy out (ForestTemple_AmyPuzzleBoxCleard). Beating her (ForestTemple_DefeatAmy) lights the torch and opens the shutter (44.5, 104.9, 0) to room 26 and the lobby.",
+  "locations": {
+   "FT Amy Room Pot 1": {
+    "id": "FT_AMY_ROOM_POT_01",
+    "spot": "pot@46.0,-3.5",
+    "kind": "pot",
+    "note": "drop table DropTable_RangeWeapon_02",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Amy Room Pot 2": {
+    "id": "FT_AMY_ROOM_POT_02",
+    "spot": "pot@46.0,-2.0",
+    "kind": "pot",
+    "note": "drop table Drop_ResourceSupply_BeforeBoss",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "events": {
+   "FT Amy Defeated": "can_use(Bow)"
+  },
+  "exits": {
+   "FT Falling Ceiling Room": "True",
+   "FT Lobby": "'FT Amy Defeated'"
+  }
+ },
+ {
+  "region": "FT Basement",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 27 (y 60), reached with the lobby's elevator once Meg is beaten. A floor that turns around the middle (Obj_ForestTemple_PivotedFloor_A_01, grabbed and pushed). The floor switch at (-15.9, 60.7, -19.6) sets the turning floor alight (ForestTemple_Room17_Switch_On_01); the eye switch at (24.9, 62.1, -3.5) is inside ice that melts when an arrow reaches it through fire (ForestTemple_Room27_MeltedIce); shooting the switch opens the shutter (0, 59.5, -19.6) to the boss door (ForestTemple_Room17_Switch_On_02). Remake: the N64 basement had no ice and no eye switch. The boss door (0, 59.5, -40.9) has the boss lock (Obj_DoorChainLock_A_02) and also stays shut until SageOfForest_IsAfter_Step07_Exp.",
+  "locations": {
+   "FT Basement Chest": {
+    "id": "FT_BASEMENT_CHEST",
+    "spot": "chest@-16.5,12.5",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT GS Basement": {
+    "id": "FT_BASEMENT_GS",
+    "spot": "skulltula@-3.5,17.0",
+    "rule": "can_use(Hookshot)",
+    "note": "at y 65.6 (the floor is at 60.7); Hookshot assumed: check in game",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Basement Pot 1": {
+    "id": "FT_BASEMENT_POT_01",
+    "spot": "pot@-1.5,20.0",
+    "kind": "pot",
+    "note": "drop table Drop_ResourceSupply_BeforeBoss",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Basement Pot 2": {
+    "id": "FT_BASEMENT_POT_02",
+    "spot": "pot@-0.5,21.0",
+    "kind": "pot",
+    "note": "drop table Drop_ResourceSupply_BeforeBoss",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Basement Pot 3": {
+    "id": "FT_BASEMENT_POT_03",
+    "spot": "pot@0.5,21.0",
+    "kind": "pot",
+    "note": "drop table Drop_ResourceSupply_BeforeBoss",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Basement Pot 4": {
+    "id": "FT_BASEMENT_POT_04",
+    "spot": "pot@1.5,20.0",
+    "kind": "pot",
+    "note": "drop table Drop_ResourceSupply_BeforeBoss",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "exits": {
+   "FT Lobby": "True",
+   "FT Phantom Ganon Room": "can_use(Bow) and ForestTempleBossKey"
+  }
+ },
+ {
+  "region": "FT Phantom Ganon Room",
+  "scene": "ForestTemple",
+  "verified": false,
+  "notes": "Room 29 at (0, 74.7, -62.5): Phantom Ganon (Enemy_DungeonBoss_PhantomGanon) and his six paintings. After the fight the Heart Container lies at (-3.2, 74.7, -64.4) and the warp (Obj_WarpPoint_A_01) leads to the sage's room (SageRoom), then to Kokiri Forest as an adult. Bow or Hookshot to hit him as he rides out of a painting is from the N64 game: check in game. The event \"Forest Temple Clear\" is what changes the adult rock circle in Kokiri Forest (SageOfForest_IsBefore_Step08).",
+  "locations": {
+   "FT Phantom Ganon Heart Container": {
+    "id": "FT_PHANTOM_GANON_HEART_CONTAINER_ITEM",
+    "spot": "freestanding@-3.0,-64.5",
+    "rule": "'Forest Temple Clear'",
+    "kind": "freestanding",
+    "note": "the boss heart (Obj_Heart_Container), shown in the cutscene Dm_ForestTemple_BossOut",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   },
+   "FT Forest Medallion": {
+    "id": "FT_FOREST_MEDALLION_GIFT",
+    "rule": "'Forest Temple Clear'",
+    "kind": "gift",
+    "pos": [
+     0.0,
+     74.7,
+     -62.5
+    ],
+    "note": "the dungeon reward: the Forest Medallion (Item_Medal_Forest in the item table), given after the boss. How the game hands it over is not found yet (its name is in none of the Dm_SageRoom or SageOfForest flows): to find in part 7",
+    "randomizable": "untested",
+    "randomizable_note": "not yet changed in game"
+   }
+  },
+  "events": {
+   "Forest Temple Clear": "can_use(Bow) or can_use(Hookshot)"
+  },
+  "exits": {
+   "FT Basement": "True"
+  }
+ }
+]

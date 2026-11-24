@@ -103,6 +103,11 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
 33. **The four settings gaps are settled:** D34-D37.
 38. **Each phase is worked in parts:** one part = one test round = one PR; never two untested parts stacked;
     only the current phase is broken into parts. Phase 1's seven parts are in the roadmap.
+39. **The Forest Temple's Bow room reopens its door when the chest appears** (2026-11-23). In the unchanged game
+    the west shutter stays shut until the eye switch is shot with an arrow (it is behind bars, so the Hookshot
+    does not reach it), saving is off, and dying loses what was picked up there. The randomizer opens the
+    shutter as soon as the chest has appeared, so the room needs no Bow and any item can be in its chest. Built
+    and tested in phase 1, part 3.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".

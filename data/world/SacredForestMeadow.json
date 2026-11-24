@@ -111,7 +111,7 @@
   "exits": {
    "SFM Meadow": "True",
    "SFM Upper Grotto": "can_blast_or_smash",
-   "Forest Temple (not mapped yet)": "is_adult and can_use(Hookshot)"
+   "FT Entrance": "is_adult and can_use(Hookshot)"
   }
  },
  {

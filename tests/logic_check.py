@@ -91,5 +91,37 @@ expect('adult Skulltula without the hookshot (a jump reaches it)', ['MasterSword
        age_of={'SFM GS': ['adult']})
 expect('adult without Saria\'s Song: blocked by Mido', ['MasterSword', 'Hookshot'], {}, not_want=['Sheik in Forest'])
 
+# Forest Temple
+FT_IN = ['MasterSword', 'Hookshot', 'SariasSong', 'Ocarina']
+K = 'ForestTempleSmallKey'
+expect('Forest Temple: at the door with no key: the first room only',
+       FT_IN, {}, want=['FT Entrance Chest', 'FT GS Entrance'], not_want=['FT Lobby Pot 1', 'FT First Stalfos Room Chest'],
+       age_of={'FT Entrance Chest': ['adult']})
+expect('Forest Temple: one key: lobby, Stalfos room, east courtyard; not the west courtyard or the block room',
+       FT_IN + [K], {}, want=['FT Lobby Pot 1', 'FT GS Lobby', 'FT First Stalfos Room Chest', 'FT East Courtyard Chest'],
+       not_want=['FT Well Chest', 'FT Block Room Pot 1', 'FT GS West Courtyard'])
+expect('Forest Temple: one key + Song of Time: the west courtyard, the drained well',
+       FT_IN + [K, 'SongOfTime'], {}, want=['FT Well Chest', 'FT Well Pot 1'], not_want=['FT GS West Courtyard'])
+expect('Forest Temple: one key + Iron Boots: the well without draining it (as in the N64 game)',
+       FT_IN + [K, 'IronBoots'], {}, want=['FT Well Chest'])
+expect('Forest Temple: two keys: block room and its balcony; the eye switch chest needs the Bow',
+       FT_IN + [K] * 2, {}, want=['FT Block Room Pot 1', 'FT GS West Courtyard', 'FT Well Chest'],
+       not_want=['FT Block Room Eye Switch Chest', 'FT Bow Chest'])
+expect('Forest Temple: three keys, no Bow: the Bow room is reached, Joelle\'s chest and the boss key are not',
+       FT_IN + [K] * 3, {}, want=['FT Bow Chest', 'FT Bow Room Pot 1'],
+       not_want=['FT Joelle Chest', 'FT Boss Key Chest', 'FT Floormaster Chest', 'FT Beth Room Pot 1'])
+expect('Forest Temple: three keys + Bow: Joelle, the boss key, the Floormaster; Beth needs a fourth key',
+       FT_IN + [K] * 3 + ['Bow'], {}, want=['FT Joelle Chest', 'FT Boss Key Chest', 'FT Floormaster Chest',
+                                           'FT Block Room Eye Switch Chest'], not_want=['FT Beth Chest'])
+expect('Forest Temple: five keys + Bow, no boss key: the basement, not the boss',
+       FT_IN + [K] * 5 + ['Bow'], {}, want=['FT Basement Chest', 'FT GS Basement', 'FT Falling Ceiling Room Chest'],
+       not_want=['FT Phantom Ganon Heart Container', 'FT Forest Medallion'])
+expect('Forest Temple: five keys + Bow + boss key: the Heart Container and the Forest Medallion',
+       FT_IN + [K] * 5 + ['Bow', 'ForestTempleBossKey'], {},
+       age_of={'FT Phantom Ganon Heart Container': ['adult'], 'FT Forest Medallion': ['adult']})
+expect('Forest Temple: five keys and the boss key but no Bow: no Poe sisters, so no basement',
+       FT_IN + [K] * 5 + ['ForestTempleBossKey'], {}, want=['FT Beth Room Pot 1'],
+       not_want=['FT Basement Chest', 'FT Beth Chest', 'FT Frozen Eye Switch Room Pot 1'])
+
 print('\n%d failed' % failures)
 sys.exit(1 if failures else 0)

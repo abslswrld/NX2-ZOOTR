@@ -56,16 +56,5 @@
    "Lost Woods": "can_dive or can_use(IronBoots)",
    "Hyrule Field (not mapped yet)": "True"
   }
- },
- {
-  "region": "Forest Temple (not mapped yet)",
-  "unmapped": true,
-  "notes": "Placeholder. Event \"Forest Temple Clear\" (placeholder rule: reaching the temple; the real requirements come when it is mapped): the adult rock circle in Kokiri Forest changes after it (level logic, flag SageOfForest_IsBefore_Step08).",
-  "exits": {
-   "SFM Upper": "True"
-  },
-  "events": {
-   "Forest Temple Clear": "is_adult"
-  }
  }
 ]

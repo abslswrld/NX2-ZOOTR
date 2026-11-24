@@ -62,6 +62,9 @@ echo.
 echo === One-time drops (rocks, bushes, pots) check ===
 %PY% tests\one_time_check.py "%ROMFS%"
 echo.
+echo === Forest Temple data check ===
+%PY% tests\forest_temple_check.py "%ROMFS%"
+echo.
 echo === Starting state of a new file check ===
 %PY% tests\start_state_check.py "%ROMFS%"
 echo.

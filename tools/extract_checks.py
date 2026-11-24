@@ -40,6 +40,9 @@ def kind_of(gyaml):
     if g.startswith('Shop_') and not g.startswith('Shop_Board'):
         return 'shop'
     if g.startswith('Obj_Pot'):
+        if g.endswith('_Respawn'):
+            return None                        # a refill pot that comes back (arrows in the Forest Temple's
+                                               # Bow room): never a check
         return 'pot'
     if g.startswith(('Obj_Rupee_', 'Obj_Heart')) or g in ('Obj_HeartPiece', 'Obj_Heart_Piece'):
         return 'freestanding'

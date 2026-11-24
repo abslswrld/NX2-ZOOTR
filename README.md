@@ -154,6 +154,7 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `tests/hint_check.py` | gossip stone hints (`build_mod.py --hint STONE=ITEM` or `STONE=@CHECK_ID`): every name a hint uses is the game's own English text, every check gets a wording that fits a stone, what `--hint` takes and refuses, and a whole build read back (in `run_tests.bat`) |
 | `tools/start_state.py` | the starting state of a new file: adds starting items and starting flags to the game's own list of what a new file has, the sequence module `Sequence/SetPouchAndStatusForGameStart` (used by `build_mod.py --start ITEM[=N]` and `--start-flag NAME=VALUE`) |
 | `tests/start_state_check.py` | the starting state: where the game sets up a new file and what it gives and sets there, read from its own files; items and flags of each type added and read back; what is refused; whole builds (in `run_tests.bat`) |
+| `tests/forest_temple_check.py` | the Forest Temple's data against the game's files: its 46 spots and what the game puts in them, one check and one permanent ID per spot, the five locked doors as the five key rules, the boss lock, the eye switches and the ice, and the temple walked with the items where the game puts them (and without the Bow, the boss key or a key) (in `run_tests.bat`) |
 | `tests/size_check.py` | checks those rules against the entry of every game file they cover (reads every pack: several minutes; not part of `run_tests.bat`) |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):
@@ -178,6 +179,14 @@ game: the entryway grotto (two Wolfos, chest) opens with the Song of Storms, the
 explosives, and the upper grotto holds a chest behind Song of Time blocks instead of two Deku Scrubs (all
 from the grotto covers' own actor files: `Land_HidingHoleCover_DisappearSrom_Base` vs
 `Land_HidingHoleCover_BrokenBomb_Base`). That finishes the forest outside the temples.
+
+**Forest Temple** (one map for both ages; entered as an adult with the Hookshot): 23 regions, 12 chests, 5 Gold
+Skulltulas, 28 pots, the Heart Container and the Forest Medallion (47 checks, all with IDs, area code `FT`).
+Five locked doors in a fixed order, so the rules ask for 1 to 5 small keys (`ForestTempleSmallKey`), and the
+boss door asks for `ForestTempleBossKey`. Remake differences found in the files: the first door is locked
+(its key is in the first room's chest), the east courtyard opens with a floor switch, the basement has ice
+over an eye switch, and there is no chest on a raised island (12 chests, not 13). Nothing here is checked in
+game yet: every region is `"verified": false`, and the open questions are in CHANGELOG.md (2026-11-23).
 
 Breakable boulders (`Obj_BrokenRock`) are listed with the rocks (kind "boulder"). Gifts from NPCs (no map
 placement) carry the position of their NPC so they show on the maps.
@@ -232,6 +241,6 @@ by hand: rebuilding the database updates every answer, and `tests/db_check.py` t
 search (every listed set reaches the check, every set minus any one item doesn't, and "impossible" really
 is impossible).
 
-**Classified so far:** Kokiri Forest (120 checks). `randomizable` is `"untested"` for every check that may
+**Classified so far:** Kokiri Forest (120 checks), Forest Temple (47 checks). `randomizable` is `"untested"` for every check that may
 hold an item, until changing it has been tried in game; gossip stones are `"no"`.
 
