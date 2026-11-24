@@ -375,7 +375,11 @@ GROUND_LIFT = ('Item_Gauntlet_Goron', 'Item_FairyBless_MP', 'Item_Scale_Silver',
                # their ground pose places many bones: measured with every bone posed, held up by a copy of the
                # game's pose added to their own project (2026-11-22, see the notes at the top)
                'Item_Range_SlingShot', 'Item_Range_Bow', 'Item_Gauntlet_Silver', 'Item_Gauntlet_Gold',
-               'Item_BombBag_Small', 'Item_Hookshot', 'Item_Longshot')
+               'Item_BombBag_Small', 'Item_Hookshot', 'Item_Longshot',
+               # the boots (2026-11-24): the Hover Boots lay slightly in the floor from a pot (in game,
+               # 2026-11-23). Lowest vertex in the game's pose -0.140; the Iron Boots' -0.147, the same fault.
+               # Their models have vertices on five and seven bones (item_pose._WEIGHT)
+               'Item_HoverBoot', 'Item_HeavyBoot')
 # items that share an animation project with another listed item: the one copy is measured on that item
 GROUND_LIFT_AS = {'Item_FairyBless_MPDouble': 'Item_FairyBless_MP',
                   'Item_FairyBless_DefenseDouble': 'Item_FairyBless_MP',

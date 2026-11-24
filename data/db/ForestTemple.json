@@ -679,7 +679,7 @@
    "note": "no item or drop table in the map data"
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Mirror Shield",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Mirror Shield; on 2026-11-24 a small key (counted)",
   "requirements": {
    "child": null,
    "adult": [
@@ -877,7 +877,7 @@
    "note": null
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Ice Arrow, with no message from Navi about the Bow (its opening event removed)",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Ice Arrow, with no message from Navi about the Bow (its opening event removed); on 2026-11-24 a small key (counted, opened the Bow room's east door)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1219,8 +1219,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): gave the Megaton Hammer (its small key was on the Gold Skulltula)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1267,7 +1267,7 @@
    "note": null
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): dropped the Iron Boots instead of its token",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): dropped the Iron Boots instead of its token; on 2026-11-24 a small key (counted for the temple, opened the first door)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1364,8 +1364,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): gave the Lens of Truth, with no magic meter (--fix magic_is_separate)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1414,7 +1414,7 @@
    "note": "random drop (DropTable_Obj_Heart)"
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Lens of Truth",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Lens of Truth; on 2026-11-24 a small key (the chest's key as a ground item: looked and acted like the others)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1808,7 +1808,7 @@
    "note": "random drop (DropTable_Obj_Heart)"
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Megaton Hammer (its drop table removed: only the item came out), and stayed gone after it was taken",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Megaton Hammer (its drop table removed: only the item came out), and stayed gone after it was taken; on 2026-11-24 a small key (counted)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1857,7 +1857,7 @@
    "note": "no item or drop table in the map data"
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Hover Boots (they lay slightly in the floor), and stayed gone after they were taken",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Hover Boots (they lay slightly in the floor), and stayed gone after they were taken; on 2026-11-24 the Hover Boots again, now lying on the floor (the height fix)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1905,8 +1905,8 @@
    "source": null,
    "note": "random drop (DropTable_RangeWeapon_02)"
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): gave the Iron Boots, lying on the floor",
   "requirements": {
    "child": null,
    "adult": [

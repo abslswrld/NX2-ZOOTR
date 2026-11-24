@@ -293,7 +293,7 @@ def shelf_copy(base, base_project, new_project, item_anim, shop, held_lower=0.0)
 # this gives exactly the box of ActorInfo for all seven models (with the shapes their visibility shows).
 SSC = 0x800000
 _INDEX = {'0302': 1, '0309': 2, '030b': 4}           # bone index formats: one, two, four bytes
-_WEIGHT = {'0109': 2, '010b': 4}                      # weights: two or four bytes, 0..255
+_WEIGHT = {'0102': 1, '0109': 2, '010b': 4}           # weights: one, two or four bytes, 0..255
 
 
 def skeleton(data):
