@@ -1,5 +1,6 @@
 {
  "open_forest": true,
  "start_with_goron_bracelet": true,
- "bombs_without_bracelet": true
+ "bombs_without_bracelet": true,
+ "forest_temple_bow_room_door": true
 }

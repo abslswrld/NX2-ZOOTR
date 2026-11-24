@@ -114,6 +114,9 @@ Parts, in order:
    still where the game puts them. In game: a sample in the temple. **Also here (D39):** the Bow room's west
    shutter reopens when the chest appears; then the rule out of the room no longer asks for the Bow. In game:
    walk out of the Bow room without the Bow.
+   **Built 2026-11-23, to test in game:** items on the temple's chests (not the boss key's), pots and Gold
+   Skulltulas; `--fix forest_temple_bow_room_door`. The loose item is the boss's Heart Container: it moves to
+   part 7.
 4. **Small keys in their own dungeon:** keys moved to other checks in the temple. In game: the locked doors open
    with keys found in new places, and the key count is right.
 5. **Keys anywhere, and which dungeon a key belongs to:** a Forest Temple key placed in Kokiri Forest; its get
