@@ -71,11 +71,16 @@ Temple orange. The game has no blue or purple.
 In game 2026-11-24 (fourth test): the list cannot be made longer. With blue, purple and orange added behind
 the game's eight (numbers 8, 9, 10), the game started as usual and all three names came out orange: a number
 past the game's eight is not looked up in the file.
-So a colour of our own takes a place of the game's list that no text of the game uses (OUR_COLOURS; to test
-in game): blue is place 2 (the game's is a loud pink, 255, 0, 254), purple is place 7 (133, 125, 104); only
-the three colour values of that place change, its name stays, and only the places a named key of the build
-uses. Orange is the game's own place 6 (255, 53, 25), unchanged. Not known: whether the game's code uses
-place 2, 6 or 7 for something of its own (their names' hashes are in the file, the names are not known).
+So a colour of our own takes a place of the game's list that no text of the game uses (OUR_COLOURS): blue is
+place 2 (the game's is a loud pink, 255, 0, 254), purple is place 7 (133, 125, 104), orange is place 6 (255,
+53, 25); only the three colour values of that place change, its name stays, and only the places a named key
+of the build uses.
+In game 2026-11-24 (fifth test): blue and purple show and are the shades the user wants. The game's own place
+6 was "darker than last time" and the user wants "a more yellowish orange" (the fourth test's orange was ours,
+215, 110, 0: a number past the list seems to give the list's last colour), so place 6 is recoloured too (225,
+130, 0; this shade is not seen in game yet). Not known: whether the game's code uses place 2, 6 or 7 for
+something of its own (their names' hashes are in the file, the names are not known); the user saw nothing
+out of place, but did not look everywhere.
 
 Not yet: gifts, scrubs, shop shelves, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
@@ -116,7 +121,7 @@ COLOUR_LIST = 'MessageColorArray'
 GAME_COLOUR_COUNT = 8                            # the game's list; a number past it is not looked up
 # colours by name: name -> (its place in the game's list, the (red, green, blue) that place gets, or None
 # where the game's own colour is used)
-OUR_COLOURS = {'blue': (2, (30, 80, 190)), 'purple': (7, (115, 45, 160)), 'orange': (6, None)}
+OUR_COLOURS = {'blue': (2, (30, 80, 190)), 'purple': (7, (115, 45, 160)), 'orange': (6, (225, 130, 0))}
 # dungeon -> the colour of its name: a place in the game's list, or one of OUR_COLOURS (the user, 2026-11-24)
 COLOURS = {'ForestTemple': 3, 'FireTemple': 0, 'WaterTemple': 'blue', 'ShadowTemple': 'purple',
            'SpiritTemple': 'orange'}

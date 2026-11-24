@@ -108,6 +108,13 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     does not reach it), saving is off, and dying loses what was picked up there. The randomizer opens the
     shutter as soon as the chest has appeared, so the room needs no Bow and any item can be in its chest. Built
     in phase 1, part 3 (`--fix forest_temple_bow_room_door`); **passed in game 2026-11-23.**
+40. **A named small key says its temple's name in the temple's colour** (2026-11-24): Forest Temple green, Fire
+    Temple red, Water Temple blue, Shadow Temple purple, Spirit Temple a yellowish orange. Green and red are the
+    game's own text colours; the game has no blue, purple or orange and its list of eight cannot be made
+    longer, so those three recolour three places of the list that no text of the game uses (2, 7, 6). Built in
+    phase 1, part 6 (`tools/dungeon_keys.py`: `COLOURS`, `OUR_COLOURS`); green, red, blue and purple **passed
+    in game 2026-11-24**, the orange's last shade is not seen in game yet. The other eight dungeons have no
+    colour.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".

@@ -4,15 +4,27 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (four tests in game done; fifth test build to test)
+### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (five tests in game done; the last change, the orange's shade, is not seen in game)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24), fifth test build:**
+- **Blue and purple work, in the shades the user wants:** the Water Temple's name was blue (place 2 of the
+  game's list recoloured) and the Shadow Temple's purple (place 7). Fire red and Forest green as before.
+- **Orange:** the game's own place 6 (255, 53, 25) was "darker than last time"; the user wants "a more
+  yellowish orange". So the fourth test's orange was ours (215, 110, 0): a number past the list seems to give
+  the list's last colour.
+- **Nothing out of place was seen** in blue or purple elsewhere ("didn't test it all").
+
+**After the fifth test (2026-11-24):** orange is place 6 recoloured to (225, 130, 0), the same way as blue and
+purple (`dungeon_keys.OUR_COLOURS`). **This shade has not been seen in game.** The test build in
+`out\mods\NX2-ZOOTR` has it.
 
 **In game (user, 2026-11-24), fourth test build:**
 - **The game's list of text colours cannot be made longer.** The game started as usual, and the three names in
   the added colours (numbers 8, 9 and 10: Water, Shadow and Spirit Temple) all came out orange. The Fire
   Temple was red and both pots' Forest Temple green, as before. The user: "orange shade is fine".
 
-**Fifth test build (2026-11-24, to test in game): colours of our own in places of the game's list.**
+**Fifth test build (2026-11-24): colours of our own in places of the game's list.**
 - **Blue is place 2 and purple is place 7 of the game's list** (`tools/dungeon_keys.py`: `OUR_COLOURS`,
   `colour_table`): no text of the game in any language uses those places. Only the three colour values of the
   place change (2: from (255, 0, 254) to (30, 80, 190); 7: from (133, 125, 104) to (115, 45, 160)), its name

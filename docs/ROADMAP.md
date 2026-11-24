@@ -151,8 +151,11 @@ Parts, in order:
    colours: Forest green, Fire red, Water blue, Shadow purple, Spirit orange.
    **Fourth test in game, 2026-11-24:** the game's list of text colours (a file in the pack the game loads
    first) cannot be made longer: colours added behind its eight all came out orange.
-   **Fifth test build, to test:** blue and purple take two places of the game's list that no text uses (2 and
-   7); orange is the game's own place 6.
+   **Fifth test in game, 2026-11-24:** blue and purple work as two recoloured places of the game's list that
+   no text uses (2 and 7). The game's own place 6 was too dark an orange, so it is recoloured too, to a more
+   yellowish orange (225, 130, 0): **that shade is not seen in game yet.** The colours are D40.
+   **Open:** gifts, scrubs and shelves; whether `+name` becomes the rule for a key outside its dungeon; a
+   colour for the other eight dungeons; the Map page of a place whose first cutscene did not run.
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 
