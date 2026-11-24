@@ -4,8 +4,38 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (first test in game done; second test build to test)
+### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (two tests in game done; third test build to test)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24), second test build:**
+- **The map and the compass given at the start work.** In the Forest Temple as a child the Map page showed the
+  temple's map with the map and the compass in their slots and the chests marked.
+- **A place marked as visited has its map.** With `IsVisitLocation.KokiriForest=true` the Map page showed the
+  map of Kokiri Forest right at the start, where the first build said "???". So "???" is "not visited yet".
+- **"Unavailable right now." is the adult made with the debug menu, not the build.** As an adult the Map page
+  said it in the Sacred Forest Meadow (not marked) and in the temple (marked), and there was no small map on
+  screen; as a child both were there. Something the game sets when Link becomes an adult is missing after the
+  debug menu's change. Not looked for further (one saved flag that speaks of it: `Sequence_IsChildhood`).
+- **The dungeon map shows no key count** (the user's screenshot: the temple's name and the Gold Skulltula
+  count, no keys). The count is seen in the pop-up: the Gold Skulltula's key showed 6, as expected.
+- **The name shows on a key in a chest:** the third chest in Mido's house said "You found a small key! (Forest
+  Temple)", with no count. **It does not on a key from a pot:** both pots said "You found a small key!", with
+  no count. **Why:** a key in a chest is shown as it is; for a key picked up from the ground the game holds up
+  the item its name stands for, and the text is that item's. The name was the dungeon's chest key without the
+  name, whose own name is the game's key.
+- **Asked for (the user):** the temple's name in the temple's colour (green for the Forest Temple).
+- Save and reload: as before.
+
+**Third test build (2026-11-24, to test in game):**
+- **The name of a named key is now the dungeon's named chest key** (`Item_NX2KN_<dungeon>`), which is named
+  itself and is built with every named key, as the game's `Obj_Dungeon_SmallKey` is named `Item_Dungeon_SmallKey`.
+- **The temple's name in a colour:** `--key-colour ForestTemple=3` (`tools/dungeon_keys.py`: `messages`,
+  `colour_tag`). The game's texts colour words with a numbered tag; every language uses the numbers 0, 1, 3, 4
+  and 5 and no other (0: names and places in talk, 1: Navi's thoughts, 3: "uses 1 magic power", 4 and 5: the
+  staff roll). No file says what colour a number is, and no get message of the game has a colour. So the build
+  is a colour chart: the two pots hold Forest Temple keys in colour 3, Mido's four chests hold keys of the
+  Shadow Temple (4), the Fire Temple (0), the Water Temple (1) and the Spirit Temple (5), from left to right.
+  `dungeon_keys.COLOURS` (the colour of each dungeon) stays empty until the test says which number is which.
 
 **In game (user, 2026-11-24), first test build:**
 - **Starting with a key works.** The file started with 1 Forest Temple key; with the key from Mido's chest and
@@ -35,7 +65,7 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
   right now." and not "???" (the temple's map is for the adult only, `LocationErasType`, and the adult was
   reached with the debug menu).
 
-**Second test build (2026-11-24, to test in game):**
+**Second test build (2026-11-24):**
 - **A named key now has its name in both places** (`tools/dungeon_keys.py`): its actor file's `ActorNameRef` is
   `?ActorSystem/ActorName/Item_NX2K_<dungeon>...` too (no such file exists anywhere in the game for any item;
   the reference only carries the name). Both pots and the third chest from the left in Mido's house
@@ -67,9 +97,9 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
   place, wherever you found it.", with the place's name taken from the game's own list of places
   (`LocationMsg/Location.msbt`). **Not known:** what else the game looks up under that name (its icon, a saved
   flag), so this may show nothing new or go wrong; it is on one pot in the test build, tested last.
-- **Tests:** `tests/dungeon_keys_check.py` (18 checks now): the key in its own dungeon, the named key's row,
-  actor file and texts (on the ground and in a chest), starting with keys, map and compass and a visited
-  place, and what is still refused.
+- **Tests:** `tests/dungeon_keys_check.py` (19 checks now): the key in its own dungeon, the named key's row,
+  actor file and texts (on the ground and in a chest), the name's colour, starting with keys, map and compass
+  and a visited place, and what is still refused.
 
 ### Phase 1, part 5: a dungeon's small key anywhere (in game: the keys work, the count shown is off)
 A small key that counts for the Forest Temple wherever it is found: `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`

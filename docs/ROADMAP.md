@@ -142,8 +142,13 @@ Parts, in order:
    a key in its own temple shows the right count; no count appears at a door (the game's own behaviour). The
    name did not show (only one of an item's two names was changed), and the map and the compass could not be
    checked: the Map page was closed ("???" as a child, "Unavailable right now." in the temple).
-   **Second test build, to test:** the named key has its name in both places; a place can start as visited
-   (`--start-flag IsVisitLocation.<place>=true`), to find out what opens the Map page.
+   **Second test in game, 2026-11-24:** the map and the compass given at the start work (seen on the temple's
+   map as a child); a place marked as visited (`--start-flag IsVisitLocation.<place>=true`) has its map, "???"
+   is "not visited yet"; the Map page is closed for an adult made with the debug menu, which is not the
+   build. The name shows on a key in a chest, not yet on a key from a pot.
+   **Third test build, to test:** the name on a key from a pot (the name is now the dungeon's named chest
+   key), and the temple's name in a colour (`--key-colour <dungeon>=N`; the build is a chart of the game's five
+   colour numbers).
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 

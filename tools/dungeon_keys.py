@@ -47,14 +47,28 @@ two places, and the game's own item with texts of its own (the treasure chest ga
   text ("You found a small key!") and lost the count on screen: the get event's "is it a small key" goes by
   the row, the text by the actor file.
 A named key has a name of its own (MESSAGE_NAME) in both, and three texts under it, with the dungeon's name as
-the game writes it (LocationMsg/Location.msbt, the label is the dungeon's map name). That name is also the
-name of the dungeon's chest key, which is built with every named key, so the name is an actor the game knows.
+the game writes it (LocationMsg/Location.msbt, the label is the dungeon's map name).
+
+That name must be an item that is named so itself (in game 2026-11-24, second test: a named key in a chest
+showed "You found a small key! (Forest Temple)", a named key from a pot still the game's text). A key in a
+chest is shown as it is. A key picked up from the ground is not: the game holds up the item its name stands
+for (the game's Obj_Dungeon_SmallKey is named Item_Dungeon_SmallKey, and Item_Dungeon_SmallKey is named
+itself), and the text is that item's. The second test's name was the dungeon's chest key without the name,
+which is named Item_Dungeon_SmallKey. So the name is the dungeon's NAMED chest key (`Item_NX2KN_<dungeon>`),
+which is named itself and is built with every named key.
+
+The name's colour (`COLOURS`, `build_mod.py --key-colour DUNGEON=N`; to test in game): the game's texts colour
+words with the tag (0, 3) and a number, and end with the same tag and 0xFFFF. Every language uses the numbers
+0, 1, 3, 4 and 5 and no other (0: names and places in talk; 1: Navi's thoughts; 3: "uses 1 magic power" in
+the magic items' captions; 4 and 5: the staff roll). No file says what colour a number is, and no get message
+of the game has a colour, so which number is which, and whether the get window shows it, is seen in game.
 
 Not yet: gifts, scrubs, shop shelves, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
 """
 import copy
 import os
+import struct
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -78,7 +92,12 @@ NAMES = {'once': 'Obj_NX2K_%s', 'token': 'Obj_NX2K_GS_%s', 'chest': 'Item_NX2K_%
 # the same with the dungeon's name in its messages (the +name form)
 NAMED_NAMES = {'once': 'Obj_NX2KN_%s', 'token': 'Obj_NX2KN_GS_%s', 'chest': 'Item_NX2KN_%s'}
 NAMED = '+name'
-MESSAGE_NAME = 'Item_NX2K_%s'                    # ActorName of a named key: its texts are <this>_Name...
+MESSAGE_NAME = NAMED_NAMES['chest']              # the name of a named key: its texts are <this>_Name...
+COLOURED = '_GetMessage'                         # the text in which the dungeon's name is coloured
+COLOUR_TAG = (0, 3)                              # the tag that colours what follows; COLOUR_END ends it
+COLOUR_END = 0xFFFF
+GAME_COLOURS = (0, 1, 3, 4, 5)                   # the numbers the game's texts use
+COLOURS = {}                                     # dungeon -> number, once the in-game test says which is which
 NAME_REF = '?ActorSystem/ActorName/%s.engine__actor__ActorName.bgyml'   # an actor file's ActorNameRef
 MESSAGE_FILE = 'ActorMsg/PouchContent.msbt'
 LOCATION_FILE = 'LocationMsg/Location.msbt'      # the game's names of places, by map name
@@ -125,10 +144,25 @@ def name(dungeon, kind, named=False):
     return (NAMED_NAMES if named else NAMES)[kind] % dungeon
 
 
-def messages(dungeon, place):
-    """the texts of a named key: {label: text}; `place`: the dungeon's name as the game writes it"""
-    return {(MESSAGE_NAME % dungeon) + tail: (text % place if '%s' in text else text) + '\x00'
-            for tail, text in MESSAGES}
+def colour_tag(number):
+    """the tag that starts colour `number` (COLOUR_END: back to the text's own), as it stands in a text"""
+    return (b'\x0e' + struct.pack('<HHHH', COLOUR_TAG[0], COLOUR_TAG[1], 2, number)).decode('utf-8',
+                                                                                            'surrogateescape')
+
+
+def messages(dungeon, place, colour=None):
+    """the texts of a named key: {label: text}; `place`: the dungeon's name as the game writes it; `colour`:
+    the number of the colour the name has in the get message (None: the text's own)"""
+    if colour is not None and colour not in GAME_COLOURS:
+        raise SystemExit('colour %r for %s: the game\'s texts only use the colours %s'
+                         % (colour, dungeon, ', '.join(map(str, GAME_COLOURS))))
+    out = {}
+    for tail, text in MESSAGES:
+        shown = place
+        if colour is not None and tail == COLOURED:
+            shown = colour_tag(colour) + place + colour_tag(COLOUR_END)
+        out[(MESSAGE_NAME % dungeon) + tail] = (text % shown if '%s' in text else text) + '\x00'
+    return out
 
 
 def is_ours(item):
@@ -412,6 +446,8 @@ def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project
     if named:                                          # its texts are found under a name of its own
         if rows['ActorInfo'].get('ActorName') != KEY_ITEM:
             raise SystemExit('%s: its ActorInfo row is not named %s as expected' % (new, KEY_ITEM))
+        if (kind == 'chest') != (new == MESSAGE_NAME % dungeon):
+            raise SystemExit('%s: the name of the named keys must be the named chest key' % new)
         rows['ActorInfo']['ActorName'] = type(rows['ActorInfo']['ActorName'])(MESSAGE_NAME % dungeon)
         adoc = byml.loads(files[ap_path(new)])         # and so does its actor file: the get message's name
         adoc.root = type(adoc.root)(adoc.root)

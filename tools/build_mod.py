@@ -3626,6 +3626,9 @@ def main(argv):
     ap.add_argument('--start-flag', action='append', default=[], metavar='NAME=VALUE',
                     help='a flag set on every new file (a Bool: true or false, an Int: a number, a String64: '
                          'text); see tools/start_state.py')
+    ap.add_argument('--key-colour', action='append', default=[], metavar='DUNGEON=N',
+                    help='the colour number of the dungeon\'s name in its named keys\' get message '
+                         '(Item_Dungeon_SmallKey@DUNGEON+name); see tools/dungeon_keys.py')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
     if not a.assign and not a.fix and not a.gossip and not a.start and not a.start_flag:
@@ -3714,7 +3717,18 @@ def main(argv):
             assignments[k] = (cid, FAMILY_ALIASES[item])
     # CHECK_ID=Item_Dungeon_SmallKey@Dungeon: a key that counts for that dungeon wherever it is found
     # (tools/dungeon_keys.py): planned as the key's own version for the kind of check
-    key_versions = {}                                  # (dungeon, kind of version) -> name
+    key_versions = {}                                  # (dungeon, kind of version, named) -> name
+    key_colours = dict(dungeon_keys.COLOURS)           # dungeon -> the colour number of its name
+    key_colour_asked = set()
+    for spec in a.key_colour:
+        dungeon, _, number = spec.partition('=')
+        if dungeon not in dungeon_keys.DUNGEONS or not number.isdigit() \
+                or int(number) not in dungeon_keys.GAME_COLOURS:
+            raise SystemExit('--key-colour %s: give DUNGEON=N, a dungeon with keys (%s) and one of the game\'s '
+                             'colour numbers (%s)' % (spec, ', '.join(dungeon_keys.DUNGEONS),
+                                                      ', '.join(map(str, dungeon_keys.GAME_COLOURS))))
+        key_colours[dungeon] = int(number)
+        key_colour_asked.add(dungeon)
     key_chests = {}                                    # check id -> dungeon: chests that hold a dungeon's key
     for k, (cid, item) in enumerate(assignments):
         parsed = dungeon_keys.parse(item)
@@ -3730,8 +3744,8 @@ def main(argv):
             continue
         assignments[k] = (cid, key_versions.setdefault((dungeon, kind, named),
                                                        dungeon_keys.name(dungeon, kind, named)))
-        if named:                                      # the name its messages are found under is an actor too
-            key_versions.setdefault((dungeon, 'chest', False), dungeon_keys.name(dungeon, 'chest'))
+        if named:                                      # the item its name stands for: the named chest key
+            key_versions.setdefault((dungeon, 'chest', True), dungeon_keys.name(dungeon, 'chest', True))
         if kind == 'chest':
             key_chests[cid] = dungeon
     dicts = zstd.Dictionaries.from_pack(open(os.path.join(a.romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
@@ -4652,11 +4666,17 @@ def main(argv):
             for dungeon in named_keys:
                 if dungeon not in places:
                     raise SystemExit('%s: no name for it in %s' % (dungeon, dungeon_keys.LOCATION_FILE))
-                lines.update(dungeon_keys.messages(dungeon, msg_plain(places[dungeon])))
+                lines.update(dungeon_keys.messages(dungeon, msg_plain(places[dungeon]), key_colours.get(dungeon)))
             return lines
         scrub_messages(out, a.romfs, key_lines, dungeon_keys.MESSAGE_FILE)
         print('%-18s %s: the texts of the named keys of %s added in every language'
-              % ('key names', dungeon_keys.MESSAGE_FILE, ', '.join(named_keys)))
+              % ('key names', dungeon_keys.MESSAGE_FILE, ', '.join(
+                  '%s (its name in colour %d)' % (x, key_colours[x]) if x in key_colours else x
+                  for x in named_keys)))
+    for dungeon in sorted(set(key_colours) - set(named_keys)):
+        if dungeon in key_colour_asked:
+            raise SystemExit('--key-colour %s: no key of this build names %s (%s@%s%s)'
+                             % (dungeon, dungeon, dungeon_keys.KEY_ITEM, dungeon, dungeon_keys.NAMED))
 
     # the rocks, bushes and pots themselves: an AI of our own name for each actor that drops for us. It only
     # hands its placement's number to its drop: it does not name another level's version (Drop__DropActor is

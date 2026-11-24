@@ -162,7 +162,7 @@ def main(romfs):
                 wrong.append('%s -> %s' % (' '.join(args), said))
         good &= check('%d requests are refused with their reason (no such dungeon, another item, a gift, a scrub)'
                       % len(REFUSED), not wrong, wrong)
-        said, folder = run('keys', *['%s=%s' % x for x in SAMPLE])
+        said, folder = run('keys', '--key-colour', '%s=3' % D, *['%s=%s' % x for x in SAMPLE])
         read = lambda f: zstd.decompress(open(os.path.join(folder, *f.split('/')) + '.zs', 'rb').read(), d)   # noqa: E731
         held = {}
         for cid, _ in SAMPLE:
@@ -215,11 +215,12 @@ def main(romfs):
             vfiles = sarc.Sarc.read(read(ground_items.pack_path(version))).files
             refs[version] = ground_items.resolved_components(vfiles, version)['ActorNameRef']
         game_ref = ground_items.item_components(key_files, KEY)['ActorNameRef']
-        good &= check('  the named key: its row and its actor file are named %s, an actor of the build, and its '
-                      'three texts are in the message files with the temple\'s name (%r)'
+        good &= check('  the named key: its row and its actor file are named %s, the named chest key, which is '
+                      'named itself; its three texts are in the message files with the temple\'s name (%r)'
                       % (msg, texts['USen'].get(msg + '_Name')),
-                      info[dungeon_keys.name(D, 'once', True)]['ActorName'] == msg and msg in info
-                      and info[dungeon_keys.name(D, 'chest', True)]['ActorName'] == msg
+                      info[dungeon_keys.name(D, 'once', True)]['ActorName'] == msg
+                      and msg == dungeon_keys.name(D, 'chest', True)
+                      and info[msg]['ActorName'] == msg
                       and refs[dungeon_keys.name(D, 'once', True)] == dungeon_keys.NAME_REF % msg
                       and refs[dungeon_keys.name(D, 'chest', True)] == dungeon_keys.NAME_REF % msg
                       and refs[dungeon_keys.name(D, 'once')] == game_ref
@@ -228,6 +229,15 @@ def main(romfs):
                       and texts['USen'].get(msg + '_Name') == 'Small Key (Forest Temple)\x00'
                       and all(msg + t in texts[lang] for lang in texts for t, _ in dungeon_keys.MESSAGES)
                       and texts['USen']['%s_Name' % KEY] == 'Small Key\x00')
+        got = texts['USen'].get(msg + '_GetMessage', '')
+        parts = msbt.tags(got, 0)
+        good &= check('  the temple\'s name is in colour 3 in the get message, between the game\'s own colour tag '
+                      'and its end (--key-colour %s=3); a colour the game does not use is refused' % D,
+                      [p if isinstance(p, str) else (p[0], p[1], bytes(p[2])) for p in parts] == [
+                          'You found a small key! (', (0, 3, b'\x03\x00'), 'Forest Temple',
+                          (0, 3, b'\xff\xff'), ')\x00']
+                      and bool(refused(run, 'no', '--key-colour', '%s=2' % D, '%s=%s+name' % (SAMPLE[0][0], SAMPLE[0][1])))
+                      and bool(refused(run, 'no', '--key-colour', 'WaterTemple=3', '%s=%s' % SAMPLE[0])), parts)
         start = ['DungeonInfo.%s.SmallKeyNum=2' % D, 'DungeonInfo.%s.IsGetMap=true' % D,
                  'DungeonInfo.%s.IsGetCompass=true' % D, 'DungeonInfo.WaterTemple.SmallKeyNum=1',
                  'IsVisitLocation.KokiriForest=true']
