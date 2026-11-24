@@ -146,9 +146,11 @@ Parts, in order:
    map as a child); a place marked as visited (`--start-flag IsVisitLocation.<place>=true`) has its map, "???"
    is "not visited yet"; the Map page is closed for an adult made with the debug menu, which is not the
    build. The name shows on a key in a chest, not yet on a key from a pot.
-   **Third test build, to test:** the name on a key from a pot (the name is now the dungeon's named chest
-   key), and the temple's name in a colour (`--key-colour <dungeon>=N`; the build is a chart of the game's five
-   colour numbers).
+   **Third test in game, 2026-11-24:** the name shows on a key from a pot too (the name is the dungeon's
+   named chest key), and the get window shows a colour: the game's number 3 is green, 0 is red. The user's
+   colours: Forest green, Fire red, Water blue, Shadow purple, Spirit orange.
+   **Fourth test build, to test:** blue, purple and orange are colours of our own, added behind the eight of
+   the game's list of text colours (a file in the pack the game loads first).
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 

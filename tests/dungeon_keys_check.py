@@ -42,6 +42,7 @@ SAMPLE = [
     ('FT_ENTRANCE_GS', KEY + '@' + D),                        # in the temple itself: the game's own key
     ('KF_HOUSE_OF_TWINS_CHILD_POT_01', KEY + '@' + D + '+name'),   # with the temple's name in its messages
     ('KF_MIDO_CHEST_02', KEY + '@' + D + '+name'),            # and so in a chest
+    ('KF_MIDO_CHEST_03', KEY + '@WaterTemple+name'),          # a name in a colour of our own (blue)
     ('FT_ENTRANCE_CHEST', 'Item_Hammer'),                     # the chest that held the first key
 ]
 REFUSED = [(['KF_MIDO_CHEST_01=%s@Nowhere' % KEY], 'no dungeon Nowhere'),
@@ -162,7 +163,7 @@ def main(romfs):
                 wrong.append('%s -> %s' % (' '.join(args), said))
         good &= check('%d requests are refused with their reason (no such dungeon, another item, a gift, a scrub)'
                       % len(REFUSED), not wrong, wrong)
-        said, folder = run('keys', '--key-colour', '%s=3' % D, *['%s=%s' % x for x in SAMPLE])
+        said, folder = run('keys', *['%s=%s' % x for x in SAMPLE])
         read = lambda f: zstd.decompress(open(os.path.join(folder, *f.split('/')) + '.zs', 'rb').read(), d)   # noqa: E731
         held = {}
         for cid, _ in SAMPLE:
@@ -187,8 +188,9 @@ def main(romfs):
         flow = build_mod.tbox_sync_read(read(build_mod.flow_path(build_mod.TBOX_KEY_FLOW)))
         steps = flow.get(event, [])
         good &= check('  our chest event: Link joins, the chest\'s usual event (%s) runs, then 1 is added to '
-                      'DungeonInfo.%s.SmallKeyNum; nothing else' % (usual, D),
-                      list(flow) == [event] and len(steps) == 3 and steps[1][2].get('EventName') == usual
+                      'DungeonInfo.%s.SmallKeyNum; nothing else (and one such event for the chest key of the Water Temple)' % (usual, D),
+                      sorted(flow) == sorted([event, event.replace(D, 'WaterTemple')]) and len(steps) == 3
+                      and steps[1][2].get('EventName') == usual
                       and steps[2][:2] == build_mod.KEY_ADD
                       and steps[2][2] == {'GameDataName': dungeon_keys.flag(D), 'Value': 1, 'Index': -1}, steps)
         settings = {str(r['__RowId']): r for r in byml.loads(read(build_mod.EVENT_SETTING)).root}
@@ -231,13 +233,31 @@ def main(romfs):
                       and texts['USen']['%s_Name' % KEY] == 'Small Key\x00')
         got = texts['USen'].get(msg + '_GetMessage', '')
         parts = msbt.tags(got, 0)
-        good &= check('  the temple\'s name is in colour 3 in the get message, between the game\'s own colour tag '
-                      'and its end (--key-colour %s=3); a colour the game does not use is refused' % D,
+        good &= check('  the temple\'s name is in its colour in the get message (the game\'s green, number 3), '
+                      'between the game\'s own colour tag and its end; a colour that does not exist and a colour '
+                      'for a dungeon no key names are refused',
                       [p if isinstance(p, str) else (p[0], p[1], bytes(p[2])) for p in parts] == [
                           'You found a small key! (', (0, 3, b'\x03\x00'), 'Forest Temple',
                           (0, 3, b'\xff\xff'), ')\x00']
-                      and bool(refused(run, 'no', '--key-colour', '%s=2' % D, '%s=%s+name' % (SAMPLE[0][0], SAMPLE[0][1])))
-                      and bool(refused(run, 'no', '--key-colour', 'WaterTemple=3', '%s=%s' % SAMPLE[0])), parts)
+                      and bool(refused(run, 'no', '--key-colour', '%s=99' % D, '%s=%s+name' % (SAMPLE[0][0], SAMPLE[0][1])))
+                      and bool(refused(run, 'no', '--key-colour', '%s=pink' % D, '%s=%s+name' % (SAMPLE[0][0], SAMPLE[0][1])))
+                      and bool(refused(run, 'no', '--key-colour', 'FireTemple=3', '%s=%s' % SAMPLE[0])), parts)
+        game_pack = sarc.Sarc.read(plain(dungeon_keys.COLOUR_PACK)).files
+        built_pack = sarc.Sarc.read(read(dungeon_keys.COLOUR_PACK)).files
+        game_list = byml.loads(game_pack[dungeon_keys.COLOUR_TABLE]).root[dungeon_keys.COLOUR_LIST]
+        built_list = byml.loads(built_pack[dungeon_keys.COLOUR_TABLE]).root[dungeon_keys.COLOUR_LIST]
+        water = msbt.tags(texts['USen'].get(dungeon_keys.MESSAGE_NAME % 'WaterTemple' + '_GetMessage', ''), 0)
+        good &= check('  a colour of our own (the Water Temple\'s blue): the game\'s list of %d text colours has '
+                      'ours behind it (%s), its own entries and every other file of the pack are unchanged, and '
+                      'the name is in number %d' % (len(game_list), ', '.join(n for n, _ in dungeon_keys.NEW_COLOURS),
+                                                    len(game_list)),
+                      len(game_list) == 8 and built_list[:8] == game_list
+                      and [(e.get('Red', 0), e.get('Green', 0), e.get('Blue', 0)) for e in built_list[8:]]
+                      == [rgb for _, rgb in dungeon_keys.NEW_COLOURS]
+                      and set(built_pack) == set(game_pack)
+                      and all(built_pack[k] == v for k, v in game_pack.items() if k != dungeon_keys.COLOUR_TABLE)
+                      and (0, 3, b'\x08\x00') in [(p[0], p[1], bytes(p[2])) for p in water if not isinstance(p, str)],
+                      built_list[8:])
         start = ['DungeonInfo.%s.SmallKeyNum=2' % D, 'DungeonInfo.%s.IsGetMap=true' % D,
                  'DungeonInfo.%s.IsGetCompass=true' % D, 'DungeonInfo.WaterTemple.SmallKeyNum=1',
                  'IsVisitLocation.KokiriForest=true']

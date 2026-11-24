@@ -4,8 +4,33 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (two tests in game done; third test build to test)
+### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (three tests in game done; fourth test build to test)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24), third test build:**
+- **The name shows on a key from a pot.** Both pots said "You found a small key! (Forest Temple)".
+- **The get window shows the colour.** Number 3 is green, number 0 is red, numbers 1, 4 and 5 look gray. All
+  four chests in Mido's house showed their temple's name; nothing was broken.
+- **The user's colours:** Forest Temple green, Fire Temple red, Water Temple blue, Shadow Temple purple, Spirit
+  Temple orange, the last three "if we can use a custom color".
+
+**Fourth test build (2026-11-24, to test in game): colours of our own.**
+- **The game's list of text colours is a file:** `MessageColorArray` in
+  `UI/Message/MessageColorTable/MessageColorTable.game__ui__MessageColorTable.bgyml`, inside
+  `Pack/Bootup.Nin_Ounce_NVN2.pack`. Eight colours (red, green, blue, alpha; a name's hash on seven of them: 1
+  is "Gray", 3 is "Green"), and a text's colour number is the place in that list: 0 (138, 0, 0), 1 (80, 45,
+  20), 2 (255, 0, 254), 3 (20, 152, 55), 4 and 5 (255, 253, 198) half and two thirds see-through, 6 (255, 53,
+  25), 7 (133, 125, 104). It has no blue, purple or orange.
+- **Three colours are added behind the game's eight** when a named key of the build uses one
+  (`tools/dungeon_keys.py`: `NEW_COLOURS`, `colour_table`): blue (30, 80, 190) as number 8, purple (115, 45,
+  160) as 9, orange (215, 110, 0) as 10. The game's own eight and every other file of the pack are unchanged.
+  **Not known:** whether the game takes a number past its own eight.
+- **The colour of each temple's name is now set** (`dungeon_keys.COLOURS`): Forest Temple 3, Fire Temple 0,
+  Water Temple blue, Shadow Temple purple, Spirit Temple orange. `--key-colour DUNGEON=COLOUR` chooses another
+  for a build (a number of the game's list, or blue, purple, orange). The other eight dungeons have no colour.
+- **Size rule** for the colour list (`tools/sizes.py`): the game has one file of the type, so the rule charges
+  everything per colour (733 each), which gives the game's entry for the game's file and can only be too much
+  for a longer list.
 
 **In game (user, 2026-11-24), second test build:**
 - **The map and the compass given at the start work.** In the Forest Temple as a child the Map page showed the
@@ -26,7 +51,7 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
 - **Asked for (the user):** the temple's name in the temple's colour (green for the Forest Temple).
 - Save and reload: as before.
 
-**Third test build (2026-11-24, to test in game):**
+**Third test build (2026-11-24):**
 - **The name of a named key is now the dungeon's named chest key** (`Item_NX2KN_<dungeon>`), which is named
   itself and is built with every named key, as the game's `Obj_Dungeon_SmallKey` is named `Item_Dungeon_SmallKey`.
 - **The temple's name in a colour:** `--key-colour ForestTemple=3` (`tools/dungeon_keys.py`: `messages`,
@@ -97,9 +122,10 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
   place, wherever you found it.", with the place's name taken from the game's own list of places
   (`LocationMsg/Location.msbt`). **Not known:** what else the game looks up under that name (its icon, a saved
   flag), so this may show nothing new or go wrong; it is on one pot in the test build, tested last.
-- **Tests:** `tests/dungeon_keys_check.py` (19 checks now): the key in its own dungeon, the named key's row,
-  actor file and texts (on the ground and in a chest), the name's colour, starting with keys, map and compass
-  and a visited place, and what is still refused.
+- **Tests:** `tests/dungeon_keys_check.py` (20 checks now): the key in its own dungeon, the named key's row,
+  actor file and texts (on the ground and in a chest), the name's colour (one of the game's, and one of ours
+  added to the game's list), starting with keys, map and compass and a visited place, and what is still
+  refused.
 
 ### Phase 1, part 5: a dungeon's small key anywhere (in game: the keys work, the count shown is off)
 A small key that counts for the Forest Temple wherever it is found: `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`

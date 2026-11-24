@@ -57,11 +57,19 @@ itself), and the text is that item's. The second test's name was the dungeon's c
 which is named Item_Dungeon_SmallKey. So the name is the dungeon's NAMED chest key (`Item_NX2KN_<dungeon>`),
 which is named itself and is built with every named key.
 
-The name's colour (`COLOURS`, `build_mod.py --key-colour DUNGEON=N`; to test in game): the game's texts colour
-words with the tag (0, 3) and a number, and end with the same tag and 0xFFFF. Every language uses the numbers
-0, 1, 3, 4 and 5 and no other (0: names and places in talk; 1: Navi's thoughts; 3: "uses 1 magic power" in
-the magic items' captions; 4 and 5: the staff roll). No file says what colour a number is, and no get message
-of the game has a colour, so which number is which, and whether the get window shows it, is seen in game.
+The name's colour (`COLOURS`, `build_mod.py --key-colour DUNGEON=COLOUR`): the game's texts colour words with
+the tag (0, 3) and a number, and end with the same tag and 0xFFFF. The number is the place in the game's list
+of text colours, `MessageColorArray` in COLOUR_TABLE (a file of the pack the game loads first, COLOUR_PACK):
+eight colours, each `Red`, `Green`, `Blue`, `Alpha` (left out: 0, 0, 0, 255) and a `ColorName` (a name's
+hash: 1 is "Gray", 3 is "Green"; 0 has none). 0: (138, 0, 0), 1: (80, 45, 20), 2: (255, 0, 254), 3: (20, 152,
+55), 4 and 5: (255, 253, 198) half and two thirds see-through, 6: (255, 53, 25), 7: (133, 125, 104). Every
+language's texts use 0, 1, 3, 4 and 5 and no other (0: names and places in talk; 1: Navi's thoughts; 3: "uses
+1 magic power" in the magic items' captions; 4 and 5: the staff roll).
+In game 2026-11-24 (third test): the get window shows the colour; 3 is green, 0 is red, 1, 4 and 5 look gray.
+The user's colours: Forest Temple green, Fire Temple red, Water Temple blue, Shadow Temple purple, Spirit
+Temple orange. The game has no blue, purple or orange, so those three are colours of our own (NEW_COLOURS),
+added behind the game's eight (places 8, 9, 10; no `ColorName`, as the game's first). To test in game: whether
+the game takes a place past its own eight.
 
 Not yet: gifts, scrubs, shop shelves, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
@@ -96,8 +104,14 @@ MESSAGE_NAME = NAMED_NAMES['chest']              # the name of a named key: its 
 COLOURED = '_GetMessage'                         # the text in which the dungeon's name is coloured
 COLOUR_TAG = (0, 3)                              # the tag that colours what follows; COLOUR_END ends it
 COLOUR_END = 0xFFFF
-GAME_COLOURS = (0, 1, 3, 4, 5)                   # the numbers the game's texts use
-COLOURS = {}                                     # dungeon -> number, once the in-game test says which is which
+COLOUR_PACK = 'Pack/Bootup.Nin_Ounce_NVN2.pack'
+COLOUR_TABLE = 'UI/Message/MessageColorTable/MessageColorTable.game__ui__MessageColorTable.bgyml'
+COLOUR_LIST = 'MessageColorArray'
+# colours of our own, added behind the game's in this order: name -> (red, green, blue)
+NEW_COLOURS = (('blue', (30, 80, 190)), ('purple', (115, 45, 160)), ('orange', (215, 110, 0)))
+# dungeon -> the colour of its name: a place in the game's list, or one of NEW_COLOURS (the user, 2026-11-24)
+COLOURS = {'ForestTemple': 3, 'FireTemple': 0, 'WaterTemple': 'blue', 'ShadowTemple': 'purple',
+           'SpiritTemple': 'orange'}
 NAME_REF = '?ActorSystem/ActorName/%s.engine__actor__ActorName.bgyml'   # an actor file's ActorNameRef
 MESSAGE_FILE = 'ActorMsg/PouchContent.msbt'
 LOCATION_FILE = 'LocationMsg/Location.msbt'      # the game's names of places, by map name
@@ -150,12 +164,48 @@ def colour_tag(number):
                                                                                             'surrogateescape')
 
 
+def colour_number(colour, game_count):
+    """the number a text names a colour by: a place in the game's list of `game_count` colours, or the place
+    of one of ours behind them"""
+    names = [n for n, _ in NEW_COLOURS]
+    if isinstance(colour, int) and not isinstance(colour, bool) and 0 <= colour < game_count:
+        return colour
+    if colour in names:
+        return game_count + names.index(colour)
+    raise SystemExit('colour %r: give one of the game\'s %d colours (0 to %d) or one of ours (%s)'
+                     % (colour, game_count, game_count - 1, ', '.join(names)))
+
+
+def colour_table(table_data):
+    """(the game's list of text colours with ours added behind it, how many the game has); stops when the
+    file is not the list this was made for"""
+    doc = byml.loads(table_data)
+    game = doc.root.get(COLOUR_LIST) if isinstance(doc.root, dict) else None
+    fields = {'Red', 'Green', 'Blue', 'Alpha', 'ColorName'}
+    if not isinstance(game, list) or len(game) < 6 or set(doc.root) != {COLOUR_LIST} \
+            or any(not isinstance(e, dict) or not set(map(str, e)) <= fields for e in game) \
+            or byml.dumps(doc) != table_data:
+        raise SystemExit('%s is not the list of text colours this was made for' % COLOUR_TABLE)
+    number = type(game[0]['Red'])
+    for _, (r, g, b) in NEW_COLOURS:
+        entry = type(game[0])()
+        for k, v in (('Blue', b), ('Green', g), ('Red', r)):
+            if v:                                      # as the game's entries: a 0 is left out
+                entry[k] = number(v)
+        game.append(entry)
+    new = byml.dumps(doc)
+    back = byml.loads(new).root[COLOUR_LIST]
+    n = len(back) - len(NEW_COLOURS)
+    if back[:n] != byml.loads(table_data).root[COLOUR_LIST] or [
+            (int(e.get('Red', 0)), int(e.get('Green', 0)), int(e.get('Blue', 0))) for e in back[n:]] != [
+            rgb for _, rgb in NEW_COLOURS]:
+        raise SystemExit('read-back: %s differs from what was intended' % COLOUR_TABLE)
+    return new, n
+
+
 def messages(dungeon, place, colour=None):
     """the texts of a named key: {label: text}; `place`: the dungeon's name as the game writes it; `colour`:
-    the number of the colour the name has in the get message (None: the text's own)"""
-    if colour is not None and colour not in GAME_COLOURS:
-        raise SystemExit('colour %r for %s: the game\'s texts only use the colours %s'
-                         % (colour, dungeon, ', '.join(map(str, GAME_COLOURS))))
+    the number of the colour the name has in the get message (colour_number; None: the text's own)"""
     out = {}
     for tail, text in MESSAGES:
         shown = place
