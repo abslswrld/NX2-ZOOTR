@@ -109,10 +109,10 @@ def main(romfs):
           and [r['vanilla_contents']['value'] for r in db if r['check_type'] == 'skulltula']
           == ['GoldSkulltulaToken'] * 5)
     changed = sorted(l['id'] for _, _, l in locs.values() if l.get('randomizable') == 'yes')
-    check('every region of the temple is still "not verified in game"; 11 checks were changed in game '
-          '(2026-11-23), the other 36 are "untested"',
-          not any(r.verified for r in regions.values()) and len(changed) == 11
-          and all('changed in game on 2026-11-23' in l['randomizable_note'] for _, _, l in locs.values()
+    check('every region of the temple is still "not verified in game"; 14 checks were changed in game '
+          '(11 on 2026-11-23, 3 more on 2026-11-24), the other 33 are "untested"',
+          not any(r.verified for r in regions.values()) and len(changed) == 14
+          and all('changed in game on 2026-11-2' in l['randomizable_note'] for _, _, l in locs.values()
                   if l['id'] in changed)
           and all(l.get('randomizable') == 'untested' for _, _, l in locs.values() if l['id'] not in changed),
           changed)

@@ -9,15 +9,15 @@
     "id": "FT_ENTRANCE_CHEST",
     "spot": "chest@-10.0,64.5",
     "note": "up at y 117.5 (the floor is at 101.5), on the west side; how it is reached (climbing) is not read from the files: check in game",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): gave the Megaton Hammer (its small key was on the Gold Skulltula)"
    },
    "FT GS Entrance": {
     "id": "FT_ENTRANCE_GS",
     "spot": "skulltula@11.5,64.0",
     "note": "up at y 119.8 on the east side; there at any time of day (Gimmick_AllDay_Skulltula). In game (user, 2026-11-23): it is grabbed by climbing the vines, no Hookshot needed, so no item rule",
     "randomizable": "yes",
-    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): dropped the Iron Boots instead of its token"
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): dropped the Iron Boots instead of its token; on 2026-11-24 a small key (counted for the temple, opened the first door)"
    }
   },
   "exits": {
@@ -37,7 +37,7 @@
     "kind": "pot",
     "note": "drop table DropTable_Obj_Heart",
     "randomizable": "yes",
-    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Megaton Hammer (its drop table removed: only the item came out), and stayed gone after it was taken"
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Megaton Hammer (its drop table removed: only the item came out), and stayed gone after it was taken; on 2026-11-24 a small key (counted)"
    },
    "FT Lobby Pot 2": {
     "id": "FT_LOBBY_POT_02",
@@ -45,15 +45,15 @@
     "kind": "pot",
     "note": "no drop table in the map data",
     "randomizable": "yes",
-    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Hover Boots (they lay slightly in the floor), and stayed gone after they were taken"
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Hover Boots (they lay slightly in the floor), and stayed gone after they were taken; on 2026-11-24 the Hover Boots again, now lying on the floor (the height fix)"
    },
    "FT Lobby Pot 3": {
     "id": "FT_LOBBY_POT_03",
     "spot": "pot@-13.5,16.0",
     "kind": "pot",
     "note": "drop table DropTable_RangeWeapon_02",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): gave the Iron Boots, lying on the floor"
    },
    "FT Lobby Pot 4": {
     "id": "FT_LOBBY_POT_04",
@@ -110,8 +110,8 @@
     "id": "FT_FIRST_STALFOS_ROOM_CHEST",
     "spot": "chest@0.0,-63.0",
     "note": "appears when both Stalfos are beaten",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): gave the Lens of Truth, with no magic meter (--fix magic_is_separate)"
    },
    "FT First Stalfos Room Pot 1": {
     "id": "FT_FIRST_STALFOS_ROOM_POT_01",
@@ -119,7 +119,7 @@
     "kind": "pot",
     "note": "drop table DropTable_Obj_Heart",
     "randomizable": "yes",
-    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Lens of Truth"
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Lens of Truth; on 2026-11-24 a small key (the chest's key as a ground item: looked and acted like the others)"
    },
    "FT First Stalfos Room Pot 2": {
     "id": "FT_FIRST_STALFOS_ROOM_POT_02",
@@ -261,7 +261,7 @@
     "kind": "pot",
     "note": "no drop table in the map data",
     "randomizable": "yes",
-    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Mirror Shield"
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Mirror Shield; on 2026-11-24 a small key (counted)"
    },
    "FT Block Room Pot 2": {
     "id": "FT_BLOCK_ROOM_POT_02",
@@ -386,7 +386,7 @@
     "spot": "chest@0.0,-68.5",
     "note": "the game puts the Bow here (GetEventName ForestTemple_GetBow, flag ForestTemple_Room06_GetBow); appears when the last two Stalfos are beaten",
     "randomizable": "yes",
-    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Ice Arrow, with no message from Navi about the Bow (its opening event removed)"
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Ice Arrow, with no message from Navi about the Bow (its opening event removed); on 2026-11-24 a small key (counted, opened the Bow room's east door)"
    },
    "FT Bow Room Pot 1": {
     "id": "FT_BOW_ROOM_POT_01",

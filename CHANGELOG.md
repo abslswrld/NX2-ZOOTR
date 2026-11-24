@@ -4,9 +4,28 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 4: the Forest Temple's small keys on other checks of the temple (to test in game)
+### Phase 1, part 4: the Forest Temple's small keys on other checks of the temple (passed in game)
 The five small keys can be put on other checks of the temple: in another chest, in a pot, on a Gold Skulltula.
 Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24): passed.**
+- **All five keys were counted for the temple,** each from its new place: the first room's Gold Skulltula, a
+  lobby pot, a first Stalfos room pot, a block room pot and the Bow room's big chest. Picking one up showed
+  "small key" and the count in a pop-up on screen. The count went 1, 0, 1, 2, 1, 2, 1, 2, 1 as keys were found
+  and the four locked doors on the way (first room, lobby west, top of the block room, Bow room east) opened.
+- **The two forms of the key** (the game's ground key, and the chest's key made to lie on the ground) looked
+  and acted the same.
+- **The chests that held keys** gave their new items: the Megaton Hammer (first room) and the Lens of Truth
+  (first Stalfos room), the Lens with no magic meter.
+- **The boots:** the Hover Boots and the Iron Boots lay on the floor.
+- **After save and reload:** the count was still 1, the four doors open, the key pots and the Gold Skulltula
+  gone.
+- **Not answered:** the two lines about skipping the opening and starting with the Hookshot were left blank.
+  The well's, the Floormaster room's, Joelle's and the east courtyard's chests were not on the test's way.
+- **Seen, not part of this change:** the Megaton Hammer is "a little high" when Link holds it up from the
+  chest. A chest holds the game's own `Item_Hammer` with the game's own pose (`Item_Hammer_Animation`,
+  `Pose_Common`: no held-up pose of its own); the builder changes neither. To compare with the unchanged game
+  at the Fire Temple's chest. FPS (part 3's note): the user thinks it was PC usage; not looked into.
 
 - **No builder change was needed for the keys.** A small key is a small key by its inventory settings
   (`PouchSpecialDeal: SmallKey`, counted), and the game has it in two forms: `Item_Dungeon_SmallKey` (in a chest)
