@@ -134,6 +134,10 @@ Parts, in order:
 6. **Start with:** keys, the map and the compass given at the start, through part 1. **Also here (the user,
    2026-11-24), from part 5:** the key count shown on screen for a dungeon's key (it shows the count from before
    the key; none from a chest), and the dungeon's name in the key's get message.
+   **Built 2026-11-24, to test in game:** `--start-flag DungeonInfo.<dungeon>.SmallKeyNum=N`, `IsGetMap`,
+   `IsGetCompass`; a key in its own dungeon is the game's own key (its count shows as the game's does); the
+   name on a key as an experiment (`...@ForestTemple+name`). Outside its dungeon a key's pick-up still shows the
+   count of the place Link is in.
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 

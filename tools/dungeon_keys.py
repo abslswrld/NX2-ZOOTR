@@ -30,7 +30,20 @@ small key (the game's "dungeon Link is in" code must not run for it, in D or out
 Each has the key's model, name and get scene; its item settings are the key's with `NotPushToPouch`, no
 inventory item named, not counted; its row in PouchActorInfo says the same.
 
-Not yet: gifts, scrubs, shop shelves, songs; a get message that names the dungeon.
+In its own dungeon the key is the game's own small key (tools/build_mod.py decides by the check's map): there
+the game counts and shows it itself, exactly as it does its own (in game 2026-11-24: a dungeon's key picked up
+in its dungeon showed the count from before the key, and a chest showed none). Outside, the count on screen
+is the count of the place Link is in, so a key of another dungeon cannot show its own.
+
+The dungeon's name in the messages (`Item_Dungeon_SmallKey@D+name`, an experiment to test in game): the game
+names an item in its texts by the ActorName of its row in ActorInfo: `<ActorName>_Name`, `_GetMessage`,
+`_GetCaption` in ActorMsg/PouchContent.msbt. A named key's row has a name of its own (MESSAGE_NAME) and three
+texts under it, with the dungeon's name as the game writes it (LocationMsg/Location.msbt, the label is the
+dungeon's map name). That name is also the name of the dungeon's chest key, which is built with every named
+key, so the name is an actor the game knows. Not known: what else the game looks up under that name (its
+icon, a saved flag).
+
+Not yet: gifts, scrubs, shop shelves, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
 """
 import copy
@@ -55,9 +68,17 @@ DUNGEONS = ('InsideTheDekuTree', 'DodongoCavern', 'InsideJabuJabuBelly', 'Forest
 STRUCT, FIELD = 'DungeonInfo.%s', 'SmallKeyNum'
 # kind -> (name of the version, the kinds of check it is for)
 NAMES = {'once': 'Obj_NX2K_%s', 'token': 'Obj_NX2K_GS_%s', 'chest': 'Item_NX2K_%s'}
+# the same with the dungeon's name in its messages (the +name form)
+NAMED_NAMES = {'once': 'Obj_NX2KN_%s', 'token': 'Obj_NX2KN_GS_%s', 'chest': 'Item_NX2KN_%s'}
+NAMED = '+name'
+MESSAGE_NAME = 'Item_NX2K_%s'                    # ActorName of a named key: its texts are <this>_Name...
+MESSAGE_FILE = 'ActorMsg/PouchContent.msbt'
+LOCATION_FILE = 'LocationMsg/Location.msbt'      # the game's names of places, by map name
+MESSAGES = (('_Name', 'Small Key (%s)'), ('_GetMessage', 'You found a small key! (%s)'),
+            ('_GetCaption', 'It opens locked doors in that place,\nwherever you found it.'))
 CHECK_KINDS = {'pot': 'once', 'rock': 'once', 'bush': 'once', 'freestanding': 'once', 'skulltula': 'token',
                'chest': 'chest'}
-PREFIXES = tuple(n % '' for n in NAMES.values())
+PREFIXES = tuple(n % '' for n in list(NAMES.values()) + list(NAMED_NAMES.values()))
 AI_NAMES = {'once': 'NX2_Key_%s', 'token': 'NX2_KeyGS_%s'}
 # where the copied nodes and values come from
 ADD_SOURCE = 'AI/NpcCommon.event.root.ainb'                         # OneShotAddGameDataInt
@@ -70,15 +91,19 @@ VALUE, FLOW, STRING = once_items.VALUE, once_items.FLOW, once_items.STRING
 
 
 def parse(item):
-    """the dungeon of `Item_Dungeon_SmallKey@Dungeon`, or None for any other item"""
+    """(the dungeon, whether its messages name it) of `Item_Dungeon_SmallKey@Dungeon` or `...@Dungeon+name`,
+    or None for any other item"""
     if SEP not in item:
         return None
     key, dungeon = item.split(SEP, 1)
+    named = dungeon.endswith(NAMED)
+    if named:
+        dungeon = dungeon[:-len(NAMED)]
     if key != KEY_ITEM:
         raise SystemExit('%s: only %s%s<dungeon> can name a dungeon' % (item, KEY_ITEM, SEP))
     if dungeon not in DUNGEONS:
         raise SystemExit('%s: no dungeon %s; the dungeons with keys: %s' % (item, dungeon, ', '.join(DUNGEONS)))
-    return dungeon
+    return dungeon, named
 
 
 def kind_for(check_kind, cid):
@@ -88,8 +113,14 @@ def kind_for(check_kind, cid):
     return CHECK_KINDS[check_kind]
 
 
-def name(dungeon, kind):
-    return NAMES[kind] % dungeon
+def name(dungeon, kind, named=False):
+    return (NAMED_NAMES if named else NAMES)[kind] % dungeon
+
+
+def messages(dungeon, place):
+    """the texts of a named key: {label: text}; `place`: the dungeon's name as the game writes it"""
+    return {(MESSAGE_NAME % dungeon) + tail: (text % place if '%s' in text else text) + '\x00'
+            for tail, text in MESSAGES}
 
 
 def is_ours(item):
@@ -98,9 +129,10 @@ def is_ours(item):
 
 def dungeon_of(version):
     """(dungeon, kind) of a version's name"""
-    for kind, n in sorted(NAMES.items(), key=lambda x: -len(x[1])):
-        if version.startswith(n % ''):
-            return version[len(n % ''):], kind
+    for names in (NAMED_NAMES, NAMES):
+        for kind, n in sorted(names.items(), key=lambda x: -len(x[1])):
+            if version.startswith(n % ''):
+                return version[len(n % ''):], kind
     raise KeyError(version)
 
 
@@ -299,13 +331,14 @@ def _swap_ai(files, new_inner, name, old_ai, ai, tpl, dungeon, like_ai, like_inf
     new_inner[ap_path(name)] = (files[ap_path(name)],) + tuple(new_inner[ap_path(name)][1:])
 
 
-def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project: False, src=None):
+def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project: False, src=None,
+          named=False):
     """the key of `dungeon` for a kind of check (NAMES). Returns (name, pack data, {inner path: (data, the
     game file its size entry is worked out from, that file's contents)} for the files new to the game, {table:
     new row}, the game pack this pack is like)."""
     if dungeon not in DUNGEONS or kind not in NAMES:
         raise SystemExit('no key of %s for %s' % (dungeon, kind))
-    new = name(dungeon, kind)
+    new = name(dungeon, kind, named)
     key_pack = sarc.Sarc.read(read_pack(pack_path(KEY_ITEM)))
     settings, settings_like = key_settings(key_pack.files, read_pack)
     shared = sarc.Sarc.read(read_pack(turn_items.AI_PACK)).files
@@ -368,6 +401,10 @@ def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project
         rows[t] = type(rows[t])(rows[t])
         rows[t]['__RowId'] = new
     rows['PouchActorInfo'] = key_row(tables['PouchActorInfo'][KEY_ITEM], new)
+    if named:                                          # its texts are found under a name of its own
+        if rows['ActorInfo'].get('ActorName') != KEY_ITEM:
+            raise SystemExit('%s: its ActorInfo row is not named %s as expected' % (new, KEY_ITEM))
+        rows['ActorInfo']['ActorName'] = type(rows['ActorInfo']['ActorName'])(MESSAGE_NAME % dungeon)
     out = copy.copy(arc)
     out.files = files
     out.align = {p: arc.align.get(p, 8) for p in files}

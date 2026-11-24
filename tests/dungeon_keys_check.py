@@ -26,7 +26,7 @@ import ground_items  # noqa: E402
 import once_items  # noqa: E402
 import start_state  # noqa: E402
 import turn_items  # noqa: E402
-from formats import zstd, byml, sarc, ainb, evfl  # noqa: E402
+from formats import zstd, byml, sarc, ainb, evfl, msbt  # noqa: E402
 from logic.world import World  # noqa: E402
 
 D = 'ForestTemple'
@@ -39,7 +39,8 @@ SAMPLE = [
     ('KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01', KEY + '@' + D),     # a Forest Temple key in a pot outside the temple
     ('KF_MIDO_CHEST_01', KEY + '@' + D),                      # and in a chest
     ('KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02', 'Obj_Dungeon_SmallKey'),   # the control: the game's own key outside
-    ('FT_ENTRANCE_GS', KEY + '@' + D),                        # a Forest Temple key on a Gold Skulltula
+    ('FT_ENTRANCE_GS', KEY + '@' + D),                        # in the temple itself: the game's own key
+    ('KF_HOUSE_OF_TWINS_CHILD_POT_01', KEY + '@' + D + '+name'),   # with the temple's name in its messages
     ('FT_ENTRANCE_CHEST', 'Item_Hammer'),                     # the chest that held the first key
 ]
 REFUSED = [(['KF_MIDO_CHEST_01=%s@Nowhere' % KEY], 'no dungeon Nowhere'),
@@ -174,10 +175,12 @@ def main(romfs):
         event = build_mod.tbox_key_event(usual, D)
         good &= check('the sample builds; read back from the mod folder: the pot drops %s, the chest holds %s and '
                       'runs our event, the Gold Skulltula drops %s, the control pot the game\'s own key'
-                      % tuple(dungeon_keys.name(D, k) for k in ('once', 'chest', 'token')),
+                      % (dungeon_keys.name(D, 'once'), dungeon_keys.name(D, 'chest'),
+                         'the game\'s own key (it is in its own temple)'),
                       held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once'), None)}
                       and held['KF_MIDO_CHEST_01'] == {(dungeon_keys.name(D, 'chest'), event)}
-                      and held['FT_ENTRANCE_GS'] == {(dungeon_keys.name(D, 'token'), None)}
+                      and held['FT_ENTRANCE_GS'] == {('Obj_NX2_GS_Dungeon_SmallKey', None)}
+                      and held['KF_HOUSE_OF_TWINS_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once', True), None)}
                       and {x[0] for x in held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02']}
                       == {'Obj_NX2_GS_Obj_Dungeon_SmallKey'}, held)
         flow = build_mod.tbox_sync_read(read(build_mod.flow_path(build_mod.TBOX_KEY_FLOW)))
@@ -194,10 +197,38 @@ def main(romfs):
                       and str(settings[event]['FlowchartFileName']).endswith('/%s.evfc' % build_mod.TBOX_KEY_FLOW)
                       and [str(x) for x in infos[event]['ChildEventList']] == [usual])
         table = {str(r['__RowId']): r for r in byml.loads(read(ground_items.table_path('PouchActorInfo'))).root}
-        good &= check('  the three versions are in the item table as "not put in the inventory"; the game\'s key '
+        good &= check('  the versions built are in the item table as "not put in the inventory"; the game\'s key '
                       'rows are untouched',
                       all(table[dungeon_keys.name(D, k)]['PouchSpecialDeal'] == dungeon_keys.NOT_PUSHED
-                          for k in dungeon_keys.NAMES) and dict(table[KEY]) == dict(pouch[KEY]))
+                          for k in ('once', 'chest')) and dict(table[KEY]) == dict(pouch[KEY])
+                      and dungeon_keys.name(D, 'token') not in table)
+        info = {str(r['__RowId']): r for r in byml.loads(read(ground_items.table_path('ActorInfo'))).root}
+        msg = dungeon_keys.MESSAGE_NAME % D
+        texts = {}
+        for lang in ('USen', 'JPja'):
+            arc = sarc.Sarc.read(read('Mals/%s.Product.110.sarc' % lang))
+            texts[lang] = msbt.Msbt.read(arc.files[dungeon_keys.MESSAGE_FILE]).texts
+        good &= check('  the named key: its row is named %s, an actor of the build, and its three texts are in '
+                      'the message files with the temple\'s name (%r)' % (msg, texts['USen'].get(msg + '_Name')),
+                      info[dungeon_keys.name(D, 'once', True)]['ActorName'] == msg and msg in info
+                      and info[dungeon_keys.name(D, 'once')]['ActorName'] == KEY
+                      and texts['USen'].get(msg + '_Name') == 'Small Key (Forest Temple)\x00'
+                      and all(msg + t in texts[lang] for lang in texts for t, _ in dungeon_keys.MESSAGES)
+                      and texts['USen']['%s_Name' % KEY] == 'Small Key\x00')
+        start = ['DungeonInfo.%s.SmallKeyNum=2' % D, 'DungeonInfo.%s.IsGetMap=true' % D,
+                 'DungeonInfo.%s.IsGetCompass=true' % D, 'DungeonInfo.WaterTemple.SmallKeyNum=1']
+        _, sfolder = run('start', *[x for f in start for x in ('--start-flag', f)])
+        written = open(os.path.join(sfolder, *start_state.MODULE.split('/')), 'rb').read()
+        good &= check('starting with keys, the map and the compass: the new-file module sets the fields of the '
+                      'dungeons\' records (%s)' % ', '.join(start),
+                      start_state.read_members(written) == [
+                          ('DungeonInfo.%s.SmallKeyNum' % D, 2), ('DungeonInfo.%s.IsGetMap' % D, True),
+                          ('DungeonInfo.%s.IsGetCompass' % D, True), ('DungeonInfo.WaterTemple.SmallKeyNum', 1)]
+                      and start_state.read_members(plain(start_state.MODULE)) == []
+                      and len(start_state.read_members(written, 'PlayerStatus')) == 5)
+        refusals = [refused(run, 'no', '--start-flag', f) for f in ('PlayerStatus.MaxLife=80', 'DungeonInfo.%s.NoSuch=1' % D)]
+        good &= check('  a field of another struct, and a field that does not exist, are still refused',
+                      all(refusals) and 'a field of a struct' in refusals[0] and 'no flag of this name' in refusals[1], refusals)
         good &= check('  the build says what each key does', said.count('adds 1 to %s' % dungeon_keys.flag(D)) >= 3
                       and 'key chests' in said)
 

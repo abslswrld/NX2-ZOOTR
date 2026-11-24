@@ -4,6 +4,32 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
+### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (to test in game)
+Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **Start with a dungeon's keys, map and compass:** `--start-flag DungeonInfo.ForestTemple.SmallKeyNum=2`,
+  `--start-flag DungeonInfo.ForestTemple.IsGetMap=true`, `...IsGetCompass=true` (and `IsGetBossKey`). These are
+  fields of the dungeon's saved record, which `--start-flag` refused until now. They are set the way the game's
+  own new-file module sets Link's hearts: one node that finds the record by its name, and one setter per field
+  (`tools/start_state.py`). Fields of other structs are still refused.
+- **The key count shown on screen** (part 5's in-game result: the pop-up showed the count from before the key,
+  and a chest showed none). What was found: the count on screen is the count of the dungeon Link is in, shown
+  by a step of the game's own get events (`EventTriggerSetDisplaySmallKey`) after the game has counted its own
+  key. So:
+  - **a key placed in its own dungeon is now the game's own small key.** The builder decides by the check's
+    map. The game counts and shows that one itself, as in part 4's test;
+  - **a key placed outside its dungeon** stays the item of its own from part 5. Outside, the game has no count
+    of that dungeon to show: a pick-up showed "0 to 0". That is not changed by this part.
+- **The temple's name on a key, as an experiment:** `Item_Dungeon_SmallKey@ForestTemple+name`. The game finds
+  an item's texts by the name in its `ActorInfo` row (`<name>_Name`, `_GetMessage`, `_GetCaption` in
+  `ActorMsg/PouchContent.msbt`). A named key has a name of its own there, and three new texts in every
+  language: "Small Key (Forest Temple)", "You found a small key! (Forest Temple)", "It opens locked doors in that
+  place, wherever you found it.", with the place's name taken from the game's own list of places
+  (`LocationMsg/Location.msbt`). **Not known:** what else the game looks up under that name (its icon, a saved
+  flag), so this may show nothing new or go wrong; it is on one pot in the test build, tested last.
+- **Tests:** `tests/dungeon_keys_check.py` (18 checks now): the key in its own dungeon, the named key's row and
+  texts, starting with keys, map and compass, and what is still refused.
+
 ### Phase 1, part 5: a dungeon's small key anywhere (in game: the keys work, the count shown is off)
 A small key that counts for the Forest Temple wherever it is found: `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`
 (any of the 13 dungeons with keys can be named). Test build and checklist: `out\TEST_CHECKLIST.md`.
