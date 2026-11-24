@@ -92,7 +92,8 @@ name kept, and only when a named key of the build uses it:
   recoloured was seen in game (the Training Ground's name, "good").
 The user's colours: Forest Temple green (3), Fire Temple red (0), Water Temple blue, Shadow Temple purple,
 Spirit Temple orange, Gerudo Training Ground "different orange?", Bottom of the Well "gray?" (1), Ganon's
-Castle none. Not seen in game: purple as the added place, the oranges in places 4 and 5.
+Castle none. In game 2026-11-24: all seven are as the user wants them (purple as the added place, the
+oranges in places 4 and 5), and a red word in someone's talk is red. The credits were not looked at.
 
 Not yet: gifts, scrubs, shop shelves, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.

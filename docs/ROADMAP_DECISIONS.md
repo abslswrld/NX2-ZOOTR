@@ -115,9 +115,8 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     the Well is gray (the game's own), the Gerudo Training Ground a second, darker orange, Ganon's Castle has
     no colour. Built in phase 1, part 6 (`tools/dungeon_keys.py`: `COLOURS`, `OUR_COLOURS`): blue recolours
     place 2 of the game's list (no text uses it), purple is one colour added behind the list, and the two
-    oranges take the staff roll's two places (4 and 5), so those lines of the credits change colour. Green,
-    red, blue and both oranges' shades **passed in game 2026-11-24**; where purple and the oranges now sit is
-    not seen in game yet.
+    oranges take the staff roll's two places (4 and 5), so those lines of the credits change colour. All
+    seven colours **passed in game 2026-11-24**; the credits were not looked at.
 41. **Every small key says its dungeon's name** (2026-11-24): a dungeon's key placed outside that dungeon always
     has the name in its messages ("You found a small key! (Forest Temple)"), which also keeps the game from
     showing the key count of the place Link is in. In its own dungeon the key is the game's own small key, with

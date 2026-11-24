@@ -161,9 +161,10 @@ Parts, in order:
    credits take that colour). Only eight places use small keys; Ganon's Castle has no colour.
    **The look at them in game, 2026-11-24:** both oranges good, the map at the start good; but the Well's
    name was purple and the Fire Temple's orange: the get window shows place 6 of the game's colour list for
-   "red" (number 0) and place 7 for "gray" (number 1), so those two places are not free. **Corrected, not seen
-   in game:** 6 and 7 are the game's again; purple is one colour added behind the list, the two oranges take
-   the staff roll's places 4 and 5 (those lines of the credits change colour).
+   "red" (number 0) and place 7 for "gray" (number 1), so those two places are not free. **Corrected:** 6 and
+   7 are the game's again; purple is one colour added behind the list, the two oranges take the staff roll's
+   places 4 and 5 (those lines of the credits change colour).
+   **Passed in game 2026-11-24:** all seven colours, and the game's own red is red.
    **Open:** gifts, scrubs and shelves; the dungeon's name on a key in its own dungeon (the game's own key has
    one text for all dungeons).
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or

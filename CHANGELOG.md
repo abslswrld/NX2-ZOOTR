@@ -4,8 +4,16 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (five tests and a last look in game done; the corrected colour places are not seen in game)
+### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (passed in game 2026-11-24)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24), all seven key colours with the corrected places: passed.**
+- Mido's four chests: the Shadow Temple's name purple (the colour added behind the game's list), the Spirit
+  Temple's the yellowish orange (place 4), "Gerudo Proving Grounds" the darker orange (place 5), the Fire
+  Temple's red. The two pots: the Bottom of the Well gray, the Water Temple blue. All "good".
+- The game's own red is red again: "when fado mentioned the great deku tree it was red".
+- So one colour can be added behind the game's eight, and places 6 and 7 must stay the game's.
+- **Not seen:** the credits, where the two oranges change 17 headings and 115 names.
 
 **In game (user, 2026-11-24), the look at the last changes; and what it showed about the colour list:**
 - **Good:** Kokiri Forest's map at the start (by the rule), the Spirit Temple's yellowish orange, the Training
@@ -18,7 +26,7 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
   the third test were places 6 and 7. With 6 recoloured orange and 7 purple, red became orange and gray
   purple, and would have wherever the game uses that pair. No text names 6 or 7 by number, which is why they
   looked free.
-- **Corrected (not seen in game yet):** places 6 and 7 are the game's again and are never changed
+- **Corrected (seen in game afterwards, see above):** places 6 and 7 are the game's again and are never changed
   (`dungeon_keys.KEPT_PLACES`: 0, 1, 3, 6, 7). The colours of our own now are: **blue** place 2 (as before,
   seen in game); **purple** one place added behind the game's eight (number 8: a number past the list shows
   the list's last colour, which the fourth test showed, so one colour can be added that way); **orange** place
