@@ -72,6 +72,12 @@ A later level of an upgrade family placed on its own (Item_Scale_Gold, Item_Long
 build before anything is written: Link could take it before the level in front of it (UPGRADE_FAMILIES,
 skip_level_guard). The message names the First>Second or First>Second>Third form to use when there is one.
 
+A dungeon's small key anywhere (to test in game): CHECK_ID=Item_Dungeon_SmallKey@ForestTemple puts a small key
+that counts for the Forest Temple on the check, in the temple or outside it (tools/dungeon_keys.py). The game
+itself counts a key for the dungeon Link is in. On a pot, a rock, a bush, a freestanding item or a Gold Skulltula
+the key adds to the temple's key count when it is picked up (its own AI); in a chest the chest gets an opening
+event of our own around its usual one that adds to it (TBOX_KEY_FLOW). Not on gifts, scrubs or shelves yet.
+
 Gossip stone text (to test in game): --gossip STONE=TEXT (repeatable) sets what a stone says, in every language
 (English text everywhere). STONE is the stone's check ID or its name in the map. In TEXT, \\n is a new line, \\p a
 new page and {...} is highlighted; longer lines are wrapped and full pages continue on a new page, as the game's
@@ -141,6 +147,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
+import dungeon_keys  # noqa: E402
 import ground_items  # noqa: E402
 import harp_colors  # noqa: E402
 import once_items  # noqa: E402
@@ -607,6 +614,63 @@ def tbox_sync_flow(template, sync, usuals, version):
     return ef
 
 
+# A dungeon's key in a chest (tools/dungeon_keys.py): the same kind of opening event of our own, with one step
+# after the chest's usual event: GameDataActor.EventTriggerAddOrSubGameDataInt adds 1 to the dungeon's key count
+# (DungeonInfo.<dungeon>.SmallKeyNum), as the treasure chest game's flow adds to its own key count
+# (MiniGame_SequentialChoiceTreasure: MiniGame_SmallKeyNum + 1). One event per (usual event, dungeon):
+#   Event/EventFlow/NX2_TBoxKey.bfevfl                   entry point NX2_TBoxKey_<dungeon>_<usual event>
+TBOX_KEY_FLOW = 'NX2_TBoxKey'
+KEY_ADD_FLOW = 'Event/EventFlow/MiniGame_SequentialChoiceTreasure.bfevfl'
+KEY_ADD = ('GameDataActor', 'EventTriggerAddOrSubGameDataInt')
+
+
+def tbox_key_event(usual, dungeon):
+    return '%s_%s_%s' % (TBOX_KEY_FLOW, dungeon, usual)
+
+
+def key_add_template(fc):
+    """the game's own "add 1 to a saved number" step: (actor, action name, parameters)"""
+    for e in fc.events:
+        if e.type == 'action' and fc.actors[e.actor].name == KEY_ADD[0] and _action_name(fc, e) == KEY_ADD[1] \
+                and isinstance(e.params, dict) and sorted(e.params) == ['GameDataName', 'Index', 'Value'] \
+                and e.params['Value'] == 1 and e.params['Index'] == -1 and not fc.actors[e.actor].secondary:
+            return fc.actors[e.actor], KEY_ADD[1], e.params
+    raise SystemExit('%s: no step that adds 1 to a saved number found as expected (game files differ from what '
+                     'this was made for)' % KEY_ADD_FLOW)
+
+
+def key_add_step(add, dungeon):
+    actor, action, params = add
+    p = evfl.Params(params)
+    p['GameDataName'] = dungeon_keys.flag(dungeon)
+    return actor, action, p
+
+
+def tbox_key_flow(template, add, events, version):
+    """our flow: for each (usual event, dungeon) one entry point: join, run the usual event and wait for its
+    end (`template`: tbox_sync_template), then one key more for the dungeon (`add`: key_add_template)"""
+    fc = evfl.Flowchart(TBOX_KEY_FLOW)
+    ef = evfl.EventFlow(TBOX_KEY_FLOW, [fc])
+    ef.version = version
+    (join_actor, join, _), (run_actor, run, run_params) = template
+    for (usual, dungeon), name in sorted(events.items()):
+        nxt = sync_steps(fc, [key_add_step(add, dungeon)])
+        params = evfl.Params(run_params)
+        params['EventName'] = usual
+        nxt = fc.add_action(flow_copy_actor(fc, run_actor), run, params, next=nxt)
+        nxt = fc.add_action(flow_copy_actor(fc, join_actor), join, None, next=nxt)
+        fc.add_entry_point(name, nxt)
+    return ef
+
+
+def tbox_key_steps(template, add, usual, dungeon):
+    """what an entry point of our flow must read back as (tbox_sync_read)"""
+    (join_actor, join, _), (run_actor, run, run_params) = template
+    actor, action, params = key_add_step(add, dungeon)
+    return [(join_actor.name, join, None), (run_actor.name, run, dict(run_params, EventName=usual)),
+            (actor.name, action, dict(params))]
+
+
 def tbox_sync_read(data):
     """{entry point: [(actor, action, parameters)]} of our flow as written: each entry point's steps in order"""
     fc = evfl.loads(data).flowchart
@@ -631,7 +695,7 @@ def tbox_sync_steps(template, sync, usual):
         + [(a.name, n, dict(p) if isinstance(p, dict) else p) for a, n, p in sync]
 
 
-def tbox_sync_rows(settings, infos, usuals):
+def tbox_sync_rows(settings, infos, usuals, events=None, flow_name=None):
     """the two table rows of each of our events, copied from the game's wrapper's (TBOX_SYNC_LIKE):
     {'EventSetting': [rows], 'GameAnalyzedEventInfo': [rows]}. The usual event must be an event that runs no
     other event itself (no ChildEventList: the plain chest events)."""
@@ -645,8 +709,8 @@ def tbox_sync_rows(settings, infos, usuals):
         raise SystemExit('%s: its rows in EventSetting and GameAnalyzedEventInfo are not as expected (game files '
                          'differ from what this was made for)' % TBOX_SYNC_LIKE)
     rows = {'EventSetting': [], 'GameAnalyzedEventInfo': []}
-    for usual in sorted(usuals):
-        name = tbox_sync_event(usual)
+    # events: [(usual event, the name of ours around it)] of another flow of ours (flow_name: a dungeon's keys)
+    for usual, name in (events if events is not None else [(u, tbox_sync_event(u)) for u in sorted(usuals)]):
         if usual not in setting or usual not in info:
             raise SystemExit('%s: not an event of the game (no row in EventSetting or GameAnalyzedEventInfo)' % usual)
         if info[usual].get('ChildEventList'):
@@ -656,7 +720,7 @@ def tbox_sync_rows(settings, infos, usuals):
             raise SystemExit('%s already exists in the game' % name)
         s = type(like_s)(like_s)
         s['__RowId'] = s['EntryPointName'] = name
-        s['FlowchartFileName'] = flow(TBOX_SYNC_FLOW)
+        s['FlowchartFileName'] = flow(flow_name or TBOX_SYNC_FLOW)
         i = type(like_i)(like_i)
         i['__RowId'] = name
         i['ChildEventList'] = type(like_i['ChildEventList'])([usual])
@@ -3642,6 +3706,18 @@ def main(argv):
         if item in FAMILY_ALIASES:
             print('%-18s %s placed: gives %s with it instead (the weapon first)' % (cid, item, FAMILY_ALIASES[item]))
             assignments[k] = (cid, FAMILY_ALIASES[item])
+    # CHECK_ID=Item_Dungeon_SmallKey@Dungeon: a key that counts for that dungeon wherever it is found
+    # (tools/dungeon_keys.py): planned as the key's own version for the kind of check
+    key_versions = {}                                  # (dungeon, kind of version) -> name
+    key_chests = {}                                    # check id -> dungeon: chests that hold a dungeon's key
+    for k, (cid, item) in enumerate(assignments):
+        dungeon = dungeon_keys.parse(item)
+        if dungeon is None:
+            continue
+        kind = dungeon_keys.kind_for(check_kind(world, cid), cid)
+        assignments[k] = (cid, key_versions.setdefault((dungeon, kind), dungeon_keys.name(dungeon, kind)))
+        if kind == 'chest':
+            key_chests[cid] = dungeon
     dicts = zstd.Dictionaries.from_pack(open(os.path.join(a.romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
     if start_items or start_flags:                     # the starting state: refused here, with nothing touched
         game_file = lambda path: zstd.decompress(                                        # noqa: E731
@@ -3792,7 +3868,7 @@ def main(argv):
 
     def once_drop(item):
         """what a rock, a bush or a pot drops once: a version of the item that marks it when picked up"""
-        if item.startswith(once_items.PREFIX) or item == ground_items.TOKEN:
+        if item.startswith(once_items.PREFIX) or item == ground_items.TOKEN or dungeon_keys.is_ours(item):
             return item                                # a family's level (built further down); a real token
         kind = ground_items.kind_of(plain, item)
         if kind in ('item', 'equipment'):
@@ -3800,7 +3876,7 @@ def main(argv):
         return gs_drop(item)                           # a ground actor of the game: its token-built version
 
     def on_ground(item):
-        if item.startswith((turn_items.PREFIX, once_items.PREFIX)):
+        if item.startswith((turn_items.PREFIX, once_items.PREFIX)) or dungeon_keys.is_ours(item):
             return item                                # a turning item (a progressive pair): built further down
         kind = ground_items.kind_of(plain, item)
         if kind == 'ground':
@@ -3810,6 +3886,8 @@ def main(argv):
         raise SystemExit('%s: not something that can lie on the ground, and no ground version can be made' % item)
 
     def in_chest(item):
+        if dungeon_keys.is_ours(item):
+            return item                                # a dungeon's key: built further down
         if ground_items.kind_of(plain, item) == 'equipment':
             return grounds.setdefault((item, 'held'), ground_items.ground_name(item, 'held'))
         return item
@@ -3817,7 +3895,7 @@ def main(argv):
     def gs_drop(item):
         if item == ground_items.TOKEN:
             return item                                # its own token
-        if item.startswith(once_items.PREFIX):
+        if item.startswith(once_items.PREFIX) or dungeon_keys.is_ours(item):
             return item                                # a level of a family (a progressive form): built further down
         if ground_items.kind_of(plain, item) in ('ground', 'item', 'equipment'):
             return grounds.setdefault((item, 'token'), ground_items.ground_name(item, 'token'))
@@ -3839,6 +3917,15 @@ def main(argv):
     def tbox_event(gyaml, event):
         usual = event if event is not None else chest_usual_event(plain, gyaml)
         return tbox_usuals.setdefault(usual, tbox_sync_event(usual))
+
+    # chests that hold a dungeon's key: an opening event of our own around the usual one, which adds the key
+    key_events = {}                                    # (usual opening event, dungeon) -> our event around it
+
+    def key_event(dungeon):
+        def event_for(gyaml, event):
+            usual = event if event is not None else chest_usual_event(plain, gyaml)
+            return key_events.setdefault((usual, dungeon), tbox_key_event(usual, dungeon))
+        return event_for
 
     def get_plan(items):
         """how gifts, scrubs and song cutscenes give these items: (the items Link can't hold up in
@@ -3981,6 +4068,8 @@ def main(argv):
         checking.update({h: pair_check(triples[cid][:2], in_chest) for h, (cid, _, _, kind) in changes.items()
                          if cid in triples})
         wrap = {h: tbox_event for h, (cid, _, _, kind) in changes.items() if kind == 'chest' and holds_ocarina(cid)}
+        wrap.update({h: key_event(key_chests[cid]) for h, (cid, _, _, kind) in changes.items()
+                     if kind == 'chest' and cid in key_chests})
         new, found, _ = patch_file(old, {h: v for h, v in changes.items()}, checking, three, wrap)
         for h, (cid, item, expected_old, kind) in changes.items():
             if found[h] != expected_old:
@@ -4038,9 +4127,15 @@ def main(argv):
                 if h in wrap:
                     # an ocarina chest: our opening event around the one the chest would run
                     usual = dyn.get(TBOX_EVENT_KEY) or chest_usual_event(plain, want['Gyaml'])
-                    dyn[TBOX_EVENT_KEY] = tbox_sync_event(usual)
-                    print('%-18s   holds an ocarina: opening event %s (runs %s, then makes Link\'s ocarina)'
-                          % (changes[h][0], dyn[TBOX_EVENT_KEY], usual))
+                    if changes[h][0] in key_chests:
+                        dyn[TBOX_EVENT_KEY] = tbox_key_event(usual, key_chests[changes[h][0]])
+                        print('%-18s   holds a key of %s: opening event %s (runs %s, then adds 1 to %s)'
+                              % (changes[h][0], key_chests[changes[h][0]], dyn[TBOX_EVENT_KEY], usual,
+                                 dungeon_keys.flag(key_chests[changes[h][0]])))
+                    else:
+                        dyn[TBOX_EVENT_KEY] = tbox_sync_event(usual)
+                        print('%-18s   holds an ocarina: opening event %s (runs %s, then makes Link\'s ocarina)'
+                              % (changes[h][0], dyn[TBOX_EVENT_KEY], usual))
                 want['Dynamic'] = dyn
             if act != want:
                 raise SystemExit('read-back: actor %s (%s) differs from what was intended' % (h, act['Gyaml']))
@@ -4073,6 +4168,32 @@ def main(argv):
                                for a, n, _ in tbox_sync_steps(template, sync, usual))
             print('%-18s %s: entry point and event %s: %s' % ('ocarina chests', flow_path(TBOX_SYNC_FLOW), name, said))
         print('%-18s %d rows added to %s and %s' % ('ocarina chests', len(tbox_usuals), EVENT_SETTING, EVENT_INFO))
+
+    # chests that hold a dungeon's key: the flow of our opening events and their two table rows each; read back:
+    # every entry point is join, the usual event, one key more for its dungeon, nothing else
+    if key_events:
+        like = flow_path(TBOX_SYNC_LIKE_FLOW)
+        like_data = plain(like)
+        like_ef = evfl.loads(like_data)
+        template = tbox_sync_template(like_ef.flowchart)
+        add = key_add_template(evfl.loads(plain(KEY_ADD_FLOW)).flowchart)
+        try:
+            data = evfl.dumps_checked(tbox_key_flow(template, add, key_events, like_ef.version))
+        except ValueError as e:
+            raise SystemExit(str(e))
+        if tbox_sync_read(data) != {name: tbox_key_steps(template, add, usual, dungeon)
+                                    for (usual, dungeon), name in key_events.items()}:
+            raise SystemExit('read-back: %s differs from what was intended' % flow_path(TBOX_KEY_FLOW))
+        out.write_new(flow_path(TBOX_KEY_FLOW), data, like)
+        out.add(flow_path(TBOX_KEY_FLOW), data, like, like_data)
+        rows = tbox_sync_rows(byml.loads(out.read(EVENT_SETTING)[1]).root, byml.loads(out.read(EVENT_INFO)[1]).root,
+                              (), [(usual, name) for (usual, _), name in sorted(key_events.items())], TBOX_KEY_FLOW)
+        for t, path in (('EventSetting', EVENT_SETTING), ('GameAnalyzedEventInfo', EVENT_INFO)):
+            src, old = out.read(path)
+            out.write(path, src, old, ground_items.add_rows(old, rows[t]))
+        for (usual, dungeon), name in sorted(key_events.items()):
+            print('%-18s %s: entry point and event %s: %s, then %s + 1'
+                  % ('key chests', flow_path(TBOX_KEY_FLOW), name, usual, dungeon_keys.flag(dungeon)))
 
     # songs: the cutscene only hands over the item (a family: the inventory questions in front of one get per
     # level); read back against the original
@@ -4474,6 +4595,34 @@ def main(argv):
                           % (bundle['bag'], bundle_for, ', '.join('%d %s' % (n, turn_items._actor_of(x))
                                                                   for x, n in bundle['gives']))
                           if bundle_for else ''))
+    # a dungeon's keys (tools/dungeon_keys.py): the key's version for each kind of check it is on
+    for (dungeon, kind), name in sorted(key_versions.items()):
+        got, pack, new_inner, rows, like_pack = dungeon_keys.build(dungeon, kind, plain, table_rows, model_there,
+                                                                   once_src)
+        assert got == name
+        path = ground_items.pack_path(name)
+        out.write_new(path, pack, like=like_pack)
+        out.add(path, pack, like_pack, plain(like_pack))
+        for inner, (data, like, like_data) in sorted(new_inner.items()):
+            if inner in once_shared:                   # the same file as in the one-time versions' packs
+                if once_shared[inner] != data:
+                    raise SystemExit('%s: %s differs from the one in another version' % (name, inner))
+                continue
+            if not inner.split('/')[-1].startswith((name + '.', 'NX2_Key')):
+                once_shared[inner] = data
+            out.add(inner, data, like, like_data)
+        for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
+            if out.table.get(inner) is None:
+                raise SystemExit('%s: %s has no resource size entry' % (name, inner))
+        for t, row in rows.items():
+            new_rows.setdefault(t, []).append(row)
+        print('key    version %-22s a small key of %s (%d bytes): %s' % (name, dungeon, len(pack), {
+            'once': 'picked up, it adds 1 to %s and marks what dropped it' % dungeon_keys.flag(dungeon),
+            'token': 'dropped by a Gold Skulltula: picked up, it adds 1 to %s and marks the skulltula done'
+                     % dungeon_keys.flag(dungeon),
+            'chest': 'what a chest holds; the chest\'s opening event adds 1 to %s' % dungeon_keys.flag(dungeon),
+        }[kind]))
+
     # the rocks, bushes and pots themselves: an AI of our own name for each actor that drops for us. It only
     # hands its placement's number to its drop: it does not name another level's version (Drop__DropActor is
     # an instance parameter, and writing one stops the game: tools/once_items.py, seen 2026-11-22)
