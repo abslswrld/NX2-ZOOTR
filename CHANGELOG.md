@@ -4,9 +4,30 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 5: a dungeon's small key anywhere (to test in game)
+### Phase 1, part 5: a dungeon's small key anywhere (in game: the keys work, the count shown is off)
 A small key that counts for the Forest Temple wherever it is found: `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`
 (any of the 13 dungeons with keys can be named). Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24): the keys count and open the doors; the count the game shows is not right.**
+- **Keys found in Kokiri Forest count for the Forest Temple.** With the key from the pot and the key from
+  Mido's chest, the temple showed 2, and in a second run the first door opened without the Gold Skulltula's
+  key. The first door, the lobby's west door and the door at the top of the block room all opened.
+- **The roadmap's question is answered: no.** The game's own small key picked up in Kokiri Forest (the control
+  pot) did not count for the temple: both pot keys were picked up, and the temple showed 2, not 3.
+- **The chest:** the key was in the second chest from the left in Mido's house (`KF_MIDO_CHEST_01`). The game
+  went on normally after it; the other three chests were as in the game.
+- **What is off: the count on screen.**
+  - picking up a key in Kokiri Forest showed a count going "from 0 to 0" (both the Forest Temple key and the
+    game's own key);
+  - the chest showed no count and no pop-up;
+  - in the temple, the pop-up after the Gold Skulltula's key showed 2 where 3 were held: it shows the count
+    from before the key is added;
+  - no count appeared when a door was opened.
+  The user: "Key count doesn't seem to accurately display, but the keys themselves seem to work"; "not end of
+  world if the keys themselves work". The right count is on the dungeon map in the pause menu, inside the
+  dungeon (the user; not tested in this round).
+- **Not answered:** the two lines about saving and about save and reload were left blank. Which of the two pots
+  held which key cannot be told (both showed the same).
 
 - **Where the game keeps a dungeon's keys.** A saved number per dungeon, `DungeonInfo.<dungeon>.SmallKeyNum`
   (13 dungeons; the same record holds the boss key, the map and the compass: `IsGetBossKey`, `IsGetMap`,
