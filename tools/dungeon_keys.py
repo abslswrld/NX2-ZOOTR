@@ -35,7 +35,8 @@ the game counts and shows it itself, exactly as it does its own (in game 2026-11
 in its dungeon showed the count from before the key, and a chest showed none). Outside, the count on screen
 is the count of the place Link is in, so a key of another dungeon cannot show its own.
 
-The dungeon's name in the messages (`Item_Dungeon_SmallKey@D+name`, an experiment to test in game): an item's
+The dungeon's name in the messages (every key of a dungeon placed outside it: the user, 2026-11-24; it began as
+an option, `Item_Dungeon_SmallKey@D+name`, which is still read): an item's
 texts are `<name>_Name`, `_GetMessage`, `_GetCaption` in ActorMsg/PouchContent.msbt. An item has that name in
 two places, and the game's own item with texts of its own (the treasure chest game's key, Obj_MiniGame_SmallKey:
 "Door Key") has its name in both:
@@ -145,14 +146,15 @@ VALUE, FLOW, STRING = once_items.VALUE, once_items.FLOW, once_items.STRING
 
 
 def parse(item):
-    """(the dungeon, whether its messages name it) of `Item_Dungeon_SmallKey@Dungeon` or `...@Dungeon+name`,
-    or None for any other item"""
+    """(the dungeon, whether its messages name it) of `Item_Dungeon_SmallKey@Dungeon`, or None for any other
+    item. Its messages always name it (the user, 2026-11-24: every key says its dungeon's name); the first
+    form of that, `...@Dungeon+name`, is still read and means the same"""
     if SEP not in item:
         return None
     key, dungeon = item.split(SEP, 1)
-    named = dungeon.endswith(NAMED)
-    if named:
+    if dungeon.endswith(NAMED):
         dungeon = dungeon[:-len(NAMED)]
+    named = True
     if key != KEY_ITEM:
         raise SystemExit('%s: only %s%s<dungeon> can name a dungeon' % (item, KEY_ITEM, SEP))
     if dungeon not in DUNGEONS:

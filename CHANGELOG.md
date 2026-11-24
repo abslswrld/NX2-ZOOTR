@@ -7,6 +7,23 @@ Newest first. Dates are when the work was done.
 ### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (five tests in game done; the last change, the orange's shade, is not seen in game)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
 
+**Two rules from the user (2026-11-24), built after the fifth test:**
+- **Every key says its dungeon's name** (D41). `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple` on a check outside
+  the Forest Temple is now always the key with the temple's name in its messages; `...@ForestTemple+name`, the
+  option it began as, is still read and means the same (`tools/dungeon_keys.py`: `parse`). On a check of its
+  own dungeon the key is still the game's own small key, which says "You found a small key!" and shows the
+  count: the game's key has one text for all dungeons.
+- **Kokiri Forest's map is open from the start** (D42). A build with `--fix skippable_opening` starts a new file
+  with `IsVisitLocation.KokiriForest` set (`tools/build_mod.py`: `OPENING_VISITED`), unless the build gives that
+  flag itself. In the second test this flag opened the map right at the start.
+- **More colours for the other dungeons** (the user's question): the game's list has eight places and cannot be
+  made longer (fourth test). Three of them are used by no text and are now blue, orange and purple; the other
+  five are used by the game's own texts (0 red, 1 a dark brown for Navi's thoughts, 3 green, 4 and 5 the staff
+  roll's pale colours). So the other eight dungeons can share the five colours, or take the staff roll's two
+  places (the credits' text would change colour with them). Not decided.
+- **Tests:** `tests/dungeon_keys_check.py` (the sample's keys carry the name without `+name`),
+  `tests/start_state_check.py` (the opening fix marks Kokiri Forest; a flag given for it is kept).
+
 **In game (user, 2026-11-24), fifth test build:**
 - **Blue and purple work, in the shades the user wants:** the Water Temple's name was blue (place 2 of the
   game's list recoloured) and the Shadow Temple's purple (place 7). Fire red and Forest green as before.

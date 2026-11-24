@@ -115,6 +115,12 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     phase 1, part 6 (`tools/dungeon_keys.py`: `COLOURS`, `OUR_COLOURS`); green, red, blue and purple **passed
     in game 2026-11-24**, the orange's last shade is not seen in game yet. The other eight dungeons have no
     colour.
+41. **Every small key says its dungeon's name** (2026-11-24): a dungeon's key placed outside that dungeon always
+    has the name in its messages ("You found a small key! (Forest Temple)"), which also keeps the game from
+    showing the key count of the place Link is in. In its own dungeon the key is the game's own small key, with
+    the game's text and count.
+42. **Kokiri Forest's map is open from the start** (2026-11-24): with the opening skippable, a new file starts
+    with Kokiri Forest marked as visited (`IsVisitLocation.KokiriForest`), which is what opens a place's map.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".

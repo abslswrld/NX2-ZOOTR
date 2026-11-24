@@ -154,8 +154,11 @@ Parts, in order:
    **Fifth test in game, 2026-11-24:** blue and purple work as two recoloured places of the game's list that
    no text uses (2 and 7). The game's own place 6 was too dark an orange, so it is recoloured too, to a more
    yellowish orange (225, 130, 0): **that shade is not seen in game yet.** The colours are D40.
-   **Open:** gifts, scrubs and shelves; whether `+name` becomes the rule for a key outside its dungeon; a
-   colour for the other eight dungeons; the Map page of a place whose first cutscene did not run.
+   **Rules from the user, 2026-11-24:** every key outside its dungeon says the dungeon's name (D41); with the
+   opening skippable, Kokiri Forest's map is open from the start (D42).
+   **Open:** gifts, scrubs and shelves; a colour for the other eight dungeons (the game's list has eight places
+   and all are taken or in use); the dungeon's name on a key in its own dungeon (the game's own key has one
+   text for all dungeons).
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 

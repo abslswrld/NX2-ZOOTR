@@ -131,7 +131,8 @@ Game fixes (--fix NAME, see FIXES and FILE_FIXES):
                              (Item_FairyBless_MP: magic, Item_FairyBless_MPDouble: double magic)
     skippable_opening        the opening cutscene (Dm_Kokiri_0000) can be skipped like every other cutscene:
                              removes its "DisableSkip" setting (only the opening, the title screen and the
-                             staff credits have it)
+                             staff credits have it). A new file then also starts with Kokiri Forest marked
+                             as visited, so its map is open from the start (OPENING_VISITED)
 
 The game's own files are only read. The output contains modified game files: it must never be committed
 or shared (out/ is ignored by git).
@@ -377,6 +378,10 @@ FILE_FIXES = {
         ['Components', 'SkipSetting'],
         '?Event/EventSetting/EventSettingComponent/SkipSetting/DisableSkip.engine__event__SkipSetting.bgyml'),
 }
+# With the opening skippable, a new file starts with Kokiri Forest marked as visited. The Map page shows "???"
+# for a place that is not visited (in game 2026-11-24), and the game marks a place when it shows its title:
+# for Kokiri Forest in a cutscene (Dm_Kokiri_0045). With this mark the map was open right at the start.
+OPENING_VISITED = 'IsVisitLocation.KokiriForest'
 LAUNCHER = r"""@echo off
 rem NX2-ZOOTR test launcher (made by tools/build_mod.py). Starts Longshot with the mods in
 rem %(mods)s and saves in %(user)s:
@@ -3636,6 +3641,9 @@ def main(argv):
     if not a.assign and not a.fix and not a.gossip and not a.start and not a.start_flag:
         ap.error('nothing to do: give CHECK_ID=Item assignments, --fix, --gossip, --start and/or --start-flag')
     start_items, start_flags = start_state.parse_items(a.start), start_state.parse_flags(a.start_flag)
+    if 'skippable_opening' in a.fix and not any(name == OPENING_VISITED for name, _ in start_flags):
+        # the map of Kokiri Forest is open from the start (the user, 2026-11-24): see OPENING_VISITED
+        start_flags.append((OPENING_VISITED, 'true'))
     if a.hint and not a.assign:
         ap.error('--hint: nothing is placed to hint at (give CHECK_ID=Item assignments)')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]

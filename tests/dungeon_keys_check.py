@@ -36,6 +36,7 @@ GAME_KEY_NODES = ('OneShotDungeonGetSmallKey', 'OneShotDungeonUseSmallKey', 'Que
                   'EventGetDungeonSmallKey', 'EventUseDungeonSmallKey')
 # the test build of part 5 (out/TEST_CHECKLIST.md)
 SAMPLE = [
+    # every key outside its dungeon says the dungeon's name (the first form, ...+name, means the same)
     ('KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01', KEY + '@' + D),     # a Forest Temple key in a pot outside the temple
     ('KF_MIDO_CHEST_01', KEY + '@' + D),                      # and in a chest
     ('KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02', 'Obj_Dungeon_SmallKey'),   # the control: the game's own key outside
@@ -177,10 +178,10 @@ def main(romfs):
         event = build_mod.tbox_key_event(usual, D)
         good &= check('the sample builds; read back from the mod folder: the pot drops %s, the chest holds %s and '
                       'runs our event, the Gold Skulltula drops %s, the control pot the game\'s own key'
-                      % (dungeon_keys.name(D, 'once'), dungeon_keys.name(D, 'chest'),
+                      % (dungeon_keys.name(D, 'once', True), dungeon_keys.name(D, 'chest', True),
                          'the game\'s own key (it is in its own temple)'),
-                      held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once'), None)}
-                      and held['KF_MIDO_CHEST_01'] == {(dungeon_keys.name(D, 'chest'), event)}
+                      held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once', True), None)}
+                      and held['KF_MIDO_CHEST_01'] == {(dungeon_keys.name(D, 'chest', True), event)}
                       and held['FT_ENTRANCE_GS'] == {('Obj_NX2_GS_Dungeon_SmallKey', None)}
                       and held['KF_HOUSE_OF_TWINS_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once', True), None)}
                       and {x[0] for x in held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02']}
@@ -202,9 +203,10 @@ def main(romfs):
         table = {str(r['__RowId']): r for r in byml.loads(read(ground_items.table_path('PouchActorInfo'))).root}
         good &= check('  the versions built are in the item table as "not put in the inventory"; the game\'s key '
                       'rows are untouched',
-                      all(table[dungeon_keys.name(D, k)]['PouchSpecialDeal'] == dungeon_keys.NOT_PUSHED
+                      all(table[dungeon_keys.name(D, k, True)]['PouchSpecialDeal'] == dungeon_keys.NOT_PUSHED
                           for k in ('once', 'chest')) and dict(table[KEY]) == dict(pouch[KEY])
-                      and dungeon_keys.name(D, 'token') not in table)
+                      and dungeon_keys.name(D, 'token', True) not in table
+                      and not any(dungeon_keys.name(D, k) in table for k in dungeon_keys.NAMES))
         info = {str(r['__RowId']): r for r in byml.loads(read(ground_items.table_path('ActorInfo'))).root}
         msg = dungeon_keys.MESSAGE_NAME % D
         texts = {}
@@ -212,10 +214,12 @@ def main(romfs):
             arc = sarc.Sarc.read(read('Mals/%s.Product.110.sarc' % lang))
             texts[lang] = msbt.Msbt.read(arc.files[dungeon_keys.MESSAGE_FILE]).texts
         refs = {}
-        for version in (dungeon_keys.name(D, 'once', True), dungeon_keys.name(D, 'chest', True),
-                        dungeon_keys.name(D, 'once'), dungeon_keys.name(D, 'chest')):
+        for version in (dungeon_keys.name(D, 'once', True), dungeon_keys.name(D, 'chest', True)):
             vfiles = sarc.Sarc.read(read(ground_items.pack_path(version))).files
             refs[version] = ground_items.resolved_components(vfiles, version)['ActorNameRef']
+        for kind in ('once', 'chest'):                 # the versions without the name (not in a build any more)
+            vfiles = sarc.Sarc.read(built[kind][1]).files
+            refs[built[kind][0]] = ground_items.resolved_components(vfiles, built[kind][0])['ActorNameRef']
         game_ref = ground_items.item_components(key_files, KEY)['ActorNameRef']
         good &= check('  the named key: its row and its actor file are named %s, the named chest key, which is '
                       'named itself; its three texts are in the message files with the temple\'s name (%r)'
@@ -227,7 +231,7 @@ def main(romfs):
                       and refs[dungeon_keys.name(D, 'chest', True)] == dungeon_keys.NAME_REF % msg
                       and refs[dungeon_keys.name(D, 'once')] == game_ref
                       and refs[dungeon_keys.name(D, 'chest')] == game_ref
-                      and info[dungeon_keys.name(D, 'once')]['ActorName'] == KEY
+                      and built['once'][3]['ActorInfo']['ActorName'] == KEY
                       and texts['USen'].get(msg + '_Name') == 'Small Key (Forest Temple)\x00'
                       and all(msg + t in texts[lang] for lang in texts for t, _ in dungeon_keys.MESSAGES)
                       and texts['USen']['%s_Name' % KEY] == 'Small Key\x00')
