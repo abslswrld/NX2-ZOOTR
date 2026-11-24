@@ -43,7 +43,7 @@ LEFT_OUT = ('Sword_Giant', 'Sword_Biggoron', 'Sword_BrokenGiant', 'BrokenSword',
 # not listed, so no copy: an item that lies right, one whose project another item's copy is made of, one with
 # vertices on more bones than Skl_Root (the compass's needle; the first bomb bag was this one until 2026-11-22)
 NOT_LIFTED = ('Item_Boomerang', 'TBox_ArrowBundle_Large', 'Item_Dungeon_Compass')
-# the seven whose ground pose places many bones (2026-11-22): {item: (its project, how many bones the pose places,
+# the nine whose ground pose places many bones (seven 2026-11-22, the boots 2026-11-24): {item: (its project, how many bones the pose places,
 # lowest vertex in the game's pose with the spin, measured with every bone posed)}. Their copy is their own project
 # with Pose_GetDemo added (a copy of the game's Pose_Common) and the height of Skl_Root changed in Pose_Common
 MANY = {'Item_Range_SlingShot': ('Weapon_Range_SlingShot_Animation', 19, -0.1485),
@@ -52,7 +52,11 @@ MANY = {'Item_Range_SlingShot': ('Weapon_Range_SlingShot_Animation', 19, -0.1485
         'Item_Gauntlet_Gold': ('Armor_Adult_Gauntlet_Gold_Animation', 73, -0.1626),
         'Item_BombBag_Small': ('Item_BombBag_Small_Animation', 5, -0.1427),
         'Item_Hookshot': ('Item_Hookshot_Animation', 19, -0.2004),
-        'Item_Longshot': ('Item_Hookshot_Animation', 19, -0.2004)}
+        'Item_Longshot': ('Item_Hookshot_Animation', 19, -0.2004),
+        # the boots (2026-11-24: the Hover Boots lay slightly in the floor in game). Their models have vertices
+        # on five and seven bones, the fifth weight in a byte of its own (item_pose._WEIGHT '0102')
+        'Item_HoverBoot': ('Armor_Adult_HoverBoot_Animation', 18, -0.1400),
+        'Item_HeavyBoot': ('Armor_Adult_HeavyBoot_Animation', 22, -0.1469)}
 # their copies, as first made: {copy: checksum}
 MANY_COPIES = {
     'NX2Gnd_Range_SlingShot_Animation': 'af3c4c621bd64ebfa9f3f1ac50f1616f21b05f0cae0e7324cfcc5b8adb5e62e9',
@@ -60,11 +64,15 @@ MANY_COPIES = {
     'NX2GA_Adult_Gauntlet_Silver_Animation': 'b0b906184b78b7ea4fd29b260ddddbce02a85e6ab142bd80eb1f66c8dd3b09ae',
     'NX2GA_Adult_Gauntlet_Gold_Animation': 'fb9e79f5a566171fc6d33384a95eef12d9f5f3411fb69f58bbe1a2cf8b8a5947',
     'NX2G_BombBag_Small_Animation': '3ff2c34632fe4649ed4bd7cdf1f8299ebf3cbc6d4ad855dff2d471ce9cf8e405',
-    'NX2G_Hookshot_Animation': 'd5d25a50521d96bf0b521dc78cdd0f65f2d9ae04d4983d1c6fad21cb28ab0b96'}
+    'NX2G_Hookshot_Animation': 'd5d25a50521d96bf0b521dc78cdd0f65f2d9ae04d4983d1c6fad21cb28ab0b96',
+    'NX2GA_Adult_HoverBoot_Animation': 'e205650978af08786a6361714ea40ee21d94c3203c7edb9381623b973da00c74',
+    'NX2GA_Adult_HeavyBoot_Animation': 'eb373f854d2b61ff3ea17a354d2839ecfc19c98cc35b32f4400a8b7002e273c8'}
 # every other item, every version (ground, token, turn, held), as ground_items.build made them before 2026-11-22
 # (taken with the builder of main 68e5e89): how many built or stopped, and one checksum over them all (see
-# fingerprint below). Only the seven's ground, token and turn versions differ
-OTHERS = (1559, '9be0344f9860c6e77b56e0511249f836cd330cebc30e3e116d2dff450c7ff555')
+# fingerprint below). Only the nine's ground, token and turn versions differ
+# 2026-11-24: the two boots joined MANY, so their ground, token and turn versions left this count (1559 -> 1553).
+# The checksum of the 1553 was taken with the builder before that change (main d792b77) and is the same after it
+OTHERS = (1553, '25f38ec44cf6257b771bd2ba1a837ea40c3b0abe911fb3ec90e88e6ca9f4f285')
 # the Fire Arrow's copy (also the Ice Arrow's) as it was before the Light Arrow got a copy of its own of the same
 # project (2026-11-20): its name and checksum, and the checksums of the four packs that name it
 ARROW_COPY = ('NX2G_Arrow_Fire_Animation', '882e3ca4009701ff166c7fa06a43bcd906ea49792c672ae9422b4c84f3f212d7')
@@ -390,8 +398,8 @@ def main(romfs):
             none &= not ground_items.build(item, plain, table_rows, has_model, version)[4]
     good &= check('items not listed get no copy (%s)' % ', '.join(NOT_LIFTED), none)
 
-    # the seven whose ground pose places many bones (2026-11-22)
-    good &= check('the seven on many bones are listed (%s); the Longshot lies on the Hookshot\'s copy'
+    # the nine whose ground pose places many bones (2026-11-22, the boots 2026-11-24)
+    good &= check('the nine on many bones are listed (%s); the Longshot lies on the Hookshot\'s copy'
                   % ', '.join(MANY), set(MANY) <= set(lift) and sorted(many_seen) == sorted(MANY)
                   and shared.get('Item_Longshot') == 'Item_Hookshot' and not set(MANY) & set(box))
     bones_ok = read_ok = shown_ok = low_ok = dic_ok = True
@@ -460,7 +468,7 @@ def main(romfs):
                 continue
             others['%s|%s' % (item, version)] = fingerprint(item, plain, cached_rows, has_model, version)
     digest = hashlib.sha256(''.join('%s=%s\n' % (k, others[k]) for k in sorted(others)).encode()).hexdigest()
-    good &= check('  every other item\'s versions (%d: the seven held up too) are built as before, byte for byte'
+    good &= check('  every other item\'s versions (%d: the nine held up too) are built as before, byte for byte'
                   % len(others), (len(others), digest) == OTHERS)
     print('\n'.join(lines))
 

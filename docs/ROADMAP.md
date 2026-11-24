@@ -118,7 +118,10 @@ Parts, in order:
    Skulltulas (11 placements tested); `--fix forest_temple_bow_room_door` (walked out of the Bow room without
    the Bow). The loose item is the boss's Heart Container: it moves to part 7.
 4. **Small keys in their own dungeon:** keys moved to other checks in the temple. In game: the locked doors open
-   with keys found in new places, and the key count is right.
+   with keys found in new places, and the key count is right. **Also here (the user, 2026-11-24):** the Hover
+   Boots' height on the ground (they lay slightly in the floor in part 3's test).
+   **Built 2026-11-24, to test in game:** keys in a chest, in pots and on a Gold Skulltula (no builder change
+   needed); the boots raised (the Iron Boots had the same fault).
 5. **Keys anywhere, and which dungeon a key belongs to:** a Forest Temple key placed in Kokiri Forest; its get
    message and the pause menu name the temple (unique key models stay after the beta). In game: pick it up
    outside, use it inside. Unknown settled here: does a key found outside count for the right dungeon?

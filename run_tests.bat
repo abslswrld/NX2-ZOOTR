@@ -68,6 +68,9 @@ echo.
 echo === Forest Temple items check ===
 %PY% tests\forest_temple_items_check.py "%ROMFS%"
 echo.
+echo === Forest Temple keys check ===
+%PY% tests\forest_temple_keys_check.py "%ROMFS%"
+echo.
 echo === Starting state of a new file check ===
 %PY% tests\start_state_check.py "%ROMFS%"
 echo.
