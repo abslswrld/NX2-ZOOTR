@@ -4,13 +4,13 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
-### Phase 1, part 1: the starting state of a new file (to test in game)
+### Phase 1, part 1: the starting state of a new file (passed in game)
 New builder options: `--start ITEM` or `--start ITEM=N` puts an item in the inventory of every new file, and
 `--start-flag NAME=VALUE` sets a flag on it. Later parts reuse this for "start with" keys, maps and compasses,
 Zelda's Letter, starting as adult, full wallets and the "open" options.
 
 - **The roadmap's unknown, answered from the game's files: both. Items and flags can be set on a new file, in
-  the same place.** Whether it holds in game is this part's test (`out\TEST_CHECKLIST.md`).
+  the same place.** Confirmed in game the same day (result at the end of this entry).
 - **Where the game sets up a new file** (read from its own files):
   - The new-game sequence `Sequence/Opening.module.ainb` runs `Sequence/SetPouchAndStatusForGameStart.module.ainb`
     once: after the title screen's map is gone (`ChangeBanc`, `DoAfterDestroyBanc`) and before it asks for the
@@ -74,7 +74,14 @@ Zelda's Letter, starting as adult, full wallets and the "open" options.
   What the flag does, from the forest's logic modules: while it is true,
   `Logic/KokiriForest_Child_Level_All_02_35ae` keeps two areas in front of Mido that turn on
   `KokiriForest_Npc_Kokiri_Blocker` when Link steps in; with it false those areas are removed.
-- **In-game result:** not tested yet.
+- **In-game result (2026-11-23, new file, all good):**
+  - The Boomerang is in the item menu right after waking up, and it is thrown normally inside Link's house and
+    outside.
+  - The rest of the start is as usual: 3 hearts, no sword, no shield, 0 rupees, green tunic.
+  - Mido lets Link through to the Deku Tree without the sword and shield. He stands in the middle of the path
+    and says a long text box (noted by the user as "listen here my no fairy----"); it looked fine.
+  - After save and reload the Boomerang is still there and the path is still open.
+  - Not tested: that an older file is unchanged (the optional line).
 
 ### Roadmap to the public beta (docs only)
 - `docs/ROADMAP.md`: the approved plan of action, in priority order: the Forest Temple first, then every area in
