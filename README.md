@@ -152,6 +152,8 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `tools/sizes.py` | what a file's entry in the resource size table has to be, from its contents: the rules per kind of file, fitted on the game's own files (used by `build_mod.py` for every file it changes or adds) |
 | `tests/event_families_check.py` | upgrade families on a song check and on Saria's bridge gift: every family, every number of levels owned, what follows each get, the read-backs, whole builds (in `run_tests.bat`) |
 | `tests/hint_check.py` | gossip stone hints (`build_mod.py --hint STONE=ITEM` or `STONE=@CHECK_ID`): every name a hint uses is the game's own English text, every check gets a wording that fits a stone, what `--hint` takes and refuses, and a whole build read back (in `run_tests.bat`) |
+| `tools/start_state.py` | the starting state of a new file: adds starting items and starting flags to the game's own list of what a new file has, the sequence module `Sequence/SetPouchAndStatusForGameStart` (used by `build_mod.py --start ITEM[=N]` and `--start-flag NAME=VALUE`) |
+| `tests/start_state_check.py` | the starting state: where the game sets up a new file and what it gives and sets there, read from its own files; items and flags of each type added and read back; what is refused; whole builds (in `run_tests.bat`) |
 | `tests/size_check.py` | checks those rules against the entry of every game file they cover (reads every pack: several minutes; not part of `run_tests.bat`) |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):

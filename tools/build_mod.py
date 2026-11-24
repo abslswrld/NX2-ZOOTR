@@ -85,6 +85,14 @@ of this build is, as a --gossip text worded from the placements and the game's o
         --hint KF_NEAR_LOST_WOODS_GOSSIP=Item_Boomerang
     -> "They say the {Boomerang} can be found in a pot in the {House of the Know-It-All Brothers} in {Kokiri Forest}."
 
+Starting state of a new file (to test in game): --start ITEM or --start ITEM=N (repeatable) puts an item in the
+inventory of every new file, and --start-flag NAME=VALUE (repeatable) sets a flag on it (a Bool: true or false,
+an Int: a number, a String64: text). Both are added to the game's own list of what a new file has, the sequence
+module Sequence/SetPouchAndStatusForGameStart, which the new-game sequence runs once before Kokiri Forest is
+loaded (tools/start_state.py). Files that already exist are not changed:
+
+    python tools/build_mod.py ... --start Item_Boomerang --start-flag KokiriForest_Npc_Kokiri_Mido_Child_Blocker=false
+
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
                              Deku Tree (the "low on stock" set is removed, every shelf is open from the
@@ -131,6 +139,7 @@ import harp_colors  # noqa: E402
 import once_items  # noqa: E402
 import shop_items  # noqa: E402
 import sizes  # noqa: E402
+import start_state  # noqa: E402
 import three_chest  # noqa: E402
 import turn_items  # noqa: E402
 from formats import zstd, byml, restbl, sarc, evfl, ainb, msbt  # noqa: E402
@@ -3436,10 +3445,16 @@ def main(argv):
     ap.add_argument('--hint', action='append', default=[], metavar='STONE=ITEM',
                     help='a gossip stone says where an item of this build is (ITEM: an item as assigned, or a '
                          'family\'s first level; or @CHECK_ID for the item of that check); see hint_specs')
+    ap.add_argument('--start', action='append', default=[], metavar='ITEM[=N]',
+                    help='an item every new file has from the start (N: how many); see tools/start_state.py')
+    ap.add_argument('--start-flag', action='append', default=[], metavar='NAME=VALUE',
+                    help='a flag set on every new file (a Bool: true or false, an Int: a number, a String64: '
+                         'text); see tools/start_state.py')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
-    if not a.assign and not a.fix and not a.gossip:
-        ap.error('nothing to do: give CHECK_ID=Item assignments, --fix and/or --gossip')
+    if not a.assign and not a.fix and not a.gossip and not a.start and not a.start_flag:
+        ap.error('nothing to do: give CHECK_ID=Item assignments, --fix, --gossip, --start and/or --start-flag')
+    start_items, start_flags = start_state.parse_items(a.start), start_state.parse_flags(a.start_flag)
     if a.hint and not a.assign:
         ap.error('--hint: nothing is placed to hint at (give CHECK_ID=Item assignments)')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
@@ -3522,6 +3537,14 @@ def main(argv):
             print('%-18s %s placed: gives %s with it instead (the weapon first)' % (cid, item, FAMILY_ALIASES[item]))
             assignments[k] = (cid, FAMILY_ALIASES[item])
     dicts = zstd.Dictionaries.from_pack(open(os.path.join(a.romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
+    if start_items or start_flags:                     # the starting state: refused here, with nothing touched
+        game_file = lambda path: zstd.decompress(                                        # noqa: E731
+            open(os.path.join(a.romfs, *(path + '.zs').split('/')), 'rb').read(), dicts)
+        start_data = start_state.GameData(game_file(start_state.GAME_DATA))
+        start_state.check_items(start_items, start_data,
+                                {r['__RowId'] for r in byml.loads(game_file(start_state.ITEM_TABLE)).root},
+                                NEVER_GIVEN, UPGRADE_FAMILIES)
+        start_flags = start_state.check_flags(start_flags, start_data)
     mod_romfs = os.path.join(a.out, a.name, 'romfs')
     if os.path.isdir(mod_romfs):
         # files of an earlier build would stay in the mod otherwise (only this build's output folder is removed)
@@ -4463,6 +4486,17 @@ def main(argv):
     if a.gossip:
         gossip_build(out, a.romfs, gossip)
 
+    # The starting state of a new file: one more push per item and one more setter per flag in the game's own
+    # new-game module (tools/start_state.py: read back against the game's files before it is written)
+    if start_items or start_flags:
+        src, old = out.read(start_state.MODULE)
+        new, said = start_state.edit(old, out.read(start_state.SETTER_SOURCE)[1], start_items, start_flags)
+        out.write(start_state.MODULE, src, old, new)
+        for line in said:
+            print('%s (%s)' % (line, start_state.MODULE))
+        for name, _, _, note in start_flags:
+            if note:
+                print('NOTE start flag %s: %s' % (name, note))
     out.finish()
     print('mod folder:', os.path.join(a.out, a.name))
     if a.longshot:

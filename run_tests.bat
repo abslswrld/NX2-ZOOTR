@@ -62,6 +62,9 @@ echo.
 echo === One-time drops (rocks, bushes, pots) check ===
 %PY% tests\one_time_check.py "%ROMFS%"
 echo.
+echo === Starting state of a new file check ===
+%PY% tests\start_state_check.py "%ROMFS%"
+echo.
 echo === Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence) ===
 %PY% tests\roundtrip.py "%ROMFS%" Event RSDB Mals GameData Pack System AI Logic Sequence --report report.txt
 echo.
