@@ -1,0 +1,2425 @@
+[
+ {
+  "unique_check_id": "FT_AMY_ROOM_POT_01",
+  "check_name": "FT Amy Room Pot 1",
+  "region": "FT Amy Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@46.0,-3.5",
+    "hash": "16313270500968203353",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_RangeWeapon_02)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_RangeWeapon_02"
+ },
+ {
+  "unique_check_id": "FT_AMY_ROOM_POT_02",
+  "check_name": "FT Amy Room Pot 2",
+  "region": "FT Amy Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@46.0,-2.0",
+    "hash": "204034068196251074",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (Drop_ResourceSupply_BeforeBoss)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table Drop_ResourceSupply_BeforeBoss"
+ },
+ {
+  "unique_check_id": "FT_BASEMENT_CHEST",
+  "check_name": "FT Basement Chest",
+  "region": "FT Basement",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@-16.5,12.5",
+    "hash": "9038700938965170329",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "TBox_ArrowBundle_Large",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "FT_BASEMENT_GS",
+  "check_name": "FT GS Basement",
+  "region": "FT Basement",
+  "area": "ForestTemple",
+  "check_type": "skulltula",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "skulltula@-3.5,17.0",
+    "hash": "3072474196008424241",
+    "actor": "Enemy_Skulltula_Gold",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "GoldSkulltulaToken",
+   "source": "check kind (not stored in the map data)",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "can_use(Hookshot)",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "at y 65.6 (the floor is at 60.7); Hookshot assumed: check in game"
+ },
+ {
+  "unique_check_id": "FT_BASEMENT_POT_01",
+  "check_name": "FT Basement Pot 1",
+  "region": "FT Basement",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-1.5,20.0",
+    "hash": "845052341770025044",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (Drop_ResourceSupply_BeforeBoss)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table Drop_ResourceSupply_BeforeBoss"
+ },
+ {
+  "unique_check_id": "FT_BASEMENT_POT_02",
+  "check_name": "FT Basement Pot 2",
+  "region": "FT Basement",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-0.5,21.0",
+    "hash": "17869964928823963066",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (Drop_ResourceSupply_BeforeBoss)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table Drop_ResourceSupply_BeforeBoss"
+ },
+ {
+  "unique_check_id": "FT_BASEMENT_POT_03",
+  "check_name": "FT Basement Pot 3",
+  "region": "FT Basement",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@0.5,21.0",
+    "hash": "8451893348143348779",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (Drop_ResourceSupply_BeforeBoss)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table Drop_ResourceSupply_BeforeBoss"
+ },
+ {
+  "unique_check_id": "FT_BASEMENT_POT_04",
+  "check_name": "FT Basement Pot 4",
+  "region": "FT Basement",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@1.5,20.0",
+    "hash": "15881257994982213730",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (Drop_ResourceSupply_BeforeBoss)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table Drop_ResourceSupply_BeforeBoss"
+ },
+ {
+  "unique_check_id": "FT_BETH_CHEST",
+  "check_name": "FT Beth Chest",
+  "region": "FT Beth Room",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@17.0,-63.5",
+    "hash": "6948525240950728236",
+    "actor": "Obj_TBox_A_02_NoBake",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Dungeon_Compass",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*4",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*4",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "can_use(Bow)",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the game puts the compass here; appears when Beth is beaten; the pictures are shot with arrows"
+ },
+ {
+  "unique_check_id": "FT_BETH_ROOM_POT_01",
+  "check_name": "FT Beth Room Pot 1",
+  "region": "FT Beth Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@20.0,-67.5",
+    "hash": "14344239269960841819",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*4",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*4",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "no drop table in the map data"
+ },
+ {
+  "unique_check_id": "FT_BETH_ROOM_POT_02",
+  "check_name": "FT Beth Room Pot 2",
+  "region": "FT Beth Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@22.0,-67.5",
+    "hash": "12084337161955511012",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_RangeWeapon_02)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*4",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*4",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_RangeWeapon_02"
+ },
+ {
+  "unique_check_id": "FT_BETH_ROOM_POT_03",
+  "check_name": "FT Beth Room Pot 3",
+  "region": "FT Beth Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@24.0,-67.5",
+    "hash": "4243968346728704417",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (Drop_ResourceSupply_BeforeBoss)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*4",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*4",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table Drop_ResourceSupply_BeforeBoss"
+ },
+ {
+  "unique_check_id": "FT_BLOCK_ROOM_EYE_SWITCH_CHEST",
+  "check_name": "FT Block Room Eye Switch Chest",
+  "region": "FT Block Room",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@-53.0,4.0",
+    "hash": "15920957434854338961",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "TBox_Rupee_Purple",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "can_use(Bow)",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "falls when the eye switch is shot; the eye switch has isHitHookShot false in the map data: an arrow, not the Hookshot"
+ },
+ {
+  "unique_check_id": "FT_BLOCK_ROOM_POT_01",
+  "check_name": "FT Block Room Pot 1",
+  "region": "FT Block Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-51.5,16.5",
+    "hash": "14169869109292081997",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "no drop table in the map data"
+ },
+ {
+  "unique_check_id": "FT_BLOCK_ROOM_POT_02",
+  "check_name": "FT Block Room Pot 2",
+  "region": "FT Block Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-49.5,16.5",
+    "hash": "3947004986900705772",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "no drop table in the map data"
+ },
+ {
+  "unique_check_id": "FT_BLOCK_ROOM_POT_03",
+  "check_name": "FT Block Room Pot 3",
+  "region": "FT Block Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-47.5,16.5",
+    "hash": "5080915951880062416",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "no drop table in the map data"
+ },
+ {
+  "unique_check_id": "FT_BOSS_KEY_CHEST",
+  "check_name": "FT Boss Key Chest",
+  "region": "FT Boss Key Corridor",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@-49.5,-63.5",
+    "hash": "5306318520835485827",
+    "actor": "Obj_TBox_A_03_NoBake",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Dungeon_BossKey",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the game puts the boss key here (GetEventName ForesetTemple_GetBossKey, flag ForestTemple_Room23_GetBossKey)"
+ },
+ {
+  "unique_check_id": "FT_BOW_CHEST",
+  "check_name": "FT Bow Chest",
+  "region": "FT Bow Room",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@0.0,-68.5",
+    "hash": "11082303891540711688",
+    "actor": "Obj_TBox_A_02_NoBake",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Range_Bow",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the game puts the Bow here (GetEventName ForestTemple_GetBow, flag ForestTemple_Room06_GetBow); appears when the last two Stalfos are beaten"
+ },
+ {
+  "unique_check_id": "FT_BOW_ROOM_POT_01",
+  "check_name": "FT Bow Room Pot 1",
+  "region": "FT Bow Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-2.0,-69.0",
+    "hash": "13098892055243633233",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_Obj_Heart)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_Obj_Heart"
+ },
+ {
+  "unique_check_id": "FT_BOW_ROOM_POT_02",
+  "check_name": "FT Bow Room Pot 2",
+  "region": "FT Bow Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@2.5,-69.0",
+    "hash": "6298504646306157744",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_Obj_Heart)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_Obj_Heart"
+ },
+ {
+  "unique_check_id": "FT_BOW_ROOM_POT_03",
+  "check_name": "FT Bow Room Pot 3",
+  "region": "FT Bow Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-2.0,-50.0",
+    "hash": "11701653450964348630",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_Obj_Heart)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_Obj_Heart"
+ },
+ {
+  "unique_check_id": "FT_BOW_ROOM_POT_04",
+  "check_name": "FT Bow Room Pot 4",
+  "region": "FT Bow Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@2.5,-50.0",
+    "hash": "2110020506516121812",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_Obj_Heart)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_Obj_Heart"
+ },
+ {
+  "unique_check_id": "FT_EAST_COURTYARD_CHEST",
+  "check_name": "FT East Courtyard Chest",
+  "region": "FT East Courtyard",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@39.0,-35.5",
+    "hash": "3174893090599461927",
+    "actor": "Obj_TBox_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Dungeon_Map",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "can_use(Hookshot)",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the game puts the map here. Hookshot assumed (the target next to it); whether it can be reached without is not known: check in game"
+ },
+ {
+  "unique_check_id": "FT_EAST_COURTYARD_GS",
+  "check_name": "FT GS East Courtyard",
+  "region": "FT East Courtyard",
+  "area": "ForestTemple",
+  "check_type": "skulltula",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "skulltula@44.5,-38.0",
+    "hash": "2014780391754316762",
+    "actor": "Enemy_Skulltula_Gold",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "GoldSkulltulaToken",
+   "source": "check kind (not stored in the map data)",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "can_use(Hookshot)",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "at y 112.1, level with the balcony above the ledge door; Hookshot assumed: check in game"
+ },
+ {
+  "unique_check_id": "FT_ENTRANCE_CHEST",
+  "check_name": "FT Entrance Chest",
+  "region": "FT Entrance",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@-10.0,64.5",
+    "hash": "1171460703078800858",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Dungeon_SmallKey",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "up at y 117.5 (the floor is at 101.5), on the west side; how it is reached (climbing) is not read from the files: check in game"
+ },
+ {
+  "unique_check_id": "FT_ENTRANCE_GS",
+  "check_name": "FT GS Entrance",
+  "region": "FT Entrance",
+  "area": "ForestTemple",
+  "check_type": "skulltula",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "skulltula@11.5,64.0",
+    "hash": "11081821111317815057",
+    "actor": "Enemy_Skulltula_Gold",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "GoldSkulltulaToken",
+   "source": "check kind (not stored in the map data)",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "can_use(Hookshot)",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "up at y 119.8 on the east side; there at any time of day (Gimmick_AllDay_Skulltula). Hookshot assumed for the height: check in game"
+ },
+ {
+  "unique_check_id": "FT_FALLING_CEILING_ROOM_CHEST",
+  "check_name": "FT Falling Ceiling Room Chest",
+  "region": "FT Falling Ceiling Room",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@56.0,-23.0",
+    "hash": "15117164073907033527",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "its map entry names no item (no Drop__DropActor): what the game gives here is to be seen in game"
+ },
+ {
+  "unique_check_id": "FT_FIRST_STALFOS_ROOM_CHEST",
+  "check_name": "FT First Stalfos Room Chest",
+  "region": "FT First Stalfos Room",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@0.0,-63.0",
+    "hash": "14776684749746592758",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Dungeon_SmallKey",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "appears when both Stalfos are beaten"
+ },
+ {
+  "unique_check_id": "FT_FIRST_STALFOS_ROOM_POT_01",
+  "check_name": "FT First Stalfos Room Pot 1",
+  "region": "FT First Stalfos Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-2.5,-63.5",
+    "hash": "8740962919121236974",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_Obj_Heart)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_Obj_Heart"
+ },
+ {
+  "unique_check_id": "FT_FIRST_STALFOS_ROOM_POT_02",
+  "check_name": "FT First Stalfos Room Pot 2",
+  "region": "FT First Stalfos Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@2.5,-63.5",
+    "hash": "2723241463527082223",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_Obj_Heart)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_Obj_Heart"
+ },
+ {
+  "unique_check_id": "FT_FLOORMASTER_CHEST",
+  "check_name": "FT Floormaster Chest",
+  "region": "FT Floormaster Room",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@-70.0,-26.5",
+    "hash": "7535137041266964235",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Dungeon_SmallKey",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "appears when the Floormaster is beaten"
+ },
+ {
+  "unique_check_id": "FT_FOREST_MEDALLION_GIFT",
+  "check_name": "FT Forest Medallion",
+  "region": "FT Phantom Ganon Room",
+  "area": "ForestTemple",
+  "check_type": "gift",
+  "object_id": [],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "event with no map placement; contents not found in the game data yet"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleBossKey",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleBossKey",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "'Forest Temple Clear'",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "object_id_note": "no map placement (an event); its ID in the game is still to be found",
+  "notes": "the dungeon reward: the Forest Medallion (Item_Medal_Forest in the item table), given after the boss. How the game hands it over is not found yet (its name is in none of the Dm_SageRoom or SageOfForest flows): to find in part 7"
+ },
+ {
+  "unique_check_id": "FT_FROZEN_EYE_SWITCH_ROOM_POT_01",
+  "check_name": "FT Frozen Eye Switch Room Pot 1",
+  "region": "FT Frozen Eye Switch Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@55.5,15.0",
+    "hash": "10045766070541814618",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_RangeWeapon_01)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_RangeWeapon_01"
+ },
+ {
+  "unique_check_id": "FT_FROZEN_EYE_SWITCH_ROOM_POT_02",
+  "check_name": "FT Frozen Eye Switch Room Pot 2",
+  "region": "FT Frozen Eye Switch Room",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@57.5,15.0",
+    "hash": "14386060266040640728",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_RangeWeapon_01)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_RangeWeapon_01"
+ },
+ {
+  "unique_check_id": "FT_JOELLE_CHEST",
+  "check_name": "FT Joelle Chest",
+  "region": "FT Joelle Room",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@-17.0,-63.5",
+    "hash": "3433400840978782007",
+    "actor": "Obj_TBox_A_01_NoBake",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Dungeon_SmallKey",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleSmallKey*3",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "can_use(Bow)",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "appears when Joelle is beaten; the pictures are shot with arrows"
+ },
+ {
+  "unique_check_id": "FT_LOBBY_GS",
+  "check_name": "FT GS Lobby",
+  "region": "FT Lobby",
+  "area": "ForestTemple",
+  "check_type": "skulltula",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "skulltula@9.0,-23.5",
+    "hash": "17612196129225973969",
+    "actor": "Enemy_Skulltula_Gold",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "GoldSkulltulaToken",
+   "source": "check kind (not stored in the map data)",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "can_use(Hookshot)",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "on a wall at y 109.6 (the hall floor is at 100); Hookshot assumed: check in game"
+ },
+ {
+  "unique_check_id": "FT_LOBBY_POT_01",
+  "check_name": "FT Lobby Pot 1",
+  "region": "FT Lobby",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-16.5,13.0",
+    "hash": "139743615625578751",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_Obj_Heart)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_Obj_Heart"
+ },
+ {
+  "unique_check_id": "FT_LOBBY_POT_02",
+  "check_name": "FT Lobby Pot 2",
+  "region": "FT Lobby",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-15.0,14.5",
+    "hash": "9600596241209359414",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "no drop table in the map data"
+ },
+ {
+  "unique_check_id": "FT_LOBBY_POT_03",
+  "check_name": "FT Lobby Pot 3",
+  "region": "FT Lobby",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@-13.5,16.0",
+    "hash": "8229370832781285891",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_RangeWeapon_02)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_RangeWeapon_02"
+ },
+ {
+  "unique_check_id": "FT_LOBBY_POT_04",
+  "check_name": "FT Lobby Pot 4",
+  "region": "FT Lobby",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@13.5,16.5",
+    "hash": "16714728970292620430",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_RangeWeapon_02)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_RangeWeapon_02"
+ },
+ {
+  "unique_check_id": "FT_LOBBY_POT_05",
+  "check_name": "FT Lobby Pot 5",
+  "region": "FT Lobby",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@15.0,15.0",
+    "hash": "12190827011300834192",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "no drop table in the map data"
+ },
+ {
+  "unique_check_id": "FT_LOBBY_POT_06",
+  "check_name": "FT Lobby Pot 6",
+  "region": "FT Lobby",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@16.5,13.5",
+    "hash": "16258156194217221025",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_Obj_Heart)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_Obj_Heart"
+ },
+ {
+  "unique_check_id": "FT_PHANTOM_GANON_HEART_CONTAINER_ITEM",
+  "check_name": "FT Phantom Ganon Heart Container",
+  "region": "FT Phantom Ganon Room",
+  "area": "ForestTemple",
+  "check_type": "freestanding",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "freestanding@-3.0,-64.5",
+    "hash": "18379569660496940670",
+    "actor": "Obj_Heart_Container",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Obj_Heart_Container",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "Bow",
+     "ForestTempleBossKey",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "Bow",
+     "ForestTempleBossKey",
+     "ForestTempleSmallKey*5",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "'Forest Temple Clear'",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "the boss heart (Obj_Heart_Container), shown in the cutscene Dm_ForestTemple_BossOut"
+ },
+ {
+  "unique_check_id": "FT_WELL_CHEST",
+  "check_name": "FT Well Chest",
+  "region": "FT Well",
+  "area": "ForestTemple",
+  "check_type": "chest",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "chest@16.5,-42.5",
+    "hash": "6449977980406424425",
+    "actor": "Obj_TBox_A_01",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "Item_Dungeon_SmallKey",
+   "source": "map data",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "IronBoots",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "IronBoots",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong",
+     "SongOfTime"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong",
+     "SongOfTime"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped"
+ },
+ {
+  "unique_check_id": "FT_WELL_POT_01",
+  "check_name": "FT Well Pot 1",
+  "region": "FT Well",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@14.0,-39.5",
+    "hash": "6916546705775293667",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "no item or drop table in the map data"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "IronBoots",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "IronBoots",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong",
+     "SongOfTime"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong",
+     "SongOfTime"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "no drop table in the map data"
+ },
+ {
+  "unique_check_id": "FT_WELL_POT_02",
+  "check_name": "FT Well Pot 2",
+  "region": "FT Well",
+  "area": "ForestTemple",
+  "check_type": "pot",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "pot@15.5,-39.5",
+    "hash": "9611679337718327541",
+    "actor": "Obj_Pot_A_02",
+    "files": [
+     "ForestTemple_Dynamic.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": null,
+   "source": null,
+   "note": "random drop (DropTable_Obj_Heart)"
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "IronBoots",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "IronBoots",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong",
+     "SongOfTime"
+    ],
+    [
+     "ForestTempleSmallKey",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong",
+     "SongOfTime"
+    ]
+   ]
+  },
+  "check_rule": "True",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "drop table DropTable_Obj_Heart"
+ },
+ {
+  "unique_check_id": "FT_WEST_COURTYARD_GS",
+  "check_name": "FT GS West Courtyard",
+  "region": "FT West Courtyard Balcony",
+  "area": "ForestTemple",
+  "check_type": "skulltula",
+  "object_id": [
+   {
+    "scene": "ForestTemple",
+    "spot": "skulltula@-38.0,-4.5",
+    "hash": "10970805784153267902",
+    "actor": "Enemy_Skulltula_Gold",
+    "files": [
+     "ForestTemple_Static.bcett.byml.zs"
+    ],
+    "ages": []
+   }
+  ],
+  "vanilla_contents": {
+   "value": "GoldSkulltulaToken",
+   "source": "check kind (not stored in the map data)",
+   "note": null
+  },
+  "randomizable": "untested",
+  "randomizable_note": "not yet changed in game",
+  "requirements": {
+   "child": null,
+   "adult": [
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "Ocarina",
+     "SariasSong"
+    ],
+    [
+     "ForestTempleSmallKey*2",
+     "Hookshot",
+     "MasterSword",
+     "OcarinaOfTime",
+     "SariasSong"
+    ]
+   ]
+  },
+  "check_rule": "can_use(Hookshot)",
+  "verification_status": "not verified in game",
+  "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
+  "notes": "on the courtyard's south wall at y 112.9, about 14 units from the balcony's corner; the Hookshot's reach from here is not known (the Longshot or another spot may be needed): check in game"
+ }
+]

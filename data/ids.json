@@ -2,7 +2,8 @@
  "_about": "Every check ID ever issued. IDs are permanent: never renamed, never reused. A retired ID stays here with status \"retired\", the date and the reason. See README, \"Check IDs\".",
  "areas": {
   "KF": "Kokiri Forest",
-  "LW": "Lost Woods"
+  "LW": "Lost Woods",
+  "FT": "Forest Temple"
  },
  "types": {
   "CHEST": "chest",
@@ -891,6 +892,241 @@
    "status": "active",
    "issued": "2026-11-17",
    "check": "KF Rock Circle Kokiri Gift"
+  },
+  "FT_ENTRANCE_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Entrance Chest"
+  },
+  "FT_ENTRANCE_GS": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT GS Entrance"
+  },
+  "FT_LOBBY_POT_01": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Lobby Pot 1"
+  },
+  "FT_LOBBY_POT_02": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Lobby Pot 2"
+  },
+  "FT_LOBBY_POT_03": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Lobby Pot 3"
+  },
+  "FT_LOBBY_POT_04": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Lobby Pot 4"
+  },
+  "FT_LOBBY_POT_05": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Lobby Pot 5"
+  },
+  "FT_LOBBY_POT_06": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Lobby Pot 6"
+  },
+  "FT_LOBBY_GS": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT GS Lobby"
+  },
+  "FT_FIRST_STALFOS_ROOM_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT First Stalfos Room Chest"
+  },
+  "FT_FIRST_STALFOS_ROOM_POT_01": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT First Stalfos Room Pot 1"
+  },
+  "FT_FIRST_STALFOS_ROOM_POT_02": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT First Stalfos Room Pot 2"
+  },
+  "FT_EAST_COURTYARD_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT East Courtyard Chest"
+  },
+  "FT_EAST_COURTYARD_GS": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT GS East Courtyard"
+  },
+  "FT_WEST_COURTYARD_GS": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT GS West Courtyard"
+  },
+  "FT_WELL_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Well Chest"
+  },
+  "FT_WELL_POT_01": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Well Pot 1"
+  },
+  "FT_WELL_POT_02": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Well Pot 2"
+  },
+  "FT_BLOCK_ROOM_POT_01": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Block Room Pot 1"
+  },
+  "FT_BLOCK_ROOM_POT_02": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Block Room Pot 2"
+  },
+  "FT_BLOCK_ROOM_POT_03": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Block Room Pot 3"
+  },
+  "FT_BLOCK_ROOM_EYE_SWITCH_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Block Room Eye Switch Chest"
+  },
+  "FT_BOSS_KEY_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Boss Key Chest"
+  },
+  "FT_FLOORMASTER_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Floormaster Chest"
+  },
+  "FT_JOELLE_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Joelle Chest"
+  },
+  "FT_BOW_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Bow Chest"
+  },
+  "FT_BOW_ROOM_POT_01": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Bow Room Pot 1"
+  },
+  "FT_BOW_ROOM_POT_02": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Bow Room Pot 2"
+  },
+  "FT_BOW_ROOM_POT_03": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Bow Room Pot 3"
+  },
+  "FT_BOW_ROOM_POT_04": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Bow Room Pot 4"
+  },
+  "FT_BETH_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Beth Chest"
+  },
+  "FT_BETH_ROOM_POT_01": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Beth Room Pot 1"
+  },
+  "FT_BETH_ROOM_POT_02": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Beth Room Pot 2"
+  },
+  "FT_BETH_ROOM_POT_03": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Beth Room Pot 3"
+  },
+  "FT_FROZEN_EYE_SWITCH_ROOM_POT_01": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Frozen Eye Switch Room Pot 1"
+  },
+  "FT_FROZEN_EYE_SWITCH_ROOM_POT_02": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Frozen Eye Switch Room Pot 2"
+  },
+  "FT_FALLING_CEILING_ROOM_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Falling Ceiling Room Chest"
+  },
+  "FT_AMY_ROOM_POT_01": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Amy Room Pot 1"
+  },
+  "FT_AMY_ROOM_POT_02": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Amy Room Pot 2"
+  },
+  "FT_BASEMENT_CHEST": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Basement Chest"
+  },
+  "FT_BASEMENT_GS": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT GS Basement"
+  },
+  "FT_BASEMENT_POT_01": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Basement Pot 1"
+  },
+  "FT_BASEMENT_POT_02": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Basement Pot 2"
+  },
+  "FT_BASEMENT_POT_03": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Basement Pot 3"
+  },
+  "FT_BASEMENT_POT_04": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Basement Pot 4"
+  },
+  "FT_PHANTOM_GANON_HEART_CONTAINER_ITEM": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Phantom Ganon Heart Container"
+  },
+  "FT_FOREST_MEDALLION_GIFT": {
+   "status": "active",
+   "issued": "2026-11-23",
+   "check": "FT Forest Medallion"
   }
  }
 }

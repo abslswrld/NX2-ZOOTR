@@ -18,7 +18,7 @@ from logic.world import World  # noqa: E402
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import build_db  # noqa: E402
 
-CLASSIFIED = ['KokiriForest']          # areas whose checks all have IDs
+CLASSIFIED = ['KokiriForest', 'ForestTemple']          # areas whose checks all have IDs
 TYPE_OF_KIND = {'chest': 'CHEST', 'skulltula': 'GS', 'scrub': 'SCRUB', 'shop': 'SHOP', 'pot': 'POT',
                 'freestanding': 'ITEM', 'rock': 'ROCK', 'boulder': 'BOULDER', 'bush': 'BUSH',
                 'gift': ('GIFT', 'SONG'), 'gossip': 'GOSSIP'}

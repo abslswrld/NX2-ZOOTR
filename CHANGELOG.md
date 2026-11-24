@@ -4,6 +4,68 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
+### Phase 1, part 2: the Forest Temple's data (no game changes)
+The temple's checks, regions and logic rules, read from the game's files. Nothing in the game is changed and there
+is nothing to test in game for this part; the rules are tried in game with part 3's build.
+
+- **47 checks, each with a permanent ID** (area code `FT`, `data/ids.json`): 12 chests, 5 Gold Skulltulas, 28
+  pots, the Heart Container and the Forest Medallion. The map files hold 46 spots; the "1 loose item" of the
+  count is the boss's Heart Container, so the Medallion is the only check without a map object.
+- **23 regions** in `data/world/ForestTemple.json`, each with the positions and flag names it was read from. The
+  placeholder "Forest Temple (not mapped yet)" is gone; the Sacred Forest Meadow now leads to `FT Entrance`.
+- **Small keys:** 5 locked doors (a chain lock on each side, 10 locks) and 5 small keys in chests. The doors come in
+  a fixed order, so the rules ask for 1, 2, 3, 4 and 5 keys (`ForestTempleSmallKey`):
+  1. first room to the lobby (**remake: this door is locked**; its key is in the first room's chest);
+  2. lobby, west door, to the block room;
+  3. top of the block room to the west twisted corridor;
+  4. Bow room to Beth's room;
+  5. east twisted corridor to the room with the frozen eye switch.
+  The boss door has its own lock (`ForestTempleBossKey`).
+- **What the game puts in the chests:** small keys in the first room, the first Stalfos room, the well, the
+  Floormaster room and Joelle's room; the boss key in the straightened corridor; the Bow; the map (east courtyard);
+  the compass (Beth's room); a purple rupee (block room eye switch); arrows (basement). The falling ceiling room's
+  chest names no item in the map.
+- **Read from the room logic** (`Logic/ForestTemple_Level_Room_*`):
+  - The lobby's east courtyard door opens with a **floor switch**, not an eye switch. The west courtyard door has a
+    Song of Time block in front of it.
+  - Three eye switches cannot be pressed with the Hookshot (`isHitHookShot` false): both in the block room and the
+    one in the Bow room. They need an arrow.
+  - Joelle and Beth come out when their pictures are shot; Amy after her picture is shot and its blocks are put
+    together; Meg appears in the lobby once the other three are beaten, and then the elevator goes down.
+  - Two eye switches sit in ice that melts when an arrow reaches it through fire: the room after the east twisted
+    corridor, and **the basement (not in the N64 game)**. So the boss cannot be reached without the Bow.
+  - The well is drained by a floor switch on the west courtyard's upper walkway.
+- **Found for part 3 (items on the temple's checks): the Bow room can trap the player.** Its west shutter opens
+  again only when the eye switch is shot after the chest appears. Without the Bow the only other way out is the
+  locked east door, which leads to Beth's room, a dead end without the Bow; saving and warping are off while the
+  shutter is shut. In the logic the room is entered freely and left with the Bow. To settle before another item
+  is put in that chest: what happens in game (does a game over put Link back at the entrance?), and whether to
+  let the Hookshot press that switch or keep the shutter open.
+- **Logic:** `logic/requirements.py` now keeps only the highest count of an item in one alternative
+  (`ForestTempleSmallKey*5`, not 1+2+3+4+5 keys). `tools/extract_checks.py` leaves out pots that come back
+  (`Obj_Pot_*_Respawn`: the arrow pot in the Bow room, the only one in the four areas extracted so far);
+  the forest's three areas extract exactly as before.
+- **Not known from the files, to check in game** (every region is `"verified": false`; each point is in the notes
+  of its region or check):
+  1. First room: how the chest (y 117.5) is reached, and whether its Gold Skulltula (y 119.8) needs the Hookshot.
+  2. Gold Skulltulas in the lobby, the east courtyard and the basement: Hookshot assumed. The west courtyard's is
+     about 14 units from the balcony: Hookshot or Longshot?
+  3. East courtyard: is the chest reachable without the Hookshot, and does the Hookshot target get Link up to the
+     ledge of the falling ceiling room's door? (The logic says no: the ledge is reached from that room.)
+  4. West courtyard: does the upper walkway (y 113.9) join the balcony (y 107), and can the Floormaster room be
+     entered from the block room's side of the balcony? (The logic says no: only after the drop from the
+     straightened corridor.)
+  5. The flooded well with Iron Boots; pushing blocks without the Goron Bracelet; the ice with Din's Fire or Fire
+     Arrows; Meg and Phantom Ganon without the Bow.
+  6. What the falling ceiling room's chest gives.
+  7. How the game hands over the Forest Medallion (its item, `Item_Medal_Forest`, is in none of the sage room's
+     flows by name): part 7.
+- **Tests:** `tests/forest_temple_check.py` (new, in `run_tests.bat`, 35 lines): the data against the game's
+  files, and the temple walked with the items where the game puts them (all 47 checks, with or without the Song
+  of Time), without the Bow (26 checks, as far as the Bow room), without the boss key (45), and with a key
+  missing. `tests/logic_check.py` has 10 new situations; `tests/db_check.py` now covers the Forest Temple (167
+  active IDs, 0 errors).
+
 ### Phase 1, part 1: the starting state of a new file (passed in game)
 New builder options: `--start ITEM` or `--start ITEM=N` puts an item in the inventory of every new file, and
 `--start-flag NAME=VALUE` sets a flag on it. Later parts reuse this for "start with" keys, maps and compasses,

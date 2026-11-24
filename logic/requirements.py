@@ -9,6 +9,8 @@ A requirement is a list of alternatives, any one of which is enough; each altern
 names (items, settings that must be on, 'Item*n' for n copies):
     [[]]                       nothing needed
     [['KokiriSword'], ['Slingshot']]   the Kokiri Sword, or the slingshot
+    [['Bow', 'ForestTempleSmallKey*3']]   the Bow and three small keys (a route through three locked doors
+                               needs has(Key, 1), has(Key, 2), has(Key, 3): only the highest count is kept)
     None                       impossible at this age (with everything mapped so far)
 Only alternatives that are not covered by a smaller one are kept.
 
@@ -33,10 +35,31 @@ class RequirementError(Exception):
     pass
 
 
+def _split(name):
+    """'Item*3' -> ('Item', 3); 'Item' -> ('Item', 1)"""
+    item, star, count = name.partition('*')
+    return (item, int(count)) if star and count.isdigit() else (name, 1)
+
+
+def _highest(s):
+    """the same set with one name per item: of 'Key', 'Key*2' and 'Key*3' only 'Key*3' stays"""
+    top = {}
+    for name in s:
+        item, n = _split(name)
+        top[item] = max(top.get(item, 0), n)
+    return frozenset(item if n == 1 else '%s*%d' % (item, n) for item, n in top.items())
+
+
+def _covers(small, big):
+    """everything `small` asks for is in `big`, counts included ('Key*2' is covered by 'Key*3')"""
+    have = dict(_split(name) for name in big)
+    return all(have.get(item, 0) >= n for item, n in map(_split, small))
+
+
 def _minimal(sets):
     out = []
-    for s in sorted(set(sets), key=len):
-        if not any(o <= s for o in out):
+    for s in sorted({_highest(s) for s in sets}, key=lambda s: (len(s), sorted(s))):
+        if not any(_covers(o, s) for o in out):
             out.append(s)
     return frozenset(out)
 

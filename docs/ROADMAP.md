@@ -103,6 +103,9 @@ Parts, in order:
    new file with the Boomerang and Mido's blocking flag off: both held, also after save and reload.
 2. **The Forest Temple's data** (D25, D26): check IDs, regions and logic rules for its 46 spots (12 chests, 5 Gold
    Skulltulas, 28 pots, 1 loose item) plus the boss heart and the Medallion. No game changes: test scripts only.
+   **Done 2026-11-23 (data and test scripts; nothing to test in game):** 47 checks with IDs (the loose item is
+   the boss heart), 23 regions, 5 locked doors in a fixed order (1 to 5 keys), the boss key. Its rules are tried
+   in game with part 3. Found for part 3: the Bow room traps a player who has no Bow (CHANGELOG.md, 2026-11-23).
 3. **Items on the Forest Temple's checks:** random items in its chests, pots, Gold Skulltulas and loose item, keys
    still where the game puts them. In game: a sample in the temple.
 4. **Small keys in their own dungeon:** keys moved to other checks in the temple. In game: the locked doors open
