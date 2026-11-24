@@ -187,6 +187,8 @@ def main(romfs):
           {'ForestTemple_Level_Room_06_PressedEyeball', 'ForestTemple_Room06_GetBow'} <= strings(doc)
           and regions['FT Bow Room'].exits['FT Joelle Room'][0] == 'can_use(Bow)'
           and regions['FT Joelle Room'].exits['FT Bow Room'][0] == 'True')
+    check('first room: its Gold Skulltula asks for no item (in game 2026-11-23: no Hookshot needed)',
+          regions['FT Entrance'].locations['FT GS Entrance'].get('rule', True) is True)
     sisters = {'Enemy_Poe_Joelle', 'Enemy_Poe_Beth', 'Enemy_Poe_Amy', 'Enemy_MiddleBoss_Poe_Meg'}
     check('the four Poe sisters and Phantom Ganon are in the map; Meg needs the other three beaten',
           sisters <= {a['Gyaml'] for a in actors} and 'Enemy_DungeonBoss_PhantomGanon' in {a['Gyaml'] for a in actors}

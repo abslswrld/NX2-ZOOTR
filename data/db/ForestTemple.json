@@ -1285,10 +1285,10 @@
     ]
    ]
   },
-  "check_rule": "can_use(Hookshot)",
+  "check_rule": "True",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "up at y 119.8 on the east side; there at any time of day (Gimmick_AllDay_Skulltula). Hookshot assumed for the height: check in game"
+  "notes": "up at y 119.8 on the east side; there at any time of day (Gimmick_AllDay_Skulltula). In game (user, 2026-11-23): it does not need the Hookshot, so no item rule"
  },
  {
   "unique_check_id": "FT_FALLING_CEILING_ROOM_CHEST",

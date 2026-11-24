@@ -8,6 +8,15 @@ Newest first. Dates are when the work was done.
 The temple's checks, regions and logic rules, read from the game's files. Nothing in the game is changed and there
 is nothing to test in game for this part; the rules are tried in game with part 3's build.
 
+**In game (user, 2026-11-23, the unchanged game):**
+- **The first room's Gold Skulltula does not need the Hookshot.** `FT GS Entrance` now has no item rule (it had
+  `can_use(Hookshot)`, assumed for its height).
+- **The Bow room does need the Bow to leave.** The eye switch sits behind bars, so the Hookshot does not reach it.
+  **Saving is off in the room.** Dying puts Link back at the temple's beginning, and because nothing was saved,
+  whatever was picked up in the room is lost. So a player without the Bow is not stuck for good, but can keep
+  nothing found in the Bow room (its chest and 4 pots). The rules are as before (in freely, out with the Bow);
+  what to do about the chest and the pots is part 3's decision.
+
 - **47 checks, each with a permanent ID** (area code `FT`, `data/ids.json`): 12 chests, 5 Gold Skulltulas, 28
   pots, the Heart Container and the Forest Medallion. The map files hold 46 spots; the "1 loose item" of the
   count is the boss's Heart Container, so the Medallion is the only check without a map object.
@@ -39,15 +48,15 @@ is nothing to test in game for this part; the rules are tried in game with part 
   again only when the eye switch is shot after the chest appears. Without the Bow the only other way out is the
   locked east door, which leads to Beth's room, a dead end without the Bow; saving and warping are off while the
   shutter is shut. In the logic the room is entered freely and left with the Bow. To settle before another item
-  is put in that chest: what happens in game (does a game over put Link back at the entrance?), and whether to
-  let the Hookshot press that switch or keep the shutter open.
+  is put in that chest: whether to keep the shutter open, or to leave the room as it is and ask for the Bow
+  before it. (In game: see the result above. The switch is behind bars, so letting the Hookshot press it is out.)
 - **Logic:** `logic/requirements.py` now keeps only the highest count of an item in one alternative
   (`ForestTempleSmallKey*5`, not 1+2+3+4+5 keys). `tools/extract_checks.py` leaves out pots that come back
   (`Obj_Pot_*_Respawn`: the arrow pot in the Bow room, the only one in the four areas extracted so far);
   the forest's three areas extract exactly as before.
 - **Not known from the files, to check in game** (every region is `"verified": false`; each point is in the notes
   of its region or check):
-  1. First room: how the chest (y 117.5) is reached, and whether its Gold Skulltula (y 119.8) needs the Hookshot.
+  1. First room: how the chest (y 117.5) is reached. (Its Gold Skulltula: answered, no Hookshot needed.)
   2. Gold Skulltulas in the lobby, the east courtyard and the basement: Hookshot assumed. The west courtyard's is
      about 14 units from the balcony: Hookshot or Longshot?
   3. East courtyard: is the chest reachable without the Hookshot, and does the Hookshot target get Link up to the
@@ -60,7 +69,7 @@ is nothing to test in game for this part; the rules are tried in game with part 
   6. What the falling ceiling room's chest gives.
   7. How the game hands over the Forest Medallion (its item, `Item_Medal_Forest`, is in none of the sage room's
      flows by name): part 7.
-- **Tests:** `tests/forest_temple_check.py` (new, in `run_tests.bat`, 35 lines): the data against the game's
+- **Tests:** `tests/forest_temple_check.py` (new, in `run_tests.bat`, 35 checks): the data against the game's
   files, and the temple walked with the items where the game puts them (all 47 checks, with or without the Song
   of Time), without the Bow (26 checks, as far as the Bow room), without the boss key (45), and with a key
   missing. `tests/logic_check.py` has 10 new situations; `tests/db_check.py` now covers the Forest Temple (167

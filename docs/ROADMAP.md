@@ -106,6 +106,10 @@ Parts, in order:
    **Done 2026-11-23 (data and test scripts; nothing to test in game):** 47 checks with IDs (the loose item is
    the boss heart), 23 regions, 5 locked doors in a fixed order (1 to 5 keys), the boss key. Its rules are tried
    in game with part 3. Found for part 3: the Bow room traps a player who has no Bow (CHANGELOG.md, 2026-11-23).
+   **Confirmed in the unchanged game the same day:** the room needs the Bow to leave (the eye switch is behind
+   bars), saving is off in it, and dying puts Link back at the temple's beginning without what was picked up in
+   the room. Also: the first room's Gold Skulltula does not need the Hookshot. **Open for part 3:** keep the
+   shutter open (a game change), or leave the room as it is and ask for the Bow before it.
 3. **Items on the Forest Temple's checks:** random items in its chests, pots, Gold Skulltulas and loose item, keys
    still where the game puts them. In game: a sample in the temple.
 4. **Small keys in their own dungeon:** keys moved to other checks in the temple. In game: the locked doors open
