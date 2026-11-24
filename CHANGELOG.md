@@ -4,8 +4,48 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (to test in game)
+### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (first test in game done; second test build to test)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24), first test build:**
+- **Starting with a key works.** The file started with 1 Forest Temple key; with the key from Mido's chest and
+  the two from the pots, the Gold Skulltula's key in the temple showed **5**.
+- **A key in its own temple, as the game's own key, shows the right count.** The Gold Skulltula's key in the
+  first room showed the count, and the right one (5). In part 5 the same spot showed the count from before the
+  key.
+- **The first room's chest gave the Megaton Hammer; the first door and the lobby's west door opened.**
+- **No count appears when a locked door opens.** That is the game's own key and the game's own door, so the
+  game shows none there.
+- **The temple's name on a key did not show.** Both pots said "You found a small key!". The pot further from
+  the door showed no count, the pot nearer to the door showed "0/0". **Why (found in the game's files
+  afterwards):** an item has its name in two places, the `ActorName` of its row in `ActorInfo` and the
+  `ActorNameRef` of its actor file. The get message is found under the second one (the item's AI,
+  `EventTriggerSetOwnNameToMessage`, writes it into the flag `UI_MessageTargetActorName`); the first build
+  changed only the first. Changing the first alone is what took the count away: the get event's "is it a
+  small key" goes by the row. The game's own model with both changed is the treasure chest game's key,
+  `Obj_MiniGame_SmallKey` ("Door Key").
+- **The map and the compass could not be checked: the Map page was closed.** As a child in Kokiri Forest it
+  said "???", as an adult in the temple "Unavailable right now.", so the key count on the dungeon map was not
+  read either. **What was found in the game's files:** the Map page has the states WorldMap, DungeonMap,
+  FieldMap, UnopenMap ("???") and two "invisible" ones ("Unavailable right now."); the game's code picks one,
+  no file says how. A place has a saved "visited" mark, `IsVisitLocation.<place>` (36 places), set when the
+  place's title is shown: in the place's first cutscene (`UISystemActor.EventTriggerOpenLocationUI`:
+  `Dm_Kokiri_0045` for Kokiri Forest, `Dm_ForestTemple_0000` for the Forest Temple) or from the place's
+  `LocationArea`. **Not known:** whether that mark is what opens the map, and why the temple says "Unavailable
+  right now." and not "???" (the temple's map is for the adult only, `LocationErasType`, and the adult was
+  reached with the debug menu).
+
+**Second test build (2026-11-24, to test in game):**
+- **A named key now has its name in both places** (`tools/dungeon_keys.py`): its actor file's `ActorNameRef` is
+  `?ActorSystem/ActorName/Item_NX2K_<dungeon>...` too (no such file exists anywhere in the game for any item;
+  the reference only carries the name). Both pots and the third chest from the left in Mido's house
+  (`KF_MIDO_CHEST_02`) hold a named key; the second chest from the left holds a key without the name, as
+  before.
+- **A place can start as visited, to find out what opens the Map page:**
+  `--start-flag IsVisitLocation.KokiriForest=true` (`tools/start_state.py`; the same way as a dungeon's
+  record). The build sets it for Kokiri Forest and the Forest Temple, and not for the Sacred Forest Meadow.
+
+**What was built for the first test build:**
 
 - **Start with a dungeon's keys, map and compass:** `--start-flag DungeonInfo.ForestTemple.SmallKeyNum=2`,
   `--start-flag DungeonInfo.ForestTemple.IsGetMap=true`, `...IsGetCompass=true` (and `IsGetBossKey`). These are
@@ -27,8 +67,9 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
   place, wherever you found it.", with the place's name taken from the game's own list of places
   (`LocationMsg/Location.msbt`). **Not known:** what else the game looks up under that name (its icon, a saved
   flag), so this may show nothing new or go wrong; it is on one pot in the test build, tested last.
-- **Tests:** `tests/dungeon_keys_check.py` (18 checks now): the key in its own dungeon, the named key's row and
-  texts, starting with keys, map and compass, and what is still refused.
+- **Tests:** `tests/dungeon_keys_check.py` (18 checks now): the key in its own dungeon, the named key's row,
+  actor file and texts (on the ground and in a chest), starting with keys, map and compass and a visited
+  place, and what is still refused.
 
 ### Phase 1, part 5: a dungeon's small key anywhere (in game: the keys work, the count shown is off)
 A small key that counts for the Forest Temple wherever it is found: `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`

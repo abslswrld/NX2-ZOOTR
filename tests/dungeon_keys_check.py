@@ -41,6 +41,7 @@ SAMPLE = [
     ('KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02', 'Obj_Dungeon_SmallKey'),   # the control: the game's own key outside
     ('FT_ENTRANCE_GS', KEY + '@' + D),                        # in the temple itself: the game's own key
     ('KF_HOUSE_OF_TWINS_CHILD_POT_01', KEY + '@' + D + '+name'),   # with the temple's name in its messages
+    ('KF_MIDO_CHEST_02', KEY + '@' + D + '+name'),            # and so in a chest
     ('FT_ENTRANCE_CHEST', 'Item_Hammer'),                     # the chest that held the first key
 ]
 REFUSED = [(['KF_MIDO_CHEST_01=%s@Nowhere' % KEY], 'no dungeon Nowhere'),
@@ -208,22 +209,36 @@ def main(romfs):
         for lang in ('USen', 'JPja'):
             arc = sarc.Sarc.read(read('Mals/%s.Product.110.sarc' % lang))
             texts[lang] = msbt.Msbt.read(arc.files[dungeon_keys.MESSAGE_FILE]).texts
-        good &= check('  the named key: its row is named %s, an actor of the build, and its three texts are in '
-                      'the message files with the temple\'s name (%r)' % (msg, texts['USen'].get(msg + '_Name')),
+        refs = {}
+        for version in (dungeon_keys.name(D, 'once', True), dungeon_keys.name(D, 'chest', True),
+                        dungeon_keys.name(D, 'once'), dungeon_keys.name(D, 'chest')):
+            vfiles = sarc.Sarc.read(read(ground_items.pack_path(version))).files
+            refs[version] = ground_items.resolved_components(vfiles, version)['ActorNameRef']
+        game_ref = ground_items.item_components(key_files, KEY)['ActorNameRef']
+        good &= check('  the named key: its row and its actor file are named %s, an actor of the build, and its '
+                      'three texts are in the message files with the temple\'s name (%r)'
+                      % (msg, texts['USen'].get(msg + '_Name')),
                       info[dungeon_keys.name(D, 'once', True)]['ActorName'] == msg and msg in info
+                      and info[dungeon_keys.name(D, 'chest', True)]['ActorName'] == msg
+                      and refs[dungeon_keys.name(D, 'once', True)] == dungeon_keys.NAME_REF % msg
+                      and refs[dungeon_keys.name(D, 'chest', True)] == dungeon_keys.NAME_REF % msg
+                      and refs[dungeon_keys.name(D, 'once')] == game_ref
+                      and refs[dungeon_keys.name(D, 'chest')] == game_ref
                       and info[dungeon_keys.name(D, 'once')]['ActorName'] == KEY
                       and texts['USen'].get(msg + '_Name') == 'Small Key (Forest Temple)\x00'
                       and all(msg + t in texts[lang] for lang in texts for t, _ in dungeon_keys.MESSAGES)
                       and texts['USen']['%s_Name' % KEY] == 'Small Key\x00')
         start = ['DungeonInfo.%s.SmallKeyNum=2' % D, 'DungeonInfo.%s.IsGetMap=true' % D,
-                 'DungeonInfo.%s.IsGetCompass=true' % D, 'DungeonInfo.WaterTemple.SmallKeyNum=1']
+                 'DungeonInfo.%s.IsGetCompass=true' % D, 'DungeonInfo.WaterTemple.SmallKeyNum=1',
+                 'IsVisitLocation.KokiriForest=true']
         _, sfolder = run('start', *[x for f in start for x in ('--start-flag', f)])
         written = open(os.path.join(sfolder, *start_state.MODULE.split('/')), 'rb').read()
-        good &= check('starting with keys, the map and the compass: the new-file module sets the fields of the '
-                      'dungeons\' records (%s)' % ', '.join(start),
+        good &= check('starting with keys, the map and the compass, and a place marked as visited: the new-file '
+                      'module sets the fields of the records (%s)' % ', '.join(start),
                       start_state.read_members(written) == [
                           ('DungeonInfo.%s.SmallKeyNum' % D, 2), ('DungeonInfo.%s.IsGetMap' % D, True),
-                          ('DungeonInfo.%s.IsGetCompass' % D, True), ('DungeonInfo.WaterTemple.SmallKeyNum', 1)]
+                          ('DungeonInfo.%s.IsGetCompass' % D, True), ('DungeonInfo.WaterTemple.SmallKeyNum', 1),
+                          ('IsVisitLocation.KokiriForest', True)]
                       and start_state.read_members(plain(start_state.MODULE)) == []
                       and len(start_state.read_members(written, 'PlayerStatus')) == 5)
         refusals = [refused(run, 'no', '--start-flag', f) for f in ('PlayerStatus.MaxLife=80', 'DungeonInfo.%s.NoSuch=1' % D)]

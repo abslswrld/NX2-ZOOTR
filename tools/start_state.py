@@ -36,7 +36,11 @@ What is accepted, and why:
   `SeqOneShotSetGameDataInt` node (a Bool: `SeqOneShotSetGameDataBool`, copied from
   Sequence/DestroySceneCommon.module.ainb) whose `ParentStruct` comes from a `SeqQueryGetNonStructGameDataStruct`
   node that finds the struct by its name (the module's own finds PlayerStatus). One such node is added per
-  dungeon named, and one setter per field.
+  dungeon named, and one setter per field;
+- and so can a place's "visited" mark, `IsVisitLocation.<place>` (2026-11-24, to test in game): the game sets
+  it when it shows a place's title, in the place's first cutscene (`UISystemActor.EventTriggerOpenLocationUI`:
+  Dm_Kokiri_0045 for Kokiri Forest, Dm_ForestTemple_0000 for the Forest Temple) or from the place's
+  LocationArea. The Map page's states are named WorldMap, DungeonMap, FieldMap and UnopenMap ("???").
 
 Used by tools/build_mod.py (--start, --start-flag); tests/start_state_check.py reads it all back.
 """
@@ -59,6 +63,7 @@ SETTERS = {'Bool': ('SeqOneShotSetNonStructGameDataBool', 'bool'),
 # fields of these structs can be set too (the dungeons' records), the way the module sets PlayerStatus:
 # flag type -> (the setter that takes a struct, parameter type of its Value)
 MEMBER_PREFIX = 'DungeonInfo.'
+MEMBER_PREFIXES = (MEMBER_PREFIX, 'IsVisitLocation.')
 MEMBER_SETTERS = {'Bool': ('SeqOneShotSetGameDataBool', 'bool'), 'Int': (N_STATUS, 'int')}
 MEMBER = 'Member'                                              # kind of such a flag: 'MemberBool', 'MemberInt'
 STRUCT_QUERY = 'SeqQueryGetNonStructGameDataStruct'
@@ -190,13 +195,13 @@ def check_flags(flags, game_data):
         if game_data.is_member(name):
             struct, _, field = name.rpartition('.')
             parent = game_data.find(struct)
-            if not name.startswith(MEMBER_PREFIX) or kind not in MEMBER_SETTERS or not parent \
+            if not name.startswith(MEMBER_PREFIXES) or kind not in MEMBER_SETTERS or not parent \
                     or parent[0] != 'Struct' or not any(
                         int(m['Hash']) == name_hash(field) and int(m['Value']) == name_hash(name)
                         for m in parent[1]['DefaultValue']):
                 raise SystemExit('--start-flag %s: it is a field of a struct, which the plain setters do not take '
-                                 '(for an item use --start; only the fields of %s<dungeon> can be set)'
-                                 % (name, MEMBER_PREFIX))
+                                 '(for an item use --start; only the fields of %s<dungeon> and %s<place> can '
+                                 'be set)' % ((name,) + MEMBER_PREFIXES))
             member = True
         if int(e['SaveFileIndex']) != SLOT_SAVE:
             raise SystemExit('--start-flag %s: it is not saved in the save slot (%s; its save file index is '
@@ -375,7 +380,7 @@ def member_nodes(doc, source_data, members, taken):
     return out
 
 
-def read_members(module_data, prefix=MEMBER_PREFIX):
+def read_members(module_data, prefix=MEMBER_PREFIXES):
     """the fields of structs a new-game module sets, read from it by following each setter to its struct
     finder: [(struct.field, value)] of the structs whose name starts with `prefix`"""
     doc = ainb.Ainb.read(module_data)
@@ -392,7 +397,7 @@ def read_members(module_data, prefix=MEMBER_PREFIX):
         if n.preconditions != [waits.index(src.node)]:
             raise SystemExit('%s: a setter that does not wait for its struct' % MODULE)
         struct = q.inputs['string'][0].value
-        if struct.startswith(prefix):
+        if (struct + '.').startswith(prefix):
             out.append(('%s.%s' % (struct, n.inputs['string'][0].value),
                         next(x.value for x in n.inputs[MEMBER_SETTERS[kind][1]] if x.name == 'Value')))
     return out

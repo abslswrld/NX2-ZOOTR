@@ -35,13 +35,20 @@ the game counts and shows it itself, exactly as it does its own (in game 2026-11
 in its dungeon showed the count from before the key, and a chest showed none). Outside, the count on screen
 is the count of the place Link is in, so a key of another dungeon cannot show its own.
 
-The dungeon's name in the messages (`Item_Dungeon_SmallKey@D+name`, an experiment to test in game): the game
-names an item in its texts by the ActorName of its row in ActorInfo: `<ActorName>_Name`, `_GetMessage`,
-`_GetCaption` in ActorMsg/PouchContent.msbt. A named key's row has a name of its own (MESSAGE_NAME) and three
-texts under it, with the dungeon's name as the game writes it (LocationMsg/Location.msbt, the label is the
-dungeon's map name). That name is also the name of the dungeon's chest key, which is built with every named
-key, so the name is an actor the game knows. Not known: what else the game looks up under that name (its
-icon, a saved flag).
+The dungeon's name in the messages (`Item_Dungeon_SmallKey@D+name`, an experiment to test in game): an item's
+texts are `<name>_Name`, `_GetMessage`, `_GetCaption` in ActorMsg/PouchContent.msbt. An item has that name in
+two places, and the game's own item with texts of its own (the treasure chest game's key, Obj_MiniGame_SmallKey:
+"Door Key") has its name in both:
+- its actor file's `ActorNameRef` (`?ActorSystem/ActorName/<name>.engine__actor__ActorName.bgyml`; no such
+  file exists anywhere in the game, the reference only carries the name). The item's AI hands this name to
+  the get message: `EventTriggerSetOwnNameToMessage` writes `QueryGenericGetActorName`'s ActorName into the flag
+  `UI_MessageTargetActorName`;
+- the `ActorName` of its row in ActorInfo. In game 2026-11-24 a key with only this one changed kept the game's
+  text ("You found a small key!") and lost the count on screen: the get event's "is it a small key" goes by
+  the row, the text by the actor file.
+A named key has a name of its own (MESSAGE_NAME) in both, and three texts under it, with the dungeon's name as
+the game writes it (LocationMsg/Location.msbt, the label is the dungeon's map name). That name is also the
+name of the dungeon's chest key, which is built with every named key, so the name is an actor the game knows.
 
 Not yet: gifts, scrubs, shop shelves, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
@@ -72,6 +79,7 @@ NAMES = {'once': 'Obj_NX2K_%s', 'token': 'Obj_NX2K_GS_%s', 'chest': 'Item_NX2K_%
 NAMED_NAMES = {'once': 'Obj_NX2KN_%s', 'token': 'Obj_NX2KN_GS_%s', 'chest': 'Item_NX2KN_%s'}
 NAMED = '+name'
 MESSAGE_NAME = 'Item_NX2K_%s'                    # ActorName of a named key: its texts are <this>_Name...
+NAME_REF = '?ActorSystem/ActorName/%s.engine__actor__ActorName.bgyml'   # an actor file's ActorNameRef
 MESSAGE_FILE = 'ActorMsg/PouchContent.msbt'
 LOCATION_FILE = 'LocationMsg/Location.msbt'      # the game's names of places, by map name
 MESSAGES = (('_Name', 'Small Key (%s)'), ('_GetMessage', 'You found a small key! (%s)'),
@@ -405,6 +413,13 @@ def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project
         if rows['ActorInfo'].get('ActorName') != KEY_ITEM:
             raise SystemExit('%s: its ActorInfo row is not named %s as expected' % (new, KEY_ITEM))
         rows['ActorInfo']['ActorName'] = type(rows['ActorInfo']['ActorName'])(MESSAGE_NAME % dungeon)
+        adoc = byml.loads(files[ap_path(new)])         # and so does its actor file: the get message's name
+        adoc.root = type(adoc.root)(adoc.root)
+        comp = type(adoc.root['Components'])(adoc.root['Components'])
+        comp['ActorNameRef'] = NAME_REF % (MESSAGE_NAME % dungeon)
+        adoc.root['Components'] = comp
+        files[ap_path(new)] = byml.dumps(adoc)
+        new_inner[ap_path(new)] = (files[ap_path(new)],) + tuple(new_inner[ap_path(new)][1:])
     out = copy.copy(arc)
     out.files = files
     out.align = {p: arc.align.get(p, 8) for p in files}
@@ -416,7 +431,9 @@ def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project
     if set(back) != set(files) or any(back[p] != d for p, d in files.items()) \
             or got.get('PouchContentRef') != '?' + pouch_param_path(new) or 'PouchActor' in sroot \
             or sroot.get('SpecialDeal') != not_pushed_value(read_pack) \
-            or got.get('ActorNameRef') != ground_items.item_components(key_pack.files, KEY_ITEM)['ActorNameRef'] \
+            or got.get('ActorNameRef') != (
+                NAME_REF % (MESSAGE_NAME % dungeon) if named
+                else ground_items.item_components(key_pack.files, KEY_ITEM)['ActorNameRef']) \
             or any(p not in back for p in new_inner):
         raise SystemExit('read-back: the key of %s (%s) differs from what was intended' % (dungeon, new))
     if kind != 'chest' and (got.get('AIInfoRef') != '?' + ai_info_path(ai) or counts_of(back[ai_path(ai)]) != [

@@ -138,6 +138,12 @@ Parts, in order:
    `IsGetCompass`; a key in its own dungeon is the game's own key (its count shows as the game's does); the
    name on a key as an experiment (`...@ForestTemple+name`). Outside its dungeon a key's pick-up still shows the
    count of the place Link is in.
+   **First test in game, 2026-11-24:** starting with a key works (the temple showed 5 with 1 from the start);
+   a key in its own temple shows the right count; no count appears at a door (the game's own behaviour). The
+   name did not show (only one of an item's two names was changed), and the map and the compass could not be
+   checked: the Map page was closed ("???" as a child, "Unavailable right now." in the temple).
+   **Second test build, to test:** the named key has its name in both places; a place can start as visited
+   (`--start-flag IsVisitLocation.<place>=true`), to find out what opens the Map page.
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 
