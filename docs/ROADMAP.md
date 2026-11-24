@@ -131,7 +131,9 @@ Parts, in order:
    Temple and opened its doors. **Unknown answered: no,** the game's own key found outside does not count for
    the dungeon. **Open:** the count shown on screen is off (it shows the count from before the key; none from a
    chest or at a door), the dungeon's name in the get message, and gifts, scrubs and shelves.
-6. **Start with:** keys, the map and the compass given at the start, through part 1.
+6. **Start with:** keys, the map and the compass given at the start, through part 1. **Also here (the user,
+   2026-11-24), from part 5:** the key count shown on screen for a dungeon's key (it shows the count from before
+   the key; none from a chest), and the dungeon's name in the key's get message.
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 

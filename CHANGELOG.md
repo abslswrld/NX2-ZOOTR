@@ -28,6 +28,10 @@ A small key that counts for the Forest Temple wherever it is found: `CHECK_ID=It
   dungeon (the user; not tested in this round).
 - **Not answered:** the two lines about saving and about save and reload were left blank. Which of the two pots
   held which key cannot be told (both showed the same).
+- **The user's decision (2026-11-24):** the PR for this part is opened as it is; the count shown on screen and
+  the dungeon's name in the get message go into the next part (part 6). Whether the game showed a count when a
+  door was opened in part 4's test, with the game's own keys, the user could not say for sure ("I thought the
+  key count went down by 1 when you used a key but I could be misremembering"): to look at in part 6.
 
 - **Where the game keeps a dungeon's keys.** A saved number per dungeon, `DungeonInfo.<dungeon>.SmallKeyNum`
   (13 dungeons; the same record holds the boss key, the map and the compass: `IsGetBossKey`, `IsGetMap`,
