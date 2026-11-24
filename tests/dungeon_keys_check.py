@@ -247,17 +247,21 @@ def main(romfs):
         game_list = byml.loads(game_pack[dungeon_keys.COLOUR_TABLE]).root[dungeon_keys.COLOUR_LIST]
         built_list = byml.loads(built_pack[dungeon_keys.COLOUR_TABLE]).root[dungeon_keys.COLOUR_LIST]
         water = msbt.tags(texts['USen'].get(dungeon_keys.MESSAGE_NAME % 'WaterTemple' + '_GetMessage', ''), 0)
-        good &= check('  a colour of our own (the Water Temple\'s blue): the game\'s list of %d text colours has '
-                      'ours behind it (%s), its own entries and every other file of the pack are unchanged, and '
-                      'the name is in number %d' % (len(game_list), ', '.join(n for n, _ in dungeon_keys.NEW_COLOURS),
-                                                    len(game_list)),
-                      len(game_list) == 8 and built_list[:8] == game_list
-                      and [(e.get('Red', 0), e.get('Green', 0), e.get('Blue', 0)) for e in built_list[8:]]
-                      == [rgb for _, rgb in dungeon_keys.NEW_COLOURS]
+        place, rgb = dungeon_keys.OUR_COLOURS['blue']
+        rest = [i for i in range(len(game_list)) if i != place]
+        good &= check('  a colour of our own (the Water Temple\'s blue): place %d of the game\'s %d text colours has '
+                      'its three colour values changed and its name kept; the other places and every other file '
+                      'of the pack are unchanged, and the name is in number %d' % (place, len(game_list), place),
+                      len(game_list) == len(built_list) == dungeon_keys.GAME_COLOUR_COUNT
+                      and all(built_list[i] == game_list[i] for i in rest)
+                      and (built_list[place].get('Red', 0), built_list[place].get('Green', 0),
+                           built_list[place].get('Blue', 0)) == rgb
+                      and built_list[place].get('ColorName') == game_list[place].get('ColorName')
                       and set(built_pack) == set(game_pack)
                       and all(built_pack[k] == v for k, v in game_pack.items() if k != dungeon_keys.COLOUR_TABLE)
-                      and (0, 3, b'\x08\x00') in [(p[0], p[1], bytes(p[2])) for p in water if not isinstance(p, str)],
-                      built_list[8:])
+                      and (0, 3, bytes([place, 0])) in [(p[0], p[1], bytes(p[2])) for p in water
+                                                        if not isinstance(p, str)],
+                      built_list[place])
         start = ['DungeonInfo.%s.SmallKeyNum=2' % D, 'DungeonInfo.%s.IsGetMap=true' % D,
                  'DungeonInfo.%s.IsGetCompass=true' % D, 'DungeonInfo.WaterTemple.SmallKeyNum=1',
                  'IsVisitLocation.KokiriForest=true']

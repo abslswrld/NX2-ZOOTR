@@ -149,8 +149,10 @@ Parts, in order:
    **Third test in game, 2026-11-24:** the name shows on a key from a pot too (the name is the dungeon's
    named chest key), and the get window shows a colour: the game's number 3 is green, 0 is red. The user's
    colours: Forest green, Fire red, Water blue, Shadow purple, Spirit orange.
-   **Fourth test build, to test:** blue, purple and orange are colours of our own, added behind the eight of
-   the game's list of text colours (a file in the pack the game loads first).
+   **Fourth test in game, 2026-11-24:** the game's list of text colours (a file in the pack the game loads
+   first) cannot be made longer: colours added behind its eight all came out orange.
+   **Fifth test build, to test:** blue and purple take two places of the game's list that no text uses (2 and
+   7); orange is the game's own place 6.
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 

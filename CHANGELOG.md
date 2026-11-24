@@ -4,8 +4,22 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (three tests in game done; fourth test build to test)
+### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (four tests in game done; fifth test build to test)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24), fourth test build:**
+- **The game's list of text colours cannot be made longer.** The game started as usual, and the three names in
+  the added colours (numbers 8, 9 and 10: Water, Shadow and Spirit Temple) all came out orange. The Fire
+  Temple was red and both pots' Forest Temple green, as before. The user: "orange shade is fine".
+
+**Fifth test build (2026-11-24, to test in game): colours of our own in places of the game's list.**
+- **Blue is place 2 and purple is place 7 of the game's list** (`tools/dungeon_keys.py`: `OUR_COLOURS`,
+  `colour_table`): no text of the game in any language uses those places. Only the three colour values of the
+  place change (2: from (255, 0, 254) to (30, 80, 190); 7: from (133, 125, 104) to (115, 45, 160)), its name
+  stays, and only the places a named key of the build uses. **Orange is the game's own place 6** (255, 53, 25),
+  unchanged. The list stays eight long.
+- **Not known:** whether the game's own code uses place 2, 6 or 7 for something (their names' hashes are in
+  the file; the names are not known), and whether place 6 is the orange the fourth test showed.
 
 **In game (user, 2026-11-24), third test build:**
 - **The name shows on a key from a pot.** Both pots said "You found a small key! (Forest Temple)".
@@ -14,7 +28,7 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
 - **The user's colours:** Forest Temple green, Fire Temple red, Water Temple blue, Shadow Temple purple, Spirit
   Temple orange, the last three "if we can use a custom color".
 
-**Fourth test build (2026-11-24, to test in game): colours of our own.**
+**Fourth test build (2026-11-24): colours of our own, added behind the game's (did not work, see above).**
 - **The game's list of text colours is a file:** `MessageColorArray` in
   `UI/Message/MessageColorTable/MessageColorTable.game__ui__MessageColorTable.bgyml`, inside
   `Pack/Bootup.Nin_Ounce_NVN2.pack`. Eight colours (red, green, blue, alpha; a name's hash on seven of them: 1
@@ -124,7 +138,7 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
   flag), so this may show nothing new or go wrong; it is on one pot in the test build, tested last.
 - **Tests:** `tests/dungeon_keys_check.py` (20 checks now): the key in its own dungeon, the named key's row,
   actor file and texts (on the ground and in a chest), the name's colour (one of the game's, and one of ours
-  added to the game's list), starting with keys, map and compass and a visited place, and what is still
+  in a place of the game's list), starting with keys, map and compass and a visited place, and what is still
   refused.
 
 ### Phase 1, part 5: a dungeon's small key anywhere (in game: the keys work, the count shown is off)

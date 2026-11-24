@@ -67,9 +67,15 @@ language's texts use 0, 1, 3, 4 and 5 and no other (0: names and places in talk;
 1 magic power" in the magic items' captions; 4 and 5: the staff roll).
 In game 2026-11-24 (third test): the get window shows the colour; 3 is green, 0 is red, 1, 4 and 5 look gray.
 The user's colours: Forest Temple green, Fire Temple red, Water Temple blue, Shadow Temple purple, Spirit
-Temple orange. The game has no blue, purple or orange, so those three are colours of our own (NEW_COLOURS),
-added behind the game's eight (places 8, 9, 10; no `ColorName`, as the game's first). To test in game: whether
-the game takes a place past its own eight.
+Temple orange. The game has no blue or purple.
+In game 2026-11-24 (fourth test): the list cannot be made longer. With blue, purple and orange added behind
+the game's eight (numbers 8, 9, 10), the game started as usual and all three names came out orange: a number
+past the game's eight is not looked up in the file.
+So a colour of our own takes a place of the game's list that no text of the game uses (OUR_COLOURS; to test
+in game): blue is place 2 (the game's is a loud pink, 255, 0, 254), purple is place 7 (133, 125, 104); only
+the three colour values of that place change, its name stays, and only the places a named key of the build
+uses. Orange is the game's own place 6 (255, 53, 25), unchanged. Not known: whether the game's code uses
+place 2, 6 or 7 for something of its own (their names' hashes are in the file, the names are not known).
 
 Not yet: gifts, scrubs, shop shelves, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
@@ -107,9 +113,11 @@ COLOUR_END = 0xFFFF
 COLOUR_PACK = 'Pack/Bootup.Nin_Ounce_NVN2.pack'
 COLOUR_TABLE = 'UI/Message/MessageColorTable/MessageColorTable.game__ui__MessageColorTable.bgyml'
 COLOUR_LIST = 'MessageColorArray'
-# colours of our own, added behind the game's in this order: name -> (red, green, blue)
-NEW_COLOURS = (('blue', (30, 80, 190)), ('purple', (115, 45, 160)), ('orange', (215, 110, 0)))
-# dungeon -> the colour of its name: a place in the game's list, or one of NEW_COLOURS (the user, 2026-11-24)
+GAME_COLOUR_COUNT = 8                            # the game's list; a number past it is not looked up
+# colours by name: name -> (its place in the game's list, the (red, green, blue) that place gets, or None
+# where the game's own colour is used)
+OUR_COLOURS = {'blue': (2, (30, 80, 190)), 'purple': (7, (115, 45, 160)), 'orange': (6, None)}
+# dungeon -> the colour of its name: a place in the game's list, or one of OUR_COLOURS (the user, 2026-11-24)
 COLOURS = {'ForestTemple': 3, 'FireTemple': 0, 'WaterTemple': 'blue', 'ShadowTemple': 'purple',
            'SpiritTemple': 'orange'}
 NAME_REF = '?ActorSystem/ActorName/%s.engine__actor__ActorName.bgyml'   # an actor file's ActorNameRef
@@ -164,43 +172,51 @@ def colour_tag(number):
                                                                                             'surrogateescape')
 
 
-def colour_number(colour, game_count):
-    """the number a text names a colour by: a place in the game's list of `game_count` colours, or the place
-    of one of ours behind them"""
-    names = [n for n, _ in NEW_COLOURS]
-    if isinstance(colour, int) and not isinstance(colour, bool) and 0 <= colour < game_count:
+def colour_number(colour):
+    """the number a text names a colour by: a place in the game's list, or the place one of OUR_COLOURS has"""
+    if isinstance(colour, int) and not isinstance(colour, bool) and 0 <= colour < GAME_COLOUR_COUNT:
         return colour
-    if colour in names:
-        return game_count + names.index(colour)
-    raise SystemExit('colour %r: give one of the game\'s %d colours (0 to %d) or one of ours (%s)'
-                     % (colour, game_count, game_count - 1, ', '.join(names)))
+    if colour in OUR_COLOURS:
+        return OUR_COLOURS[colour][0]
+    raise SystemExit('colour %r: give a place in the game\'s list of %d text colours (0 to %d) or one of %s'
+                     % (colour, GAME_COLOUR_COUNT, GAME_COLOUR_COUNT - 1, ', '.join(sorted(OUR_COLOURS))))
 
 
-def colour_table(table_data):
-    """(the game's list of text colours with ours added behind it, how many the game has); stops when the
-    file is not the list this was made for"""
+def colour_table(table_data, colours):
+    """the game's list of text colours with the places of `colours` (names of OUR_COLOURS) recoloured, or None
+    when none of them changes a place; stops when the file is not the list this was made for"""
     doc = byml.loads(table_data)
     game = doc.root.get(COLOUR_LIST) if isinstance(doc.root, dict) else None
     fields = {'Red', 'Green', 'Blue', 'Alpha', 'ColorName'}
-    if not isinstance(game, list) or len(game) < 6 or set(doc.root) != {COLOUR_LIST} \
+    if not isinstance(game, list) or len(game) != GAME_COLOUR_COUNT or set(doc.root) != {COLOUR_LIST} \
             or any(not isinstance(e, dict) or not set(map(str, e)) <= fields for e in game) \
             or byml.dumps(doc) != table_data:
         raise SystemExit('%s is not the list of text colours this was made for' % COLOUR_TABLE)
     number = type(game[0]['Red'])
-    for _, (r, g, b) in NEW_COLOURS:
-        entry = type(game[0])()
-        for k, v in (('Blue', b), ('Green', g), ('Red', r)):
+    changed = {}
+    for name in sorted(set(colours)):
+        place, rgb = OUR_COLOURS[name]
+        if rgb is None:
+            continue
+        entry = type(game[place])(game[place])
+        for k, v in zip(('Red', 'Green', 'Blue'), rgb):
+            entry.pop(k, None)
             if v:                                      # as the game's entries: a 0 is left out
                 entry[k] = number(v)
-        game.append(entry)
+        game[place] = type(entry)(sorted(entry.items()))
+        changed[place] = rgb
+    if not changed:
+        return None
     new = byml.dumps(doc)
-    back = byml.loads(new).root[COLOUR_LIST]
-    n = len(back) - len(NEW_COLOURS)
-    if back[:n] != byml.loads(table_data).root[COLOUR_LIST] or [
-            (int(e.get('Red', 0)), int(e.get('Green', 0)), int(e.get('Blue', 0))) for e in back[n:]] != [
-            rgb for _, rgb in NEW_COLOURS]:
+    back, was = byml.loads(new).root[COLOUR_LIST], byml.loads(table_data).root[COLOUR_LIST]
+    rest = ('Alpha', 'ColorName')
+    if len(back) != len(was) or any(
+            (e != w) if i not in changed else
+            ((int(e.get('Red', 0)), int(e.get('Green', 0)), int(e.get('Blue', 0))) != changed[i]
+             or [e.get(k) for k in rest] != [w.get(k) for k in rest])
+            for i, (e, w) in enumerate(zip(back, was))):
         raise SystemExit('read-back: %s differs from what was intended' % COLOUR_TABLE)
-    return new, n
+    return new
 
 
 def messages(dungeon, place, colour=None):

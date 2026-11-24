@@ -3728,7 +3728,7 @@ def main(argv):
             raise SystemExit('--key-colour %s: give DUNGEON=COLOUR, a dungeon with keys (%s) and a place in the '
                              'game\'s list of text colours or one of ours (%s)'
                              % (spec, ', '.join(dungeon_keys.DUNGEONS),
-                                ', '.join(n for n, _ in dungeon_keys.NEW_COLOURS)))
+                                ', '.join(sorted(dungeon_keys.OUR_COLOURS))))
         key_colours[dungeon] = int(colour) if colour.isdigit() else colour
         key_colour_asked.add(dungeon)
     key_chests = {}                                    # check id -> dungeon: chests that hold a dungeon's key
@@ -4667,14 +4667,15 @@ def main(argv):
                              % (dungeon, dungeon, dungeon_keys.KEY_ITEM, dungeon, dungeon_keys.NAMED))
         del key_colours[dungeon]
     if named_keys:
-        # the colour of each name: a place in the game's list of text colours; ours are added behind the
-        # game's when a name of this build has one of them
+        # the colour of each name: a place in the game's list of text colours; one of ours takes a place no
+        # text of the game uses, when a name of this build has it
         src, old = out.read(dungeon_keys.COLOUR_PACK)
         arc = sarc.Sarc.read(old)
         old_table = arc.files[dungeon_keys.COLOUR_TABLE]
-        new_table, game_count = dungeon_keys.colour_table(old_table)
-        key_numbers = {x: dungeon_keys.colour_number(c, game_count) for x, c in key_colours.items()}
-        if any(n >= game_count for n in key_numbers.values()):
+        key_numbers = {x: dungeon_keys.colour_number(c) for x, c in key_colours.items()}
+        ours = sorted({c for c in key_colours.values() if c in dungeon_keys.OUR_COLOURS})
+        new_table = dungeon_keys.colour_table(old_table, ours)
+        if new_table is not None:
             arc.files[dungeon_keys.COLOUR_TABLE] = new_table
             new = arc.write()
             back = sarc.Sarc.read(new)
@@ -4682,10 +4683,11 @@ def main(argv):
                 raise SystemExit('read-back: %s differs from what was intended' % dungeon_keys.COLOUR_PACK)
             out.write(dungeon_keys.COLOUR_PACK, src, old, new)
             out.size(dungeon_keys.COLOUR_TABLE, old_table, new_table)
-            print('%-18s %s in %s: %s added behind the game\'s %d text colours'
+            print('%-18s %s in %s: %s'
                   % ('key colours', dungeon_keys.COLOUR_TABLE.split('/')[-1], dungeon_keys.COLOUR_PACK,
-                     ', '.join('%s %s as number %d' % (n, rgb, game_count + i)
-                               for i, (n, rgb) in enumerate(dungeon_keys.NEW_COLOURS)), game_count))
+                     ', '.join('place %d of the game\'s text colours is now %s %s'
+                               % (dungeon_keys.OUR_COLOURS[n][0], n, dungeon_keys.OUR_COLOURS[n][1])
+                               for n in ours if dungeon_keys.OUR_COLOURS[n][1])))
 
         def key_lines(arc):
             places = msbt.Msbt.read(arc.files[dungeon_keys.LOCATION_FILE]).texts
