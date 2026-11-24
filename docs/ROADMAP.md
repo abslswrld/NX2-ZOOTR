@@ -126,6 +126,9 @@ Parts, in order:
 5. **Keys anywhere, and which dungeon a key belongs to:** a Forest Temple key placed in Kokiri Forest; its get
    message and the pause menu name the temple (unique key models stay after the beta). In game: pick it up
    outside, use it inside. Unknown settled here: does a key found outside count for the right dungeon?
+   **Built 2026-11-24, to test in game:** `Item_Dungeon_SmallKey@<dungeon>` on pots, rocks, bushes, freestanding
+   items, Gold Skulltulas and in chests; from the files the game's own key cannot count outside its dungeon.
+   Not yet: the dungeon's name in the get message, and gifts, scrubs and shelves.
 6. **Start with:** keys, the map and the compass given at the start, through part 1.
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).

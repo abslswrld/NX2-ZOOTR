@@ -4,6 +4,31 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
+### Phase 1, part 5: a dungeon's small key anywhere (to test in game)
+A small key that counts for the Forest Temple wherever it is found: `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`
+(any of the 13 dungeons with keys can be named). Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **Where the game keeps a dungeon's keys.** A saved number per dungeon, `DungeonInfo.<dungeon>.SmallKeyNum`
+  (13 dungeons; the same record holds the boss key, the map and the compass: `IsGetBossKey`, `IsGetMap`,
+  `IsGetCompass`). The names are stored only as hashes; they were found by trying names against the hashes.
+- **The roadmap's question, from the files:** the game's own key steps name no dungeon (`OneShotDungeonGetSmallKey`,
+  `EventGetDungeonSmallKey`...): they count for the dungeon Link is in. So the game's own key found outside
+  cannot count for the right dungeon. The test build has one in a Kokiri Forest pot to see what it does.
+- **The key of a dungeon is an item of its own** (`tools/dungeon_keys.py`), never the game's small key, so the
+  game's "dungeon Link is in" step never runs for it:
+  - on a pot, a rock, a bush, a freestanding item or a Gold Skulltula: the builder's version of the key for that
+    kind, with two nodes more in its AI: picked up, it adds 1 to the dungeon's count. This is how the game's own
+    Gerudo Fortress keys set their flag;
+  - in a chest: the chest gets an opening event of our own around its usual one (as the ocarina chests have),
+    with one step after it that adds 1 to the dungeon's count, as the treasure chest game's flow counts its keys;
+  - it has the key's model and name; its item settings say "not put in the inventory".
+- **Limits, told plainly:**
+  - not on gifts, Deku Scrubs, shop shelves or songs yet (the builder refuses those);
+  - the get message still says "small key", not the dungeon's name. Not done in this part;
+  - no entry in the inventory: a new inventory item would need saved flags of its own, which the save file has
+    no place for. The count shows where the game shows a dungeon's keys.
+- **Tests:** `tests/dungeon_keys_check.py` (new, in `run_tests.bat`, 15 checks).
+
 ### Phase 1, part 4: the Forest Temple's small keys on other checks of the temple (passed in game)
 The five small keys can be put on other checks of the temple: in another chest, in a pot, on a Gold Skulltula.
 Test build and checklist: `out\TEST_CHECKLIST.md`.
