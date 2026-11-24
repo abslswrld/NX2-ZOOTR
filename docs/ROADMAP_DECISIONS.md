@@ -107,7 +107,7 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     the west shutter stays shut until the eye switch is shot with an arrow (it is behind bars, so the Hookshot
     does not reach it), saving is off, and dying loses what was picked up there. The randomizer opens the
     shutter as soon as the chest has appeared, so the room needs no Bow and any item can be in its chest. Built
-    and tested in phase 1, part 3.
+    in phase 1, part 3 (`--fix forest_temple_bow_room_door`); **passed in game 2026-11-23.**
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".

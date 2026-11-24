@@ -188,9 +188,11 @@ boss door asks for `ForestTempleBossKey`. Remake differences found in the files:
 (its key is in the first room's chest), the east courtyard opens with a floor switch, the basement has ice
 over an eye switch, and there is no chest on a raised island (12 chests, not 13). Nothing here is checked in
 game yet: every region is `"verified": false`, and the open questions are in CHANGELOG.md (2026-11-23).
-Items can be placed on its chests (not the boss key's yet), pots and Gold Skulltulas (to test in game). The
+Items can be placed on its chests (not the boss key's yet), pots and Gold Skulltulas (passed in game
+2026-11-23 with 11 placements). The
 Bow room reopens its door when its chest appears (`--fix forest_temple_bow_room_door`, setting
-`forest_temple_bow_room_door`, on by default: decision 39), so the room needs no Bow to leave.
+`forest_temple_bow_room_door`, on by default: decision 39), so the room needs no Bow to leave (passed in
+game 2026-11-23).
 
 Breakable boulders (`Obj_BrokenRock`) are listed with the rocks (kind "boulder"). Gifts from NPCs (no map
 placement) carry the position of their NPC so they show on the maps.

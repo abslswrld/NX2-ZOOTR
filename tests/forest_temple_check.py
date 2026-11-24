@@ -108,9 +108,14 @@ def main(romfs):
               if r['unique_check_id'] in GAME_CHESTS)
           and [r['vanilla_contents']['value'] for r in db if r['check_type'] == 'skulltula']
           == ['GoldSkulltulaToken'] * 5)
-    check('every region of the temple is still "not verified in game", every check "untested"',
-          not any(r.verified for r in regions.values())
-          and all(l.get('randomizable') == 'untested' for _, _, l in locs.values()))
+    changed = sorted(l['id'] for _, _, l in locs.values() if l.get('randomizable') == 'yes')
+    check('every region of the temple is still "not verified in game"; 11 checks were changed in game '
+          '(2026-11-23), the other 36 are "untested"',
+          not any(r.verified for r in regions.values()) and len(changed) == 11
+          and all('changed in game on 2026-11-23' in l['randomizable_note'] for _, _, l in locs.values()
+                  if l['id'] in changed)
+          and all(l.get('randomizable') == 'untested' for _, _, l in locs.values() if l['id'] not in changed),
+          changed)
 
     # ---- locked doors: the map against the rules
     locks = [a for a in actors if a['Gyaml'] == 'Obj_DoorChainLock_A_01']

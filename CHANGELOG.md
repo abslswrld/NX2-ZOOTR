@@ -4,10 +4,33 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-23
 
-### Phase 1, part 3: items on the Forest Temple's checks, and the Bow room's door (to test in game)
+### Phase 1, part 3: items on the Forest Temple's checks, and the Bow room's door (passed in game)
 The builder now places items on the temple's chests, pots and Gold Skulltulas, and a new game fix reopens the
 Bow room's door when its chest appears (decision 39). The small keys and the boss key stay where the game puts
 them. Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-23): passed.** A new file (it started with the Hookshot), warped to the Sacred Forest
+Meadow with the debug menu, into the temple with the Hookshot.
+- **All 11 placements gave their item:** the two Gold Skulltulas (Iron Boots, Piece of Heart), the six pots
+  (Megaton Hammer, Hover Boots, Lens of Truth, Mirror Shield, Din's Fire, Farore's Wind) and the three chests
+  (Ice Arrow in the Bow's big chest with no message from Navi, the Fairy Bow with quiver and arrows in the
+  map's big chest, the Fire Arrow in the chest the eye switch drops).
+- **Pots:** only the item came out of the pot that had a drop table; the other four lobby pots were as in the
+  game; the two item pots stayed gone after leaving the lobby and coming back.
+- **Keys:** the first room's and the first Stalfos room's chest still gave a small key. The line about the
+  well's chest was left blank.
+- **The Bow room without the Bow:** the door shut, three Stalfos, the chest appeared, and the west door's bars
+  went up by themselves. Saving worked in the room after that. After walking out and back in the door was
+  still open and the Stalfos were gone. With the Bow later, shooting the eye switch behind the bars showed the
+  door and did nothing more.
+- **After save and reload:** items kept, chests open, item pots gone, Gold Skulltulas gone, the door open.
+- **Sides:** left, right and "furthest" in the checklist, worked out from the map's numbers, were right.
+- **Seen, not part of this change:**
+  - the Hover Boots lay slightly in the floor (from a pot). Not fixed yet;
+  - the Lens of Truth gave the magic meter, and the opening could not be skipped: this test build was made
+    without `--fix magic_is_separate` and `--fix skippable_opening`, which earlier test builds had. The fixes
+    themselves are unchanged;
+  - "FPS felt lower than normal?": not looked into yet.
 
 - **Pots.** None of the temple's 28 pots names an item: 21 name a drop table (`Drop__DropTable`: hearts,
   arrows...) and 7 name nothing. The builder refused both. Now such a pot gets the item (`Drop__DropActor`) and

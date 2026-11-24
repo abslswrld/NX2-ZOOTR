@@ -627,8 +627,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Fire Arrow",
   "requirements": {
    "child": null,
    "adult": [
@@ -678,8 +678,8 @@
    "source": null,
    "note": "no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Mirror Shield",
   "requirements": {
    "child": null,
    "adult": [
@@ -876,8 +876,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Ice Arrow, with no message from Navi about the Bow (its opening event removed)",
   "requirements": {
    "child": null,
    "adult": [
@@ -925,8 +925,8 @@
    "source": null,
    "note": "random drop (DropTable_Obj_Heart)"
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave Din's Fire",
   "requirements": {
    "child": null,
    "adult": [
@@ -1023,8 +1023,8 @@
    "source": null,
    "note": "random drop (DropTable_Obj_Heart)"
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave Farore's Wind",
   "requirements": {
    "child": null,
    "adult": [
@@ -1121,8 +1121,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Fairy Bow with its quiver and arrows (the chest's own opening event kept)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1266,8 +1266,8 @@
    "source": "check kind (not stored in the map data)",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): dropped the Iron Boots instead of its token",
   "requirements": {
    "child": null,
    "adult": [
@@ -1413,8 +1413,8 @@
    "source": null,
    "note": "random drop (DropTable_Obj_Heart)"
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Lens of Truth",
   "requirements": {
    "child": null,
    "adult": [
@@ -1758,8 +1758,8 @@
    "source": "check kind (not stored in the map data)",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): dropped a Piece of Heart instead of its token",
   "requirements": {
    "child": null,
    "adult": [
@@ -1807,8 +1807,8 @@
    "source": null,
    "note": "random drop (DropTable_Obj_Heart)"
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Megaton Hammer (its drop table removed: only the item came out), and stayed gone after it was taken",
   "requirements": {
    "child": null,
    "adult": [
@@ -1856,8 +1856,8 @@
    "source": null,
    "note": "no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Hover Boots (they lay slightly in the floor), and stayed gone after they were taken",
   "requirements": {
    "child": null,
    "adult": [

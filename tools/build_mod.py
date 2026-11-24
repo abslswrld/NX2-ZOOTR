@@ -175,7 +175,8 @@ CHEST_EVENTS = {
                                              '(found in game: the sword came with any item; removed and '
                                              'retested 2026-11-16: slingshot only, no sword)'),
     'KokiriForest_TreasureBox_NaviChatOff': ('keep', 'Mido\'s chests: tested in game with four other items, harmless'),
-    # the Forest Temple (read from the flows, 2026-11-23; to test in game)
+    # the Forest Temple (read from the flows; in game 2026-11-23: the Bow's chest with the Ice Arrow gave no
+    # message from Navi, the map's chest with the Fairy Bow opened as usual; the compass's not tested)
     'ForestTemple_GetBow': ('remove', 'SageOfForest / TreasureBoxDM_NaviChat_Bow: the usual opening '
                                       '(Dm_SY_Treasurebox), then Navi\'s balloon message 476 about the Bow'),
     'ForesetTemple_GetMap': ('keep', 'NaviChat / TreasureBoxDM_NaviChat_ForestTemple_Map: only the usual opening '
