@@ -156,9 +156,16 @@ Parts, in order:
    yellowish orange (225, 130, 0): **that shade is not seen in game yet.** The colours are D40.
    **Rules from the user, 2026-11-24:** every key outside its dungeon says the dungeon's name (D41); with the
    opening skippable, Kokiri Forest's map is open from the start (D42).
-   **Open:** gifts, scrubs and shelves; a colour for the other eight dungeons (the game's list has eight places
-   and all are taken or in use); the dungeon's name on a key in its own dungeon (the game's own key has one
-   text for all dungeons).
+   **The last two colours (the user, 2026-11-24; not seen in game):** Bottom of the Well gray (the game's own
+   place 1), Gerudo Training Ground a darker orange (the staff roll's place 4 recoloured: 17 headings of the
+   credits take that colour). Only eight places use small keys; Ganon's Castle has no colour.
+   **The look at them in game, 2026-11-24:** both oranges good, the map at the start good; but the Well's
+   name was purple and the Fire Temple's orange: the get window shows place 6 of the game's colour list for
+   "red" (number 0) and place 7 for "gray" (number 1), so those two places are not free. **Corrected, not seen
+   in game:** 6 and 7 are the game's again; purple is one colour added behind the list, the two oranges take
+   the staff roll's places 4 and 5 (those lines of the credits change colour).
+   **Open:** gifts, scrubs and shelves; the dungeon's name on a key in its own dungeon (the game's own key has
+   one text for all dungeons).
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 

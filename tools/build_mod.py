@@ -4693,7 +4693,7 @@ def main(argv):
             out.size(dungeon_keys.COLOUR_TABLE, old_table, new_table)
             print('%-18s %s in %s: %s'
                   % ('key colours', dungeon_keys.COLOUR_TABLE.split('/')[-1], dungeon_keys.COLOUR_PACK,
-                     ', '.join('place %d of the game\'s text colours is now %s %s'
+                     ', '.join('place %d of the text colours is %s %s'
                                % (dungeon_keys.OUR_COLOURS[n][0], n, dungeon_keys.OUR_COLOURS[n][1])
                                for n in ours if dungeon_keys.OUR_COLOURS[n][1])))
 

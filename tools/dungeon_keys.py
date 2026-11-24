@@ -72,16 +72,27 @@ Temple orange. The game has no blue or purple.
 In game 2026-11-24 (fourth test): the list cannot be made longer. With blue, purple and orange added behind
 the game's eight (numbers 8, 9, 10), the game started as usual and all three names came out orange: a number
 past the game's eight is not looked up in the file.
-So a colour of our own takes a place of the game's list that no text of the game uses (OUR_COLOURS): blue is
-place 2 (the game's is a loud pink, 255, 0, 254), purple is place 7 (133, 125, 104), orange is place 6 (255,
-53, 25); only the three colour values of that place change, its name stays, and only the places a named key
-of the build uses.
-In game 2026-11-24 (fifth test): blue and purple show and are the shades the user wants. The game's own place
-6 was "darker than last time" and the user wants "a more yellowish orange" (the fourth test's orange was ours,
-215, 110, 0: a number past the list seems to give the list's last colour), so place 6 is recoloured too (225,
-130, 0; this shade is not seen in game yet). Not known: whether the game's code uses place 2, 6 or 7 for
-something of its own (their names' hashes are in the file, the names are not known); the user saw nothing
-out of place, but did not look everywhere.
+In game 2026-11-24 (fifth test): with place 2 recoloured blue and place 7 purple, the Water Temple's name
+(number 2) was blue and the Shadow Temple's (7) purple.
+In game 2026-11-24 (the look after it, with places 4, 6 and 7 recoloured): the Fire Temple's name (number 0)
+came out in the Spirit Temple's orange (place 6) and the Bottom of the Well's (number 1) in purple (place 7).
+So **in the get window the game shows place 6 for number 0 and place 7 for number 1**: 6 (255, 53, 25) is the
+red and 7 (133, 125, 104) the gray for that window, 0 (138, 0, 0) and 1 (80, 45, 20) are their darker
+versions. That fits every test: "red" and "gray" in the third test were places 6 and 7. Places 6 and 7 are
+the game's and are never changed (a red or a gray word anywhere such a window is used would change with them).
+
+What is left for colours of our own (OUR_COLOURS), each the three colour values of a place, made solid, its
+name kept, and only when a named key of the build uses it:
+- place 2 (a loud pink, 255, 0, 254; no text uses it): blue. Seen in game.
+- one place behind the game's eight (number 8): purple. A number past the list shows the list's last colour
+  (fourth test: 8, 9 and 10 all showed the last one added), so exactly one colour can be added there.
+- the staff roll's two places, 4 (17 headings of the credits) and 5 (115 names of the credits), both (255,
+  253, 198) and see-through: orange (225, 130, 0) and a darker orange (185, 85, 15). In a build with a Spirit
+  Temple or a Training Ground key outside its dungeon, those lines of the credits are that orange. Place 4
+  recoloured was seen in game (the Training Ground's name, "good").
+The user's colours: Forest Temple green (3), Fire Temple red (0), Water Temple blue, Shadow Temple purple,
+Spirit Temple orange, Gerudo Training Ground "different orange?", Bottom of the Well "gray?" (1), Ganon's
+Castle none. Not seen in game: purple as the added place, the oranges in places 4 and 5.
 
 Not yet: gifts, scrubs, shop shelves, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
@@ -119,13 +130,17 @@ COLOUR_END = 0xFFFF
 COLOUR_PACK = 'Pack/Bootup.Nin_Ounce_NVN2.pack'
 COLOUR_TABLE = 'UI/Message/MessageColorTable/MessageColorTable.game__ui__MessageColorTable.bgyml'
 COLOUR_LIST = 'MessageColorArray'
-GAME_COLOUR_COUNT = 8                            # the game's list; a number past it is not looked up
-# colours by name: name -> (its place in the game's list, the (red, green, blue) that place gets, or None
-# where the game's own colour is used)
-OUR_COLOURS = {'blue': (2, (30, 80, 190)), 'purple': (7, (115, 45, 160)), 'orange': (6, (225, 130, 0))}
-# dungeon -> the colour of its name: a place in the game's list, or one of OUR_COLOURS (the user, 2026-11-24)
+GAME_COLOUR_COUNT = 8                            # the game's list; a number past it shows the last colour
+ADDED_PLACE = GAME_COLOUR_COUNT                  # the one place that can be added behind the game's
+KEPT_PLACES = (0, 1, 3, 6, 7)                    # used by the game's texts and windows: never changed
+# colours by name: name -> (its place, the (red, green, blue) that place gets)
+OUR_COLOURS = {'blue': (2, (30, 80, 190)), 'purple': (ADDED_PLACE, (115, 45, 160)),
+               'orange': (4, (225, 130, 0)), 'dark-orange': (5, (185, 85, 15))}
+# dungeon -> the colour of its name: a place in the game's list, or one of OUR_COLOURS (the user, 2026-11-24).
+# The places with small keys (the user; the game's maps agree): these seven and Ganon's Castle, whose colour
+# "is not important" (none). Gerudo Fortress has keys of its own kind.
 COLOURS = {'ForestTemple': 3, 'FireTemple': 0, 'WaterTemple': 'blue', 'ShadowTemple': 'purple',
-           'SpiritTemple': 'orange'}
+           'SpiritTemple': 'orange', 'GerudoTrainingGround': 'dark-orange', 'BottomOfTheWell': 1}
 NAME_REF = '?ActorSystem/ActorName/%s.engine__actor__ActorName.bgyml'   # an actor file's ActorNameRef
 MESSAGE_FILE = 'ActorMsg/PouchContent.msbt'
 LOCATION_FILE = 'LocationMsg/Location.msbt'      # the game's names of places, by map name
@@ -182,7 +197,7 @@ def colour_tag(number):
 def colour_number(colour):
     """the number a text names a colour by: a place in the game's list, or the place one of OUR_COLOURS has"""
     if isinstance(colour, int) and not isinstance(colour, bool) and 0 <= colour < GAME_COLOUR_COUNT:
-        return colour
+        return colour                                  # in the get window 0 is shown as place 6 and 1 as place 7
     if colour in OUR_COLOURS:
         return OUR_COLOURS[colour][0]
     raise SystemExit('colour %r: give a place in the game\'s list of %d text colours (0 to %d) or one of %s'
@@ -190,8 +205,9 @@ def colour_number(colour):
 
 
 def colour_table(table_data, colours):
-    """the game's list of text colours with the places of `colours` (names of OUR_COLOURS) recoloured, or None
-    when none of them changes a place; stops when the file is not the list this was made for"""
+    """the game's list of text colours with the places of `colours` (names of OUR_COLOURS) recoloured (its
+    three colour values; solid; its name kept; the added place is a new entry behind the game's), or None when
+    there are none; stops when the file is not the list this was made for"""
     doc = byml.loads(table_data)
     game = doc.root.get(COLOUR_LIST) if isinstance(doc.root, dict) else None
     fields = {'Red', 'Green', 'Blue', 'Alpha', 'ColorName'}
@@ -201,27 +217,31 @@ def colour_table(table_data, colours):
         raise SystemExit('%s is not the list of text colours this was made for' % COLOUR_TABLE)
     number = type(game[0]['Red'])
     changed = {}
-    for name in sorted(set(colours)):
+    for name in sorted(set(colours), key=lambda n: OUR_COLOURS[n][0]):
         place, rgb = OUR_COLOURS[name]
-        if rgb is None:
-            continue
-        entry = type(game[place])(game[place])
+        if place in KEPT_PLACES or place in changed or place > ADDED_PLACE:
+            raise SystemExit('colour %s: place %d of the list cannot be taken' % (name, place))
+        entry = type(game[0])() if place == ADDED_PLACE else type(game[place])(game[place])
+        entry.pop('Alpha', None)                       # solid (the staff roll's places are see-through)
         for k, v in zip(('Red', 'Green', 'Blue'), rgb):
             entry.pop(k, None)
             if v:                                      # as the game's entries: a 0 is left out
                 entry[k] = number(v)
-        game[place] = type(entry)(sorted(entry.items()))
+        entry = type(entry)(sorted(entry.items()))
+        if place == ADDED_PLACE:
+            game.append(entry)
+        else:
+            game[place] = entry
         changed[place] = rgb
     if not changed:
         return None
     new = byml.dumps(doc)
     back, was = byml.loads(new).root[COLOUR_LIST], byml.loads(table_data).root[COLOUR_LIST]
-    rest = ('Alpha', 'ColorName')
-    if len(back) != len(was) or any(
-            (e != w) if i not in changed else
+    if len(back) != len(was) + (ADDED_PLACE in changed) or any(
+            (e != was[i]) if i not in changed else
             ((int(e.get('Red', 0)), int(e.get('Green', 0)), int(e.get('Blue', 0))) != changed[i]
-             or [e.get(k) for k in rest] != [w.get(k) for k in rest])
-            for i, (e, w) in enumerate(zip(back, was))):
+             or 'Alpha' in e or e.get('ColorName') != (was[i].get('ColorName') if i < len(was) else None))
+            for i, e in enumerate(back)):
         raise SystemExit('read-back: %s differs from what was intended' % COLOUR_TABLE)
     return new
 

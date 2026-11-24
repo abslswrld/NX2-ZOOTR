@@ -253,6 +253,25 @@ def main(romfs):
         water = msbt.tags(texts['USen'].get(dungeon_keys.MESSAGE_NAME % 'WaterTemple' + '_GetMessage', ''), 0)
         place, rgb = dungeon_keys.OUR_COLOURS['blue']
         rest = [i for i in range(len(game_list)) if i != place]
+        numbers = {x: dungeon_keys.colour_number(c) for x, c in dungeon_keys.COLOURS.items()}
+        full = byml.loads(dungeon_keys.colour_table(game_pack[dungeon_keys.COLOUR_TABLE],
+                                                    sorted(dungeon_keys.OUR_COLOURS))).root[dungeon_keys.COLOUR_LIST]
+        touched = {p: rgb for p, rgb in dungeon_keys.OUR_COLOURS.values()}
+        kept = list(dungeon_keys.KEPT_PLACES)
+        good &= check('  the seven places with small keys each have a colour of their own (%s); with all of ours '
+                      'the game\'s list keeps its places %s (0, 1, 3 for its texts; 6 and 7, what the get window '
+                      'shows for 0 and 1), a recoloured place is solid and keeps its name, and one colour is '
+                      'added behind the game\'s' % (', '.join('%s %s' % (x, numbers[x]) for x in sorted(numbers)),
+                                                    ', '.join(map(str, kept))),
+                      len(numbers) == 7 and len(set(numbers.values())) == 7
+                      and kept == [0, 1, 3, 6, 7] and not set(touched) & set(kept)
+                      and len(full) == len(game_list) + 1 and sorted(touched) == [2, 4, 5, len(game_list)]
+                      and all(full[i] == game_list[i] for i in kept)
+                      and all((full[p].get('Red', 0), full[p].get('Green', 0), full[p].get('Blue', 0)) == rgb
+                              and 'Alpha' not in full[p]
+                              and full[p].get('ColorName') == (game_list[p].get('ColorName') if p < len(game_list)
+                                                               else None)
+                              for p, rgb in touched.items()), numbers)
         good &= check('  a colour of our own (the Water Temple\'s blue): place %d of the game\'s %d text colours has '
                       'its three colour values changed and its name kept; the other places and every other file '
                       'of the pack are unchanged, and the name is in number %d' % (place, len(game_list), place),

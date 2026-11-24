@@ -4,8 +4,45 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (five tests in game done; the last change, the orange's shade, is not seen in game)
+### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (five tests and a last look in game done; the corrected colour places are not seen in game)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24), the look at the last changes; and what it showed about the colour list:**
+- **Good:** Kokiri Forest's map at the start (by the rule), the Spirit Temple's yellowish orange, the Training
+  Ground's darker orange ("Gerudo Proving Grounds").
+- **Wrong:** the Bottom of the Well's name was purple, not gray, and "fire temple became the orange from
+  spirit".
+- **Why: places 6 and 7 of the game's list are not unused.** In the get window the game shows place 6 for
+  colour number 0 and place 7 for number 1: 6 (255, 53, 25) is that window's red and 7 (133, 125, 104) its
+  gray; 0 (138, 0, 0) and 1 (80, 45, 20) are their darker versions. Every test fits: the "red" and "gray" of
+  the third test were places 6 and 7. With 6 recoloured orange and 7 purple, red became orange and gray
+  purple, and would have wherever the game uses that pair. No text names 6 or 7 by number, which is why they
+  looked free.
+- **Corrected (not seen in game yet):** places 6 and 7 are the game's again and are never changed
+  (`dungeon_keys.KEPT_PLACES`: 0, 1, 3, 6, 7). The colours of our own now are: **blue** place 2 (as before,
+  seen in game); **purple** one place added behind the game's eight (number 8: a number past the list shows
+  the list's last colour, which the fourth test showed, so one colour can be added that way); **orange** place
+  4 and the **darker orange** place 5, the staff roll's two places.
+- **Side effect, larger than before:** in a build with a Spirit Temple key outside its dungeon the 17 headings
+  of the credits that use place 4 are orange, and with a Training Ground key the 115 names that use place 5
+  are the darker orange.
+- `run_tests.bat` was not run on this change (the user: do not run another); `tests/dungeon_keys_check.py`
+  passes (21 checks).
+
+**The last two places with small keys (the user, 2026-11-24):**
+- **The user:** only eight places use small keys: the Forest, Fire, Water, Shadow and Spirit Temples, the
+  Gerudo Training Ground ("different orange?"), the Bottom of the Well ("gray?") and Ganon's Castle (colour not
+  important). The game's maps agree: those eight have small-key doors (`Obj_DoorChainLock_A_01`; Ganon's Castle
+  has one such door and one small key placed), and Gerudo Fortress has keys of its own kind.
+- **Bottom of the Well: gray**, the game's own place 1 (named "Gray" in the list; it looked gray in the third
+  test), unchanged.
+- **Gerudo Training Ground: a second, darker orange** (`dark-orange`, 185, 85, 15). The only places left in the
+  game's list are the staff roll's two, so it takes place 4 (255, 253, 198, half see-through), recoloured and
+  made solid. **Side effect:** the 17 headings of the staff roll that use place 4 are that orange in a build
+  with a Training Ground key outside it. Nothing else in any language uses place 4.
+- The key's text uses the game's own name of the place: "Small Key (Gerudo Proving Grounds)".
+- **Tests:** `tests/dungeon_keys_check.py` (21 checks): the seven places each have a colour of their own, and
+  the game's places 0, 1, 3 and 5 are never changed.
 
 **Two rules from the user (2026-11-24), built after the fifth test:**
 - **Every key says its dungeon's name** (D41). `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple` on a check outside
