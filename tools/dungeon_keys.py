@@ -446,10 +446,10 @@ def counts_of(data):
     return out
 
 
-def _swap_ai(files, new_inner, name, old_ai, ai, tpl, dungeon, like_ai, like_info, like_files):
-    """the pack's AI `old_ai` becomes `ai` (with the count), named by an AI info file of its own, and the actor
-    names that"""
-    files[ai_path(ai)] = count_ai(files[ai_path(old_ai)], tpl, ai, dungeon)
+def _swap_ai(files, new_inner, name, old_ai, ai, tpl, dungeon, like_ai, like_info, like_files, step=None):
+    """the pack's AI `old_ai` becomes `ai` (with the count; or with what `step` makes of it:
+    tools/dungeon_items.py), named by an AI info file of its own, and the actor names that"""
+    files[ai_path(ai)] = step(files[ai_path(old_ai)]) if step else count_ai(files[ai_path(old_ai)], tpl, ai, dungeon)
     idoc = byml.loads(files[ai_info_path(old_ai)])
     want = 'Work/AI/Root/%s.root.ain' % old_ai
     if idoc.root.get('RootAIRef') != want:

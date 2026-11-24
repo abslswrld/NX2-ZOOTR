@@ -169,6 +169,10 @@ Parts, in order:
    one text for all dungeons).
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
+   **Built 2026-11-24, to test in game:** the boss key anywhere (`Item_Dungeon_BossKey@<dungeon>`; the map and
+   the compass the same way), another item in the boss key's chest, on the boss's heart and where the
+   Medallion is given, the Medallion on another check. **Not known:** what the boss's last cutscene does when
+   the Heart Container is another item; a Medallion picked up from the ground.
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.

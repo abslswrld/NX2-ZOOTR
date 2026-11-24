@@ -150,6 +150,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
+import dungeon_items  # noqa: E402
 import dungeon_keys  # noqa: E402
 import ground_items  # noqa: E402
 import harp_colors  # noqa: E402
@@ -193,6 +194,9 @@ CHEST_EVENTS = {
                                      '(subflow PlayDemo -> Dm_SY_Treasurebox), no message'),
     'ForesetTemple_GetCompass': ('keep', 'NaviChat / TreasureBoxDM_NaviChat_ForestTemple_Compass: only the usual '
                                          'opening (subflow PlayDemo -> Dm_SY_Treasurebox), no message'),
+    'ForesetTemple_GetBossKey': ('remove', 'ForestTemple_Gimmick / TreasureBoxDM_NaviChat_ForestTemple_BossKey: '
+                                           'the usual opening (Dm_SY_Treasurebox), then Navi\'s balloon message '
+                                           '361 about the boss key'),
 }
 # The game's checking chest (Obj_TBox_A_06, 9 placements) is the ordinary small chest (its settings file has
 # $parent Obj_TBox_A_01: same model, animation, physics and opening event) with its own AI, a second held actor
@@ -626,13 +630,40 @@ def tbox_sync_flow(template, sync, usuals, version):
 # (DungeonInfo.<dungeon>.SmallKeyNum), as the treasure chest game's flow adds to its own key count
 # (MiniGame_SequentialChoiceTreasure: MiniGame_SmallKeyNum + 1). One event per (usual event, dungeon):
 #   Event/EventFlow/NX2_TBoxKey.bfevfl                   entry point NX2_TBoxKey_<dungeon>_<usual event>
+# A dungeon's boss key, map or compass in a chest outside its dungeon (tools/dungeon_items.py): the same event,
+# whose step sets the item's field of the dungeon's record: GameDataActor.EventTriggerSetGameDataBool True, the
+# step the game's flows set their own flags with (KEY_SET_FLOW). What a chest holds for this is written
+# `what`: a dungeon (its small key) or (item, dungeon).
 TBOX_KEY_FLOW = 'NX2_TBoxKey'
 KEY_ADD_FLOW = 'Event/EventFlow/MiniGame_SequentialChoiceTreasure.bfevfl'
 KEY_ADD = ('GameDataActor', 'EventTriggerAddOrSubGameDataInt')
+KEY_SET_FLOW = 'Event/EventFlow/Npc_Kokiri_003_Child.bfevfl'
+KEY_SET = ('GameDataActor', 'EventTriggerSetGameDataBool')
 
 
-def tbox_key_event(usual, dungeon):
-    return '%s_%s_%s' % (TBOX_KEY_FLOW, dungeon, usual)
+def key_what_flag(what):
+    """the saved number or yes/no the chest's step changes"""
+    return dungeon_keys.flag(what) if isinstance(what, str) else dungeon_items.flag(*what)
+
+
+def key_what_said(what):
+    return 'a key of %s' % what if isinstance(what, str) else '%s of %s' % what
+
+
+def tbox_key_event(usual, what):
+    tag = what if isinstance(what, str) else '%s_%s' % (dungeon_items.field(what[0]), what[1])
+    return '%s_%s_%s' % (TBOX_KEY_FLOW, tag, usual)
+
+
+def key_set_template(fc):
+    """the game's own "set a saved yes/no to yes" step: (actor, action name, parameters)"""
+    for e in fc.events:
+        if e.type == 'action' and fc.actors[e.actor].name == KEY_SET[0] and _action_name(fc, e) == KEY_SET[1] \
+                and isinstance(e.params, dict) and sorted(e.params) == ['GameDataName', 'Index', 'Value'] \
+                and e.params['Value'] is True and e.params['Index'] == -1 and not fc.actors[e.actor].secondary:
+            return fc.actors[e.actor], KEY_SET[1], e.params
+    raise SystemExit('%s: no step that sets a saved yes/no found as expected (game files differ from what this '
+                     'was made for)' % KEY_SET_FLOW)
 
 
 def key_add_template(fc):
@@ -646,10 +677,11 @@ def key_add_template(fc):
                      'this was made for)' % KEY_ADD_FLOW)
 
 
-def key_add_step(add, dungeon):
-    actor, action, params = add
+def key_add_step(add, what):
+    """the step for what the chest holds; add: (key_add_template, key_set_template)"""
+    actor, action, params = add[0] if isinstance(what, str) else add[1]
     p = evfl.Params(params)
-    p['GameDataName'] = dungeon_keys.flag(dungeon)
+    p['GameDataName'] = key_what_flag(what)
     return actor, action, p
 
 
@@ -660,7 +692,7 @@ def tbox_key_flow(template, add, events, version):
     ef = evfl.EventFlow(TBOX_KEY_FLOW, [fc])
     ef.version = version
     (join_actor, join, _), (run_actor, run, run_params) = template
-    for (usual, dungeon), name in sorted(events.items()):
+    for (usual, dungeon), name in sorted(events.items(), key=lambda x: x[1]):
         nxt = sync_steps(fc, [key_add_step(add, dungeon)])
         params = evfl.Params(run_params)
         params['EventName'] = usual
@@ -924,13 +956,19 @@ def gift_edit(fc, events, direct=(), sync=None):
         e = by_name.get(ev)
         if e is None:
             raise SystemExit('%s: event %s not in the flow' % (cid, ev))
-        if e.type != 'subflow' or e.flowchart != GIFT_FLOW or not isinstance(e.params, dict):
-            raise SystemExit('%s: event %s is not a call of %s' % (cid, ev, GIFT_FLOW))
+        # a gift the game itself gives with the get window (a Medallion: Dm_Awake_*_Get): any item is given
+        # the same way there, by that call's ActorName
+        windowed = e.type == 'subflow' and (e.flowchart, e.entry) == DIRECT_GET \
+            and isinstance(e.params, dict) and set(e.params) == {'ActorName'}
+        if not windowed and (e.type != 'subflow' or e.flowchart != GIFT_FLOW or not isinstance(e.params, dict)):
+            raise SystemExit('%s: event %s is not a call of %s or of %s<%s>'
+                             % (cid, ev, GIFT_FLOW, DIRECT_GET[0], DIRECT_GET[1]))
         if e.params.get('ActorName') != old:
             raise SystemExit('%s: event %s gives %r, the data says %s' % (cid, ev, e.params.get('ActorName'), old))
         if item not in direct:
             e.params['ActorName'] = item
-            said.append('%-18s %s: %s -> %s' % (cid, ev, old, item))
+            said.append('%-18s %s: %s -> %s%s' % (cid, ev, old, item, ', given with the get window as %s is '
+                                                 '(%s<%s>)' % (old, DIRECT_GET[0], DIRECT_GET[1]) if windowed else ''))
         else:
             was = '%s<%s>' % (e.flowchart, e.entry)
             e.flowchart, e.entry = DIRECT_GET
@@ -3502,6 +3540,24 @@ def map_entry(length):
     return (length + 31) // 32 * 32 + 264
 
 
+# For some event flows the game loads another file than <name>.bfevfl: Event/EventFlow/EventFlowFileEntry lists
+# them with a version ("Versions": {"Dm_Awake_Forest_Get": "110", ...}: 13 flows, among them the five Medallion
+# cutscenes), and the file loaded is <name>.<version>.bfevfl. Both files are in the game. The builder reads and
+# writes the one the game loads, whichever name it is asked for (Output.real).
+FLOW_VERSIONS = 'Event/EventFlow/EventFlowFileEntry.Product.110.byml'
+FLOW_FOLDER, FLOW_EXT = 'Event/EventFlow/', '.bfevfl'
+
+
+def flow_versions(data):
+    """{flow name: version} of the game's list of event flows with a version of their own"""
+    root = byml.loads(data).root
+    versions = root.get('Versions') if isinstance(root, dict) else None
+    if not isinstance(versions, dict) or set(root) != {'Versions'} \
+            or not all(isinstance(v, str) and v for v in versions.values()):
+        raise SystemExit('%s is not the list of flow versions this was made for' % FLOW_VERSIONS)
+    return {str(k): str(v) for k, v in versions.items()}
+
+
 class Output:
     """writes changed files into the mod folder and keeps the resource size table up to date"""
 
@@ -3512,10 +3568,24 @@ class Output:
         self.sizes = {}          # path -> (original length, new length, original entry, new entry)
         self.orig = {}           # path -> the game's file (what its original entry was made for)
         self.written = {}        # path -> (file as stored in the game, contents written): edited twice = read back
+        self.versions = flow_versions(zstd.decompress(
+            open(os.path.join(romfs, *(FLOW_VERSIONS + '.zs').split('/')), 'rb').read(), dicts))
+        for name, version in self.versions.items():
+            if not os.path.exists(os.path.join(romfs, *('%s%s.%s%s.zs' % (FLOW_FOLDER, name, version, FLOW_EXT)).split('/'))):
+                raise SystemExit('%s: %s has version %s, but that file is not in the game' % (FLOW_VERSIONS, name, version))
+
+    def real(self, path):
+        """the file the game loads for an event flow (FLOW_VERSIONS); any other path as it is"""
+        if path.startswith(FLOW_FOLDER) and path.endswith(FLOW_EXT):
+            name = path[len(FLOW_FOLDER):-len(FLOW_EXT)]
+            if name in self.versions:
+                return '%s%s.%s%s' % (FLOW_FOLDER, name, self.versions[name], FLOW_EXT)
+        return path
 
     def read(self, path):
         """(file as stored, contents); a few game files are stored uncompressed (no .zs); a file this build
         already changed is read back as changed"""
+        path = self.real(path)
         if path in self.written:
             return self.written[path]
         plain = os.path.join(self.romfs, *path.split('/'))
@@ -3531,6 +3601,7 @@ class Output:
         rules of tools/sizes.py (loading a file takes more memory than its bytes, and a parameter file more per
         element of its lists and tables: adding elements needs more than what the file grew); and `floor`.
         A length instead of contents is accepted too: then only the growth counts."""
+        path = self.real(path)
         new_len = new if isinstance(new, int) else len(new)
         if path in self.sizes:
             old_len, _, entry, _ = self.sizes[path]
@@ -3579,6 +3650,7 @@ class Output:
         open(dest, 'wb').write(comp)
 
     def write(self, path, src, old, new):
+        path = self.real(path)
         self.written[path] = (src, new)
         if src is None:                                  # stored uncompressed: write it the same way
             dest = os.path.join(self.mod_romfs, *path.split('/'))
@@ -3739,8 +3811,33 @@ def main(argv):
                                 ', '.join(sorted(dungeon_keys.OUR_COLOURS))))
         key_colours[dungeon] = int(colour) if colour.isdigit() else colour
         key_colour_asked.add(dungeon)
-    key_chests = {}                                    # check id -> dungeon: chests that hold a dungeon's key
+    key_chests = {}                                    # check id -> what the chest's own step is for (TBOX_KEY_FLOW)
+    item_versions = {}                                 # (item, dungeon, kind of version) -> name (dungeon_items)
     for k, (cid, item) in enumerate(assignments):
+        flagged = dungeon_items.parse(item)
+        if flagged is not None or item in dungeon_items.ITEMS:
+            # a dungeon's boss key, map or compass (tools/dungeon_items.py)
+            r, _, loc = find_check(world, cid)
+            scenes = {scene for scene, _, _ in world.placements_of(r, loc)}
+            if flagged is None:
+                if check_kind(world, cid) != 'chest' or len(scenes) != 1 or not scenes <= set(dungeon_keys.DUNGEONS):
+                    raise SystemExit('%s: %s only counts in a chest of its own dungeon (the chest\'s opening sets '
+                                     'it for the dungeon Link is in); anywhere else name its dungeon: %s%s<dungeon>'
+                                     % (cid, item, item, dungeon_keys.SEP))
+                continue
+            base, dungeon = flagged
+            kind = dungeon_keys.kind_for(check_kind(world, cid), cid)
+            if kind == 'chest' and scenes == {dungeon}:
+                print('%-18s %s of %s in a chest of %s itself: the game\'s own item' % (cid, base, dungeon, dungeon))
+                assignments[k] = (cid, base)
+                continue
+            assignments[k] = (cid, item_versions.setdefault((base, dungeon, kind),
+                                                            dungeon_items.name(base, dungeon, kind)))
+            # the item its name stands for: its chest version
+            item_versions.setdefault((base, dungeon, 'chest'), dungeon_items.name(base, dungeon, 'chest'))
+            if kind == 'chest':
+                key_chests[cid] = (base, dungeon)
+            continue
         parsed = dungeon_keys.parse(item)
         if parsed is None:
             continue
@@ -3908,7 +4005,7 @@ def main(argv):
 
     def once_drop(item):
         """what a rock, a bush or a pot drops once: a version of the item that marks it when picked up"""
-        if item.startswith(once_items.PREFIX) or item == ground_items.TOKEN or dungeon_keys.is_ours(item):
+        if item.startswith(once_items.PREFIX) or item == ground_items.TOKEN or dungeon_ours(item):
             return item                                # a family's level (built further down); a real token
         kind = ground_items.kind_of(plain, item)
         if kind in ('item', 'equipment'):
@@ -3916,7 +4013,7 @@ def main(argv):
         return gs_drop(item)                           # a ground actor of the game: its token-built version
 
     def on_ground(item):
-        if item.startswith((turn_items.PREFIX, once_items.PREFIX)) or dungeon_keys.is_ours(item):
+        if item.startswith((turn_items.PREFIX, once_items.PREFIX)) or dungeon_ours(item):
             return item                                # a turning item (a progressive pair): built further down
         kind = ground_items.kind_of(plain, item)
         if kind == 'ground':
@@ -3926,7 +4023,7 @@ def main(argv):
         raise SystemExit('%s: not something that can lie on the ground, and no ground version can be made' % item)
 
     def in_chest(item):
-        if dungeon_keys.is_ours(item):
+        if dungeon_ours(item):
             return item                                # a dungeon's key: built further down
         if ground_items.kind_of(plain, item) == 'equipment':
             return grounds.setdefault((item, 'held'), ground_items.ground_name(item, 'held'))
@@ -3935,7 +4032,7 @@ def main(argv):
     def gs_drop(item):
         if item == ground_items.TOKEN:
             return item                                # its own token
-        if item.startswith(once_items.PREFIX) or dungeon_keys.is_ours(item):
+        if item.startswith(once_items.PREFIX) or dungeon_ours(item):
             return item                                # a level of a family (a progressive form): built further down
         if ground_items.kind_of(plain, item) in ('ground', 'item', 'equipment'):
             return grounds.setdefault((item, 'token'), ground_items.ground_name(item, 'token'))
@@ -3959,7 +4056,11 @@ def main(argv):
         return tbox_usuals.setdefault(usual, tbox_sync_event(usual))
 
     # chests that hold a dungeon's key: an opening event of our own around the usual one, which adds the key
-    key_events = {}                                    # (usual opening event, dungeon) -> our event around it
+    key_events = {}                                    # (usual opening event, what it is for) -> our event around it
+
+    def dungeon_ours(item):
+        """a version of a dungeon's key, boss key, map or compass: built by its own module"""
+        return dungeon_keys.is_ours(item) or dungeon_items.is_ours(item)
 
     def key_event(dungeon):
         def event_for(gyaml, event):
@@ -4169,9 +4270,10 @@ def main(argv):
                     usual = dyn.get(TBOX_EVENT_KEY) or chest_usual_event(plain, want['Gyaml'])
                     if changes[h][0] in key_chests:
                         dyn[TBOX_EVENT_KEY] = tbox_key_event(usual, key_chests[changes[h][0]])
-                        print('%-18s   holds a key of %s: opening event %s (runs %s, then adds 1 to %s)'
-                              % (changes[h][0], key_chests[changes[h][0]], dyn[TBOX_EVENT_KEY], usual,
-                                 dungeon_keys.flag(key_chests[changes[h][0]])))
+                        what = key_chests[changes[h][0]]
+                        print('%-18s   holds %s: opening event %s (runs %s, then %s %s)'
+                              % (changes[h][0], key_what_said(what), dyn[TBOX_EVENT_KEY], usual,
+                                 'adds 1 to' if isinstance(what, str) else 'sets', key_what_flag(what)))
                     else:
                         dyn[TBOX_EVENT_KEY] = tbox_sync_event(usual)
                         print('%-18s   holds an ocarina: opening event %s (runs %s, then makes Link\'s ocarina)'
@@ -4216,7 +4318,8 @@ def main(argv):
         like_data = plain(like)
         like_ef = evfl.loads(like_data)
         template = tbox_sync_template(like_ef.flowchart)
-        add = key_add_template(evfl.loads(plain(KEY_ADD_FLOW)).flowchart)
+        add = (key_add_template(evfl.loads(plain(KEY_ADD_FLOW)).flowchart),
+               key_set_template(evfl.loads(plain(KEY_SET_FLOW)).flowchart))
         try:
             data = evfl.dumps_checked(tbox_key_flow(template, add, key_events, like_ef.version))
         except ValueError as e:
@@ -4227,13 +4330,15 @@ def main(argv):
         out.write_new(flow_path(TBOX_KEY_FLOW), data, like)
         out.add(flow_path(TBOX_KEY_FLOW), data, like, like_data)
         rows = tbox_sync_rows(byml.loads(out.read(EVENT_SETTING)[1]).root, byml.loads(out.read(EVENT_INFO)[1]).root,
-                              (), [(usual, name) for (usual, _), name in sorted(key_events.items())], TBOX_KEY_FLOW)
+                              (), [(usual, name) for (usual, _), name in sorted(key_events.items(), key=lambda x: x[1])],
+                              TBOX_KEY_FLOW)
         for t, path in (('EventSetting', EVENT_SETTING), ('GameAnalyzedEventInfo', EVENT_INFO)):
             src, old = out.read(path)
             out.write(path, src, old, ground_items.add_rows(old, rows[t]))
-        for (usual, dungeon), name in sorted(key_events.items()):
-            print('%-18s %s: entry point and event %s: %s, then %s + 1'
-                  % ('key chests', flow_path(TBOX_KEY_FLOW), name, usual, dungeon_keys.flag(dungeon)))
+        for (usual, what), name in sorted(key_events.items(), key=lambda x: x[1]):
+            print('%-18s %s: entry point and event %s: %s, then %s %s'
+                  % ('key chests', flow_path(TBOX_KEY_FLOW), name, usual, key_what_flag(what),
+                     '+ 1' if isinstance(what, str) else 'set'))
 
     # songs: the cutscene only hands over the item (a family: the inventory questions in front of one get per
     # level); read back against the original
@@ -4666,9 +4771,47 @@ def main(argv):
             'chest': 'what a chest holds; the chest\'s opening event adds 1 to %s' % dungeon_keys.flag(dungeon),
         }[kind]))
 
+    # a dungeon's boss key, map or compass (tools/dungeon_items.py): its version for each kind of check it is on
+    for (base, dungeon, kind), name in sorted(item_versions.items()):
+        got, pack, new_inner, rows, like_pack, loose = dungeon_items.build(base, dungeon, kind, plain, table_rows,
+                                                                           model_there, once_src)
+        assert got == name
+        path = ground_items.pack_path(name)
+        out.write_new(path, pack, like=like_pack)
+        out.add(path, pack, like_pack, plain(like_pack))
+        for inner, (data, like, like_data) in sorted(new_inner.items()):
+            if inner in once_shared:                   # the same file as in the one-time versions' packs
+                if once_shared[inner] != data:
+                    raise SystemExit('%s: %s differs from the one in another version' % (name, inner))
+                continue
+            if not inner.split('/')[-1].startswith(name + '.'):
+                once_shared[inner] = data
+            out.add(inner, data, like, like_data)
+        for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
+            if out.table.get(inner) is None:
+                raise SystemExit('%s: %s has no resource size entry' % (name, inner))
+        for t, row in rows.items():
+            new_rows.setdefault(t, []).append(row)
+        for lpath, (data, like, old_h, new_h, _) in sorted(loose.items()):
+            if lifted_before(lpath, data):
+                continue
+            out.write_new(lpath, data, like)
+            out.add(lpath, data, like, plain(like))
+            print('%-6s %s: lies %.3f %s on the ground (pose height %.3f -> %.3f, %s)'
+                  % ('dungeon', base, abs(new_h - old_h), 'higher' if new_h > old_h else 'lower', old_h, new_h, lpath))
+        print('dungeon version %-22s %s of %s (%d bytes), its messages under %s: %s' % (
+            name, base, dungeon, len(pack), dungeon_items.message_name(base, dungeon), {
+                'once': 'picked up, it sets %s and marks what dropped it' % dungeon_items.flag(base, dungeon),
+                'token': 'dropped by a Gold Skulltula: picked up, it sets %s and marks the skulltula done'
+                         % dungeon_items.flag(base, dungeon),
+                'chest': 'what a chest holds; the chest\'s opening event sets %s' % dungeon_items.flag(base, dungeon),
+            }[kind]))
+
     # named keys: their three texts in every language's message archive, with the dungeon's name as that
     # language's own text has it
-    named_keys = sorted({dungeon for dungeon, _, named in key_versions if named})
+    named_items = sorted({(base, dungeon) for base, dungeon, _ in item_versions})
+    named_keys = sorted({dungeon for dungeon, _, named in key_versions if named} | {d for _, d in named_items})
+    key_only = {dungeon for dungeon, _, named in key_versions if named}
     for dungeon in sorted(set(key_colours) - set(named_keys)):
         if dungeon in key_colour_asked:
             raise SystemExit('--key-colour %s: no key of this build names %s (%s@%s%s)'
@@ -4703,10 +4846,14 @@ def main(argv):
             for dungeon in named_keys:
                 if dungeon not in places:
                     raise SystemExit('%s: no name for it in %s' % (dungeon, dungeon_keys.LOCATION_FILE))
-                lines.update(dungeon_keys.messages(dungeon, msg_plain(places[dungeon]), key_numbers.get(dungeon)))
+                if dungeon in key_only:
+                    lines.update(dungeon_keys.messages(dungeon, msg_plain(places[dungeon]), key_numbers.get(dungeon)))
+            for base, dungeon in named_items:
+                lines.update(dungeon_items.messages(base, dungeon, msg_plain(places[dungeon]),
+                                                    key_numbers.get(dungeon)))
             return lines
         scrub_messages(out, a.romfs, key_lines, dungeon_keys.MESSAGE_FILE)
-        print('%-18s %s: the texts of the named keys of %s added in every language'
+        print('%-18s %s: the texts of the keys, boss keys, maps and compasses of %s added in every language'
               % ('key names', dungeon_keys.MESSAGE_FILE, ', '.join(
                   '%s (its name in colour %s, number %d)' % (x, key_colours[x], key_numbers[x])
                   if x in key_numbers else x for x in named_keys)))

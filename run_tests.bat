@@ -74,6 +74,9 @@ echo.
 echo === Dungeon keys check ===
 %PY% tests\dungeon_keys_check.py "%ROMFS%"
 echo.
+echo === Boss key, boss door, boss heart and Medallion check ===
+%PY% tests\boss_check.py "%ROMFS%"
+echo.
 echo === Starting state of a new file check ===
 %PY% tests\start_state_check.py "%ROMFS%"
 echo.

@@ -851,7 +851,7 @@
   "check_rule": "True",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the game puts the boss key here (GetEventName ForesetTemple_GetBossKey, flag ForestTemple_Room23_GetBossKey)"
+  "notes": "the game puts the boss key here, in a big chest (Obj_TBox_A_03_NoBake; GetEventName ForesetTemple_GetBossKey: the usual opening, then Navi's message 361; flag ForestTemple_Room23_GetBossKey). The builder removes that event when another item is put here"
  },
  {
   "unique_check_id": "FT_BOW_CHEST",
@@ -1547,9 +1547,9 @@
   "check_type": "gift",
   "object_id": [],
   "vanilla_contents": {
-   "value": null,
-   "source": null,
-   "note": "event with no map placement; contents not found in the game data yet"
+   "value": "Item_Medal_Forest",
+   "source": "event flow Dm_Awake_Forest_Get, Event13",
+   "note": null
   },
   "randomizable": "untested",
   "randomizable_note": "not yet changed in game",
@@ -1580,7 +1580,7 @@
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "object_id_note": "no map placement (an event); its ID in the game is still to be found",
-  "notes": "the dungeon reward: the Forest Medallion (Item_Medal_Forest in the item table), given after the boss. How the game hands it over is not found yet (its name is in none of the Dm_SageRoom or SageOfForest flows): to find in part 7"
+  "notes": "the dungeon reward: the Forest Medallion, given after the boss by the cutscene Dm_Awake_Forest_Get (Saria in the Chamber of Sages): its step Event13 is a call of GetPouchContent<GetPouchContentByActorName> with Item_Medal_Forest, the get window and the item. The game loads the file Dm_Awake_Forest_Get.110.bfevfl for it (Event/EventFlow/EventFlowFileEntry). The medallion that floats down in the cutscene is an actor of the cutscene and stays"
  },
  {
   "unique_check_id": "FT_FROZEN_EYE_SWITCH_ROOM_POT_01",
@@ -2129,7 +2129,7 @@
   "check_rule": "'Forest Temple Clear'",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "the boss heart (Obj_Heart_Container), shown in the cutscene Dm_ForestTemple_BossOut"
+  "notes": "the boss heart (Obj_Heart_Container): the boss room's logic (ForestTemple_Level_Room_22_Prefab_c724) brings it in once the boss is beaten (SageOfForest_IsAfter_Step08_Exp), by its place in the map; the cutscene Dm_ForestTemple_BossOut shows it coming down, by the actor's name"
  },
  {
   "unique_check_id": "FT_WELL_CHEST",

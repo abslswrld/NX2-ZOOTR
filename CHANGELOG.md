@@ -4,6 +4,43 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
+### Phase 1, part 7: boss key, boss door, boss heart and the Medallion (to test in game)
+Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **The boss key anywhere** (`tools/dungeon_items.py`, new): `CHECK_ID=Item_Dungeon_BossKey@ForestTemple`. What
+  was found: the boss key, the map and the compass are yes/no fields of the dungeon's saved record
+  (`DungeonInfo.<dungeon>.IsGetBossKey`, `IsGetMap`, `IsGetCompass`); the items themselves are "not put in the
+  inventory", and what sets the field is the chests' shared opening event (`Dm_SY_Treasurebox`:
+  `EventGetDungeonBossKey` and its three siblings), for the dungeon Link is in. So:
+  - **in a chest of its own dungeon** it is the game's own item (the builder decides by the check's map);
+  - **on a pot, rock, bush, freestanding item or Gold Skulltula**, in the dungeon or outside, it is a version
+    of ours whose AI sets the dungeon's field when it is picked up (`OneShotSetGameDataBool`, the step the
+    Gerudo Fortress keys set their own flag with);
+  - **in a chest outside its dungeon** the chest's opening event gets a step after it that sets the field
+    (`GameDataActor.EventTriggerSetGameDataBool`), as a small key's chest adds 1.
+  Every version says the dungeon's name in the dungeon's colour: "You found the boss key! (Forest Temple)".
+- **The map and the compass the same way** (`Item_Dungeon_Map@ForestTemple`, `Item_Dungeon_Compass@...`): they
+  are built exactly as the boss key is. **A flaw this closes:** the builder used to accept a boss key, a map or
+  a compass on a pot, which gave an item that set nothing when picked up. Without its dungeon named, one of
+  the three is now only accepted on a chest of a dungeon.
+- **Another item in the boss key's chest:** its own opening event (`ForesetTemple_GetBossKey`: the usual
+  opening, then a message from Navi about the boss key) is removed with the boss key, as the Bow chest's was.
+- **The boss door** needs no change: its lock (`Obj_DoorChainLock_A_02`) opens with the dungeon's field. **Start
+  with the boss key:** `--start-flag DungeonInfo.ForestTemple.IsGetBossKey=true` (part 6's start flags).
+- **The boss's heart:** it is a placed `Obj_Heart_Container` that the boss room's logic brings in once the boss
+  is beaten, by its place in the map, so another item put there is brought in the same way. **Not known:** the
+  boss's last cutscene (`Dm_ForestTemple_BossOut`) shows the Heart Container coming down, by the actor's name.
+  With another item there the cutscene may show nothing, or stop: the in-game test decides.
+- **The Medallion:** the cutscene `Dm_Awake_Forest_Get` hands it over with one step (the get window and the
+  item), now in the temple's data, so `FT_FOREST_MEDALLION_GIFT=<item>` gives another item there, and
+  `Item_Medal_Forest` can be put on another check. The medallion that floats down in the cutscene stays.
+  A family on this check is not supported yet.
+- **The file the game loads:** for 13 event flows the game loads `<name>.110.bfevfl`, not `<name>.bfevfl`
+  (`Event/EventFlow/EventFlowFileEntry`: the five Medallion cutscenes, `Dm_HrlCastle_0020`, `Dm_Goron_0040` and
+  six more). The builder now reads and writes the file the game loads (`Output.real`); before, a change to one
+  of those 13 would have gone into a file the game never opens.
+- **Tests:** `tests/boss_check.py` (new, 16 checks; in `run_tests.bat`).
+
 ### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (passed in game 2026-11-24)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
 
