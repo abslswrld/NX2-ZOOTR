@@ -9,13 +9,14 @@ The temple's checks, regions and logic rules, read from the game's files. Nothin
 is nothing to test in game for this part; the rules are tried in game with part 3's build.
 
 **In game (user, 2026-11-23, the unchanged game):**
-- **The first room's Gold Skulltula does not need the Hookshot.** `FT GS Entrance` now has no item rule (it had
-  `can_use(Hookshot)`, assumed for its height).
+- **The first room's Gold Skulltula does not need the Hookshot:** it is grabbed by climbing the vines.
+  `FT GS Entrance` now has no item rule (it had `can_use(Hookshot)`, assumed for its height).
 - **The Bow room does need the Bow to leave.** The eye switch sits behind bars, so the Hookshot does not reach it.
   **Saving is off in the room.** Dying puts Link back at the temple's beginning, and because nothing was saved,
   whatever was picked up in the room is lost. So a player without the Bow is not stuck for good, but can keep
-  nothing found in the Bow room (its chest and 4 pots). The rules are as before (in freely, out with the Bow);
-  what to do about the chest and the pots is part 3's decision.
+  nothing found in the Bow room (its chest and 4 pots).
+- **Decided (D39): the randomizer reopens the Bow room's door when the chest appears.** A game change, so it is
+  built and tested in part 3. Until then the rules are as before (in freely, out with the Bow).
 
 - **47 checks, each with a permanent ID** (area code `FT`, `data/ids.json`): 12 chests, 5 Gold Skulltulas, 28
   pots, the Heart Container and the Forest Medallion. The map files hold 46 spots; the "1 loose item" of the
@@ -48,8 +49,7 @@ is nothing to test in game for this part; the rules are tried in game with part 
   again only when the eye switch is shot after the chest appears. Without the Bow the only other way out is the
   locked east door, which leads to Beth's room, a dead end without the Bow; saving and warping are off while the
   shutter is shut. In the logic the room is entered freely and left with the Bow. To settle before another item
-  is put in that chest: whether to keep the shutter open, or to leave the room as it is and ask for the Bow
-  before it. (In game: see the result above. The switch is behind bars, so letting the Hookshot press it is out.)
+  is put in that chest. (Settled the same day: see the in-game result and D39 above.)
 - **Logic:** `logic/requirements.py` now keeps only the highest count of an item in one alternative
   (`ForestTempleSmallKey*5`, not 1+2+3+4+5 keys). `tools/extract_checks.py` leaves out pots that come back
   (`Obj_Pot_*_Respawn`: the arrow pot in the Bow room, the only one in the four areas extracted so far);
