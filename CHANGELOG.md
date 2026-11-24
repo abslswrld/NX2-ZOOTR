@@ -4,6 +4,28 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
+### `run_tests.bat` in about 2.5 minutes instead of about 16 (every test still runs)
+The user: "I think we need to change how run_tests works cause I'm losing a lot of time just waiting."
+
+- **Timed first (main at `8dadce9`, one after another): 16.3 minutes.** The slowest: `families_check.py` 6.3 min
+  (38%), `ground_lift_check.py` 1.9, `roundtrip.py` 1.7, `skulltula_prog_check.py` 1.1, `one_time_check.py`
+  0.9; the other 17 together 4.3.
+- **`run_tests.bat` now runs every script through the new `tests/run_all.py`, 8 at a time** (the PC has 8
+  cores, 16 threads), the slowest first. The scripts don't depend on each other: each reads the game files on
+  its own and builds into a temporary folder of its own. It prints a line as each one finishes, then which
+  failed (with the last 40 lines of its output), the round-trip test's summary, and the total time. Each
+  script's whole output is in `test_logs\` (not uploaded); the round-trip report is still `report.txt`.
+  `--only NAME,...` runs a few while working; `--jobs N` sets how many at once.
+- **`families_check.py` starts its 26 whole builds side by side when it begins** (`build_plan()`), each in a
+  folder of its own, and its last section takes their results. Alone: 70 s instead of 6 min 16 s; its output
+  is byte for byte the same as before (file counts included). The checks themselves are unchanged.
+- **Result: 2 min 32 s for all 23 scripts, all 22 checks passed** (17 min of work done side by side). The
+  round-trip test gave its known report (5 BYML files differ, 264 event flows with timelines not read). The two
+  slowest now: `ground_lift_check.py` 2 min 32 s and the round-trip 2 min 20 s.
+- **A new test script now adds its row to `STEPS` in `tests/run_all.py`** instead of to `run_tests.bat`
+  (CLAUDE.md and README.md say so). A `*_check.py` that is not in the list is named when the tests run
+  (`logic_check`, `db_check` and `size_check` stay out on purpose, as before).
+
 ### Phase 1, part 5: a dungeon's small key anywhere (in game: the keys work, the count shown is off)
 A small key that counts for the Forest Temple wherever it is found: `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`
 (any of the 13 dungeons with keys can be named). Test build and checklist: `out\TEST_CHECKLIST.md`.

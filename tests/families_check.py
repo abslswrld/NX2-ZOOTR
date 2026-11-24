@@ -8,6 +8,7 @@ removed again.
 
     python tests/families_check.py "C:\\...\\romfs"
 """
+import concurrent.futures
 import contextlib
 import glob
 import io
@@ -111,7 +112,48 @@ def taken(give, levels, extra=False):
     return out
 
 
+def build_plan():
+    """The whole builds of the last section, (name, arguments) in the order it asks for them. They are started at
+    once, side by side, when the test begins (each in a folder of its own: a build clears its folder first, so
+    this gives the same files as one folder used over and over); the last section then takes their results. A
+    build asked for that is not in this list runs there and then, as before."""
+    text = {n: '>'.join(f) for n, f in FAMILIES.items()}
+    names = list(FAMILIES)
+    plan = []
+    for part in (names[:6], names[6:]):
+        plan.append(('chests', tuple('%s=%s' % (c, text[n]) for c, n in zip(CHESTS, part))))
+    for spots, parts in ((GROUND, (names,)), (ROCKS, (names,)), (BUSHES, (names[:9], names[9:])),
+                         (POTS, (names[:8], names[8:]))):
+        for part in parts:
+            plan.append(('turn', tuple(['%s=%s' % (c, text[n]) for c, n in zip(spots, part)] + CIRCLE_FIX)))
+    for n in FAMILIES:
+        plan.append(('gift', ('%s=%s' % (GIFT, text[n]), *CIRCLE_FIX)))
+    for n in SCRUB_BUILDS:
+        plan.append(('scrub', ('%s=%s' % (SCRUB, text[n]),)))
+    plan.append(('mix', ('%s=%s' % (CHESTS[0], text['BulletBag']), '%s=%s' % (ROCKS[0], text['BulletBag']),
+                         '%s=%s' % (GIFT, text['BulletBag']), *CIRCLE_FIX)))
+    plan.append(('mix', ('%s=%s' % (CHESTS[0], text['BulletBag']), '%s=%s' % (ROCKS[0], text['BulletBag']))))
+    return plan
+
+
+def build(romfs, out, name, assign):
+    """One whole build into out/<name>: what it said, and the files it wrote (relative to out/<name>)."""
+    with contextlib.redirect_stdout(io.StringIO()) as said:
+        build_mod.main(['--romfs', romfs, '--out', out, '--name', name] + list(assign))
+    folder = os.path.join(out, name)
+    return said.getvalue(), {os.path.relpath(f, folder).replace(os.sep, '/')
+                             for f in glob.glob(os.path.join(folder, '**', '*'), recursive=True) if os.path.isfile(f)}
+
+
 def main(romfs):
+    with tempfile.TemporaryDirectory() as tmp, \
+            concurrent.futures.ProcessPoolExecutor(max_workers=min(os.cpu_count() or 4, 8)) as pool:
+        builds = {(name, assign): pool.submit(build, romfs, os.path.join(tmp, 'b%02d' % i), name, assign)
+                  for i, (name, assign) in enumerate(build_plan())}
+        return checks(romfs, builds)
+
+
+def checks(romfs, builds):
     d = zstd.Dictionaries.from_pack(open(os.path.join(romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
     plain = lambda path: zstd.decompress(open(os.path.join(romfs, *path.split('/')) + '.zs', 'rb').read(), d)  # noqa: E731
     table_rows = lambda t: byml.loads(plain(ground_items.table_path(t))).root   # noqa: E731
@@ -470,12 +512,8 @@ def main(romfs):
     names = list(FAMILIES)
     with tempfile.TemporaryDirectory() as tmp:
         def run(name, *assign):
-            with contextlib.redirect_stdout(io.StringIO()) as out:
-                build_mod.main(['--romfs', romfs, '--out', tmp, '--name', name] + list(assign))
-            folder = os.path.join(tmp, name)
-            return out.getvalue(), {os.path.relpath(f, folder).replace(os.sep, '/')
-                                    for f in glob.glob(os.path.join(folder, '**', '*'), recursive=True)
-                                    if os.path.isfile(f)}
+            started = builds.get((name, assign))       # started side by side at the beginning (build_plan)
+            return started.result() if started else build(romfs, tmp, name, assign)
 
         def packs(files):
             return {f.split('/')[-1][:-len('.pack.zs')] for f in files if '/Pack/Actor/' in '/' + f}

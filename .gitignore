@@ -5,3 +5,5 @@ report.txt
 __pycache__/
 # built mods and test saves: modified game files, never committed
 out/
+# test logs (tests/run_all.py)
+test_logs/
