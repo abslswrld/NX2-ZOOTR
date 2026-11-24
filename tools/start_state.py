@@ -29,7 +29,18 @@ What is accepted, and why:
   upgrade family without the levels in front of it;
 - a flag must be a Bool, an Int or a String64 of GameDataList, saved in the save slot (progress.sav), and no
   field of a struct (PlayerStatus.MaxLife, IsGet.<item>...: the "NonStruct" setters take plain flags). A
-  BoolExp is worked out from other flags and cannot be set.
+  BoolExp is worked out from other flags and cannot be set;
+- but a field of a dungeon's record can be set (2026-11-24): `DungeonInfo.<dungeon>.SmallKeyNum` (the small
+  keys Link holds there), `IsGetBossKey`, `IsGetMap`, `IsGetCompass`. That is how a file starts with a dungeon's
+  keys, map and compass. A field of a struct is set the way the module sets Link's hearts: a
+  `SeqOneShotSetGameDataInt` node (a Bool: `SeqOneShotSetGameDataBool`, copied from
+  Sequence/DestroySceneCommon.module.ainb) whose `ParentStruct` comes from a `SeqQueryGetNonStructGameDataStruct`
+  node that finds the struct by its name (the module's own finds PlayerStatus). One such node is added per
+  dungeon named, and one setter per field;
+- and so can a place's "visited" mark, `IsVisitLocation.<place>` (2026-11-24, to test in game): the game sets
+  it when it shows a place's title, in the place's first cutscene (`UISystemActor.EventTriggerOpenLocationUI`:
+  Dm_Kokiri_0045 for Kokiri Forest, Dm_ForestTemple_0000 for the Forest Temple) or from the place's
+  LocationArea. The Map page's states are named WorldMap, DungeonMap, FieldMap and UnopenMap ("???").
 
 Used by tools/build_mod.py (--start, --start-flag); tests/start_state_check.py reads it all back.
 """
@@ -49,6 +60,14 @@ N_STATUS = 'SeqOneShotSetGameDataInt'                          # the module's ow
 SETTERS = {'Bool': ('SeqOneShotSetNonStructGameDataBool', 'bool'),
            'Int': ('SeqOneShotSetNonStructGameDataInt', 'int'),
            'String64': ('SeqOneShotSetNonStructGameDataString64', 'string')}
+# fields of these structs can be set too (the dungeons' records), the way the module sets PlayerStatus:
+# flag type -> (the setter that takes a struct, parameter type of its Value)
+MEMBER_PREFIX = 'DungeonInfo.'
+MEMBER_PREFIXES = (MEMBER_PREFIX, 'IsVisitLocation.')
+MEMBER_SETTERS = {'Bool': ('SeqOneShotSetGameDataBool', 'bool'), 'Int': (N_STATUS, 'int')}
+MEMBER = 'Member'                                              # kind of such a flag: 'MemberBool', 'MemberInt'
+STRUCT_QUERY = 'SeqQueryGetNonStructGameDataStruct'
+VALUE_LINK = 0                                                 # link type: a value handed to another node
 SIMULTANEOUS = 3                                               # node type Element_Simultaneous
 FLOW = 2                                                       # link type: flow to child nodes
 # flags of an input with nothing linked (formats/ainb.py: "0x0080/0x0180"): 0x800000 on every one, 0x1000000
@@ -172,9 +191,18 @@ def check_flags(flags, game_data):
         if kind not in SETTERS:
             raise SystemExit('--start-flag %s: its type is %s; only %s flags can be set at the start for now'
                              % (name, kind, ', '.join(sorted(SETTERS))))
+        member = False
         if game_data.is_member(name):
-            raise SystemExit('--start-flag %s: it is a field of a struct, which the plain setters do not take '
-                             '(for an item use --start)' % name)
+            struct, _, field = name.rpartition('.')
+            parent = game_data.find(struct)
+            if not name.startswith(MEMBER_PREFIXES) or kind not in MEMBER_SETTERS or not parent \
+                    or parent[0] != 'Struct' or not any(
+                        int(m['Hash']) == name_hash(field) and int(m['Value']) == name_hash(name)
+                        for m in parent[1]['DefaultValue']):
+                raise SystemExit('--start-flag %s: it is a field of a struct, which the plain setters do not take '
+                                 '(for an item use --start; only the fields of %s<dungeon> and %s<place> can '
+                                 'be set)' % ((name,) + MEMBER_PREFIXES))
+            member = True
         if int(e['SaveFileIndex']) != SLOT_SAVE:
             raise SystemExit('--start-flag %s: it is not saved in the save slot (%s; its save file index is '
                              '%d), so it would not last' % (name, game_data.save_files[SLOT_SAVE],
@@ -199,7 +227,7 @@ def check_flags(flags, game_data):
         if int(e['ResetTypeValue']) != RESET_NEW_GAME_ONLY:
             note = ('its reset type is %d, not %d: the game also resets it at other times, back to its '
                     'default %r' % (int(e['ResetTypeValue']), RESET_NEW_GAME_ONLY, e['DefaultValue']))
-        out.append((name, kind, value, note))
+        out.append((name, MEMBER + kind if member else kind, value, note))
     return out
 
 
@@ -278,6 +306,103 @@ def setter_node(templates, name, kind, value, taken):
     return n
 
 
+def _split(flags):
+    """(the plain flags, the fields of structs) of a list of starting flags, each in the order given"""
+    return ([f for f in flags if not f[1].startswith(MEMBER)], [f for f in flags if f[1].startswith(MEMBER)])
+
+
+def member_templates(doc, source_data):
+    """the game's nodes copied for a field of a struct: (the module's own struct finder, {flag type: a setter
+    that takes a struct}), each found by what it is"""
+    def takes_struct(n, name, kind):
+        return (n.name == name and not n.attachments and not n.exb_count and not n.exb_size
+                and not any(n.links) and not any(n.outputs[t] for t in ainb.PARAM_TYPES)
+                and [(t, x.name) for t in ainb.PARAM_TYPES for x in n.inputs[t]] == sorted(
+                    [('int', 'GameDataIndex'), (kind, 'Value'), ('string', 'GameDataName'),
+                     ('userdefined', 'ParentStruct')], key=lambda p: ainb.PARAM_TYPES.index(p[0]))
+                and n.inputs['userdefined'][0].node >= 0 and not n.inputs['userdefined'][0].sources
+                and all(x.node < 0 and not x.sources for t in ('int', 'bool', 'string') for x in n.inputs[t]))
+    q = [n for n in doc.nodes if n.name == STRUCT_QUERY and n.flags == 1 and not n.preconditions
+         and [(t, x.name) for t in ainb.PARAM_TYPES for x in n.inputs[t]] == [
+             ('int', 'GameDataIndex'), ('bool', 'IsDirect'), ('string', 'GameDataFullName')]
+         and [(t, x.name) for t in ainb.PARAM_TYPES for x in n.outputs[t]] == [('userdefined', 'Value')]
+         and [(k, [l.name for l in links]) for k, links in enumerate(n.links) if links] == [(VALUE_LINK, ['Value'])]]
+    if len(q) != 1:
+        raise SystemExit('%s: expected one %s node, found %d' % (MODULE, STRUCT_QUERY, len(q)))
+    source = ainb.Ainb.read(source_data)
+    setters = {}
+    for kind, (name, t) in MEMBER_SETTERS.items():
+        hits = [n for n in (doc.nodes if kind == 'Int' else source.nodes) if takes_struct(n, name, t)]
+        if not hits:
+            raise SystemExit('%s: no %s node that takes a struct to copy' % (MODULE if kind == 'Int' else SETTER_SOURCE, name))
+        setters[kind] = hits[0]
+    return q[0], setters
+
+
+def _copy_linked(template, what, taken):
+    """a copy of a node that is linked to another (a struct finder, a setter that takes a struct)"""
+    n = copy.deepcopy(template)
+    n.guid = hashlib.md5(('NX2-ZOOTR start state: %s' % what).encode()).digest()
+    n.precondition_slot = None
+    if n.guid in taken:
+        raise SystemExit('%s: node id already used (%s)' % (MODULE, what))
+    taken.add(n.guid)
+    return n
+
+
+def member_nodes(doc, source_data, members, taken):
+    """the nodes that set fields of structs, to be added behind the nodes `doc` has now: [(node, whether it is
+    a child of the status group)]. One struct finder per struct (in the order first named), then its setters;
+    each setter waits for its finder, as the module's own do"""
+    q_tpl, setters = member_templates(doc, source_data)
+    out, at = [], len(doc.nodes)
+    waited = sum(1 for n in doc.nodes if n.flags & 1)         # a finder's place among the nodes others wait for
+    structs = []
+    for name, _, _, _ in members:
+        if name.rpartition('.')[0] not in structs:
+            structs.append(name.rpartition('.')[0])
+    for struct in structs:
+        fields = [f for f in members if f[0].rpartition('.')[0] == struct]
+        q = _copy_linked(q_tpl, 'struct %s' % struct, taken)
+        _set(q.inputs['string'][0], struct)
+        q_at = at + len(out)
+        q.links[VALUE_LINK][0].node = q_at + 1               # its first setter, as the module's own names one
+        out.append((q, False))
+        for name, kind, value, _ in fields:
+            kind = kind[len(MEMBER):]
+            n = _copy_linked(setters[kind], 'field %s' % name, taken)
+            _set(n.inputs['string'][0], name.rpartition('.')[2])
+            _set(next(x for x in n.inputs[MEMBER_SETTERS[kind][1]] if x.name == 'Value'), value)
+            n.inputs['userdefined'][0].node, n.inputs['userdefined'][0].param = q_at, 0
+            n.preconditions = [waited]
+            out.append((n, True))
+        waited += 1
+    return out
+
+
+def read_members(module_data, prefix=MEMBER_PREFIXES):
+    """the fields of structs a new-game module sets, read from it by following each setter to its struct
+    finder: [(struct.field, value)] of the structs whose name starts with `prefix`"""
+    doc = ainb.Ainb.read(module_data)
+    out = []
+    for n in doc.nodes:
+        kind = next((k for k, (name, _) in MEMBER_SETTERS.items() if n.name == name), None)
+        if kind is None or not n.inputs['userdefined']:
+            continue
+        src = n.inputs['userdefined'][0]
+        q = doc.nodes[src.node] if src.node >= 0 else None
+        if q is None or q.name != STRUCT_QUERY:
+            raise SystemExit('%s: a setter whose struct is not found by name' % MODULE)
+        waits = [i for i, x in enumerate(doc.nodes) if x.flags & 1]
+        if n.preconditions != [waits.index(src.node)]:
+            raise SystemExit('%s: a setter that does not wait for its struct' % MODULE)
+        struct = q.inputs['string'][0].value
+        if (struct + '.').startswith(prefix):
+            out.append(('%s.%s' % (struct, n.inputs['string'][0].value),
+                        next(x.value for x in n.inputs[MEMBER_SETTERS[kind][1]] if x.name == 'Value')))
+    return out
+
+
 def edit(module_data, source_data, items, flags):
     """the new-game module with a push per starting item and a setter per starting flag added.
     items: [(item, count)]; flags: [(name, type, value, note)] (check_flags). Returns (new data, lines said);
@@ -286,6 +411,8 @@ def edit(module_data, source_data, items, flags):
     pushes, status = _group(doc, N_PUSH), _group(doc, N_STATUS)
     taken = {bytes(n.guid) for n in doc.nodes}
     template = doc.nodes[doc.nodes[pushes].links[FLOW][0].node]
+    all_flags = flags
+    flags, members = _split(flags)
     templates = setter_templates(source_data) if flags else {}
     said = []
     for where, new, line in ([(pushes, push_node(template, item, num, taken),
@@ -299,8 +426,19 @@ def edit(module_data, source_data, items, flags):
         doc.nodes[where].links[FLOW].append(link)
         doc.nodes.append(new)
         said.append(line)
+    if members:                                        # fields of structs: behind everything else
+        first = copy.deepcopy(doc.nodes[status].links[FLOW][0])
+        new_nodes = member_nodes(doc, source_data, members, taken)
+        for k, (new, child) in enumerate(new_nodes, len(doc.nodes)):
+            if child:
+                link = copy.deepcopy(first)
+                link.node = k
+                doc.nodes[status].links[FLOW].append(link)
+        doc.nodes += [new for new, _ in new_nodes]
+        said += ['start flag %s (%s, a field of a struct) = %r on a new file' % (name, kind[len(MEMBER):], value)
+                 for name, kind, value, _ in members]
     new_data = doc.write()
-    read_back(module_data, source_data, new_data, items, flags)
+    read_back(module_data, source_data, new_data, items, all_flags)
     return new_data, said
 
 
@@ -345,13 +483,41 @@ def read_back(module_data, source_data, new_data, items, flags):
     a, b = ainb.Ainb.read(module_data), ainb.Ainb.read(new_data)
     if ainb.Ainb.read(new_data).write() != new_data:
         fail('does not write back the same')
+    flags, members = _split(flags)
     n0, added = len(a.nodes), len(items) + len(flags)
-    if len(b.nodes) != n0 + added:
-        fail('%d nodes, expected %d' % (len(b.nodes), n0 + added))
+    structs = []
+    for name, _, _, _ in members:
+        if name.rpartition('.')[0] not in structs:
+            structs.append(name.rpartition('.')[0])
+    if len(b.nodes) != n0 + added + len(members) + len(structs):
+        fail('%d nodes, expected %d' % (len(b.nodes), n0 + added + len(members) + len(structs)))
     if _around(a) != _around(b):
         fail('something other than the nodes changed')
     pushes, status = _group(a, N_PUSH), _group(a, N_STATUS)
-    want_links = {pushes: list(range(n0, n0 + len(items))), status: list(range(n0 + len(items), n0 + added))}
+    setters = [k for k in range(n0 + added, len(b.nodes)) if b.nodes[k].name != STRUCT_QUERY]
+    want_links = {pushes: list(range(n0, n0 + len(items))),
+                  status: list(range(n0 + len(items), n0 + added)) + setters}
+    if members:
+        q_tpl, tpls = member_templates(a, source_data)
+        by_struct = [(s, [f for f in members if f[0].rpartition('.')[0] == s]) for s in structs]
+        if read_members(new_data) != [(f[0], f[2]) for _, fs in by_struct for f in fs] \
+                or len(setters) != len(members):
+            fail('the fields of structs set are not the ones asked for: %r' % read_members(new_data))
+        k = n0 + added
+        for struct, fields in by_struct:
+            q = b.nodes[k]
+            want_q = copy.deepcopy(q_tpl)
+            _set(want_q.inputs['string'][0], struct)
+            want_q.links[VALUE_LINK][0].node = k + 1
+            if _node(q)[:4] + _node(q)[5:] != _node(want_q)[:4] + _node(want_q)[5:]:
+                fail('the struct finder of %s is not the game\'s node with its name' % struct)
+            for j, (name, kind, value, _) in enumerate(fields, k + 1):
+                n, t = b.nodes[j], tpls[kind[len(MEMBER):]]
+                if (n.type, n.name, n.name_hash, n.flags) != (t.type, t.name, t.name_hash, t.flags) \
+                        or _params(n)['immediates'] != _params(t)['immediates'] \
+                        or n.inputs['userdefined'][0].node != k or any(n.links):
+                    fail('the setter of %s is not the game\'s %s node on its struct' % (name, t.name))
+            k += 1 + len(fields)
     for i, (o, n) in enumerate(zip(a.nodes, b.nodes)):
         if i in want_links:
             links = _links(o)
@@ -400,4 +566,4 @@ def read(module_data):
             items.append((path[len('Work/Actor/'):-len(tail)], fixed['Num']))
         elif n.name in setters:
             flags.append((fixed['GameDataFullName'], fixed['Value']))
-    return items, flags
+    return items, flags + read_members(module_data)

@@ -66,6 +66,11 @@ BGYML = {
     # the lights on actors' bones, one list per group: 160 per actor (exact for the game's 17 files)
     'game__gfx__LocationalLightRigGroupSetting': (5096, {'{}': 0, '/LightRigSettingList[]': 160,
                                                          '/LightRigSettingList[]{}': 0}),
+    # the list of text colours. The game has one file of this type (8 colours, entry 6312 = size32 + 5864), so
+    # what is constant and what is per colour cannot be told apart: the rule charges all of it per colour (733
+    # each, constant 0), the most that file allows. It gives the game's entry for the game's file, and for a
+    # longer list it can only be too much
+    'game__ui__MessageColorTable': (0, {'{}': 0, '/MessageColorArray[]': 733, '/MessageColorArray[]{}': 0}),
 }
 
 # .bgyml types with a table whose keys are free names (the slots of ActorHoldSettings): in the containers of

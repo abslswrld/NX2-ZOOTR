@@ -30,11 +30,77 @@ small key (the game's "dungeon Link is in" code must not run for it, in D or out
 Each has the key's model, name and get scene; its item settings are the key's with `NotPushToPouch`, no
 inventory item named, not counted; its row in PouchActorInfo says the same.
 
-Not yet: gifts, scrubs, shop shelves, songs; a get message that names the dungeon.
+In its own dungeon the key is the game's own small key (tools/build_mod.py decides by the check's map): there
+the game counts and shows it itself, exactly as it does its own (in game 2026-11-24: a dungeon's key picked up
+in its dungeon showed the count from before the key, and a chest showed none). Outside, the count on screen
+is the count of the place Link is in, so a key of another dungeon cannot show its own.
+
+The dungeon's name in the messages (every key of a dungeon placed outside it: the user, 2026-11-24; it began as
+an option, `Item_Dungeon_SmallKey@D+name`, which is still read): an item's
+texts are `<name>_Name`, `_GetMessage`, `_GetCaption` in ActorMsg/PouchContent.msbt. An item has that name in
+two places, and the game's own item with texts of its own (the treasure chest game's key, Obj_MiniGame_SmallKey:
+"Door Key") has its name in both:
+- its actor file's `ActorNameRef` (`?ActorSystem/ActorName/<name>.engine__actor__ActorName.bgyml`; no such
+  file exists anywhere in the game, the reference only carries the name). The item's AI hands this name to
+  the get message: `EventTriggerSetOwnNameToMessage` writes `QueryGenericGetActorName`'s ActorName into the flag
+  `UI_MessageTargetActorName`;
+- the `ActorName` of its row in ActorInfo. In game 2026-11-24 a key with only this one changed kept the game's
+  text ("You found a small key!") and lost the count on screen: the get event's "is it a small key" goes by
+  the row, the text by the actor file.
+A named key has a name of its own (MESSAGE_NAME) in both, and three texts under it, with the dungeon's name as
+the game writes it (LocationMsg/Location.msbt, the label is the dungeon's map name).
+
+That name must be an item that is named so itself (in game 2026-11-24, second test: a named key in a chest
+showed "You found a small key! (Forest Temple)", a named key from a pot still the game's text). A key in a
+chest is shown as it is. A key picked up from the ground is not: the game holds up the item its name stands
+for (the game's Obj_Dungeon_SmallKey is named Item_Dungeon_SmallKey, and Item_Dungeon_SmallKey is named
+itself), and the text is that item's. The second test's name was the dungeon's chest key without the name,
+which is named Item_Dungeon_SmallKey. So the name is the dungeon's NAMED chest key (`Item_NX2KN_<dungeon>`),
+which is named itself and is built with every named key.
+
+The name's colour (`COLOURS`, `build_mod.py --key-colour DUNGEON=COLOUR`): the game's texts colour words with
+the tag (0, 3) and a number, and end with the same tag and 0xFFFF. The number is the place in the game's list
+of text colours, `MessageColorArray` in COLOUR_TABLE (a file of the pack the game loads first, COLOUR_PACK):
+eight colours, each `Red`, `Green`, `Blue`, `Alpha` (left out: 0, 0, 0, 255) and a `ColorName` (a name's
+hash: 1 is "Gray", 3 is "Green"; 0 has none). 0: (138, 0, 0), 1: (80, 45, 20), 2: (255, 0, 254), 3: (20, 152,
+55), 4 and 5: (255, 253, 198) half and two thirds see-through, 6: (255, 53, 25), 7: (133, 125, 104). Every
+language's texts use 0, 1, 3, 4 and 5 and no other (0: names and places in talk; 1: Navi's thoughts; 3: "uses
+1 magic power" in the magic items' captions; 4 and 5: the staff roll).
+In game 2026-11-24 (third test): the get window shows the colour; 3 is green, 0 is red, 1, 4 and 5 look gray.
+The user's colours: Forest Temple green, Fire Temple red, Water Temple blue, Shadow Temple purple, Spirit
+Temple orange. The game has no blue or purple.
+In game 2026-11-24 (fourth test): the list cannot be made longer. With blue, purple and orange added behind
+the game's eight (numbers 8, 9, 10), the game started as usual and all three names came out orange: a number
+past the game's eight is not looked up in the file.
+In game 2026-11-24 (fifth test): with place 2 recoloured blue and place 7 purple, the Water Temple's name
+(number 2) was blue and the Shadow Temple's (7) purple.
+In game 2026-11-24 (the look after it, with places 4, 6 and 7 recoloured): the Fire Temple's name (number 0)
+came out in the Spirit Temple's orange (place 6) and the Bottom of the Well's (number 1) in purple (place 7).
+So **in the get window the game shows place 6 for number 0 and place 7 for number 1**: 6 (255, 53, 25) is the
+red and 7 (133, 125, 104) the gray for that window, 0 (138, 0, 0) and 1 (80, 45, 20) are their darker
+versions. That fits every test: "red" and "gray" in the third test were places 6 and 7. Places 6 and 7 are
+the game's and are never changed (a red or a gray word anywhere such a window is used would change with them).
+
+What is left for colours of our own (OUR_COLOURS), each the three colour values of a place, made solid, its
+name kept, and only when a named key of the build uses it:
+- place 2 (a loud pink, 255, 0, 254; no text uses it): blue. Seen in game.
+- one place behind the game's eight (number 8): purple. A number past the list shows the list's last colour
+  (fourth test: 8, 9 and 10 all showed the last one added), so exactly one colour can be added there.
+- the staff roll's two places, 4 (17 headings of the credits) and 5 (115 names of the credits), both (255,
+  253, 198) and see-through: orange (225, 130, 0) and a darker orange (185, 85, 15). In a build with a Spirit
+  Temple or a Training Ground key outside its dungeon, those lines of the credits are that orange. Place 4
+  recoloured was seen in game (the Training Ground's name, "good").
+The user's colours: Forest Temple green (3), Fire Temple red (0), Water Temple blue, Shadow Temple purple,
+Spirit Temple orange, Gerudo Training Ground "different orange?", Bottom of the Well "gray?" (1), Ganon's
+Castle none. In game 2026-11-24: all seven are as the user wants them (purple as the added place, the
+oranges in places 4 and 5), and a red word in someone's talk is red. The credits were not looked at.
+
+Not yet: gifts, scrubs, shop shelves, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
 """
 import copy
 import os
+import struct
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -55,9 +121,35 @@ DUNGEONS = ('InsideTheDekuTree', 'DodongoCavern', 'InsideJabuJabuBelly', 'Forest
 STRUCT, FIELD = 'DungeonInfo.%s', 'SmallKeyNum'
 # kind -> (name of the version, the kinds of check it is for)
 NAMES = {'once': 'Obj_NX2K_%s', 'token': 'Obj_NX2K_GS_%s', 'chest': 'Item_NX2K_%s'}
+# the same with the dungeon's name in its messages (the +name form)
+NAMED_NAMES = {'once': 'Obj_NX2KN_%s', 'token': 'Obj_NX2KN_GS_%s', 'chest': 'Item_NX2KN_%s'}
+NAMED = '+name'
+MESSAGE_NAME = NAMED_NAMES['chest']              # the name of a named key: its texts are <this>_Name...
+COLOURED = '_GetMessage'                         # the text in which the dungeon's name is coloured
+COLOUR_TAG = (0, 3)                              # the tag that colours what follows; COLOUR_END ends it
+COLOUR_END = 0xFFFF
+COLOUR_PACK = 'Pack/Bootup.Nin_Ounce_NVN2.pack'
+COLOUR_TABLE = 'UI/Message/MessageColorTable/MessageColorTable.game__ui__MessageColorTable.bgyml'
+COLOUR_LIST = 'MessageColorArray'
+GAME_COLOUR_COUNT = 8                            # the game's list; a number past it shows the last colour
+ADDED_PLACE = GAME_COLOUR_COUNT                  # the one place that can be added behind the game's
+KEPT_PLACES = (0, 1, 3, 6, 7)                    # used by the game's texts and windows: never changed
+# colours by name: name -> (its place, the (red, green, blue) that place gets)
+OUR_COLOURS = {'blue': (2, (30, 80, 190)), 'purple': (ADDED_PLACE, (115, 45, 160)),
+               'orange': (4, (225, 130, 0)), 'dark-orange': (5, (185, 85, 15))}
+# dungeon -> the colour of its name: a place in the game's list, or one of OUR_COLOURS (the user, 2026-11-24).
+# The places with small keys (the user; the game's maps agree): these seven and Ganon's Castle, whose colour
+# "is not important" (none). Gerudo Fortress has keys of its own kind.
+COLOURS = {'ForestTemple': 3, 'FireTemple': 0, 'WaterTemple': 'blue', 'ShadowTemple': 'purple',
+           'SpiritTemple': 'orange', 'GerudoTrainingGround': 'dark-orange', 'BottomOfTheWell': 1}
+NAME_REF = '?ActorSystem/ActorName/%s.engine__actor__ActorName.bgyml'   # an actor file's ActorNameRef
+MESSAGE_FILE = 'ActorMsg/PouchContent.msbt'
+LOCATION_FILE = 'LocationMsg/Location.msbt'      # the game's names of places, by map name
+MESSAGES = (('_Name', 'Small Key (%s)'), ('_GetMessage', 'You found a small key! (%s)'),
+            ('_GetCaption', 'It opens locked doors in that place,\nwherever you found it.'))
 CHECK_KINDS = {'pot': 'once', 'rock': 'once', 'bush': 'once', 'freestanding': 'once', 'skulltula': 'token',
                'chest': 'chest'}
-PREFIXES = tuple(n % '' for n in NAMES.values())
+PREFIXES = tuple(n % '' for n in list(NAMES.values()) + list(NAMED_NAMES.values()))
 AI_NAMES = {'once': 'NX2_Key_%s', 'token': 'NX2_KeyGS_%s'}
 # where the copied nodes and values come from
 ADD_SOURCE = 'AI/NpcCommon.event.root.ainb'                         # OneShotAddGameDataInt
@@ -70,15 +162,20 @@ VALUE, FLOW, STRING = once_items.VALUE, once_items.FLOW, once_items.STRING
 
 
 def parse(item):
-    """the dungeon of `Item_Dungeon_SmallKey@Dungeon`, or None for any other item"""
+    """(the dungeon, whether its messages name it) of `Item_Dungeon_SmallKey@Dungeon`, or None for any other
+    item. Its messages always name it (the user, 2026-11-24: every key says its dungeon's name); the first
+    form of that, `...@Dungeon+name`, is still read and means the same"""
     if SEP not in item:
         return None
     key, dungeon = item.split(SEP, 1)
+    if dungeon.endswith(NAMED):
+        dungeon = dungeon[:-len(NAMED)]
+    named = True
     if key != KEY_ITEM:
         raise SystemExit('%s: only %s%s<dungeon> can name a dungeon' % (item, KEY_ITEM, SEP))
     if dungeon not in DUNGEONS:
         raise SystemExit('%s: no dungeon %s; the dungeons with keys: %s' % (item, dungeon, ', '.join(DUNGEONS)))
-    return dungeon
+    return dungeon, named
 
 
 def kind_for(check_kind, cid):
@@ -88,8 +185,78 @@ def kind_for(check_kind, cid):
     return CHECK_KINDS[check_kind]
 
 
-def name(dungeon, kind):
-    return NAMES[kind] % dungeon
+def name(dungeon, kind, named=False):
+    return (NAMED_NAMES if named else NAMES)[kind] % dungeon
+
+
+def colour_tag(number):
+    """the tag that starts colour `number` (COLOUR_END: back to the text's own), as it stands in a text"""
+    return (b'\x0e' + struct.pack('<HHHH', COLOUR_TAG[0], COLOUR_TAG[1], 2, number)).decode('utf-8',
+                                                                                            'surrogateescape')
+
+
+def colour_number(colour):
+    """the number a text names a colour by: a place in the game's list, or the place one of OUR_COLOURS has"""
+    if isinstance(colour, int) and not isinstance(colour, bool) and 0 <= colour < GAME_COLOUR_COUNT:
+        return colour                                  # in the get window 0 is shown as place 6 and 1 as place 7
+    if colour in OUR_COLOURS:
+        return OUR_COLOURS[colour][0]
+    raise SystemExit('colour %r: give a place in the game\'s list of %d text colours (0 to %d) or one of %s'
+                     % (colour, GAME_COLOUR_COUNT, GAME_COLOUR_COUNT - 1, ', '.join(sorted(OUR_COLOURS))))
+
+
+def colour_table(table_data, colours):
+    """the game's list of text colours with the places of `colours` (names of OUR_COLOURS) recoloured (its
+    three colour values; solid; its name kept; the added place is a new entry behind the game's), or None when
+    there are none; stops when the file is not the list this was made for"""
+    doc = byml.loads(table_data)
+    game = doc.root.get(COLOUR_LIST) if isinstance(doc.root, dict) else None
+    fields = {'Red', 'Green', 'Blue', 'Alpha', 'ColorName'}
+    if not isinstance(game, list) or len(game) != GAME_COLOUR_COUNT or set(doc.root) != {COLOUR_LIST} \
+            or any(not isinstance(e, dict) or not set(map(str, e)) <= fields for e in game) \
+            or byml.dumps(doc) != table_data:
+        raise SystemExit('%s is not the list of text colours this was made for' % COLOUR_TABLE)
+    number = type(game[0]['Red'])
+    changed = {}
+    for name in sorted(set(colours), key=lambda n: OUR_COLOURS[n][0]):
+        place, rgb = OUR_COLOURS[name]
+        if place in KEPT_PLACES or place in changed or place > ADDED_PLACE:
+            raise SystemExit('colour %s: place %d of the list cannot be taken' % (name, place))
+        entry = type(game[0])() if place == ADDED_PLACE else type(game[place])(game[place])
+        entry.pop('Alpha', None)                       # solid (the staff roll's places are see-through)
+        for k, v in zip(('Red', 'Green', 'Blue'), rgb):
+            entry.pop(k, None)
+            if v:                                      # as the game's entries: a 0 is left out
+                entry[k] = number(v)
+        entry = type(entry)(sorted(entry.items()))
+        if place == ADDED_PLACE:
+            game.append(entry)
+        else:
+            game[place] = entry
+        changed[place] = rgb
+    if not changed:
+        return None
+    new = byml.dumps(doc)
+    back, was = byml.loads(new).root[COLOUR_LIST], byml.loads(table_data).root[COLOUR_LIST]
+    if len(back) != len(was) + (ADDED_PLACE in changed) or any(
+            (e != was[i]) if i not in changed else
+            ((int(e.get('Red', 0)), int(e.get('Green', 0)), int(e.get('Blue', 0))) != changed[i]
+             or 'Alpha' in e or e.get('ColorName') != (was[i].get('ColorName') if i < len(was) else None))
+            for i, e in enumerate(back)):
+        raise SystemExit('read-back: %s differs from what was intended' % COLOUR_TABLE)
+    return new
+
+
+def messages(dungeon, place, colour=None):
+    """the texts of a named key: {label: text}; `place`: the dungeon's name as the game writes it; `colour`:
+    the number of the colour the name has in the get message (colour_number; None: the text's own)"""
+    out = {}
+    for tail, text in MESSAGES:
+        shown = place
+        if colour is not None and tail == COLOURED:
+            shown = colour_tag(colour) + place + colour_tag(COLOUR_END)
+        out[(MESSAGE_NAME % dungeon) + tail] = (text % shown if '%s' in text else text) + '\x00'
+    return out
 
 
 def is_ours(item):
@@ -98,9 +265,10 @@ def is_ours(item):
 
 def dungeon_of(version):
     """(dungeon, kind) of a version's name"""
-    for kind, n in sorted(NAMES.items(), key=lambda x: -len(x[1])):
-        if version.startswith(n % ''):
-            return version[len(n % ''):], kind
+    for names in (NAMED_NAMES, NAMES):
+        for kind, n in sorted(names.items(), key=lambda x: -len(x[1])):
+            if version.startswith(n % ''):
+                return version[len(n % ''):], kind
     raise KeyError(version)
 
 
@@ -299,13 +467,14 @@ def _swap_ai(files, new_inner, name, old_ai, ai, tpl, dungeon, like_ai, like_inf
     new_inner[ap_path(name)] = (files[ap_path(name)],) + tuple(new_inner[ap_path(name)][1:])
 
 
-def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project: False, src=None):
+def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project: False, src=None,
+          named=False):
     """the key of `dungeon` for a kind of check (NAMES). Returns (name, pack data, {inner path: (data, the
     game file its size entry is worked out from, that file's contents)} for the files new to the game, {table:
     new row}, the game pack this pack is like)."""
     if dungeon not in DUNGEONS or kind not in NAMES:
         raise SystemExit('no key of %s for %s' % (dungeon, kind))
-    new = name(dungeon, kind)
+    new = name(dungeon, kind, named)
     key_pack = sarc.Sarc.read(read_pack(pack_path(KEY_ITEM)))
     settings, settings_like = key_settings(key_pack.files, read_pack)
     shared = sarc.Sarc.read(read_pack(turn_items.AI_PACK)).files
@@ -368,6 +537,19 @@ def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project
         rows[t] = type(rows[t])(rows[t])
         rows[t]['__RowId'] = new
     rows['PouchActorInfo'] = key_row(tables['PouchActorInfo'][KEY_ITEM], new)
+    if named:                                          # its texts are found under a name of its own
+        if rows['ActorInfo'].get('ActorName') != KEY_ITEM:
+            raise SystemExit('%s: its ActorInfo row is not named %s as expected' % (new, KEY_ITEM))
+        if (kind == 'chest') != (new == MESSAGE_NAME % dungeon):
+            raise SystemExit('%s: the name of the named keys must be the named chest key' % new)
+        rows['ActorInfo']['ActorName'] = type(rows['ActorInfo']['ActorName'])(MESSAGE_NAME % dungeon)
+        adoc = byml.loads(files[ap_path(new)])         # and so does its actor file: the get message's name
+        adoc.root = type(adoc.root)(adoc.root)
+        comp = type(adoc.root['Components'])(adoc.root['Components'])
+        comp['ActorNameRef'] = NAME_REF % (MESSAGE_NAME % dungeon)
+        adoc.root['Components'] = comp
+        files[ap_path(new)] = byml.dumps(adoc)
+        new_inner[ap_path(new)] = (files[ap_path(new)],) + tuple(new_inner[ap_path(new)][1:])
     out = copy.copy(arc)
     out.files = files
     out.align = {p: arc.align.get(p, 8) for p in files}
@@ -379,7 +561,9 @@ def build(dungeon, kind, read_pack, read_table_rows, model_exists=lambda project
     if set(back) != set(files) or any(back[p] != d for p, d in files.items()) \
             or got.get('PouchContentRef') != '?' + pouch_param_path(new) or 'PouchActor' in sroot \
             or sroot.get('SpecialDeal') != not_pushed_value(read_pack) \
-            or got.get('ActorNameRef') != ground_items.item_components(key_pack.files, KEY_ITEM)['ActorNameRef'] \
+            or got.get('ActorNameRef') != (
+                NAME_REF % (MESSAGE_NAME % dungeon) if named
+                else ground_items.item_components(key_pack.files, KEY_ITEM)['ActorNameRef']) \
             or any(p not in back for p in new_inner):
         raise SystemExit('read-back: the key of %s (%s) differs from what was intended' % (dungeon, new))
     if kind != 'chest' and (got.get('AIInfoRef') != '?' + ai_info_path(ai) or counts_of(back[ai_path(ai)]) != [
