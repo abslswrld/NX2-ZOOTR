@@ -110,6 +110,12 @@ system scenes (`Dm_SY_...`). Where the facts come from is at the top of the tool
 the top of the document. Both files are made by the tool: after a game update, run it again
 (`tests/cutscene_list_check.py` fails when they are out of date).
 
+## The area checklist template
+
+**`docs/AREA_CHECKLIST_TEMPLATE.md`** is the shape of every area's in-game test list (`out\TEST_CHECKLIST.md`
+and `out\TEST_ANSWERS.md`): what goes on it and in what order (decision 27), how it is written, the two blocks
+to copy, what is recorded after the answers, and a table of the check kinds already passed in game.
+
 ## Adding steps to an event flow
 
 `formats/evfl.py` can add to a flowchart as well as change it (2026-11-17):

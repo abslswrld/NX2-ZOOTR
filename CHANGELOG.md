@@ -4,6 +4,29 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### The area checklist template (phase 1 "alongside"; docs only, no game changes)
+- **`docs/AREA_CHECKLIST_TEMPLATE.md`** (new): the shape of every area's in-game test list, so each area is
+  tested the same way.
+  - **Before the list:** the area's every-spot build script and `run_tests.bat` pass; the test build carries
+    the standing fixes; a gold rupee only when something is sold; what Link needs is given at the start.
+  - **What goes on it, in order (D27):** each check kind and form the area has that has not passed in an
+    earlier area; every unusual spot (appears from a switch, a fight or an event; names no contents; a special
+    room; given by a cutscene), each with what the game's files show; the area's own settings and cutscenes;
+    samples for the rest, loose rupees and hearts included; save and reload last. A longer area gets one list
+    per day.
+  - **How it is written:** the remake's names, grouped by age and along the way through the area, one line per
+    check (where, what Link should get, what should happen), the debug-menu warp for dungeons, skippable steps
+    marked. No "does it load" steps.
+  - **Two blocks to copy** into `out\TEST_CHECKLIST.md` and `out\TEST_ANSWERS.md`, the shape the last rounds
+    used.
+  - **After the answers:** what goes into `CHANGELOG.md`, the area's data (`randomizable` and its note, then
+    `tools/build_db.py`), the template's own table, and the roadmap.
+  - **Check kinds already passed in game:** a table of every kind and form passed so far, where and when, so
+    a later area tests only what is new; and what is not proven yet (a family on a shop shelf or in a big
+    chest, a key on a gift, scrub or shelf, a stone or Medallion from a person).
+- `docs/ROADMAP.md`: phase 1's "alongside" pieces are both done; the testing section points to the template
+  and says the gold rupee is only for builds that sell something. `README.md`: a line for the template.
+
 ### Phase 1: the Forest Temple's unusual chests passed in game (the every-spot part)
 The user's answers to the checklist of 2026-11-24 (new file, the debug-menu warp, adult): every line "good".
 
