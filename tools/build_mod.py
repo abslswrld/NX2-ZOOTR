@@ -77,6 +77,8 @@ that counts for the Forest Temple on the check, in the temple or outside it (too
 itself counts a key for the dungeon Link is in. On a pot, a rock, a bush, a freestanding item or a Gold Skulltula
 the key adds to the temple's key count when it is picked up (its own AI); in a chest the chest gets an opening
 event of our own around its usual one that adds to it (TBOX_KEY_FLOW). Not on gifts, scrubs or shelves yet.
+On a check of its own dungeon it is the game's own small key: the game counts and shows that one itself.
+...@ForestTemple+name (an experiment): the key's messages name the dungeon ("Small Key (Forest Temple)").
 
 Gossip stone text (to test in game): --gossip STONE=TEXT (repeatable) sets what a stone says, in every language
 (English text everywhere). STONE is the stone's check ID or its name in the map. In TEXT, \\n is a new line, \\p a
@@ -129,7 +131,8 @@ Game fixes (--fix NAME, see FIXES and FILE_FIXES):
                              (Item_FairyBless_MP: magic, Item_FairyBless_MPDouble: double magic)
     skippable_opening        the opening cutscene (Dm_Kokiri_0000) can be skipped like every other cutscene:
                              removes its "DisableSkip" setting (only the opening, the title screen and the
-                             staff credits have it)
+                             staff credits have it). A new file then also starts with Kokiri Forest marked
+                             as visited, so its map is open from the start (OPENING_VISITED)
 
 The game's own files are only read. The output contains modified game files: it must never be committed
 or shared (out/ is ignored by git).
@@ -375,6 +378,10 @@ FILE_FIXES = {
         ['Components', 'SkipSetting'],
         '?Event/EventSetting/EventSettingComponent/SkipSetting/DisableSkip.engine__event__SkipSetting.bgyml'),
 }
+# With the opening skippable, a new file starts with Kokiri Forest marked as visited. The Map page shows "???"
+# for a place that is not visited (in game 2026-11-24), and the game marks a place when it shows its title:
+# for Kokiri Forest in a cutscene (Dm_Kokiri_0045). With this mark the map was open right at the start.
+OPENING_VISITED = 'IsVisitLocation.KokiriForest'
 LAUNCHER = r"""@echo off
 rem NX2-ZOOTR test launcher (made by tools/build_mod.py). Starts Longshot with the mods in
 rem %(mods)s and saves in %(user)s:
@@ -1810,22 +1817,26 @@ def scrub_flow_edit(fc, sales, direct=(), sync=None, pairs=None, asked=None):
     return said
 
 
-def scrub_messages(out, romfs, lines):
-    """new scrub lines {label: text} in every language's message archive"""
+def scrub_messages(out, romfs, lines, msg_file=None):
+    """new lines {label: text} in every language's message archive (the scrubs' file, or `msg_file`); `lines`
+    may be a function of the language's archive that gives them (texts made from that language's own)"""
+    msg_file = msg_file or SCRUB_MSG_FILE
+    lines_for = lines if callable(lines) else (lambda arc: lines)
     for fn in sorted(os.listdir(os.path.join(romfs, 'Mals'))):
         if not fn.endswith('.sarc.zs'):
             continue
         path = 'Mals/' + fn[:-3]
         src, old = out.read(path)
         arc = sarc.Sarc.read(old)
-        m = msbt.Msbt.read(arc.files[SCRUB_MSG_FILE])
-        if m.write() != arc.files[SCRUB_MSG_FILE] or set(lines) & set(m.texts):
-            raise SystemExit('%s: %s does not round-trip or already has %s' % (path, SCRUB_MSG_FILE, sorted(lines)))
+        lines = lines_for(arc)
+        m = msbt.Msbt.read(arc.files[msg_file])
+        if m.write() != arc.files[msg_file] or set(lines) & set(m.texts):
+            raise SystemExit('%s: %s does not round-trip or already has %s' % (path, msg_file, sorted(lines)))
         m.texts.update(lines)
         new_msg = m.write()
         if msbt.Msbt.read(new_msg).texts != m.texts:
-            raise SystemExit('read-back: %s in %s' % (SCRUB_MSG_FILE, path))
-        arc.files[SCRUB_MSG_FILE] = new_msg
+            raise SystemExit('read-back: %s in %s' % (msg_file, path))
+        arc.files[msg_file] = new_msg
         new = arc.write()
         back = sarc.Sarc.read(new)
         if set(back.files) != set(arc.files) or any(back.files[k] != v for k, v in arc.files.items()):
@@ -3620,11 +3631,19 @@ def main(argv):
     ap.add_argument('--start-flag', action='append', default=[], metavar='NAME=VALUE',
                     help='a flag set on every new file (a Bool: true or false, an Int: a number, a String64: '
                          'text); see tools/start_state.py')
+    ap.add_argument('--key-colour', action='append', default=[], metavar='DUNGEON=COLOUR',
+                    help='the colour of the dungeon\'s name in its named keys\' get message '
+                         '(Item_Dungeon_SmallKey@DUNGEON+name), in place of the one in dungeon_keys.COLOURS: a '
+                         'place in the game\'s list of text colours, or blue, purple, orange; see '
+                         'tools/dungeon_keys.py')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
     if not a.assign and not a.fix and not a.gossip and not a.start and not a.start_flag:
         ap.error('nothing to do: give CHECK_ID=Item assignments, --fix, --gossip, --start and/or --start-flag')
     start_items, start_flags = start_state.parse_items(a.start), start_state.parse_flags(a.start_flag)
+    if 'skippable_opening' in a.fix and not any(name == OPENING_VISITED for name, _ in start_flags):
+        # the map of Kokiri Forest is open from the start (the user, 2026-11-24): see OPENING_VISITED
+        start_flags.append((OPENING_VISITED, 'true'))
     if a.hint and not a.assign:
         ap.error('--hint: nothing is placed to hint at (give CHECK_ID=Item assignments)')
     assignments = [tuple(x.split('=', 1)) for x in a.assign]
@@ -3708,14 +3727,35 @@ def main(argv):
             assignments[k] = (cid, FAMILY_ALIASES[item])
     # CHECK_ID=Item_Dungeon_SmallKey@Dungeon: a key that counts for that dungeon wherever it is found
     # (tools/dungeon_keys.py): planned as the key's own version for the kind of check
-    key_versions = {}                                  # (dungeon, kind of version) -> name
+    key_versions = {}                                  # (dungeon, kind of version, named) -> name
+    key_colours = dict(dungeon_keys.COLOURS)           # dungeon -> the colour of its name (dungeon_keys.py)
+    key_colour_asked = set()
+    for spec in a.key_colour:
+        dungeon, _, colour = spec.partition('=')
+        if dungeon not in dungeon_keys.DUNGEONS or not colour:
+            raise SystemExit('--key-colour %s: give DUNGEON=COLOUR, a dungeon with keys (%s) and a place in the '
+                             'game\'s list of text colours or one of ours (%s)'
+                             % (spec, ', '.join(dungeon_keys.DUNGEONS),
+                                ', '.join(sorted(dungeon_keys.OUR_COLOURS))))
+        key_colours[dungeon] = int(colour) if colour.isdigit() else colour
+        key_colour_asked.add(dungeon)
     key_chests = {}                                    # check id -> dungeon: chests that hold a dungeon's key
     for k, (cid, item) in enumerate(assignments):
-        dungeon = dungeon_keys.parse(item)
-        if dungeon is None:
+        parsed = dungeon_keys.parse(item)
+        if parsed is None:
             continue
+        dungeon, named = parsed
         kind = dungeon_keys.kind_for(check_kind(world, cid), cid)
-        assignments[k] = (cid, key_versions.setdefault((dungeon, kind), dungeon_keys.name(dungeon, kind)))
+        r, _, loc = find_check(world, cid)
+        if {scene for scene, _, _ in world.placements_of(r, loc)} == {dungeon}:
+            # in its own dungeon: the game's own key, which the game counts and shows itself
+            print('%-18s a key of %s in %s itself: the game\'s own small key' % (cid, dungeon, dungeon))
+            assignments[k] = (cid, dungeon_keys.KEY_ITEM)
+            continue
+        assignments[k] = (cid, key_versions.setdefault((dungeon, kind, named),
+                                                       dungeon_keys.name(dungeon, kind, named)))
+        if named:                                      # the item its name stands for: the named chest key
+            key_versions.setdefault((dungeon, 'chest', True), dungeon_keys.name(dungeon, 'chest', True))
         if kind == 'chest':
             key_chests[cid] = dungeon
     dicts = zstd.Dictionaries.from_pack(open(os.path.join(a.romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
@@ -4596,9 +4636,9 @@ def main(argv):
                                                                   for x, n in bundle['gives']))
                           if bundle_for else ''))
     # a dungeon's keys (tools/dungeon_keys.py): the key's version for each kind of check it is on
-    for (dungeon, kind), name in sorted(key_versions.items()):
+    for (dungeon, kind, named), name in sorted(key_versions.items()):
         got, pack, new_inner, rows, like_pack = dungeon_keys.build(dungeon, kind, plain, table_rows, model_there,
-                                                                   once_src)
+                                                                   once_src, named)
         assert got == name
         path = ground_items.pack_path(name)
         out.write_new(path, pack, like=like_pack)
@@ -4608,20 +4648,68 @@ def main(argv):
                 if once_shared[inner] != data:
                     raise SystemExit('%s: %s differs from the one in another version' % (name, inner))
                 continue
-            if not inner.split('/')[-1].startswith((name + '.', 'NX2_Key')):
-                once_shared[inner] = data
+            if not inner.split('/')[-1].startswith(name + '.'):
+                once_shared[inner] = data              # also the key's AI: the same in a named key's pack
             out.add(inner, data, like, like_data)
         for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
             if out.table.get(inner) is None:
                 raise SystemExit('%s: %s has no resource size entry' % (name, inner))
         for t, row in rows.items():
             new_rows.setdefault(t, []).append(row)
+        if named:
+            print('key    version %-22s its messages are found under %s (the dungeon\'s name in them)'
+                  % (name, dungeon_keys.MESSAGE_NAME % dungeon))
         print('key    version %-22s a small key of %s (%d bytes): %s' % (name, dungeon, len(pack), {
             'once': 'picked up, it adds 1 to %s and marks what dropped it' % dungeon_keys.flag(dungeon),
             'token': 'dropped by a Gold Skulltula: picked up, it adds 1 to %s and marks the skulltula done'
                      % dungeon_keys.flag(dungeon),
             'chest': 'what a chest holds; the chest\'s opening event adds 1 to %s' % dungeon_keys.flag(dungeon),
         }[kind]))
+
+    # named keys: their three texts in every language's message archive, with the dungeon's name as that
+    # language's own text has it
+    named_keys = sorted({dungeon for dungeon, _, named in key_versions if named})
+    for dungeon in sorted(set(key_colours) - set(named_keys)):
+        if dungeon in key_colour_asked:
+            raise SystemExit('--key-colour %s: no key of this build names %s (%s@%s%s)'
+                             % (dungeon, dungeon, dungeon_keys.KEY_ITEM, dungeon, dungeon_keys.NAMED))
+        del key_colours[dungeon]
+    if named_keys:
+        # the colour of each name: a place in the game's list of text colours; one of ours takes a place no
+        # text of the game uses, when a name of this build has it
+        src, old = out.read(dungeon_keys.COLOUR_PACK)
+        arc = sarc.Sarc.read(old)
+        old_table = arc.files[dungeon_keys.COLOUR_TABLE]
+        key_numbers = {x: dungeon_keys.colour_number(c) for x, c in key_colours.items()}
+        ours = sorted({c for c in key_colours.values() if c in dungeon_keys.OUR_COLOURS})
+        new_table = dungeon_keys.colour_table(old_table, ours)
+        if new_table is not None:
+            arc.files[dungeon_keys.COLOUR_TABLE] = new_table
+            new = arc.write()
+            back = sarc.Sarc.read(new)
+            if set(back.files) != set(arc.files) or any(back.files[k] != v for k, v in arc.files.items()):
+                raise SystemExit('read-back: %s differs from what was intended' % dungeon_keys.COLOUR_PACK)
+            out.write(dungeon_keys.COLOUR_PACK, src, old, new)
+            out.size(dungeon_keys.COLOUR_TABLE, old_table, new_table)
+            print('%-18s %s in %s: %s'
+                  % ('key colours', dungeon_keys.COLOUR_TABLE.split('/')[-1], dungeon_keys.COLOUR_PACK,
+                     ', '.join('place %d of the text colours is %s %s'
+                               % (dungeon_keys.OUR_COLOURS[n][0], n, dungeon_keys.OUR_COLOURS[n][1])
+                               for n in ours if dungeon_keys.OUR_COLOURS[n][1])))
+
+        def key_lines(arc):
+            places = msbt.Msbt.read(arc.files[dungeon_keys.LOCATION_FILE]).texts
+            lines = {}
+            for dungeon in named_keys:
+                if dungeon not in places:
+                    raise SystemExit('%s: no name for it in %s' % (dungeon, dungeon_keys.LOCATION_FILE))
+                lines.update(dungeon_keys.messages(dungeon, msg_plain(places[dungeon]), key_numbers.get(dungeon)))
+            return lines
+        scrub_messages(out, a.romfs, key_lines, dungeon_keys.MESSAGE_FILE)
+        print('%-18s %s: the texts of the named keys of %s added in every language'
+              % ('key names', dungeon_keys.MESSAGE_FILE, ', '.join(
+                  '%s (its name in colour %s, number %d)' % (x, key_colours[x], key_numbers[x])
+                  if x in key_numbers else x for x in named_keys)))
 
     # the rocks, bushes and pots themselves: an AI of our own name for each actor that drops for us. It only
     # hands its placement's number to its drop: it does not name another level's version (Drop__DropActor is

@@ -26,7 +26,7 @@ import ground_items  # noqa: E402
 import once_items  # noqa: E402
 import start_state  # noqa: E402
 import turn_items  # noqa: E402
-from formats import zstd, byml, sarc, ainb, evfl  # noqa: E402
+from formats import zstd, byml, sarc, ainb, evfl, msbt  # noqa: E402
 from logic.world import World  # noqa: E402
 
 D = 'ForestTemple'
@@ -36,10 +36,14 @@ GAME_KEY_NODES = ('OneShotDungeonGetSmallKey', 'OneShotDungeonUseSmallKey', 'Que
                   'EventGetDungeonSmallKey', 'EventUseDungeonSmallKey')
 # the test build of part 5 (out/TEST_CHECKLIST.md)
 SAMPLE = [
+    # every key outside its dungeon says the dungeon's name (the first form, ...+name, means the same)
     ('KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01', KEY + '@' + D),     # a Forest Temple key in a pot outside the temple
     ('KF_MIDO_CHEST_01', KEY + '@' + D),                      # and in a chest
     ('KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02', 'Obj_Dungeon_SmallKey'),   # the control: the game's own key outside
-    ('FT_ENTRANCE_GS', KEY + '@' + D),                        # a Forest Temple key on a Gold Skulltula
+    ('FT_ENTRANCE_GS', KEY + '@' + D),                        # in the temple itself: the game's own key
+    ('KF_HOUSE_OF_TWINS_CHILD_POT_01', KEY + '@' + D + '+name'),   # with the temple's name in its messages
+    ('KF_MIDO_CHEST_02', KEY + '@' + D + '+name'),            # and so in a chest
+    ('KF_MIDO_CHEST_03', KEY + '@WaterTemple+name'),          # a name in a colour of our own (blue)
     ('FT_ENTRANCE_CHEST', 'Item_Hammer'),                     # the chest that held the first key
 ]
 REFUSED = [(['KF_MIDO_CHEST_01=%s@Nowhere' % KEY], 'no dungeon Nowhere'),
@@ -174,17 +178,20 @@ def main(romfs):
         event = build_mod.tbox_key_event(usual, D)
         good &= check('the sample builds; read back from the mod folder: the pot drops %s, the chest holds %s and '
                       'runs our event, the Gold Skulltula drops %s, the control pot the game\'s own key'
-                      % tuple(dungeon_keys.name(D, k) for k in ('once', 'chest', 'token')),
-                      held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once'), None)}
-                      and held['KF_MIDO_CHEST_01'] == {(dungeon_keys.name(D, 'chest'), event)}
-                      and held['FT_ENTRANCE_GS'] == {(dungeon_keys.name(D, 'token'), None)}
+                      % (dungeon_keys.name(D, 'once', True), dungeon_keys.name(D, 'chest', True),
+                         'the game\'s own key (it is in its own temple)'),
+                      held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once', True), None)}
+                      and held['KF_MIDO_CHEST_01'] == {(dungeon_keys.name(D, 'chest', True), event)}
+                      and held['FT_ENTRANCE_GS'] == {('Obj_NX2_GS_Dungeon_SmallKey', None)}
+                      and held['KF_HOUSE_OF_TWINS_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once', True), None)}
                       and {x[0] for x in held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02']}
                       == {'Obj_NX2_GS_Obj_Dungeon_SmallKey'}, held)
         flow = build_mod.tbox_sync_read(read(build_mod.flow_path(build_mod.TBOX_KEY_FLOW)))
         steps = flow.get(event, [])
         good &= check('  our chest event: Link joins, the chest\'s usual event (%s) runs, then 1 is added to '
-                      'DungeonInfo.%s.SmallKeyNum; nothing else' % (usual, D),
-                      list(flow) == [event] and len(steps) == 3 and steps[1][2].get('EventName') == usual
+                      'DungeonInfo.%s.SmallKeyNum; nothing else (and one such event for the chest key of the Water Temple)' % (usual, D),
+                      sorted(flow) == sorted([event, event.replace(D, 'WaterTemple')]) and len(steps) == 3
+                      and steps[1][2].get('EventName') == usual
                       and steps[2][:2] == build_mod.KEY_ADD
                       and steps[2][2] == {'GameDataName': dungeon_keys.flag(D), 'Value': 1, 'Index': -1}, steps)
         settings = {str(r['__RowId']): r for r in byml.loads(read(build_mod.EVENT_SETTING)).root}
@@ -194,10 +201,106 @@ def main(romfs):
                       and str(settings[event]['FlowchartFileName']).endswith('/%s.evfc' % build_mod.TBOX_KEY_FLOW)
                       and [str(x) for x in infos[event]['ChildEventList']] == [usual])
         table = {str(r['__RowId']): r for r in byml.loads(read(ground_items.table_path('PouchActorInfo'))).root}
-        good &= check('  the three versions are in the item table as "not put in the inventory"; the game\'s key '
+        good &= check('  the versions built are in the item table as "not put in the inventory"; the game\'s key '
                       'rows are untouched',
-                      all(table[dungeon_keys.name(D, k)]['PouchSpecialDeal'] == dungeon_keys.NOT_PUSHED
-                          for k in dungeon_keys.NAMES) and dict(table[KEY]) == dict(pouch[KEY]))
+                      all(table[dungeon_keys.name(D, k, True)]['PouchSpecialDeal'] == dungeon_keys.NOT_PUSHED
+                          for k in ('once', 'chest')) and dict(table[KEY]) == dict(pouch[KEY])
+                      and dungeon_keys.name(D, 'token', True) not in table
+                      and not any(dungeon_keys.name(D, k) in table for k in dungeon_keys.NAMES))
+        info = {str(r['__RowId']): r for r in byml.loads(read(ground_items.table_path('ActorInfo'))).root}
+        msg = dungeon_keys.MESSAGE_NAME % D
+        texts = {}
+        for lang in ('USen', 'JPja'):
+            arc = sarc.Sarc.read(read('Mals/%s.Product.110.sarc' % lang))
+            texts[lang] = msbt.Msbt.read(arc.files[dungeon_keys.MESSAGE_FILE]).texts
+        refs = {}
+        for version in (dungeon_keys.name(D, 'once', True), dungeon_keys.name(D, 'chest', True)):
+            vfiles = sarc.Sarc.read(read(ground_items.pack_path(version))).files
+            refs[version] = ground_items.resolved_components(vfiles, version)['ActorNameRef']
+        for kind in ('once', 'chest'):                 # the versions without the name (not in a build any more)
+            vfiles = sarc.Sarc.read(built[kind][1]).files
+            refs[built[kind][0]] = ground_items.resolved_components(vfiles, built[kind][0])['ActorNameRef']
+        game_ref = ground_items.item_components(key_files, KEY)['ActorNameRef']
+        good &= check('  the named key: its row and its actor file are named %s, the named chest key, which is '
+                      'named itself; its three texts are in the message files with the temple\'s name (%r)'
+                      % (msg, texts['USen'].get(msg + '_Name')),
+                      info[dungeon_keys.name(D, 'once', True)]['ActorName'] == msg
+                      and msg == dungeon_keys.name(D, 'chest', True)
+                      and info[msg]['ActorName'] == msg
+                      and refs[dungeon_keys.name(D, 'once', True)] == dungeon_keys.NAME_REF % msg
+                      and refs[dungeon_keys.name(D, 'chest', True)] == dungeon_keys.NAME_REF % msg
+                      and refs[dungeon_keys.name(D, 'once')] == game_ref
+                      and refs[dungeon_keys.name(D, 'chest')] == game_ref
+                      and built['once'][3]['ActorInfo']['ActorName'] == KEY
+                      and texts['USen'].get(msg + '_Name') == 'Small Key (Forest Temple)\x00'
+                      and all(msg + t in texts[lang] for lang in texts for t, _ in dungeon_keys.MESSAGES)
+                      and texts['USen']['%s_Name' % KEY] == 'Small Key\x00')
+        got = texts['USen'].get(msg + '_GetMessage', '')
+        parts = msbt.tags(got, 0)
+        good &= check('  the temple\'s name is in its colour in the get message (the game\'s green, number 3), '
+                      'between the game\'s own colour tag and its end; a colour that does not exist and a colour '
+                      'for a dungeon no key names are refused',
+                      [p if isinstance(p, str) else (p[0], p[1], bytes(p[2])) for p in parts] == [
+                          'You found a small key! (', (0, 3, b'\x03\x00'), 'Forest Temple',
+                          (0, 3, b'\xff\xff'), ')\x00']
+                      and bool(refused(run, 'no', '--key-colour', '%s=99' % D, '%s=%s+name' % (SAMPLE[0][0], SAMPLE[0][1])))
+                      and bool(refused(run, 'no', '--key-colour', '%s=pink' % D, '%s=%s+name' % (SAMPLE[0][0], SAMPLE[0][1])))
+                      and bool(refused(run, 'no', '--key-colour', 'FireTemple=3', '%s=%s' % SAMPLE[0])), parts)
+        game_pack = sarc.Sarc.read(plain(dungeon_keys.COLOUR_PACK)).files
+        built_pack = sarc.Sarc.read(read(dungeon_keys.COLOUR_PACK)).files
+        game_list = byml.loads(game_pack[dungeon_keys.COLOUR_TABLE]).root[dungeon_keys.COLOUR_LIST]
+        built_list = byml.loads(built_pack[dungeon_keys.COLOUR_TABLE]).root[dungeon_keys.COLOUR_LIST]
+        water = msbt.tags(texts['USen'].get(dungeon_keys.MESSAGE_NAME % 'WaterTemple' + '_GetMessage', ''), 0)
+        place, rgb = dungeon_keys.OUR_COLOURS['blue']
+        rest = [i for i in range(len(game_list)) if i != place]
+        numbers = {x: dungeon_keys.colour_number(c) for x, c in dungeon_keys.COLOURS.items()}
+        full = byml.loads(dungeon_keys.colour_table(game_pack[dungeon_keys.COLOUR_TABLE],
+                                                    sorted(dungeon_keys.OUR_COLOURS))).root[dungeon_keys.COLOUR_LIST]
+        touched = {p: rgb for p, rgb in dungeon_keys.OUR_COLOURS.values()}
+        kept = list(dungeon_keys.KEPT_PLACES)
+        good &= check('  the seven places with small keys each have a colour of their own (%s); with all of ours '
+                      'the game\'s list keeps its places %s (0, 1, 3 for its texts; 6 and 7, what the get window '
+                      'shows for 0 and 1), a recoloured place is solid and keeps its name, and one colour is '
+                      'added behind the game\'s' % (', '.join('%s %s' % (x, numbers[x]) for x in sorted(numbers)),
+                                                    ', '.join(map(str, kept))),
+                      len(numbers) == 7 and len(set(numbers.values())) == 7
+                      and kept == [0, 1, 3, 6, 7] and not set(touched) & set(kept)
+                      and len(full) == len(game_list) + 1 and sorted(touched) == [2, 4, 5, len(game_list)]
+                      and all(full[i] == game_list[i] for i in kept)
+                      and all((full[p].get('Red', 0), full[p].get('Green', 0), full[p].get('Blue', 0)) == rgb
+                              and 'Alpha' not in full[p]
+                              and full[p].get('ColorName') == (game_list[p].get('ColorName') if p < len(game_list)
+                                                               else None)
+                              for p, rgb in touched.items()), numbers)
+        good &= check('  a colour of our own (the Water Temple\'s blue): place %d of the game\'s %d text colours has '
+                      'its three colour values changed and its name kept; the other places and every other file '
+                      'of the pack are unchanged, and the name is in number %d' % (place, len(game_list), place),
+                      len(game_list) == len(built_list) == dungeon_keys.GAME_COLOUR_COUNT
+                      and all(built_list[i] == game_list[i] for i in rest)
+                      and (built_list[place].get('Red', 0), built_list[place].get('Green', 0),
+                           built_list[place].get('Blue', 0)) == rgb
+                      and built_list[place].get('ColorName') == game_list[place].get('ColorName')
+                      and set(built_pack) == set(game_pack)
+                      and all(built_pack[k] == v for k, v in game_pack.items() if k != dungeon_keys.COLOUR_TABLE)
+                      and (0, 3, bytes([place, 0])) in [(p[0], p[1], bytes(p[2])) for p in water
+                                                        if not isinstance(p, str)],
+                      built_list[place])
+        start = ['DungeonInfo.%s.SmallKeyNum=2' % D, 'DungeonInfo.%s.IsGetMap=true' % D,
+                 'DungeonInfo.%s.IsGetCompass=true' % D, 'DungeonInfo.WaterTemple.SmallKeyNum=1',
+                 'IsVisitLocation.KokiriForest=true']
+        _, sfolder = run('start', *[x for f in start for x in ('--start-flag', f)])
+        written = open(os.path.join(sfolder, *start_state.MODULE.split('/')), 'rb').read()
+        good &= check('starting with keys, the map and the compass, and a place marked as visited: the new-file '
+                      'module sets the fields of the records (%s)' % ', '.join(start),
+                      start_state.read_members(written) == [
+                          ('DungeonInfo.%s.SmallKeyNum' % D, 2), ('DungeonInfo.%s.IsGetMap' % D, True),
+                          ('DungeonInfo.%s.IsGetCompass' % D, True), ('DungeonInfo.WaterTemple.SmallKeyNum', 1),
+                          ('IsVisitLocation.KokiriForest', True)]
+                      and start_state.read_members(plain(start_state.MODULE)) == []
+                      and len(start_state.read_members(written, 'PlayerStatus')) == 5)
+        refusals = [refused(run, 'no', '--start-flag', f) for f in ('PlayerStatus.MaxLife=80', 'DungeonInfo.%s.NoSuch=1' % D)]
+        good &= check('  a field of another struct, and a field that does not exist, are still refused',
+                      all(refusals) and 'a field of a struct' in refusals[0] and 'no flag of this name' in refusals[1], refusals)
         good &= check('  the build says what each key does', said.count('adds 1 to %s' % dungeon_keys.flag(D)) >= 3
                       and 'key chests' in said)
 

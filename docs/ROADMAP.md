@@ -134,6 +134,39 @@ Parts, in order:
 6. **Start with:** keys, the map and the compass given at the start, through part 1. **Also here (the user,
    2026-11-24), from part 5:** the key count shown on screen for a dungeon's key (it shows the count from before
    the key; none from a chest), and the dungeon's name in the key's get message.
+   **Built 2026-11-24, to test in game:** `--start-flag DungeonInfo.<dungeon>.SmallKeyNum=N`, `IsGetMap`,
+   `IsGetCompass`; a key in its own dungeon is the game's own key (its count shows as the game's does); the
+   name on a key as an experiment (`...@ForestTemple+name`). Outside its dungeon a key's pick-up still shows the
+   count of the place Link is in.
+   **First test in game, 2026-11-24:** starting with a key works (the temple showed 5 with 1 from the start);
+   a key in its own temple shows the right count; no count appears at a door (the game's own behaviour). The
+   name did not show (only one of an item's two names was changed), and the map and the compass could not be
+   checked: the Map page was closed ("???" as a child, "Unavailable right now." in the temple).
+   **Second test in game, 2026-11-24:** the map and the compass given at the start work (seen on the temple's
+   map as a child); a place marked as visited (`--start-flag IsVisitLocation.<place>=true`) has its map, "???"
+   is "not visited yet"; the Map page is closed for an adult made with the debug menu, which is not the
+   build. The name shows on a key in a chest, not yet on a key from a pot.
+   **Third test in game, 2026-11-24:** the name shows on a key from a pot too (the name is the dungeon's
+   named chest key), and the get window shows a colour: the game's number 3 is green, 0 is red. The user's
+   colours: Forest green, Fire red, Water blue, Shadow purple, Spirit orange.
+   **Fourth test in game, 2026-11-24:** the game's list of text colours (a file in the pack the game loads
+   first) cannot be made longer: colours added behind its eight all came out orange.
+   **Fifth test in game, 2026-11-24:** blue and purple work as two recoloured places of the game's list that
+   no text uses (2 and 7). The game's own place 6 was too dark an orange, so it is recoloured too, to a more
+   yellowish orange (225, 130, 0): **that shade is not seen in game yet.** The colours are D40.
+   **Rules from the user, 2026-11-24:** every key outside its dungeon says the dungeon's name (D41); with the
+   opening skippable, Kokiri Forest's map is open from the start (D42).
+   **The last two colours (the user, 2026-11-24; not seen in game):** Bottom of the Well gray (the game's own
+   place 1), Gerudo Training Ground a darker orange (the staff roll's place 4 recoloured: 17 headings of the
+   credits take that colour). Only eight places use small keys; Ganon's Castle has no colour.
+   **The look at them in game, 2026-11-24:** both oranges good, the map at the start good; but the Well's
+   name was purple and the Fire Temple's orange: the get window shows place 6 of the game's colour list for
+   "red" (number 0) and place 7 for "gray" (number 1), so those two places are not free. **Corrected:** 6 and
+   7 are the game's again; purple is one colour added behind the list, the two oranges take the staff roll's
+   places 4 and 5 (those lines of the credits change colour).
+   **Passed in game 2026-11-24:** all seven colours, and the game's own red is red.
+   **Open:** gifts, scrubs and shelves; the dungeon's name on a key in its own dungeon (the game's own key has
+   one text for all dungeons).
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
 

@@ -26,6 +26,217 @@ The user: "I think we need to change how run_tests works cause I'm losing a lot 
   (CLAUDE.md and README.md say so). A `*_check.py` that is not in the list is named when the tests run
   (`logic_check`, `db_check` and `size_check` stay out on purpose, as before).
 
+### Phase 1, part 6: start with keys, map and compass; the key count shown; the temple's name on a key (passed in game 2026-11-24)
+Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24), all seven key colours with the corrected places: passed.**
+- Mido's four chests: the Shadow Temple's name purple (the colour added behind the game's list), the Spirit
+  Temple's the yellowish orange (place 4), "Gerudo Proving Grounds" the darker orange (place 5), the Fire
+  Temple's red. The two pots: the Bottom of the Well gray, the Water Temple blue. All "good".
+- The game's own red is red again: "when fado mentioned the great deku tree it was red".
+- So one colour can be added behind the game's eight, and places 6 and 7 must stay the game's.
+- **Not seen:** the credits, where the two oranges change 17 headings and 115 names.
+
+**In game (user, 2026-11-24), the look at the last changes; and what it showed about the colour list:**
+- **Good:** Kokiri Forest's map at the start (by the rule), the Spirit Temple's yellowish orange, the Training
+  Ground's darker orange ("Gerudo Proving Grounds").
+- **Wrong:** the Bottom of the Well's name was purple, not gray, and "fire temple became the orange from
+  spirit".
+- **Why: places 6 and 7 of the game's list are not unused.** In the get window the game shows place 6 for
+  colour number 0 and place 7 for number 1: 6 (255, 53, 25) is that window's red and 7 (133, 125, 104) its
+  gray; 0 (138, 0, 0) and 1 (80, 45, 20) are their darker versions. Every test fits: the "red" and "gray" of
+  the third test were places 6 and 7. With 6 recoloured orange and 7 purple, red became orange and gray
+  purple, and would have wherever the game uses that pair. No text names 6 or 7 by number, which is why they
+  looked free.
+- **Corrected (seen in game afterwards, see above):** places 6 and 7 are the game's again and are never changed
+  (`dungeon_keys.KEPT_PLACES`: 0, 1, 3, 6, 7). The colours of our own now are: **blue** place 2 (as before,
+  seen in game); **purple** one place added behind the game's eight (number 8: a number past the list shows
+  the list's last colour, which the fourth test showed, so one colour can be added that way); **orange** place
+  4 and the **darker orange** place 5, the staff roll's two places.
+- **Side effect, larger than before:** in a build with a Spirit Temple key outside its dungeon the 17 headings
+  of the credits that use place 4 are orange, and with a Training Ground key the 115 names that use place 5
+  are the darker orange.
+- `run_tests.bat` was not run on this change (the user: do not run another); `tests/dungeon_keys_check.py`
+  passes (21 checks).
+
+**The last two places with small keys (the user, 2026-11-24):**
+- **The user:** only eight places use small keys: the Forest, Fire, Water, Shadow and Spirit Temples, the
+  Gerudo Training Ground ("different orange?"), the Bottom of the Well ("gray?") and Ganon's Castle (colour not
+  important). The game's maps agree: those eight have small-key doors (`Obj_DoorChainLock_A_01`; Ganon's Castle
+  has one such door and one small key placed), and Gerudo Fortress has keys of its own kind.
+- **Bottom of the Well: gray**, the game's own place 1 (named "Gray" in the list; it looked gray in the third
+  test), unchanged.
+- **Gerudo Training Ground: a second, darker orange** (`dark-orange`, 185, 85, 15). The only places left in the
+  game's list are the staff roll's two, so it takes place 4 (255, 253, 198, half see-through), recoloured and
+  made solid. **Side effect:** the 17 headings of the staff roll that use place 4 are that orange in a build
+  with a Training Ground key outside it. Nothing else in any language uses place 4.
+- The key's text uses the game's own name of the place: "Small Key (Gerudo Proving Grounds)".
+- **Tests:** `tests/dungeon_keys_check.py` (21 checks): the seven places each have a colour of their own, and
+  the game's places 0, 1, 3 and 5 are never changed.
+
+**Two rules from the user (2026-11-24), built after the fifth test:**
+- **Every key says its dungeon's name** (D41). `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple` on a check outside
+  the Forest Temple is now always the key with the temple's name in its messages; `...@ForestTemple+name`, the
+  option it began as, is still read and means the same (`tools/dungeon_keys.py`: `parse`). On a check of its
+  own dungeon the key is still the game's own small key, which says "You found a small key!" and shows the
+  count: the game's key has one text for all dungeons.
+- **Kokiri Forest's map is open from the start** (D42). A build with `--fix skippable_opening` starts a new file
+  with `IsVisitLocation.KokiriForest` set (`tools/build_mod.py`: `OPENING_VISITED`), unless the build gives that
+  flag itself. In the second test this flag opened the map right at the start.
+- **More colours for the other dungeons** (the user's question): the game's list has eight places and cannot be
+  made longer (fourth test). Three of them are used by no text and are now blue, orange and purple; the other
+  five are used by the game's own texts (0 red, 1 a dark brown for Navi's thoughts, 3 green, 4 and 5 the staff
+  roll's pale colours). So the other eight dungeons can share the five colours, or take the staff roll's two
+  places (the credits' text would change colour with them). Not decided.
+- **Tests:** `tests/dungeon_keys_check.py` (the sample's keys carry the name without `+name`),
+  `tests/start_state_check.py` (the opening fix marks Kokiri Forest; a flag given for it is kept).
+
+**In game (user, 2026-11-24), fifth test build:**
+- **Blue and purple work, in the shades the user wants:** the Water Temple's name was blue (place 2 of the
+  game's list recoloured) and the Shadow Temple's purple (place 7). Fire red and Forest green as before.
+- **Orange:** the game's own place 6 (255, 53, 25) was "darker than last time"; the user wants "a more
+  yellowish orange". So the fourth test's orange was ours (215, 110, 0): a number past the list seems to give
+  the list's last colour.
+- **Nothing out of place was seen** in blue or purple elsewhere ("didn't test it all").
+
+**After the fifth test (2026-11-24):** orange is place 6 recoloured to (225, 130, 0), the same way as blue and
+purple (`dungeon_keys.OUR_COLOURS`). **This shade has not been seen in game.** The test build in
+`out\mods\NX2-ZOOTR` has it.
+
+**In game (user, 2026-11-24), fourth test build:**
+- **The game's list of text colours cannot be made longer.** The game started as usual, and the three names in
+  the added colours (numbers 8, 9 and 10: Water, Shadow and Spirit Temple) all came out orange. The Fire
+  Temple was red and both pots' Forest Temple green, as before. The user: "orange shade is fine".
+
+**Fifth test build (2026-11-24): colours of our own in places of the game's list.**
+- **Blue is place 2 and purple is place 7 of the game's list** (`tools/dungeon_keys.py`: `OUR_COLOURS`,
+  `colour_table`): no text of the game in any language uses those places. Only the three colour values of the
+  place change (2: from (255, 0, 254) to (30, 80, 190); 7: from (133, 125, 104) to (115, 45, 160)), its name
+  stays, and only the places a named key of the build uses. **Orange is the game's own place 6** (255, 53, 25),
+  unchanged. The list stays eight long.
+- **Not known:** whether the game's own code uses place 2, 6 or 7 for something (their names' hashes are in
+  the file; the names are not known), and whether place 6 is the orange the fourth test showed.
+
+**In game (user, 2026-11-24), third test build:**
+- **The name shows on a key from a pot.** Both pots said "You found a small key! (Forest Temple)".
+- **The get window shows the colour.** Number 3 is green, number 0 is red, numbers 1, 4 and 5 look gray. All
+  four chests in Mido's house showed their temple's name; nothing was broken.
+- **The user's colours:** Forest Temple green, Fire Temple red, Water Temple blue, Shadow Temple purple, Spirit
+  Temple orange, the last three "if we can use a custom color".
+
+**Fourth test build (2026-11-24): colours of our own, added behind the game's (did not work, see above).**
+- **The game's list of text colours is a file:** `MessageColorArray` in
+  `UI/Message/MessageColorTable/MessageColorTable.game__ui__MessageColorTable.bgyml`, inside
+  `Pack/Bootup.Nin_Ounce_NVN2.pack`. Eight colours (red, green, blue, alpha; a name's hash on seven of them: 1
+  is "Gray", 3 is "Green"), and a text's colour number is the place in that list: 0 (138, 0, 0), 1 (80, 45,
+  20), 2 (255, 0, 254), 3 (20, 152, 55), 4 and 5 (255, 253, 198) half and two thirds see-through, 6 (255, 53,
+  25), 7 (133, 125, 104). It has no blue, purple or orange.
+- **Three colours are added behind the game's eight** when a named key of the build uses one
+  (`tools/dungeon_keys.py`: `NEW_COLOURS`, `colour_table`): blue (30, 80, 190) as number 8, purple (115, 45,
+  160) as 9, orange (215, 110, 0) as 10. The game's own eight and every other file of the pack are unchanged.
+  **Not known:** whether the game takes a number past its own eight.
+- **The colour of each temple's name is now set** (`dungeon_keys.COLOURS`): Forest Temple 3, Fire Temple 0,
+  Water Temple blue, Shadow Temple purple, Spirit Temple orange. `--key-colour DUNGEON=COLOUR` chooses another
+  for a build (a number of the game's list, or blue, purple, orange). The other eight dungeons have no colour.
+- **Size rule** for the colour list (`tools/sizes.py`): the game has one file of the type, so the rule charges
+  everything per colour (733 each), which gives the game's entry for the game's file and can only be too much
+  for a longer list.
+
+**In game (user, 2026-11-24), second test build:**
+- **The map and the compass given at the start work.** In the Forest Temple as a child the Map page showed the
+  temple's map with the map and the compass in their slots and the chests marked.
+- **A place marked as visited has its map.** With `IsVisitLocation.KokiriForest=true` the Map page showed the
+  map of Kokiri Forest right at the start, where the first build said "???". So "???" is "not visited yet".
+- **"Unavailable right now." is the adult made with the debug menu, not the build.** As an adult the Map page
+  said it in the Sacred Forest Meadow (not marked) and in the temple (marked), and there was no small map on
+  screen; as a child both were there. Something the game sets when Link becomes an adult is missing after the
+  debug menu's change. Not looked for further (one saved flag that speaks of it: `Sequence_IsChildhood`).
+- **The dungeon map shows no key count** (the user's screenshot: the temple's name and the Gold Skulltula
+  count, no keys). The count is seen in the pop-up: the Gold Skulltula's key showed 6, as expected.
+- **The name shows on a key in a chest:** the third chest in Mido's house said "You found a small key! (Forest
+  Temple)", with no count. **It does not on a key from a pot:** both pots said "You found a small key!", with
+  no count. **Why:** a key in a chest is shown as it is; for a key picked up from the ground the game holds up
+  the item its name stands for, and the text is that item's. The name was the dungeon's chest key without the
+  name, whose own name is the game's key.
+- **Asked for (the user):** the temple's name in the temple's colour (green for the Forest Temple).
+- Save and reload: as before.
+
+**Third test build (2026-11-24):**
+- **The name of a named key is now the dungeon's named chest key** (`Item_NX2KN_<dungeon>`), which is named
+  itself and is built with every named key, as the game's `Obj_Dungeon_SmallKey` is named `Item_Dungeon_SmallKey`.
+- **The temple's name in a colour:** `--key-colour ForestTemple=3` (`tools/dungeon_keys.py`: `messages`,
+  `colour_tag`). The game's texts colour words with a numbered tag; every language uses the numbers 0, 1, 3, 4
+  and 5 and no other (0: names and places in talk, 1: Navi's thoughts, 3: "uses 1 magic power", 4 and 5: the
+  staff roll). No file says what colour a number is, and no get message of the game has a colour. So the build
+  is a colour chart: the two pots hold Forest Temple keys in colour 3, Mido's four chests hold keys of the
+  Shadow Temple (4), the Fire Temple (0), the Water Temple (1) and the Spirit Temple (5), from left to right.
+  `dungeon_keys.COLOURS` (the colour of each dungeon) stays empty until the test says which number is which.
+
+**In game (user, 2026-11-24), first test build:**
+- **Starting with a key works.** The file started with 1 Forest Temple key; with the key from Mido's chest and
+  the two from the pots, the Gold Skulltula's key in the temple showed **5**.
+- **A key in its own temple, as the game's own key, shows the right count.** The Gold Skulltula's key in the
+  first room showed the count, and the right one (5). In part 5 the same spot showed the count from before the
+  key.
+- **The first room's chest gave the Megaton Hammer; the first door and the lobby's west door opened.**
+- **No count appears when a locked door opens.** That is the game's own key and the game's own door, so the
+  game shows none there.
+- **The temple's name on a key did not show.** Both pots said "You found a small key!". The pot further from
+  the door showed no count, the pot nearer to the door showed "0/0". **Why (found in the game's files
+  afterwards):** an item has its name in two places, the `ActorName` of its row in `ActorInfo` and the
+  `ActorNameRef` of its actor file. The get message is found under the second one (the item's AI,
+  `EventTriggerSetOwnNameToMessage`, writes it into the flag `UI_MessageTargetActorName`); the first build
+  changed only the first. Changing the first alone is what took the count away: the get event's "is it a
+  small key" goes by the row. The game's own model with both changed is the treasure chest game's key,
+  `Obj_MiniGame_SmallKey` ("Door Key").
+- **The map and the compass could not be checked: the Map page was closed.** As a child in Kokiri Forest it
+  said "???", as an adult in the temple "Unavailable right now.", so the key count on the dungeon map was not
+  read either. **What was found in the game's files:** the Map page has the states WorldMap, DungeonMap,
+  FieldMap, UnopenMap ("???") and two "invisible" ones ("Unavailable right now."); the game's code picks one,
+  no file says how. A place has a saved "visited" mark, `IsVisitLocation.<place>` (36 places), set when the
+  place's title is shown: in the place's first cutscene (`UISystemActor.EventTriggerOpenLocationUI`:
+  `Dm_Kokiri_0045` for Kokiri Forest, `Dm_ForestTemple_0000` for the Forest Temple) or from the place's
+  `LocationArea`. **Not known:** whether that mark is what opens the map, and why the temple says "Unavailable
+  right now." and not "???" (the temple's map is for the adult only, `LocationErasType`, and the adult was
+  reached with the debug menu).
+
+**Second test build (2026-11-24):**
+- **A named key now has its name in both places** (`tools/dungeon_keys.py`): its actor file's `ActorNameRef` is
+  `?ActorSystem/ActorName/Item_NX2K_<dungeon>...` too (no such file exists anywhere in the game for any item;
+  the reference only carries the name). Both pots and the third chest from the left in Mido's house
+  (`KF_MIDO_CHEST_02`) hold a named key; the second chest from the left holds a key without the name, as
+  before.
+- **A place can start as visited, to find out what opens the Map page:**
+  `--start-flag IsVisitLocation.KokiriForest=true` (`tools/start_state.py`; the same way as a dungeon's
+  record). The build sets it for Kokiri Forest and the Forest Temple, and not for the Sacred Forest Meadow.
+
+**What was built for the first test build:**
+
+- **Start with a dungeon's keys, map and compass:** `--start-flag DungeonInfo.ForestTemple.SmallKeyNum=2`,
+  `--start-flag DungeonInfo.ForestTemple.IsGetMap=true`, `...IsGetCompass=true` (and `IsGetBossKey`). These are
+  fields of the dungeon's saved record, which `--start-flag` refused until now. They are set the way the game's
+  own new-file module sets Link's hearts: one node that finds the record by its name, and one setter per field
+  (`tools/start_state.py`). Fields of other structs are still refused.
+- **The key count shown on screen** (part 5's in-game result: the pop-up showed the count from before the key,
+  and a chest showed none). What was found: the count on screen is the count of the dungeon Link is in, shown
+  by a step of the game's own get events (`EventTriggerSetDisplaySmallKey`) after the game has counted its own
+  key. So:
+  - **a key placed in its own dungeon is now the game's own small key.** The builder decides by the check's
+    map. The game counts and shows that one itself, as in part 4's test;
+  - **a key placed outside its dungeon** stays the item of its own from part 5. Outside, the game has no count
+    of that dungeon to show: a pick-up showed "0 to 0". That is not changed by this part.
+- **The temple's name on a key, as an experiment:** `Item_Dungeon_SmallKey@ForestTemple+name`. The game finds
+  an item's texts by the name in its `ActorInfo` row (`<name>_Name`, `_GetMessage`, `_GetCaption` in
+  `ActorMsg/PouchContent.msbt`). A named key has a name of its own there, and three new texts in every
+  language: "Small Key (Forest Temple)", "You found a small key! (Forest Temple)", "It opens locked doors in that
+  place, wherever you found it.", with the place's name taken from the game's own list of places
+  (`LocationMsg/Location.msbt`). **Not known:** what else the game looks up under that name (its icon, a saved
+  flag), so this may show nothing new or go wrong; it is on one pot in the test build, tested last.
+- **Tests:** `tests/dungeon_keys_check.py` (20 checks now): the key in its own dungeon, the named key's row,
+  actor file and texts (on the ground and in a chest), the name's colour (one of the game's, and one of ours
+  in a place of the game's list), starting with keys, map and compass and a visited place, and what is still
+  refused.
+
 ### Phase 1, part 5: a dungeon's small key anywhere (in game: the keys work, the count shown is off)
 A small key that counts for the Forest Temple wherever it is found: `CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`
 (any of the 13 dungeons with keys can be named). Test build and checklist: `out\TEST_CHECKLIST.md`.

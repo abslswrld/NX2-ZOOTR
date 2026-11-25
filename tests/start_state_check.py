@@ -267,9 +267,9 @@ def main(romfs):
         good &= check('  a refused request leaves the earlier build of the same name untouched, byte for byte',
                       bool(said) and tree(folder) == files
                       and all(open(os.path.join(folder, *f.split('/')), 'rb').read() == v for f, v in kept.items()))
-        _, folder = run('with', '--start', ITEM, '--start-flag', FLAG + '=false', '--fix', 'skippable_opening',
+        _, folder = run('with', '--start', ITEM, '--start-flag', FLAG + '=false', '--fix', 'magic_is_separate',
                         'KF_MIDO_CHEST_01=Item_Hookshot>Item_Longshot')
-        alone = tree(run('without', '--fix', 'skippable_opening', 'KF_MIDO_CHEST_01=Item_Hookshot>Item_Longshot')[1])
+        alone = tree(run('without', '--fix', 'magic_is_separate', 'KF_MIDO_CHEST_01=Item_Hookshot>Item_Longshot')[1])
         both = tree(folder)
         same = all(open(os.path.join(tmp, 'with', 'romfs', *f.split('/')), 'rb').read()
                    == open(os.path.join(tmp, 'without', 'romfs', *f.split('/')), 'rb').read()
@@ -277,6 +277,14 @@ def main(romfs):
         good &= check('  next to placements and a fix it adds only the module (%d files without it, %d with it), '
                       'and a build without it does not touch the module' % (len(alone), len(both)),
                       start_state.MODULE not in alone and sorted(alone + [start_state.MODULE]) == both and same)
+        _, folder = run('opening', '--fix', 'skippable_opening')
+        opened = open(os.path.join(folder, *start_state.MODULE.split('/')), 'rb').read()
+        _, folder = run('opening2', '--fix', 'skippable_opening', '--start-flag', build_mod.OPENING_VISITED + '=false')
+        closed = open(os.path.join(folder, *start_state.MODULE.split('/')), 'rb').read()
+        good &= check('  with the opening skippable, a new file starts with Kokiri Forest marked as visited (its map '
+                      'is open); a start flag given for it is kept as given',
+                      start_state.read(opened)[1] == [(build_mod.OPENING_VISITED, True)]
+                      and start_state.read(closed)[1] == [(build_mod.OPENING_VISITED, False)])
 
     print()
     print('ALL OK' if good else 'SOMETHING FAILED')
