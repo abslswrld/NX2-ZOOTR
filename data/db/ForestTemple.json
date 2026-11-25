@@ -429,8 +429,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Lens of Truth; the chest appeared after Beth as in the game, nothing odd when it was opened",
   "requirements": {
    "child": null,
    "adult": [
@@ -1313,8 +1313,8 @@
    "source": null,
    "note": "no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Megaton Hammer and opened like any small chest",
   "requirements": {
    "child": null,
    "adult": [
@@ -1511,8 +1511,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Iron Boots; the chest appeared after the Floormaster as in the game",
   "requirements": {
    "child": null,
    "adult": [
@@ -1707,8 +1707,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Hover Boots; the chest appeared after Joelle as in the game",
   "requirements": {
    "child": null,
    "adult": [

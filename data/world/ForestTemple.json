@@ -344,8 +344,8 @@
     "id": "FT_FLOORMASTER_CHEST",
     "spot": "chest@-70.0,-26.5",
     "note": "appears when the Floormaster is beaten",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Iron Boots; the chest appeared after the Floormaster as in the game"
    }
   },
   "exits": {
@@ -363,8 +363,8 @@
     "spot": "chest@-17.0,-63.5",
     "rule": "can_use(Bow)",
     "note": "appears when Joelle is beaten; the pictures are shot with arrows",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Hover Boots; the chest appeared after Joelle as in the game"
    }
   },
   "events": {
@@ -437,8 +437,8 @@
     "spot": "chest@17.0,-63.5",
     "rule": "can_use(Bow)",
     "note": "the game puts the compass here; appears when Beth is beaten; the pictures are shot with arrows",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Lens of Truth; the chest appeared after Beth as in the game, nothing odd when it was opened"
    },
    "FT Beth Room Pot 1": {
     "id": "FT_BETH_ROOM_POT_01",
@@ -521,8 +521,8 @@
     "id": "FT_FALLING_CEILING_ROOM_CHEST",
     "spot": "chest@56.0,-23.0",
     "note": "its map entry names no item (no Drop__DropActor), as 9 of the game's 235 chests: it then gives from the chest's own drop table (Drop/DropSubTable/Obj_TBox: one entry of the type MostDepletedResource), the supply Link is shortest of among magic, arrows or Deku Seeds, Deku Nuts and bombs; the chest's default drop actor is Obj_Rupee_Green",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Megaton Hammer and opened like any small chest"
    }
   },
   "exits": {

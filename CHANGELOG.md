@@ -2,9 +2,26 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-25
+
+### Phase 1: the Forest Temple's unusual chests passed in game (the every-spot part)
+The user's answers to the checklist of 2026-11-24 (new file, the debug-menu warp, adult): every line "good".
+
+- **Joelle's chest** (`FT_JOELLE_CHEST`): appeared after Joelle was beaten and held the Hover Boots.
+- **Beth's chest** (`FT_BETH_CHEST`): appeared after Beth was beaten and held the Lens of Truth; nothing odd
+  when it was opened (the game's own opening for the compass is kept on this chest).
+- **The falling ceiling room's chest** (`FT_FALLING_CEILING_ROOM_CHEST`, the refill chest that names no item):
+  held the Megaton Hammer and opened like any small chest.
+- **The Floormaster's chest** (`FT_FLOORMASTER_CHEST`): appeared after the Floormaster was beaten and held the
+  Iron Boots.
+- **Save and reload:** the opened chests stayed open and the items were kept.
+- **Recorded:** the four chests are "changed in game" in `data/world/ForestTemple.json` (21 of the temple's 47
+  checks now; the other 26 are covered by `tests/forest_temple_every_spot_check.py`, by decision 27), and
+  `tests/forest_temple_check.py` expects 21.
+
 ## 2026-11-24
 
-### Phase 1: the Forest Temple's every-spot build script, and its unusual spots (to test in game)
+### Phase 1: the Forest Temple's every-spot build script, and its unusual spots (passed in game 2026-11-25)
 Test build and checklist: `out\TEST_CHECKLIST.md`. Decision 27 as changed today: in game each check kind once
 plus every unusual spot; a build script for every spot.
 

@@ -202,10 +202,13 @@ Parts, in order:
 8. **The Forest Temple's every-spot build script, and its unusual spots** (D27 as changed 2026-11-24): a
    test script builds an item onto every one of the temple's 47 checks and reads each back; in game only the
    unusual spots not tried yet.
-   **Built 2026-11-24, to test in game:** `tests/forest_temple_every_spot_check.py` (all 47 build and read
-   back; no builder change needed). The falling ceiling room's chest names no contents in the map because it
-   is a refill chest (it gives the supply Link is shortest of). In game: that chest, Joelle's and Beth's
-   chests (they appear after their Poe) and the Floormaster's chest (it appears after the fight).
+   **Built 2026-11-24, passed in game 2026-11-25:** `tests/forest_temple_every_spot_check.py` (all 47 build
+   and read back; no builder change needed). The falling ceiling room's chest names no contents in the map
+   because it is a refill chest (it gives the supply Link is shortest of). In game: that chest (the Megaton
+   Hammer), Joelle's and Beth's chests (they appear after their Poe; the Hover Boots, the Lens of Truth) and
+   the Floormaster's chest (it appears after the fight; the Iron Boots) all gave their item, and stayed open
+   after a save and reload. 21 of the temple's 47 checks are now changed in game, the other 26 are covered by
+   the build script.
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.
