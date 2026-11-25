@@ -190,10 +190,11 @@ Parts, in order:
    on the ground (it gets the Boomerang's animation settings, as the songs' harp did). **Not known:** how the
    changed actor looks in the 11 cutscenes that show a stone or a Medallion (each with its area).
    **Passed in game 2026-11-24 (decision 44):** a placed stone or Medallion says its name in its temple's
-   colour in the get window (the keys' colours). **To test in game:** the Light Medallion's name gray.
+   colour in the get window (the keys' colours); the Light Medallion's is gray.
    **Found in the same test:** with all nine owned, the Spirit and the Shadow Medallion were missing on the
    Key Items page (the two tunic rows of `key_items_tab_open` took two of the page's nine places).
-   **Corrected, to test in game:** the nine real rows come first in the table, the tunic rows behind them.
+   **Corrected and passed in game 2026-11-24:** the nine real rows come first in the table, the tunic rows
+   behind them: all nine are shown, the cursor and "Details" work, at both ages.
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.

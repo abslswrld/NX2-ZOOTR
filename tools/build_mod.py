@@ -3134,7 +3134,9 @@ POUCH_TABLE = 'UI/Pouch/PouchTable/PouchTable.game__ui__PouchTable.bgyml'
 # Spirit) were not shown on the page and the cursor could not leave them: the tunic rows had taken two of the
 # nine places. So the nine real rows come first: StoneArray is the three stones, the six Medallions' rows as
 # they are, and then the two tunic rows; MedalArray keeps a row for each Medallion that names only the item
-# (the program asks MedalArray whether Link owns a Medallion), with no model and no place.
+# (the program asks MedalArray whether Link owns a Medallion), with no model and no place. In game 2026-11-24
+# with that: the tab open and empty on a new file, all nine shown in their places, the cursor and "Details"
+# right on every one, also after save and reload and as an adult.
 KEY_ITEMS_ALWAYS = ('Obj_Armor_Child_Normal', 'Armor_Adult_Normal')
 KEY_ITEMS_STONES = ['Item_Stone_Forest', 'Item_Stone_Fire', 'Item_Stone_Water']
 KEY_ITEMS_MEDALS = ['Item_Medal_Light', 'Item_Medal_Forest', 'Item_Medal_Fire', 'Item_Medal_Water',
