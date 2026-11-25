@@ -196,9 +196,9 @@ def main(romfs):
                           for v in own), {v: pouch_actor(v) for v in own})
         good &= check('  the boots lie higher from a pot (the height fix): both are raised in the build\'s report',
                       'Item_HoverBoot: lies 0.190 higher' in said and 'Item_HeavyBoot: lies 0.197 higher' in said)
-        said2 = refused(run, 'no', 'FT_BOSS_KEY_CHEST=%s' % KEY_ITEM)
-        good &= check('a key in the boss key\'s chest is still refused (part 7)',
-                      bool(said2) and 'CHEST_EVENTS' in said2)
+        said2, _ = run('bosschest', 'FT_BOSS_KEY_CHEST=%s' % KEY_ITEM)
+        good &= check('a key in the boss key\'s chest: accepted since part 7, its own opening event removed',
+                      'special opening event ForesetTemple_GetBossKey removed' in said2, said2[-300:])
 
     print()
     print('ALL OK' if good else 'SOMETHING FAILED')

@@ -4,6 +4,160 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
+### Phase 1, part 7: boss key, boss door, boss heart and the Medallion (passed in game 2026-11-24)
+Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24): every line of the checklist "good".**
+- **Mido's house:** the 2nd chest "You found the dungeon map! (Forest Temple)" and the 3rd "You found the
+  compass! (Forest Temple)", the name in green. In the temple as a child the Map page had the map and the
+  compass in their slots and the chests marked.
+- **House of the Know-It-All Brothers:** the boss key from a pot lay on the floor properly and said "You found
+  the boss key! (Forest Temple)" with the name in green. The Forest Medallion from the other pot was picked up
+  and shown without a freeze; **it did not spin on the floor.**
+- **In the temple as an adult:** the first room's chest gave the Fairy Bow; the boss key's chest held the
+  Megaton Hammer and opened without Navi's message; **the boss door opened with the boss key from the pot.**
+- **The boss:** the last cutscene played to its end with the Boomerang in the Heart Container's place (the
+  unknown is answered: the cutscene does not stop); the Boomerang lay there and was picked up; Saria's cutscene
+  played and its window said "You got a silver scale!". After save and reload both were kept and the temple
+  was done.
+- **As expected, and kept:** in Saria's cutscene the Forest Medallion still floats down above Link while the
+  window names the other item (the user's screenshot). It is an actor of the cutscene, not the item given.
+- **Open (the user's note): the Key Items tab, the one with the stones and Medallions, was "???"** after the
+  Medallion from the pot. What the files show: "???" is the pause menu's text for a tab that is not opened yet
+  (`LayoutMsg/MenuOverlay_00`, label `Unopened`), and the Key Items tab is opened by the Great Deku Tree's
+  cutscene when he gives the Kokiri Emerald (`Dm_Kokiri_0130`, step `Event52`:
+  `UISystemActor.EventOpenPerformanceImportantMenu`; its text is "Kokiri Emerald added to Key Items"). So a
+  Medallion found before that cutscene sits in a tab that is still closed. **Not found: what the game keeps in
+  the save file for an opened tab.** Two candidates to try in game: the saved yes/no
+  `HavePlayedEvent.Dm_Kokiri_0130` (the game keeps one for each of its 3,647 events; setting it may also skip
+  the Deku Tree's cutscene), or simply owning a Spiritual Stone.
+
+**The Key Items tab, second round in game (user, 2026-11-24; the user: "key items tab first"):** a build with
+no builder change, the Forest Medallion in a pot and the Kokiri Emerald and the Goron's Ruby in Mido's chests.
+- Before anything: the tab is "???". After the Forest Medallion: still "???".
+- **After the Kokiri Emerald from the chest: "tab is there, emerald and medallion is there."** The chest showed
+  the Kokiri Emerald as the game does. The Goron's Ruby joined them; the same after save and reload; as an
+  adult (debug menu) the tab is open with the Medallion on it.
+- **So: owning a Spiritual Stone opens the tab, no cutscene and no flag is needed,** and a Medallion found
+  first is not lost: it shows as soon as a stone is owned. What is left: a Medallion alone does not open it.
+- Read from the files meanwhile: no saved flag for the tab under any likely name (about 43,000 tried against
+  the game's flag list); the game's program does not name the Deku Tree's cutscene, and does hold a list of
+  the three stones and six Medallions; the pause menu's table (`UI/Pouch/PouchTable`) lists the Medallions with
+  the mark `IsUsableAdult` and the stones with no mark.
+- **Third round in game (user, 2026-11-24): the age mark is not it.** An experiment (`--fix medallions_try`,
+  removed again): the Fire Medallion's row marked `IsUsableChild` instead of `IsUsableAdult`, the Forest
+  Medallion's with no mark. After each of them the tab was still "???"; after the Kokiri Emerald it opened
+  with both Medallions on it, also as an adult.
+- **The user: "is there a way to force key items open without any medals/stones?"** Read from the game's
+  program (`image.bin`, read only; the one place that uses the text label `Unopened`): the tab bar walks the
+  rows of the pause menu table's `StoneArray` and asks, for each row, whether Link owns its first item
+  (`Actor[0].ActorShort`); any one owned opens the tab. `MedalArray` is not looked at, which is why a
+  Medallion alone never opens it. The page's own code asks the same of `StoneArray`.
+- **Fourth round in game (user, 2026-11-24): passed. `--fix key_items_tab_open`** (`KEY_ITEMS_ALWAYS` in
+  `tools/build_mod.py`): two rows more in `StoneArray`, for the two green tunics, which the game's own
+  new-file list gives every file. The rows name no model and no place on the page (as the rows of
+  `NoDisplayArray` name none). On a new file the tab was named "Key Items" and its page was empty, with
+  nothing odd when moving the cursor; the other tabs as usual; the Forest Medallion from a chest was on the
+  page in its place and could be selected, then the Kokiri Emerald with it; the same after save and reload
+  and as an adult (debug menu). **Test:** `tests/key_items_tab_check.py` (new, 13 checks; a row of `STEPS` in
+  `tests/run_all.py`).
+- **Decision 43 (the user, 2026-11-24): the Key Items tab is open from the start in every build,** test
+  builds included (`docs/ROADMAP_DECISIONS.md`).
+- **Seventh round in game (user, 2026-11-24): passed, every line "good".** On a new file the Key Items tab is
+  open and its page empty; the Spirit Medallion alone is shown in its place and the cursor goes to it and
+  away; with all nine owned every one is shown in its own place, the cursor moves over all of them without
+  getting stuck, "Details" is right on a stone and on the Medallions (Spirit and Shadow among them), the other
+  tabs are as usual; the save screen shows all nine and the page is the same after loading; the same as an
+  adult (debug menu). The Light Medallion's name is gray.
+- **Sixth round in game (user, 2026-11-24): the colours are right; two Medallions were missing on the Key
+  Items page.** All eight names had their colour (green, green, orange, purple in Mido's chests; red, red from
+  the pots; blue, blue in Saria's house), the Light Medallion's was plain and it turns, and only the name was
+  coloured. **Wrong:** on the Key Items page the Spirit and the Shadow Medallion were not shown; the cursor
+  could go to their places and open "Details", but could not leave them without closing the menu. The save
+  screen's small picture showed all nine.
+  - **Why (my mistake in `key_items_tab_open`):** the page has nine places and fills them in the order of
+    the table's rows, the stones' list first, then the Medallions'. The two tunic rows stood right behind the
+    three stones, so they took two of the nine places and the last two Medallions of the list (Shadow, Spirit)
+    got none. The fourth round had only one Medallion and one stone, so it did not show.
+  - **Corrected (passed in game, above):** the nine real rows come first. The stones' list is now the three stones,
+    the six Medallions' rows as the game has them, and then the two tunic rows; the Medallions' own list keeps
+    a row for each Medallion that names only the item, because the game's program asks that list whether
+    Link owns a Medallion.
+- **The Light Medallion's name is gray** (the user, 2026-11-24: "Light Medallion can get gray i suppose since
+  Yellow isnt an option"): the game's own colour number 1, as the Bottom of the Well's keys. The name on the
+  Key Items page stays plain (the user: "no, leave plain").
+- **The stones' and Medallions' names in their temple's colour** (the user, 2026-11-24: "id like to add the
+  color of the keys to the medallions/stones names. Kokiri and Forest Green, Goron and Fire red, Zora and
+  Water Blue, Spirit Orange, Shadow Purple"). Built, to test in game; decision 44. A placed stone or Medallion
+  has its name coloured in the get window's message ("You were entrusted with the Forest Medallion!"), with
+  the colours of decision 40: Kokiri Emerald and Forest Medallion green, Goron Ruby and Fire Medallion red,
+  Zora Sapphire and Water Medallion blue, Spirit Medallion orange, Shadow Medallion purple
+  (`REWARD_TEMPLE`, `reward_name_lines`, `change_messages` in `tools/build_mod.py`). The Light Medallion has no
+  temple (first left plain, then gray: above). Only the message is changed: the name on the Key Items page and in hints stays
+  plain. Each language keeps its own text and the name is coloured where it stands in it: 15 of the 16
+  languages; Japanese is left as it is (its reading marks are tied to the name's first character).
+  **Test:** `tests/reward_names_check.py` (new, 10 checks; a row of `STEPS` in `tests/run_all.py`).
+- **Fifth round in game (user, 2026-11-24): the stones and Medallions turn.** The Forest Medallion and the
+  Kokiri Emerald from Mido's chests turn in Link's hands and sit right; the Fire Medallion and the Goron Ruby
+  from the pots turn on the floor at a good height and in Link's hands; the Zora Sapphire as a loose item in
+  Saria's house too; all five on the Key Items page as before, also after save and reload. **Not tried:**
+  Saria's cutscene with the changed Medallion (none of the 11 cutscenes is seen yet).
+- **The user's note, fourth round: "medallions and stones still dont spin when link holds them up".** Built
+  and passed in game (above). Why they stood still: the game only gives them in cutscenes, so their nine actors have no
+  animation (`ASRef` names an empty placeholder, `AS/DemoDummy.root.asb`, 231 bytes with no command, and the
+  stones' `AS/Dummy.root.asb` is not even a file; `AnimationRef` is an empty list; no `ASInfoRef`). Their
+  models do have the two bones the game's item spin turns and lifts (`Root`, `Skl_Root`).
+  **A placed stone or Medallion now gets what the Boomerang has,** as the songs' harp did: the get-demo
+  animation settings (nothing plays by itself), the items' shared animation file (`AS/Item_Common.root.asb`:
+  `Rotate_GetDemo` in Link's hands, `Rotate_Obj` on the ground) and a list of only the game's
+  `Item_Common_Animation` (`reward_spin_pack`, `reward_spin_rows` in `tools/build_mod.py`). The actor itself
+  is changed, so its versions on the ground and from a Gold Skulltula turn too. Only the ones a build places
+  are changed.
+  **Not known:** how the changed actor looks in the 11 cutscenes that show these actors (the five
+  `Dm_Awake_*_Get`, `Dm_Kokiri_0130`, `Dm_DeathMtTrail_0025`, `Dm_InsideJabu_Jabu_0030`,
+  `Dm_ZoraFountain_0030`, `Dm_SageRoom_0005`, `Dm_InsideGanonCastle_0000`). They move the actor by a locator
+  and its old animation file was empty, so nothing should differ; each is to be looked at with its area. A
+  stone or Medallion given as a gift is now held up like other items instead of shown in the window (not
+  tested). **Test:** `tests/reward_spin_check.py` (new, 14 checks; a row of `STEPS` in `tests/run_all.py`).
+- **A size rule for the pause menu's table** (`tools/sizes.py`, `game__ui__PouchTable`): the game has one file
+  of the type, so the rule charges 1024 for each row of `StoneArray` and for each item of a row (far more than
+  an element can cost), spreads the rest evenly, and gives the game's entry for the game's file
+  (`tests/size_check.py`: OK).
+
+- **The boss key anywhere** (`tools/dungeon_items.py`, new): `CHECK_ID=Item_Dungeon_BossKey@ForestTemple`. What
+  was found: the boss key, the map and the compass are yes/no fields of the dungeon's saved record
+  (`DungeonInfo.<dungeon>.IsGetBossKey`, `IsGetMap`, `IsGetCompass`); the items themselves are "not put in the
+  inventory", and what sets the field is the chests' shared opening event (`Dm_SY_Treasurebox`:
+  `EventGetDungeonBossKey` and its three siblings), for the dungeon Link is in. So:
+  - **in a chest of its own dungeon** it is the game's own item (the builder decides by the check's map);
+  - **on a pot, rock, bush, freestanding item or Gold Skulltula**, in the dungeon or outside, it is a version
+    of ours whose AI sets the dungeon's field when it is picked up (`OneShotSetGameDataBool`, the step the
+    Gerudo Fortress keys set their own flag with);
+  - **in a chest outside its dungeon** the chest's opening event gets a step after it that sets the field
+    (`GameDataActor.EventTriggerSetGameDataBool`), as a small key's chest adds 1.
+  Every version says the dungeon's name in the dungeon's colour: "You found the boss key! (Forest Temple)".
+- **The map and the compass the same way** (`Item_Dungeon_Map@ForestTemple`, `Item_Dungeon_Compass@...`): they
+  are built exactly as the boss key is. **A flaw this closes:** the builder used to accept a boss key, a map or
+  a compass on a pot, which gave an item that set nothing when picked up. Without its dungeon named, one of
+  the three is now only accepted on a chest of a dungeon.
+- **Another item in the boss key's chest:** its own opening event (`ForesetTemple_GetBossKey`: the usual
+  opening, then a message from Navi about the boss key) is removed with the boss key, as the Bow chest's was.
+- **The boss door** needs no change: its lock (`Obj_DoorChainLock_A_02`) opens with the dungeon's field. **Start
+  with the boss key:** `--start-flag DungeonInfo.ForestTemple.IsGetBossKey=true` (part 6's start flags).
+- **The boss's heart:** it is a placed `Obj_Heart_Container` that the boss room's logic brings in once the boss
+  is beaten, by its place in the map, so another item put there is brought in the same way. The boss's last
+  cutscene (`Dm_ForestTemple_BossOut`) shows the Heart Container coming down, by the actor's name; with another
+  item there it plays to its end (in game, above).
+- **The Medallion:** the cutscene `Dm_Awake_Forest_Get` hands it over with one step (the get window and the
+  item), now in the temple's data, so `FT_FOREST_MEDALLION_GIFT=<item>` gives another item there, and
+  `Item_Medal_Forest` can be put on another check. The medallion that floats down in the cutscene stays.
+  A family on this check is not supported yet.
+- **The file the game loads:** for 13 event flows the game loads `<name>.110.bfevfl`, not `<name>.bfevfl`
+  (`Event/EventFlow/EventFlowFileEntry`: the five Medallion cutscenes, `Dm_HrlCastle_0020`, `Dm_Goron_0040` and
+  six more). The builder now reads and writes the file the game loads (`Output.real`); before, a change to one
+  of those 13 would have gone into a file the game never opens.
+- **Tests:** `tests/boss_check.py` (new, 16 checks; in `run_tests.bat`, through `tests/run_all.py`).
+
 ### `run_tests.bat` in about 2.5 minutes instead of about 16 (every test still runs)
 The user: "I think we need to change how run_tests works cause I'm losing a lot of time just waiting."
 

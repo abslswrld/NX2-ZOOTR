@@ -123,6 +123,16 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     the game's text and count.
 42. **Kokiri Forest's map is open from the start** (2026-11-24): with the opening skippable, a new file starts
     with Kokiri Forest marked as visited (`IsVisitLocation.KokiriForest`), which is what opens a place's map.
+43. **The Key Items tab is open from the start, in every build** (2026-11-24). In the game the pause menu's tab
+    for the Spiritual Stones and Medallions is "???" until Link owns a stone, so a Medallion found first sat in
+    a closed tab. `--fix key_items_tab_open` (phase 1, part 7) opens it on a new file, with an empty page;
+    **passed in game 2026-11-24,** with all nine stones and Medallions on the page. Every build has it, test
+    builds included.
+44. **A stone or a Medallion says its name in its temple's colour** (2026-11-24), the colours of decision 40:
+    Kokiri Emerald and Forest Medallion green, Goron Ruby and Fire Medallion red, Zora Sapphire and Water
+    Medallion blue, Spirit Medallion orange, Shadow Medallion purple. The Light Medallion has no temple: gray
+    (the game has no yellow). Built in phase 1, part 7, for the message of the get window only: the name on
+    the Key Items page stays plain. All nine **passed in game 2026-11-24.**
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".

@@ -117,6 +117,12 @@ Game fixes (--fix NAME, see FIXES and FILE_FIXES):
                              appeared (decision 39). In the game it stays locked until the eye switch behind
                              the bars is shot with an arrow, saving is off in the room, and dying loses what
                              was picked up there: without the Bow nothing found in the room could be kept
+    key_items_tab_open       the pause menu's Key Items tab (Spiritual Stones and Medallions) is open from the
+                             start. In the game it is "???" until Link owns a stone, so a Medallion found
+                             first sat in a closed tab; the game opens it for the first item of any row of
+                             its pause menu table's StoneArray, which gets two rows for the green tunics
+                             every file starts with (they show nothing on the page), behind the stones'
+                             and the Medallions' rows (the page's nine places go by the order of the rows)
     bombs_without_bracelet   bombs from the bomb bag can be held without the Goron Bracelet: the bomb's lift
                              grade becomes the "no upgrade" grade of rocks, bushes, pots and Bombchus (bomb
                              flowers have their own copy of the setting and still need the bracelet)
@@ -150,6 +156,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 
+import dungeon_items  # noqa: E402
 import dungeon_keys  # noqa: E402
 import ground_items  # noqa: E402
 import harp_colors  # noqa: E402
@@ -193,6 +200,9 @@ CHEST_EVENTS = {
                                      '(subflow PlayDemo -> Dm_SY_Treasurebox), no message'),
     'ForesetTemple_GetCompass': ('keep', 'NaviChat / TreasureBoxDM_NaviChat_ForestTemple_Compass: only the usual '
                                          'opening (subflow PlayDemo -> Dm_SY_Treasurebox), no message'),
+    'ForesetTemple_GetBossKey': ('remove', 'ForestTemple_Gimmick / TreasureBoxDM_NaviChat_ForestTemple_BossKey: '
+                                           'the usual opening (Dm_SY_Treasurebox), then Navi\'s balloon message '
+                                           '361 about the boss key'),
 }
 # The game's checking chest (Obj_TBox_A_06, 9 placements) is the ordinary small chest (its settings file has
 # $parent Obj_TBox_A_01: same model, animation, physics and opening event) with its own AI, a second held actor
@@ -626,13 +636,40 @@ def tbox_sync_flow(template, sync, usuals, version):
 # (DungeonInfo.<dungeon>.SmallKeyNum), as the treasure chest game's flow adds to its own key count
 # (MiniGame_SequentialChoiceTreasure: MiniGame_SmallKeyNum + 1). One event per (usual event, dungeon):
 #   Event/EventFlow/NX2_TBoxKey.bfevfl                   entry point NX2_TBoxKey_<dungeon>_<usual event>
+# A dungeon's boss key, map or compass in a chest outside its dungeon (tools/dungeon_items.py): the same event,
+# whose step sets the item's field of the dungeon's record: GameDataActor.EventTriggerSetGameDataBool True, the
+# step the game's flows set their own flags with (KEY_SET_FLOW). What a chest holds for this is written
+# `what`: a dungeon (its small key) or (item, dungeon).
 TBOX_KEY_FLOW = 'NX2_TBoxKey'
 KEY_ADD_FLOW = 'Event/EventFlow/MiniGame_SequentialChoiceTreasure.bfevfl'
 KEY_ADD = ('GameDataActor', 'EventTriggerAddOrSubGameDataInt')
+KEY_SET_FLOW = 'Event/EventFlow/Npc_Kokiri_003_Child.bfevfl'
+KEY_SET = ('GameDataActor', 'EventTriggerSetGameDataBool')
 
 
-def tbox_key_event(usual, dungeon):
-    return '%s_%s_%s' % (TBOX_KEY_FLOW, dungeon, usual)
+def key_what_flag(what):
+    """the saved number or yes/no the chest's step changes"""
+    return dungeon_keys.flag(what) if isinstance(what, str) else dungeon_items.flag(*what)
+
+
+def key_what_said(what):
+    return 'a key of %s' % what if isinstance(what, str) else '%s of %s' % what
+
+
+def tbox_key_event(usual, what):
+    tag = what if isinstance(what, str) else '%s_%s' % (dungeon_items.field(what[0]), what[1])
+    return '%s_%s_%s' % (TBOX_KEY_FLOW, tag, usual)
+
+
+def key_set_template(fc):
+    """the game's own "set a saved yes/no to yes" step: (actor, action name, parameters)"""
+    for e in fc.events:
+        if e.type == 'action' and fc.actors[e.actor].name == KEY_SET[0] and _action_name(fc, e) == KEY_SET[1] \
+                and isinstance(e.params, dict) and sorted(e.params) == ['GameDataName', 'Index', 'Value'] \
+                and e.params['Value'] is True and e.params['Index'] == -1 and not fc.actors[e.actor].secondary:
+            return fc.actors[e.actor], KEY_SET[1], e.params
+    raise SystemExit('%s: no step that sets a saved yes/no found as expected (game files differ from what this '
+                     'was made for)' % KEY_SET_FLOW)
 
 
 def key_add_template(fc):
@@ -646,10 +683,11 @@ def key_add_template(fc):
                      'this was made for)' % KEY_ADD_FLOW)
 
 
-def key_add_step(add, dungeon):
-    actor, action, params = add
+def key_add_step(add, what):
+    """the step for what the chest holds; add: (key_add_template, key_set_template)"""
+    actor, action, params = add[0] if isinstance(what, str) else add[1]
     p = evfl.Params(params)
-    p['GameDataName'] = dungeon_keys.flag(dungeon)
+    p['GameDataName'] = key_what_flag(what)
     return actor, action, p
 
 
@@ -660,7 +698,7 @@ def tbox_key_flow(template, add, events, version):
     ef = evfl.EventFlow(TBOX_KEY_FLOW, [fc])
     ef.version = version
     (join_actor, join, _), (run_actor, run, run_params) = template
-    for (usual, dungeon), name in sorted(events.items()):
+    for (usual, dungeon), name in sorted(events.items(), key=lambda x: x[1]):
         nxt = sync_steps(fc, [key_add_step(add, dungeon)])
         params = evfl.Params(run_params)
         params['EventName'] = usual
@@ -924,13 +962,19 @@ def gift_edit(fc, events, direct=(), sync=None):
         e = by_name.get(ev)
         if e is None:
             raise SystemExit('%s: event %s not in the flow' % (cid, ev))
-        if e.type != 'subflow' or e.flowchart != GIFT_FLOW or not isinstance(e.params, dict):
-            raise SystemExit('%s: event %s is not a call of %s' % (cid, ev, GIFT_FLOW))
+        # a gift the game itself gives with the get window (a Medallion: Dm_Awake_*_Get): any item is given
+        # the same way there, by that call's ActorName
+        windowed = e.type == 'subflow' and (e.flowchart, e.entry) == DIRECT_GET \
+            and isinstance(e.params, dict) and set(e.params) == {'ActorName'}
+        if not windowed and (e.type != 'subflow' or e.flowchart != GIFT_FLOW or not isinstance(e.params, dict)):
+            raise SystemExit('%s: event %s is not a call of %s or of %s<%s>'
+                             % (cid, ev, GIFT_FLOW, DIRECT_GET[0], DIRECT_GET[1]))
         if e.params.get('ActorName') != old:
             raise SystemExit('%s: event %s gives %r, the data says %s' % (cid, ev, e.params.get('ActorName'), old))
         if item not in direct:
             e.params['ActorName'] = item
-            said.append('%-18s %s: %s -> %s' % (cid, ev, old, item))
+            said.append('%-18s %s: %s -> %s%s' % (cid, ev, old, item, ', given with the get window as %s is '
+                                                 '(%s<%s>)' % (old, DIRECT_GET[0], DIRECT_GET[1]) if windowed else ''))
         else:
             was = '%s<%s>' % (e.flowchart, e.entry)
             e.flowchart, e.entry = DIRECT_GET
@@ -2772,6 +2816,179 @@ def song_harp_rows(data, songs, models=None, anim_projects=()):
     return out
 
 
+# The Spiritual Stones and the Medallions turn when Link holds them up and when they lie on the ground (the
+# user, 2026-11-24: "medallions and stones still dont spin when link holds them up"). The game only ever gives
+# them in cutscenes, so their actors have no animation: ASRef names an empty placeholder (AS/DemoDummy.root.asb,
+# 231 bytes, no command; the stones' AS/Dummy.root.asb is not even a file), AnimationRef an empty list, and
+# there is no ASInfoRef. Their models have the two bones the game's item spin turns and lifts (Root, Skl_Root).
+# A placed stone or Medallion gets what the Boomerang has, as the songs do (song_spin_pack): the get-demo
+# animation settings (ASInfo Item_GetDemo: nothing plays by itself), the items' shared animation file
+# (AS/Item_Common.root.asb: Rotate_GetDemo in Link's hands, Rotate_Obj on the ground) and an animation list of
+# only the game's Item_Common_Animation. The actor itself is changed, so every version made of it (on the
+# ground, from a Gold Skulltula) turns too. The 11 cutscenes that show these actors (the five Dm_Awake_*_Get,
+# Dm_Kokiri_0130, Dm_DeathMtTrail_0025, Dm_InsideJabu_Jabu_0030, Dm_ZoraFountain_0030, Dm_SageRoom_0005,
+# Dm_InsideGanonCastle_0000) move them by a locator, not by their own animation; NOT KNOWN for each of them
+# whether the changed actor looks the same there (to test with each area).
+REWARD_ITEMS = ('Item_Stone_Forest', 'Item_Stone_Fire', 'Item_Stone_Water', 'Item_Medal_Light',
+                'Item_Medal_Forest', 'Item_Medal_Fire', 'Item_Medal_Water', 'Item_Medal_Shadow', 'Item_Medal_Spirit')
+REWARD_NO_AS = ('?AS/Dummy.root.asb', '?AS/DemoDummy.root.asb')
+REWARD_NO_ANIM = '?Component/AnimationParam/Dummy.engine__component__AnimationParam.bgyml'
+REWARD_ANIM_PARAM = 'Component/AnimationParam/Item_NX2_Spin.engine__component__AnimationParam.bgyml'
+
+
+# A placed stone or Medallion says its name in its temple's colour (the user, 2026-11-24: "id like to add the
+# color of the keys to the medallions/stones names. Kokiri and Forest Green, Goron and Fire red, Zora and Water
+# Blue, Spirit Orange, Shadow Purple"): the colours of decision 40 (dungeon_keys.COLOURS), in the message of
+# the get window ("You were entrusted with the Forest Medallion!"), as the keys have theirs. The Light
+# Medallion has no temple and is gray (REWARD_COLOUR). Each language keeps its own text: the item's name
+# (its _Name text) is looked for in its get message, capitals or not, and coloured where it stands once. A
+# message with reading marks over its characters (the tag 0,0: Japanese) is left as it is: the name's first
+# character is tied to the mark in front of it, and a colour tag between the two is not tried.
+RUBY_TAG = (0, 0)
+REWARD_TEMPLE = {'Item_Stone_Forest': 'ForestTemple', 'Item_Medal_Forest': 'ForestTemple',
+                 'Item_Stone_Fire': 'FireTemple', 'Item_Medal_Fire': 'FireTemple',
+                 'Item_Stone_Water': 'WaterTemple', 'Item_Medal_Water': 'WaterTemple',
+                 'Item_Medal_Spirit': 'SpiritTemple', 'Item_Medal_Shadow': 'ShadowTemple'}
+# the Light Medallion has no temple: gray, the game's own colour number 1 (the user, 2026-11-24: "Light
+# Medallion can get gray i suppose since Yellow isnt an option"; the game's list has no yellow)
+REWARD_COLOUR = {'Item_Medal_Light': 1}
+REWARD_MESSAGE = '_GetMessage'
+
+
+def reward_name_lines(texts, numbers, encoding=0):
+    """{label: new text} for the get messages of the items of `numbers` ({item: colour number}), from a
+    language's texts {label: text}: the item's name coloured where it stands in the message. An item whose name
+    is not in its message exactly once (another form of the word) is left out"""
+    start_end = dungeon_keys.colour_tag(dungeon_keys.COLOUR_END)
+    out = {}
+    for item, number in sorted(numbers.items()):
+        label = item + REWARD_MESSAGE
+        if label not in texts or item + '_Name' not in texts:
+            raise SystemExit('%s: no %s or no name in the item texts' % (item, label))
+        name, text = msg_plain(texts[item + '_Name'], encoding), texts[label]
+        low = text.lower()
+        if not name or low.count(name.lower()) != 1 or len(low) != len(text):
+            continue
+        if any(not isinstance(x, str) and tuple(x[:2]) == RUBY_TAG for x in msbt.tags(text, encoding)):
+            continue
+        at = low.index(name.lower())
+        out[label] = (text[:at] + dungeon_keys.colour_tag(number) + text[at:at + len(name)] + start_end
+                      + text[at + len(name):])
+    return out
+
+
+def change_messages(out, romfs, lines, msg_file):
+    """texts that exist changed in every language's message archive: lines(archive's files, the file's texts,
+    its encoding) -> {label: new text}; returns {language file: the labels changed}; read back"""
+    changed = {}
+    for fn in sorted(os.listdir(os.path.join(romfs, 'Mals'))):
+        if not fn.endswith('.sarc.zs'):
+            continue
+        path = 'Mals/' + fn[:-3]
+        src, old = out.read(path)
+        arc = sarc.Sarc.read(old)
+        m = msbt.Msbt.read(arc.files[msg_file])
+        if m.write() != arc.files[msg_file]:
+            raise SystemExit('%s: %s does not round-trip' % (path, msg_file))
+        new_lines = lines(arc.files, dict(m.texts), m.encoding)
+        if not set(new_lines) <= set(m.texts):
+            raise SystemExit('%s: %s has no %s' % (path, msg_file, sorted(set(new_lines) - set(m.texts))))
+        changed[fn[:-len('.sarc.zs')]] = sorted(new_lines)
+        if not new_lines:
+            continue
+        want = dict(m.texts, **new_lines)
+        m.texts.update(new_lines)
+        new_msg = m.write()
+        if msbt.Msbt.read(new_msg).texts != want:
+            raise SystemExit('read-back: %s in %s' % (msg_file, path))
+        arc.files[msg_file] = new_msg
+        new = arc.write()
+        back = sarc.Sarc.read(new)
+        if set(back.files) != set(arc.files) or any(back.files[k] != v for k, v in arc.files.items()):
+            raise SystemExit('read-back: %s differs from what was intended' % path)
+        out.write(path, src, old, new)
+    return changed
+
+
+def reward_spin_files(boomerang_pack):
+    """the files a stone's or Medallion's pack gets for the spin: the Boomerang's animation settings file as it
+    is, and an animation list of only the game's Item_Common_Animation (the songs' list, song_spin_files, under a
+    name of its own)"""
+    spin = song_spin_files(boomerang_pack)
+    return {harp_colors.AS_INFO: spin[harp_colors.AS_INFO], REWARD_ANIM_PARAM: spin[harp_colors.ANIM_PARAM]}
+
+
+def reward_spin_pack(pack_data, item, spin):
+    """a stone's or Medallion's pack with the Boomerang's animation components instead of its empty ones, and
+    their files (spin: reward_spin_files); returns (new pack, (actor file's path, its contents before, after));
+    read back"""
+    archive = sarc.Sarc.read(pack_data)
+    inner = 'Actor/%s.engine__actor__ActorParam.bgyml' % item
+    if inner not in archive.files or set(spin) & set(archive.files):
+        raise SystemExit('%s: pack not as expected (no %s, or the spin files already there)' % (item, inner))
+    old_inner = archive.files[inner]
+    doc = byml.loads(old_inner)
+    comps = doc.root['Components']
+    if (comps.get('ASRef') not in REWARD_NO_AS or comps.get('AnimationRef') != REWARD_NO_ANIM
+            or 'ASInfoRef' in comps):
+        raise SystemExit('%s: its animation components are not the empty ones expected (ASRef %r, AnimationRef %r'
+                         '%s): game files differ from what this was made for'
+                         % (item, comps.get('ASRef'), comps.get('AnimationRef'),
+                            ', an ASInfoRef' if 'ASInfoRef' in comps else ''))
+    add = {'ASInfoRef': '?' + harp_colors.AS_INFO, 'ASRef': '?' + harp_colors.AS_REF,
+           'AnimationRef': '?' + REWARD_ANIM_PARAM}
+    kind = type(comps['ModelInfoRef'])
+    for k, v in add.items():
+        comps[k] = kind(v)
+    new_inner = byml.dumps(doc)
+    archive.files[inner] = new_inner
+    archive.files.update(spin)
+    new_pack = archive.write()
+    back, before = sarc.Sarc.read(new_pack).files, sarc.Sarc.read(pack_data).files
+    if (set(back) != set(before) | set(spin) or any(back[n] != before[n] for n in before if n != inner)
+            or any(back[n] != spin[n] for n in spin)):
+        raise SystemExit('read-back: %s pack' % item)
+    want = byml.loads(old_inner).root
+    want['Components'].update(add)
+    if byml.loads(back[inner]).root != want:
+        raise SystemExit('read-back: %s differs from what was intended' % inner)
+    return new_pack, (inner, old_inner, new_inner)
+
+
+def reward_spin_rows(data, items):
+    """ActorInfo rows of `items` (stones, Medallions): the animation list of the spin, as SPIN_LIKE's row lists
+    its own, and heaps at least SPIN_LIKE's; read back"""
+    doc = byml.loads(data)
+    rows = {str(r['__RowId']): r for r in doc.root}
+    like = rows.get(SPIN_LIKE)
+    if like is None or not like.get('AnimationResources'):
+        raise SystemExit('%s: no %s row with an animation list' % (ACTOR_INFO, SPIN_LIKE))
+    res = like['AnimationResources']
+    want = {}
+    for i, r in enumerate(doc.root):
+        name = str(r['__RowId'])
+        if name not in items:
+            continue
+        if 'AnimationResources' in r:
+            raise SystemExit('%s: %s already has an animation list' % (ACTOR_INFO, name))
+        new = type(r)(r)
+        for k in ('InstanceHeapSize', 'PreActorRenderInfoHeapSize'):
+            new[k] = type(r[k])(max(int(r[k]), int(like[k])))
+        entry = type(res[0])(res[0])
+        entry['ModelProjectName'] = type(res[0]['ModelProjectName'])(harp_colors.ANIM_PROJECT)
+        new['AnimationResources'] = type(res)([entry])
+        doc.root[i] = new
+        want[name] = dict(new)
+    if set(want) != set(items):
+        raise SystemExit('%s: rows not found: %s' % (ACTOR_INFO, ', '.join(sorted(set(items) - set(want)))))
+    out = byml.dumps(doc)
+    back = {str(r['__RowId']): r for r in byml.loads(out).root}
+    before = {str(r['__RowId']): r for r in byml.loads(data).root}
+    if set(back) != set(before) or any(back[n] != (want.get(n) or before[n]) for n in back):
+        raise SystemExit('read-back: %s differs from what was intended' % ACTOR_INFO)
+    return out
+
+
 MAGIC_BLESSINGS = ('Item_FairyBless_MP', 'Pouch_FairyBless_MP', 'Item_FairyBless_MPDouble', 'Pouch_FairyBless_MPDouble')
 
 
@@ -2903,8 +3120,82 @@ def bombchus_without_bag(data):
     return new_data, sorted(want)
 
 
+POUCH_TABLE = 'UI/Pouch/PouchTable/PouchTable.game__ui__PouchTable.bgyml'
+# The Key Items tab of the pause menu open from the start (--fix key_items_tab_open). In the game the tab is
+# "???" until Link owns a Spiritual Stone; a Medallion alone does not open it (in game 2026-11-24, also with
+# the Medallions' age mark removed or made "child"). Read from the game's program: the tab bar asks, for each
+# row of the pause menu table's StoneArray, whether Link owns the first item of the row (its
+# Actor[0].ActorShort), and opens the tab when any is owned; MedalArray is not asked. So StoneArray gets a row
+# for each of the two green tunics, which the game's own new-file list gives every file (start_state reads
+# that list). The rows name no model to show and no place on the page, as the rows of NoDisplayArray name none.
+#
+# The page has nine places, filled in the order of the rows: StoneArray's, then MedalArray's. In game
+# 2026-11-24, with the two tunic rows behind the three stones, the last two Medallions of MedalArray (Shadow,
+# Spirit) were not shown on the page and the cursor could not leave them: the tunic rows had taken two of the
+# nine places. So the nine real rows come first: StoneArray is the three stones, the six Medallions' rows as
+# they are, and then the two tunic rows; MedalArray keeps a row for each Medallion that names only the item
+# (the program asks MedalArray whether Link owns a Medallion), with no model and no place. In game 2026-11-24
+# with that: the tab open and empty on a new file, all nine shown in their places, the cursor and "Details"
+# right on every one, also after save and reload and as an adult.
+KEY_ITEMS_ALWAYS = ('Obj_Armor_Child_Normal', 'Armor_Adult_Normal')
+KEY_ITEMS_STONES = ['Item_Stone_Forest', 'Item_Stone_Fire', 'Item_Stone_Water']
+KEY_ITEMS_MEDALS = ['Item_Medal_Light', 'Item_Medal_Forest', 'Item_Medal_Fire', 'Item_Medal_Water',
+                    'Item_Medal_Shadow', 'Item_Medal_Spirit']
+KEY_ITEMS_SHOWN = ('PouchActorShort',)               # of a row's item: the model on the page
+KEY_ITEMS_PLACE = ('BtnName',)                       # of a row: its place on the page
+
+
+def key_items_rows(root):
+    """what the fix makes of the table's two lists: (StoneArray, MedalArray) as plain lists of dicts"""
+    stones = [dict(r, Actor=[dict(a) for a in r['Actor']]) for r in root['StoneArray']]
+    medals = [dict(r, Actor=[dict(a) for a in r['Actor']]) for r in root['MedalArray']]
+    bare = [{'Actor': [{k: v for k, v in r['Actor'][0].items() if k not in KEY_ITEMS_SHOWN}]} for r in medals]
+    return stones + medals + [{'Actor': [{'ActorShort': n}]} for n in KEY_ITEMS_ALWAYS], bare
+
+
+def key_items_tab_open(data):
+    """the pause menu's table (POUCH_TABLE): StoneArray becomes the stones' rows, the Medallions' rows and one
+    row for each item of KEY_ITEMS_ALWAYS; MedalArray's rows keep only their item"""
+    doc = byml.loads(data)
+    stones, medals = doc.root['StoneArray'], doc.root['MedalArray']
+    have = [str(row['Actor'][0]['ActorShort']) for row in stones]
+    have_m = [str(row['Actor'][0]['ActorShort']) for row in medals]
+    if (have != KEY_ITEMS_STONES or have_m != KEY_ITEMS_MEDALS
+            or any(len(r['Actor']) != 1 or not all(k in r for k in KEY_ITEMS_PLACE)
+                   or not all(k in r['Actor'][0] for k in KEY_ITEMS_SHOWN) for r in list(stones) + list(medals))):
+        raise SystemExit('StoneArray / MedalArray are not as expected: %s, %s (game files differ from what this '
+                         'was made for)' % (have, have_m))
+    row_type, list_type, actor_type = type(stones[0]), type(stones[0]['Actor']), type(stones[0]['Actor'][0])
+    want_stones, want_medals = key_items_rows(byml.loads(data).root)
+    for row in list(medals):
+        stones.append(row)                             # the Medallion's row as it is, behind the stones
+    for name in KEY_ITEMS_ALWAYS:
+        actor = actor_type()
+        actor['ActorShort'] = name
+        row = row_type()
+        row['Actor'] = list_type([actor])
+        stones.append(row)
+    for i, row in enumerate(list(medals)):
+        actor = actor_type((k, v) for k, v in row['Actor'][0].items() if k not in KEY_ITEMS_SHOWN)
+        bare = row_type()
+        bare['Actor'] = list_type([actor])
+        medals[i] = bare
+    new = byml.dumps(doc)
+    # read back: the two lists as intended; nothing else changed
+    want = byml.loads(data).root
+    got = byml.loads(new).root
+    plain = lambda rows: [dict(r, Actor=[dict(x) for x in r['Actor']]) for r in rows]   # noqa: E731
+    if (plain(got['StoneArray']) != want_stones or plain(got['MedalArray']) != want_medals
+            or {k: v for k, v in got.items() if k not in ('StoneArray', 'MedalArray')}
+            != {k: v for k, v in want.items() if k not in ('StoneArray', 'MedalArray')}):
+        raise SystemExit('read-back: the pause menu\'s table differs from what was intended')
+    return new, (['StoneArray + %s' % n for n in KEY_ITEMS_MEDALS + list(KEY_ITEMS_ALWAYS)]
+                 + ['MedalArray: only the item of %s' % n for n in KEY_ITEMS_MEDALS])
+
+
 # name -> (file, function(data) -> (new data, list of what changed))
 TABLE_FIXES = {
+    'key_items_tab_open': (POUCH_TABLE, key_items_tab_open),
     'bombchus_without_bag': ('RSDB/PouchActorInfo.Product.111.rstbl.byml', bombchus_without_bag),
     'magic_is_separate': ('RSDB/PouchActorInfo.Product.111.rstbl.byml', magic_is_separate),
 }
@@ -3502,6 +3793,24 @@ def map_entry(length):
     return (length + 31) // 32 * 32 + 264
 
 
+# For some event flows the game loads another file than <name>.bfevfl: Event/EventFlow/EventFlowFileEntry lists
+# them with a version ("Versions": {"Dm_Awake_Forest_Get": "110", ...}: 13 flows, among them the five Medallion
+# cutscenes), and the file loaded is <name>.<version>.bfevfl. Both files are in the game. The builder reads and
+# writes the one the game loads, whichever name it is asked for (Output.real).
+FLOW_VERSIONS = 'Event/EventFlow/EventFlowFileEntry.Product.110.byml'
+FLOW_FOLDER, FLOW_EXT = 'Event/EventFlow/', '.bfevfl'
+
+
+def flow_versions(data):
+    """{flow name: version} of the game's list of event flows with a version of their own"""
+    root = byml.loads(data).root
+    versions = root.get('Versions') if isinstance(root, dict) else None
+    if not isinstance(versions, dict) or set(root) != {'Versions'} \
+            or not all(isinstance(v, str) and v for v in versions.values()):
+        raise SystemExit('%s is not the list of flow versions this was made for' % FLOW_VERSIONS)
+    return {str(k): str(v) for k, v in versions.items()}
+
+
 class Output:
     """writes changed files into the mod folder and keeps the resource size table up to date"""
 
@@ -3512,10 +3821,24 @@ class Output:
         self.sizes = {}          # path -> (original length, new length, original entry, new entry)
         self.orig = {}           # path -> the game's file (what its original entry was made for)
         self.written = {}        # path -> (file as stored in the game, contents written): edited twice = read back
+        self.versions = flow_versions(zstd.decompress(
+            open(os.path.join(romfs, *(FLOW_VERSIONS + '.zs').split('/')), 'rb').read(), dicts))
+        for name, version in self.versions.items():
+            if not os.path.exists(os.path.join(romfs, *('%s%s.%s%s.zs' % (FLOW_FOLDER, name, version, FLOW_EXT)).split('/'))):
+                raise SystemExit('%s: %s has version %s, but that file is not in the game' % (FLOW_VERSIONS, name, version))
+
+    def real(self, path):
+        """the file the game loads for an event flow (FLOW_VERSIONS); any other path as it is"""
+        if path.startswith(FLOW_FOLDER) and path.endswith(FLOW_EXT):
+            name = path[len(FLOW_FOLDER):-len(FLOW_EXT)]
+            if name in self.versions:
+                return '%s%s.%s%s' % (FLOW_FOLDER, name, self.versions[name], FLOW_EXT)
+        return path
 
     def read(self, path):
         """(file as stored, contents); a few game files are stored uncompressed (no .zs); a file this build
         already changed is read back as changed"""
+        path = self.real(path)
         if path in self.written:
             return self.written[path]
         plain = os.path.join(self.romfs, *path.split('/'))
@@ -3531,6 +3854,7 @@ class Output:
         rules of tools/sizes.py (loading a file takes more memory than its bytes, and a parameter file more per
         element of its lists and tables: adding elements needs more than what the file grew); and `floor`.
         A length instead of contents is accepted too: then only the growth counts."""
+        path = self.real(path)
         new_len = new if isinstance(new, int) else len(new)
         if path in self.sizes:
             old_len, _, entry, _ = self.sizes[path]
@@ -3579,6 +3903,7 @@ class Output:
         open(dest, 'wb').write(comp)
 
     def write(self, path, src, old, new):
+        path = self.real(path)
         self.written[path] = (src, new)
         if src is None:                                  # stored uncompressed: write it the same way
             dest = os.path.join(self.mod_romfs, *path.split('/'))
@@ -3739,8 +4064,33 @@ def main(argv):
                                 ', '.join(sorted(dungeon_keys.OUR_COLOURS))))
         key_colours[dungeon] = int(colour) if colour.isdigit() else colour
         key_colour_asked.add(dungeon)
-    key_chests = {}                                    # check id -> dungeon: chests that hold a dungeon's key
+    key_chests = {}                                    # check id -> what the chest's own step is for (TBOX_KEY_FLOW)
+    item_versions = {}                                 # (item, dungeon, kind of version) -> name (dungeon_items)
     for k, (cid, item) in enumerate(assignments):
+        flagged = dungeon_items.parse(item)
+        if flagged is not None or item in dungeon_items.ITEMS:
+            # a dungeon's boss key, map or compass (tools/dungeon_items.py)
+            r, _, loc = find_check(world, cid)
+            scenes = {scene for scene, _, _ in world.placements_of(r, loc)}
+            if flagged is None:
+                if check_kind(world, cid) != 'chest' or len(scenes) != 1 or not scenes <= set(dungeon_keys.DUNGEONS):
+                    raise SystemExit('%s: %s only counts in a chest of its own dungeon (the chest\'s opening sets '
+                                     'it for the dungeon Link is in); anywhere else name its dungeon: %s%s<dungeon>'
+                                     % (cid, item, item, dungeon_keys.SEP))
+                continue
+            base, dungeon = flagged
+            kind = dungeon_keys.kind_for(check_kind(world, cid), cid)
+            if kind == 'chest' and scenes == {dungeon}:
+                print('%-18s %s of %s in a chest of %s itself: the game\'s own item' % (cid, base, dungeon, dungeon))
+                assignments[k] = (cid, base)
+                continue
+            assignments[k] = (cid, item_versions.setdefault((base, dungeon, kind),
+                                                            dungeon_items.name(base, dungeon, kind)))
+            # the item its name stands for: its chest version
+            item_versions.setdefault((base, dungeon, 'chest'), dungeon_items.name(base, dungeon, 'chest'))
+            if kind == 'chest':
+                key_chests[cid] = (base, dungeon)
+            continue
         parsed = dungeon_keys.parse(item)
         if parsed is None:
             continue
@@ -3895,6 +4245,29 @@ def main(argv):
             harp_colors.SPIN_PROJECTS if harp_colors.SPIN else ()))
         print('%-18s %s: model %s (Sheik\'s harp) instead of the rupee' % ('songs', ', '.join(songs), HARP_MODEL))
 
+    # placed Spiritual Stones and Medallions turn when held up and on the ground (before any ground or token
+    # version copies their animation settings)
+    rewards = sorted({item for _, item in assignments if item in REWARD_ITEMS})
+    if rewards:
+        boomerang = out.read(ground_items.pack_path(SPIN_LIKE))[1]
+        spin = reward_spin_files(boomerang)
+        spin_floor = out.table.get('Actor/%s.engine__actor__ActorParam.bgyml' % SPIN_LIKE)
+        if spin_floor is None:
+            raise SystemExit('%s: no size entry for its actor file' % SPIN_LIKE)
+        out.add(REWARD_ANIM_PARAM, spin[REWARD_ANIM_PARAM], harp_colors.ANIM_PARAM_LIKE,
+                sarc.Sarc.read(boomerang).files[harp_colors.ANIM_PARAM_LIKE])
+        for item in rewards:
+            pack = ground_items.pack_path(item)
+            src, old = out.read(pack)
+            new, (inner, old_inner, new_inner) = reward_spin_pack(old, item, spin)
+            out.write(pack, src, old, new)
+            # at least the size entry of SPIN_LIKE's actor file, as for the songs
+            out.size(inner, old_inner, new_inner, floor=spin_floor)
+        src, old = out.read(ACTOR_INFO)
+        out.write(ACTOR_INFO, src, old, reward_spin_rows(old, set(rewards)))
+        print('%-18s %s: turn when held up and on the ground (animation %s)'
+              % ('stones, Medallions', ', '.join(rewards), harp_colors.ANIM_PROJECT))
+
     # items that lie on the ground (freestanding, pot drops) and only exist as the model shown when received
     # get a ground version; items a chest gives that have no get-demo settings (ocarinas: Link's instrument)
     # get a held-up version; what a Gold Skulltula drops is a version built from its token, which marks the
@@ -3908,7 +4281,7 @@ def main(argv):
 
     def once_drop(item):
         """what a rock, a bush or a pot drops once: a version of the item that marks it when picked up"""
-        if item.startswith(once_items.PREFIX) or item == ground_items.TOKEN or dungeon_keys.is_ours(item):
+        if item.startswith(once_items.PREFIX) or item == ground_items.TOKEN or dungeon_ours(item):
             return item                                # a family's level (built further down); a real token
         kind = ground_items.kind_of(plain, item)
         if kind in ('item', 'equipment'):
@@ -3916,7 +4289,7 @@ def main(argv):
         return gs_drop(item)                           # a ground actor of the game: its token-built version
 
     def on_ground(item):
-        if item.startswith((turn_items.PREFIX, once_items.PREFIX)) or dungeon_keys.is_ours(item):
+        if item.startswith((turn_items.PREFIX, once_items.PREFIX)) or dungeon_ours(item):
             return item                                # a turning item (a progressive pair): built further down
         kind = ground_items.kind_of(plain, item)
         if kind == 'ground':
@@ -3926,7 +4299,7 @@ def main(argv):
         raise SystemExit('%s: not something that can lie on the ground, and no ground version can be made' % item)
 
     def in_chest(item):
-        if dungeon_keys.is_ours(item):
+        if dungeon_ours(item):
             return item                                # a dungeon's key: built further down
         if ground_items.kind_of(plain, item) == 'equipment':
             return grounds.setdefault((item, 'held'), ground_items.ground_name(item, 'held'))
@@ -3935,7 +4308,7 @@ def main(argv):
     def gs_drop(item):
         if item == ground_items.TOKEN:
             return item                                # its own token
-        if item.startswith(once_items.PREFIX) or dungeon_keys.is_ours(item):
+        if item.startswith(once_items.PREFIX) or dungeon_ours(item):
             return item                                # a level of a family (a progressive form): built further down
         if ground_items.kind_of(plain, item) in ('ground', 'item', 'equipment'):
             return grounds.setdefault((item, 'token'), ground_items.ground_name(item, 'token'))
@@ -3959,7 +4332,11 @@ def main(argv):
         return tbox_usuals.setdefault(usual, tbox_sync_event(usual))
 
     # chests that hold a dungeon's key: an opening event of our own around the usual one, which adds the key
-    key_events = {}                                    # (usual opening event, dungeon) -> our event around it
+    key_events = {}                                    # (usual opening event, what it is for) -> our event around it
+
+    def dungeon_ours(item):
+        """a version of a dungeon's key, boss key, map or compass: built by its own module"""
+        return dungeon_keys.is_ours(item) or dungeon_items.is_ours(item)
 
     def key_event(dungeon):
         def event_for(gyaml, event):
@@ -4169,9 +4546,10 @@ def main(argv):
                     usual = dyn.get(TBOX_EVENT_KEY) or chest_usual_event(plain, want['Gyaml'])
                     if changes[h][0] in key_chests:
                         dyn[TBOX_EVENT_KEY] = tbox_key_event(usual, key_chests[changes[h][0]])
-                        print('%-18s   holds a key of %s: opening event %s (runs %s, then adds 1 to %s)'
-                              % (changes[h][0], key_chests[changes[h][0]], dyn[TBOX_EVENT_KEY], usual,
-                                 dungeon_keys.flag(key_chests[changes[h][0]])))
+                        what = key_chests[changes[h][0]]
+                        print('%-18s   holds %s: opening event %s (runs %s, then %s %s)'
+                              % (changes[h][0], key_what_said(what), dyn[TBOX_EVENT_KEY], usual,
+                                 'adds 1 to' if isinstance(what, str) else 'sets', key_what_flag(what)))
                     else:
                         dyn[TBOX_EVENT_KEY] = tbox_sync_event(usual)
                         print('%-18s   holds an ocarina: opening event %s (runs %s, then makes Link\'s ocarina)'
@@ -4216,7 +4594,8 @@ def main(argv):
         like_data = plain(like)
         like_ef = evfl.loads(like_data)
         template = tbox_sync_template(like_ef.flowchart)
-        add = key_add_template(evfl.loads(plain(KEY_ADD_FLOW)).flowchart)
+        add = (key_add_template(evfl.loads(plain(KEY_ADD_FLOW)).flowchart),
+               key_set_template(evfl.loads(plain(KEY_SET_FLOW)).flowchart))
         try:
             data = evfl.dumps_checked(tbox_key_flow(template, add, key_events, like_ef.version))
         except ValueError as e:
@@ -4227,13 +4606,15 @@ def main(argv):
         out.write_new(flow_path(TBOX_KEY_FLOW), data, like)
         out.add(flow_path(TBOX_KEY_FLOW), data, like, like_data)
         rows = tbox_sync_rows(byml.loads(out.read(EVENT_SETTING)[1]).root, byml.loads(out.read(EVENT_INFO)[1]).root,
-                              (), [(usual, name) for (usual, _), name in sorted(key_events.items())], TBOX_KEY_FLOW)
+                              (), [(usual, name) for (usual, _), name in sorted(key_events.items(), key=lambda x: x[1])],
+                              TBOX_KEY_FLOW)
         for t, path in (('EventSetting', EVENT_SETTING), ('GameAnalyzedEventInfo', EVENT_INFO)):
             src, old = out.read(path)
             out.write(path, src, old, ground_items.add_rows(old, rows[t]))
-        for (usual, dungeon), name in sorted(key_events.items()):
-            print('%-18s %s: entry point and event %s: %s, then %s + 1'
-                  % ('key chests', flow_path(TBOX_KEY_FLOW), name, usual, dungeon_keys.flag(dungeon)))
+        for (usual, what), name in sorted(key_events.items(), key=lambda x: x[1]):
+            print('%-18s %s: entry point and event %s: %s, then %s %s'
+                  % ('key chests', flow_path(TBOX_KEY_FLOW), name, usual, key_what_flag(what),
+                     '+ 1' if isinstance(what, str) else 'set'))
 
     # songs: the cutscene only hands over the item (a family: the inventory questions in front of one get per
     # level); read back against the original
@@ -4666,22 +5047,66 @@ def main(argv):
             'chest': 'what a chest holds; the chest\'s opening event adds 1 to %s' % dungeon_keys.flag(dungeon),
         }[kind]))
 
+    # a dungeon's boss key, map or compass (tools/dungeon_items.py): its version for each kind of check it is on
+    for (base, dungeon, kind), name in sorted(item_versions.items()):
+        got, pack, new_inner, rows, like_pack, loose = dungeon_items.build(base, dungeon, kind, plain, table_rows,
+                                                                           model_there, once_src)
+        assert got == name
+        path = ground_items.pack_path(name)
+        out.write_new(path, pack, like=like_pack)
+        out.add(path, pack, like_pack, plain(like_pack))
+        for inner, (data, like, like_data) in sorted(new_inner.items()):
+            if inner in once_shared:                   # the same file as in the one-time versions' packs
+                if once_shared[inner] != data:
+                    raise SystemExit('%s: %s differs from the one in another version' % (name, inner))
+                continue
+            if not inner.split('/')[-1].startswith(name + '.'):
+                once_shared[inner] = data
+            out.add(inner, data, like, like_data)
+        for inner in sarc.Sarc.read(pack).files:          # every file of the pack has a size entry
+            if out.table.get(inner) is None:
+                raise SystemExit('%s: %s has no resource size entry' % (name, inner))
+        for t, row in rows.items():
+            new_rows.setdefault(t, []).append(row)
+        for lpath, (data, like, old_h, new_h, _) in sorted(loose.items()):
+            if lifted_before(lpath, data):
+                continue
+            out.write_new(lpath, data, like)
+            out.add(lpath, data, like, plain(like))
+            print('%-6s %s: lies %.3f %s on the ground (pose height %.3f -> %.3f, %s)'
+                  % ('dungeon', base, abs(new_h - old_h), 'higher' if new_h > old_h else 'lower', old_h, new_h, lpath))
+        print('dungeon version %-22s %s of %s (%d bytes), its messages under %s: %s' % (
+            name, base, dungeon, len(pack), dungeon_items.message_name(base, dungeon), {
+                'once': 'picked up, it sets %s and marks what dropped it' % dungeon_items.flag(base, dungeon),
+                'token': 'dropped by a Gold Skulltula: picked up, it sets %s and marks the skulltula done'
+                         % dungeon_items.flag(base, dungeon),
+                'chest': 'what a chest holds; the chest\'s opening event sets %s' % dungeon_items.flag(base, dungeon),
+            }[kind]))
+
     # named keys: their three texts in every language's message archive, with the dungeon's name as that
     # language's own text has it
-    named_keys = sorted({dungeon for dungeon, _, named in key_versions if named})
+    named_items = sorted({(base, dungeon) for base, dungeon, _ in item_versions})
+    named_keys = sorted({dungeon for dungeon, _, named in key_versions if named} | {d for _, d in named_items})
+    key_only = {dungeon for dungeon, _, named in key_versions if named}
+    # placed stones and Medallions: their names in their temple's colour (REWARD_TEMPLE)
+    reward_colours = {item: key_colours[REWARD_TEMPLE[item]] for item in rewards
+                      if item in REWARD_TEMPLE and REWARD_TEMPLE[item] in key_colours}
+    reward_colours.update({item: REWARD_COLOUR[item] for item in rewards if item in REWARD_COLOUR})
     for dungeon in sorted(set(key_colours) - set(named_keys)):
-        if dungeon in key_colour_asked:
+        if dungeon in key_colour_asked and dungeon not in {REWARD_TEMPLE.get(i) for i in reward_colours}:
             raise SystemExit('--key-colour %s: no key of this build names %s (%s@%s%s)'
                              % (dungeon, dungeon, dungeon_keys.KEY_ITEM, dungeon, dungeon_keys.NAMED))
         del key_colours[dungeon]
-    if named_keys:
+    if named_keys or reward_colours:
         # the colour of each name: a place in the game's list of text colours; one of ours takes a place no
         # text of the game uses, when a name of this build has it
         src, old = out.read(dungeon_keys.COLOUR_PACK)
         arc = sarc.Sarc.read(old)
         old_table = arc.files[dungeon_keys.COLOUR_TABLE]
         key_numbers = {x: dungeon_keys.colour_number(c) for x, c in key_colours.items()}
-        ours = sorted({c for c in key_colours.values() if c in dungeon_keys.OUR_COLOURS})
+        reward_numbers = {x: dungeon_keys.colour_number(c) for x, c in reward_colours.items()}
+        ours = sorted({c for c in list(key_colours.values()) + list(reward_colours.values())
+                       if c in dungeon_keys.OUR_COLOURS})
         new_table = dungeon_keys.colour_table(old_table, ours)
         if new_table is not None:
             arc.files[dungeon_keys.COLOUR_TABLE] = new_table
@@ -4697,16 +5122,33 @@ def main(argv):
                                % (dungeon_keys.OUR_COLOURS[n][0], n, dungeon_keys.OUR_COLOURS[n][1])
                                for n in ours if dungeon_keys.OUR_COLOURS[n][1])))
 
+    if reward_colours:
+        changed = change_messages(
+            out, a.romfs, lambda files, texts, encoding: reward_name_lines(texts, reward_numbers, encoding),
+            dungeon_keys.MESSAGE_FILE)
+        left = {lang: sorted(set(reward_colours) - {x[:-len(REWARD_MESSAGE)] for x in labels})
+                for lang, labels in changed.items()}
+        print('%-18s %s: the name in the get message coloured, %s; in %d of %d languages%s'
+              % ('stones, Medallions', dungeon_keys.MESSAGE_FILE,
+                 ', '.join('%s %s (number %d)' % (x, reward_colours[x], reward_numbers[x])
+                           for x in sorted(reward_colours)),
+                 sum(1 for v in left.values() if not v), len(left),
+                 '' if not any(left.values()) else ' (the text is left as it is in: %s)' % ', '.join('%s' % lang for lang, v in sorted(left.items()) if v)))
+    if named_keys:
         def key_lines(arc):
             places = msbt.Msbt.read(arc.files[dungeon_keys.LOCATION_FILE]).texts
             lines = {}
             for dungeon in named_keys:
                 if dungeon not in places:
                     raise SystemExit('%s: no name for it in %s' % (dungeon, dungeon_keys.LOCATION_FILE))
-                lines.update(dungeon_keys.messages(dungeon, msg_plain(places[dungeon]), key_numbers.get(dungeon)))
+                if dungeon in key_only:
+                    lines.update(dungeon_keys.messages(dungeon, msg_plain(places[dungeon]), key_numbers.get(dungeon)))
+            for base, dungeon in named_items:
+                lines.update(dungeon_items.messages(base, dungeon, msg_plain(places[dungeon]),
+                                                    key_numbers.get(dungeon)))
             return lines
         scrub_messages(out, a.romfs, key_lines, dungeon_keys.MESSAGE_FILE)
-        print('%-18s %s: the texts of the named keys of %s added in every language'
+        print('%-18s %s: the texts of the keys, boss keys, maps and compasses of %s added in every language'
               % ('key names', dungeon_keys.MESSAGE_FILE, ', '.join(
                   '%s (its name in colour %s, number %d)' % (x, key_colours[x], key_numbers[x])
                   if x in key_numbers else x for x in named_keys)))

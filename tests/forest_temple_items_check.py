@@ -51,7 +51,8 @@ KEY_CHESTS = ('FT_ENTRANCE_CHEST', 'FT_FIRST_STALFOS_ROOM_CHEST', 'FT_WELL_CHEST
               'FT_JOELLE_CHEST')
 CHEST_EVENTS = {'FT_BOW_CHEST': ('ForestTemple_GetBow', 'remove'),
                 'FT_EAST_COURTYARD_CHEST': ('ForesetTemple_GetMap', 'keep'),
-                'FT_BETH_CHEST': ('ForesetTemple_GetCompass', 'keep')}
+                'FT_BETH_CHEST': ('ForesetTemple_GetCompass', 'keep'),
+                'FT_BOSS_KEY_CHEST': ('ForesetTemple_GetBossKey', 'remove')}      # decided in part 7
 
 
 def check(name, ok, detail=''):
@@ -125,12 +126,10 @@ def main(romfs):
                   len(chests) == 12 and bare == ['FT_FALLING_CEILING_ROOM_CHEST']
                   and place(bare[0])[2]['Gyaml'] in build_mod.CHECKING_CHEST, bare)
     events = {cid: dyn(place(cid)[2]).get(build_mod.TBOX_EVENT_KEY) for cid in chests}
-    good &= check('  four have an opening event of their own: the Bow\'s, the map\'s, the compass\'s (each with a '
-                  'decision in CHEST_EVENTS) and the boss key\'s (none yet: part 7)',
-                  {c: e for c, e in events.items() if e} == dict(
-                      {c: e for c, (e, _) in CHEST_EVENTS.items()}, FT_BOSS_KEY_CHEST='ForesetTemple_GetBossKey')
-                  and all(build_mod.CHEST_EVENTS[e][0] == what for e, what in CHEST_EVENTS.values())
-                  and 'ForesetTemple_GetBossKey' not in build_mod.CHEST_EVENTS)
+    good &= check('  four have an opening event of their own: the Bow\'s, the map\'s, the compass\'s and the boss '
+                  'key\'s, each with a decision in CHEST_EVENTS',
+                  {c: e for c, e in events.items() if e} == {c: e for c, (e, _) in CHEST_EVENTS.items()}
+                  and all(build_mod.CHEST_EVENTS[e][0] == what for e, what in CHEST_EVENTS.values()))
 
     # ---- one pot or chest of each form given an item
     def patched(cid, item, kind):
@@ -163,9 +162,10 @@ def main(romfs):
                   'the usual opening)',
                   as_intended('FT_EAST_COURTYARD_CHEST', 'Item_Hammer', 'chest')
                   and as_intended('FT_BETH_CHEST', 'Item_Hammer', 'chest'))
-    said = refused(patched, 'FT_BOSS_KEY_CHEST', 'Item_Hammer', 'chest')
-    good &= check('the boss key\'s chest with another item is refused (its opening event has no decision yet)',
-                  bool(said) and 'ForesetTemple_GetBossKey' in said and 'CHEST_EVENTS' in said, said)
+    good &= check('the boss key\'s chest with another item: its opening event (Navi\'s message about the boss key) '
+                  'is removed; with the boss key itself it stays',
+                  as_intended('FT_BOSS_KEY_CHEST', 'Item_Hammer', 'chest', gone=[build_mod.TBOX_EVENT_KEY])
+                  and as_intended('FT_BOSS_KEY_CHEST', 'Item_Dungeon_BossKey', 'chest'))
     good &= check('the five small key chests are ordinary chests (an item of their own, no opening event)',
                   all(dyn(place(cid)[2]).get('Drop__DropActor') == 'Item_Dungeon_SmallKey'
                       and not events[cid] for cid in KEY_CHESTS))
@@ -223,10 +223,11 @@ def main(romfs):
                 build_mod.main(['--romfs', romfs, '--out', tmp, '--name', name] + list(args))
             return out.getvalue(), os.path.join(tmp, name, 'romfs')
 
-        said = refused(run, 'no', 'FT_BOSS_KEY_CHEST=Item_Hammer')
-        good &= check('a build with the boss key\'s chest changed is refused and nothing is written',
-                      bool(said) and 'CHEST_EVENTS' in said and not os.path.isdir(os.path.join(tmp, 'no', 'romfs', 'Banc')),
-                      said)
+        said = refused(run, 'no', 'FT_FIRST_STALFOS_ROOM_POT_02=Item_Dungeon_BossKey')
+        good &= check('a build with the boss key on a pot, its dungeon not named, is refused and nothing is written '
+                      '(it would set nothing when picked up)',
+                      bool(said) and 'only counts in a chest' in said
+                      and not os.path.isdir(os.path.join(tmp, 'no', 'romfs', 'Banc')), said)
         said, folder = run('ft', '--fix', FIX, *['%s=%s' % x for x in SAMPLE])
         files = tree(folder)
         read = lambda f: open(os.path.join(folder, *f.split('/')), 'rb').read()   # noqa: E731

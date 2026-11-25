@@ -71,6 +71,22 @@ BGYML = {
     # each, constant 0), the most that file allows. It gives the game's entry for the game's file, and for a
     # longer list it can only be too much
     'game__ui__MessageColorTable': (0, {'{}': 0, '/MessageColorArray[]': 733, '/MessageColorArray[]{}': 0}),
+    # the pause menu's table of what is on each page. The game has one file of this type (239 elements in its
+    # lists, entry 46824 = size32 + 32392, 135 per element on average), so what each list costs cannot be
+    # told apart. The builder only adds rows to StoneArray: the rule charges 1024 for each of its rows and for
+    # each item of a row, far more than any element can cost, and spreads the rest evenly (112 each, constant
+    # 152), which gives the game's entry for the game's file. For a longer StoneArray it can only be too much
+    'game__ui__PouchTable': (152, {
+        '{}': 0, '/ImportantDoF[]': 112, '/ImportantDoF[]{}': 0, '/ImportantInOutPos{}': 0,
+        '/ImportantStoneOnlyCameraAt{}': 0, '/ImportantStoneOnlyCameraPos{}': 0, '/CollectArray[]': 112,
+        '/CollectArray[]{}': 0, '/CollectArray[]/Actor[]': 112, '/CollectArray[]/Actor[]{}': 0,
+        '/EquipmentArray[]': 112, '/EquipmentArray[]{}': 0, '/EquipmentArray[]/Actor[]': 112,
+        '/EquipmentArray[]/Actor[]{}': 0, '/ItemArray[]': 112, '/ItemArray[]{}': 0, '/ItemArray[]/Actor[]': 112,
+        '/ItemArray[]/Actor[]{}': 0, '/MedalArray[]': 112, '/MedalArray[]{}': 0, '/MedalArray[]/Actor[]': 112,
+        '/MedalArray[]/Actor[]{}': 0, '/NoDisplayArray[]': 112, '/NoDisplayArray[]{}': 0,
+        '/NoDisplayArray[]/Actor[]': 112, '/NoDisplayArray[]/Actor[]{}': 0, '/OcarinaArray[]': 112,
+        '/OcarinaArray[]{}': 0, '/OcarinaArray[]/Actor[]': 112, '/OcarinaArray[]/Actor[]{}': 0,
+        '/StoneArray[]': 1024, '/StoneArray[]{}': 0, '/StoneArray[]/Actor[]': 1024, '/StoneArray[]/Actor[]{}': 0}),
 }
 
 # .bgyml types with a table whose keys are free names (the slots of ActorHoldSettings): in the containers of

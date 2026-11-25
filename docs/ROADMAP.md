@@ -169,6 +169,32 @@ Parts, in order:
    one text for all dungeons).
 7. **Boss key, boss door, boss heart and the Medallion,** with the reward "at the end of the dungeon" or
    "anywhere" (D11).
+   **Built 2026-11-24, to test in game:** the boss key anywhere (`Item_Dungeon_BossKey@<dungeon>`; the map and
+   the compass the same way), another item in the boss key's chest, on the boss's heart and where the
+   Medallion is given, the Medallion on another check.
+   **Passed in game 2026-11-24:** the map and the compass from Mido's chests and the boss key from a pot in
+   Kokiri Forest (each with "(Forest Temple)" in green), the boss door opened with that key, the Megaton
+   Hammer in the boss key's chest (no message from Navi), the Boomerang in the Heart Container's place (the
+   boss's last cutscene plays to its end), the Silver Scale from Saria, the Forest Medallion from a pot.
+   **Open:** a family where the Medallion is given; in Saria's
+   cutscene the Medallion still floats down whatever is given.
+   **The Key Items tab (the user, 2026-11-24: "key items tab first"):** it was "???" after the Medallion from
+   the pot. In game the same day: a Spiritual Stone found in a chest opens it (no cutscene needed) and the
+   Medallion is then on it; a Medallion alone does not open it, whatever its age mark (third round). The
+   game opens the tab when Link owns the first item of any row of the pause menu table's `StoneArray` (read
+   from its program). **Passed in game 2026-11-24:** `--fix key_items_tab_open` (two rows more in that list,
+   for the green tunics every file starts with): the tab is open and empty on a new file, and a Medallion or
+   a stone found afterwards is on it.
+   **Decision 43:** the tab is open from the start in every build.
+   **Passed in game 2026-11-24:** a placed stone or Medallion turns when Link holds it up and when it lies
+   on the ground (it gets the Boomerang's animation settings, as the songs' harp did). **Not known:** how the
+   changed actor looks in the 11 cutscenes that show a stone or a Medallion (each with its area).
+   **Passed in game 2026-11-24 (decision 44):** a placed stone or Medallion says its name in its temple's
+   colour in the get window (the keys' colours); the Light Medallion's is gray.
+   **Found in the same test:** with all nine owned, the Spirit and the Shadow Medallion were missing on the
+   Key Items page (the two tunic rows of `key_items_tab_open` took two of the page's nine places).
+   **Corrected and passed in game 2026-11-24:** the nine real rows come first in the table, the tunic rows
+   behind them: all nine are shown, the cursor and "Details" work, at both ages.
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.
