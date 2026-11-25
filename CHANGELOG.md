@@ -30,7 +30,23 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
   Medallion found before that cutscene sits in a tab that is still closed. **Not found: what the game keeps in
   the save file for an opened tab.** Two candidates to try in game: the saved yes/no
   `HavePlayedEvent.Dm_Kokiri_0130` (the game keeps one for each of its 3,647 events; setting it may also skip
-  the Deku Tree's cutscene), or simply owning a Spiritual Stone. Not part of part 7.
+  the Deku Tree's cutscene), or simply owning a Spiritual Stone.
+
+**The Key Items tab, second round in game (user, 2026-11-24; the user: "key items tab first"):** a build with
+no builder change, the Forest Medallion in a pot and the Kokiri Emerald and the Goron's Ruby in Mido's chests.
+- Before anything: the tab is "???". After the Forest Medallion: still "???".
+- **After the Kokiri Emerald from the chest: "tab is there, emerald and medallion is there."** The chest showed
+  the Kokiri Emerald as the game does. The Goron's Ruby joined them; the same after save and reload; as an
+  adult (debug menu) the tab is open with the Medallion on it.
+- **So: owning a Spiritual Stone opens the tab, no cutscene and no flag is needed,** and a Medallion found
+  first is not lost: it shows as soon as a stone is owned. What is left: a Medallion alone does not open it.
+- Read from the files meanwhile: no saved flag for the tab under any likely name (about 43,000 tried against
+  the game's flag list); the game's program does not name the Deku Tree's cutscene, and does hold a list of
+  the three stones and six Medallions; the pause menu's table (`UI/Pouch/PouchTable`) lists the Medallions with
+  the mark `IsUsableAdult` and the stones with no mark.
+- **Third round, to test in game:** `--fix medallions_try`, an experiment (`MEDAL_TRY` in
+  `tools/build_mod.py`): the Forest Medallion's row loses its mark, the Fire Medallion's is renamed to
+  `IsUsableChild`, to see whether either opens the tab by itself. It is not a fix yet and has no test script.
 
 - **The boss key anywhere** (`tools/dungeon_items.py`, new): `CHECK_ID=Item_Dungeon_BossKey@ForestTemple`. What
   was found: the boss key, the map and the compass are yes/no fields of the dungeon's saved record

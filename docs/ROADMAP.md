@@ -177,9 +177,11 @@ Parts, in order:
    Hammer in the boss key's chest (no message from Navi), the Boomerang in the Heart Container's place (the
    boss's last cutscene plays to its end), the Silver Scale from Saria, the Forest Medallion from a pot.
    **Open:** a family where the Medallion is given; the Medallion on the ground does not spin; in Saria's
-   cutscene the Medallion still floats down whatever is given; the Key Items tab (stones and Medallions) was
-   "???" after the Medallion from the pot: the tab is opened by the Kokiri Emerald's cutscene
-   (`Dm_Kokiri_0130`), so a randomizer has to open it itself (for phase 2, with the Deku Tree).
+   cutscene the Medallion still floats down whatever is given.
+   **The Key Items tab (the user, 2026-11-24: "key items tab first"):** it was "???" after the Medallion from
+   the pot. In game the same day: a Spiritual Stone found in a chest opens it (no cutscene needed) and the
+   Medallion is then on it; a Medallion alone does not open it. **To test in game:** `--fix medallions_try`
+   (two Medallions with their "adult only" mark changed in two ways).
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.

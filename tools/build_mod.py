@@ -2941,8 +2941,57 @@ def bombchus_without_bag(data):
     return new_data, sorted(want)
 
 
+POUCH_TABLE = 'UI/Pouch/PouchTable/PouchTable.game__ui__PouchTable.bgyml'
+# AN EXPERIMENT (to test in game, 2026-11-24), not a fix yet. The Key Items tab of the pause menu stays "???"
+# for a Link who has a Medallion and no Spiritual Stone (in game 2026-11-24: "???" after the Forest Medallion,
+# open after the Kokiri Emerald, with the Medallion on it). The pause menu's table lists the six Medallions
+# with the mark IsUsableAdult and the three stones with no mark. Each row named here gets one form of the
+# mark, to see in game which form (if any) opens the tab for a child who has only that Medallion:
+#   'none'   the mark removed, as the stones have none
+#   'child'  the mark renamed to IsUsableChild
+MEDAL_TRY = {'Item_Medal_Forest': 'none', 'Item_Medal_Fire': 'child'}
+
+
+def medallions_try(data):
+    """the pause menu's table (POUCH_TABLE): the MedalArray rows of MEDAL_TRY get their form of the age mark"""
+    doc = byml.loads(data)
+    rows = doc.root['MedalArray']
+    changed = []
+    for i, row in enumerate(rows):
+        actor = row['Actor'][0]
+        form = MEDAL_TRY.get(actor['ActorShort'])
+        if form is None:
+            continue
+        if len(row['Actor']) != 1 or actor.get('IsUsableAdult') is not True or 'IsUsableChild' in actor:
+            raise SystemExit('%s: its row in MedalArray is not as expected (game files differ from what this '
+                             'was made for)' % actor['ActorShort'])
+        actor = type(actor)(actor)                    # own copies (shared nodes)
+        del actor['IsUsableAdult']
+        if form == 'child':
+            actor['IsUsableChild'] = True
+        row = type(row)(row)
+        row['Actor'] = type(row['Actor'])([actor])
+        rows[i] = row
+        changed.append('%s: %s' % (actor['ActorShort'], form))
+    if len(changed) != len(MEDAL_TRY):
+        raise SystemExit('MedalArray: found %d of the %d rows of MEDAL_TRY' % (len(changed), len(MEDAL_TRY)))
+    new = byml.dumps(doc)
+    # read back: only those rows changed, each as intended
+    want = byml.loads(data).root
+    for row in want['MedalArray']:
+        form = MEDAL_TRY.get(row['Actor'][0]['ActorShort'])
+        if form:
+            del row['Actor'][0]['IsUsableAdult']
+            if form == 'child':
+                row['Actor'][0]['IsUsableChild'] = True
+    if byml.loads(new).root != want:
+        raise SystemExit('read-back: the pause menu\'s table differs from what was intended')
+    return new, changed
+
+
 # name -> (file, function(data) -> (new data, list of what changed))
 TABLE_FIXES = {
+    'medallions_try': (POUCH_TABLE, medallions_try),
     'bombchus_without_bag': ('RSDB/PouchActorInfo.Product.111.rstbl.byml', bombchus_without_bag),
     'magic_is_separate': ('RSDB/PouchActorInfo.Product.111.rstbl.byml', magic_is_separate),
 }
