@@ -148,7 +148,8 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".
 - Starting as adult; Zora's Fountain open for child; moving Malon and Talon home.
-- Shortening each story cutscene (needs a list of every cutscene first).
+- Shortening each story cutscene (needs a list of every cutscene first: **the list is there since 2026-11-25,
+  `docs/CUTSCENES.md`**; the shortening itself is not tried yet).
 - Mask of Truth question in front of a stone's words.
 - Shop families (shelves that appear only while a flag holds).
 - Music: how the remake stores it, whether tracks can be added.

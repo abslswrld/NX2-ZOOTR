@@ -233,7 +233,7 @@ def checks(romfs, builds):
     for x in flows.values():
         try:
             fc = evfl.loads(x).flowchart
-        except Exception:                              # the flows the reader refuses (timelines)
+        except Exception:                              # timeline files have no flowchart
             continue
         for e in fc.events:
             if e.type == 'switch' and fc.actors[e.actor].queries[e.query] == build_mod.GIFT_PAIR_QUERY \

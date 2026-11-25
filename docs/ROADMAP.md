@@ -212,6 +212,12 @@ Parts, in order:
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.
+**The cutscene list is done (2026-11-25): `docs/CUTSCENES.md`** (the same as data: `data/cutscenes.json`), made
+by `tools/cutscene_list.py` from the game's files for the whole game, one section per area: 319 story
+cutscenes, the 217 events that run them, 363 small scenes. The reader now takes the cutscenes' timeline files
+(`formats/evfl.py`: all 914 event flow files, byte for byte). Not in it, because the files don't say: how long
+a flowchart cutscene runs (only its wait steps), and what the game's own skip keeps of a cutscene (to try in
+game with the first area's D15 work).
 
 (The debug-menu warp was checked on 2026-11-23: it leaves the temple untouched.)
 
@@ -324,7 +330,7 @@ models; barren and "always" hints; trade quest items.
 | Starting state: setting flags as well as items on a new file | **Answered 2026-11-23: both**, read from the game's files and confirmed in game (part 1's test). The game's own new-file list (`Sequence/SetPouchAndStatusForGameStart`) takes one more item push per item and one more setter per flag (Bool, Int, String64). Not covered yet: struct fields (hearts, rupees), items kept under another inventory name (Fairy Slingshot, Fairy Bow, gauntlets), per-placement flags (an opened chest) |
 | Keys placed outside their dungeon; "start with" keys | 1 |
 | Debug-menu warp leaves areas untouched | **Settled 2026-11-23:** a new file warped into the Forest Temple keeps its doors locked and 0 small keys |
-| Shortening each cutscene and keeping what it sets | 1 (list), then every area |
+| Shortening each cutscene and keeping what it sets | **List done 2026-11-25** (`docs/CUTSCENES.md`: what each one sets, gives and who asks whether it was played; timelines can be read and written). The change itself: every area. Still open: what the game's own skip keeps, and a flowchart cutscene's real length |
 | Shop families: shelves that appear only while a flag holds | 2 |
 | Scrubs (15) and shop shelves (44) look low next to the N64 game | 2-3, as those areas are mapped |
 | Starting as adult | 3 |

@@ -13,7 +13,7 @@ no game files are included.
 | Zstandard `.zs` (with the game's dictionaries) | `formats/zstd.py` | every compressed file | 9,341/9,341 decompress correctly |
 | SARC `.pack` / `.sarc` | `formats/sarc.py` | archives (actor packs, text) | 8,402/8,402 byte-identical |
 | BYML v7, little and big endian | `formats/byml.py` | GameData, RSDB tables, map actors (`.bcett`) | 144,150/144,152 byte-identical (see below) |
-| BFEVFL event flows | `formats/evfl.py` | item hand-outs, shops, cutscenes | 650/914 byte-identical; 264 not readable yet (see below). New steps can be added to a flow, not only existing ones changed (see "Adding steps to an event flow") |
+| BFEVFL event flows | `formats/evfl.py` | item hand-outs, shops, cutscenes | 914/914 byte-identical (2026-11-25: the 261 timeline files of the cutscenes and the 3 files with entry point variables are read and written too, see "Timelines"). New steps can be added to a flow, not only existing ones changed (see "Adding steps to an event flow") |
 | MSBT text | `formats/msbt.py` | item names, hints, dialogue | 8,640/8,640 byte-identical |
 | RESTBL | `formats/restbl.py` | file-size table the game needs for changed files | 1/1 byte-identical |
 | AINB v0x408 (AI, logic and sequence graphs) | `formats/ainb.py` | pot respawn rules, item pick-up logic, level logic (the rock circle) | 11,707/11,707 byte-identical (2026-11-17: 1,942 loose files in `AI`, `Logic`, `Sequence` and 9,765 inside packs; 5,036 different files) |
@@ -23,8 +23,6 @@ Whole game = `run_tests.bat` (the Event, RSDB, Mals, GameData, Pack and System f
 171,450 files).
 
 Not identical yet:
-- **Event flows with timelines** (261 cutscene files, `Dm_...`) and **entry point variables** (3 files:
-  `Dm_SY_Get`, `Dm_SY_Ocarina`, `LinkSleepInBed`): the reader refuses them on purpose for now.
 - **2 BYML system files** (`PhiveConfig.byml`, `HeapDef.byml`) come back smaller than the originals. Not
   files the randomizer edits.
 
@@ -65,7 +63,52 @@ module already has its own texture code), save files (needed for the tracker).
 - The 32-bit values of `return` events and `callswitch` cases are the **FNV-1a hash of a name** (`Yes`,
   `No`, `Complete`... match; `evfl.return_hash`).
 - Each entry point of an event flow lists the subflow and callswitch events that can run from it (true of
-  all 5,465 entry points in the 650 files read); the writer's helpers keep that list up to date.
+  every entry point of the game's 653 flowchart files); the writer's helpers keep that list up to date.
+- An entry point can have variables of its own with a starting value (5 entry points in 3 files:
+  `LinkSleepInBed` `IsKokiriBed`, `Dm_SY_Ocarina` `IsNotNeedSensor`, `Dm_SY_Get` `Frames`): a name list and
+  16 bytes per variable, written in place of the 24 empty bytes an entry point otherwise has
+  (`EntryPoint.variables`).
+
+## Timelines (cutscene files)
+
+A cutscene file (`Dm_...`) holds either a flowchart or a **timeline**, never both (261 timeline files). The
+timeline part is not in the public documentation for this version; it was worked out from the game's files
+(2026-11-25) and `formats/evfl.py` reads and writes it byte for byte:
+
+- **One `TLIN` block** (0x60 bytes): its length in frames, counts, and pointers to its actors, clips,
+  triggers, sub-timelines and cuts. The actors' parameters and action names are written *before* the block,
+  the clips' parameters after the cuts.
+- **Times are frames, 60 a second:** 12 movie cutscenes have a timeline beside their video file
+  (`Event/Movie/<name>.webm`), and for 11 of them it is as long as the video to within 2% (`Dm_Kokiri_0095`:
+  7040 frames, video 117.33 s).
+- **Clip** (0x18 bytes): start, length, actor, action, a track number, parameters: "this actor does this from
+  frame A for N frames". Clips of one actor on one track never overlap; an actor's `cut` byte is its number
+  of tracks.
+- **Triggers:** every clip's start (1) and end (2), in time order; at one frame the ends come first, each by
+  clip number. `evfl.timeline_triggers(tl)` gives exactly the list of all 261 files, so a changed timeline
+  can be written.
+- **Cuts** (0x18 bytes): the frame each camera cut starts at, and its name (`cut1`...). **Sub-timelines:**
+  the names of the files run alongside (`<name>_Effect`, `<name>_Env`).
+- No file has one-shot steps, timeline parameters or cut parameters; the reader takes them as the public
+  documentation of the older version has them.
+- **A timeline cannot set a flag or give an item:** its 94 kinds of step are camera, animation, voice, light,
+  effect, rumble and weather steps (the one thing five timelines set is the time of day). What a cutscene
+  sets is in the flowchart that runs it. See `docs/CUTSCENES.md`.
+
+`tests/cutscene_list_check.py` checks all of this on every file, changes a timeline (longer, a clip and a
+cut added) and reads it back, and checks that mistakes are refused.
+
+## The cutscene list
+
+`tools/cutscene_list.py "<romfs>"` writes **`docs/CUTSCENES.md`** (to read) and **`data/cutscenes.json`** (the
+same as data): every cutscene of the game by area, for decision 15 (cutscenes skippable, shortened or
+removed). It reads only. For each: the files, the kind (timeline, movie, flowchart), the length, what starts
+it and when, what it sets and gives, what it runs next, whether the game lets it be skipped, who asks whether
+it has been played, and its check. 319 story cutscenes (events named `Dm_...`), 217 lead-in events (they run
+a story cutscene as a step and hold what it "sets"), 363 small scenes (a door opens, a chest appears), 79
+system scenes (`Dm_SY_...`). Where the facts come from is at the top of the tool; how to read an entry is at
+the top of the document. Both files are made by the tool: after a game update, run it again
+(`tests/cutscene_list_check.py` fails when they are out of date).
 
 ## Adding steps to an event flow
 
@@ -84,7 +127,7 @@ module already has its own texture code), save files (needed for the tracker).
 | `evfl.dumps_checked(flow)` | brings the entry point lists up to date, checks the flow (names unique, every index in range), writes it, reads it back and compares every event, actor, action, query, parameter and entry point with what was meant |
 
 Everything new goes at the end of its list, so every existing index stays valid. `actor` is an index, a name
-or (name, secondary name). `tests/evfl_add_check.py` adds one of everything to each of the 650 flows and
+or (name, secondary name). `tests/evfl_add_check.py` adds one of everything to each of the 653 flowchart files and
 checks the read-back, and keeps two worked examples (examples only: the builder doesn't use them and they
 haven't been tried in the game):
 
@@ -169,6 +212,8 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `tests/reward_names_check.py` | the Spiritual Stones' and Medallions' names in their temple's colour in the get window: the nine items' names and messages in every language of the game, the coloured texts (each language's own, Japanese left alone, the Light Medallion left alone), and whole builds read back, with the list of text colours (in `run_tests.bat`) |
 | `tests/boss_check.py` | the boss key, boss door, boss heart and Medallion of the Forest Temple: where the game saves a dungeon's boss key, map and compass and what sets them, the boss key chest's own event, the boss room's logic, the Medallion's cutscene and the file of it the game loads; the nine versions read back, what is refused, and a whole build read back from the mod folder (in `run_tests.bat`) |
 | `tests/dungeon_keys_check.py` | a small key that counts for one dungeon wherever it is found (`CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`): where the game saves a dungeon's key count, that its own key steps name no dungeon, the game's models for the two new steps, the key's three versions (ground, Gold Skulltula, chest) read back, what is refused, and a whole build read back from the mod folder (in `run_tests.bat`) |
+| `tools/cutscene_list.py` | the cutscene list: writes `docs/CUTSCENES.md` and `data/cutscenes.json` from the game's files (events, flows, timelines, maps, logic graphs, actor parameters, the game's text); `--show <event>` prints one entry. Reads only |
+| `tests/cutscene_list_check.py` | the timeline reader and the cutscene list: all 914 event flow files read and written back byte for byte; the timeline rules on all 261 timeline files (trigger order, tracks, cuts, no step that sets a flag); the five entry point variables; a changed timeline read back, mistakes refused; the two list files are what the tool makes of the game now; every `Dm_` file is in the list; 60 frames a second against the movie files; facts found earlier (Saria on the bridge, Saria's Song, the opening, Link's door, the Forest Temple's boss and Medallion) |
 | `tests/run_all.py` | runs every test script of `run_tests.bat` side by side (`--jobs N` at once, default 8; `--only NAME,...` for a few) and says which passed; the round-trip test is shown as its summary (it always lists the same known differences). A new test script adds its row to `STEPS` there; a `*_check.py` left out is named when it runs |
 | `tests/size_check.py` | checks those rules against the entry of every game file they cover (reads every pack: several minutes; not part of `run_tests.bat`) |
 

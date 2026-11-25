@@ -11,7 +11,7 @@ test_logs/<script>.txt (not uploaded); a failing script's last lines are shown a
          working; run_tests.bat always runs them all
 
 A script passes when it ends with exit code 0. The round-trip test is a report, not a pass or fail: it always
-lists the same known differences (5 BYML files, 264 event flows with timelines), so its summary is shown
+lists the same known differences (5 BYML files), so its summary is shown
 instead; the full report is in report.txt, as before.
 """
 import concurrent.futures
@@ -56,6 +56,7 @@ STEPS = [
     ('reward_spin_check', 'Stones and Medallions turn check'),
     ('reward_names_check', 'Stones\' and Medallions\' names in colour check'),
     ('forest_temple_every_spot_check', 'Forest Temple, every spot check'),
+    ('cutscene_list_check', 'Timeline reader and cutscene list check'),
     ('roundtrip', 'Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence)'),
 ]
 
@@ -66,7 +67,8 @@ NOT_HERE = {'logic_check', 'db_check', 'size_check'}
 # so the slowest start first. A script not listed starts after these.
 SECONDS = {'ground_lift_check': 114, 'roundtrip': 103, 'families_check': 70, 'skulltula_prog_check': 63,
            'one_time_check': 54, 'skip_level_check': 47, 'hint_check': 35, 'gossip_check': 34,
-           'pairs_more_check': 31, 'evfl_add_check': 31, 'forest_temple_items_check': 26, 'ocarina_fix_check': 19,
+           'pairs_more_check': 31, 'evfl_add_check': 31, 'cutscene_list_check': 30,
+           'forest_temple_items_check': 26, 'ocarina_fix_check': 19,
            'start_state_check': 10, 'chest_check': 8, 'three_chest_check': 7, 'forest_temple_keys_check': 6,
            'gift_check': 6, 'ground_prog_check': 5}
 
