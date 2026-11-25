@@ -44,9 +44,24 @@ no builder change, the Forest Medallion in a pot and the Kokiri Emerald and the 
   the game's flag list); the game's program does not name the Deku Tree's cutscene, and does hold a list of
   the three stones and six Medallions; the pause menu's table (`UI/Pouch/PouchTable`) lists the Medallions with
   the mark `IsUsableAdult` and the stones with no mark.
-- **Third round, to test in game:** `--fix medallions_try`, an experiment (`MEDAL_TRY` in
-  `tools/build_mod.py`): the Forest Medallion's row loses its mark, the Fire Medallion's is renamed to
-  `IsUsableChild`, to see whether either opens the tab by itself. It is not a fix yet and has no test script.
+- **Third round in game (user, 2026-11-24): the age mark is not it.** An experiment (`--fix medallions_try`,
+  removed again): the Fire Medallion's row marked `IsUsableChild` instead of `IsUsableAdult`, the Forest
+  Medallion's with no mark. After each of them the tab was still "???"; after the Kokiri Emerald it opened
+  with both Medallions on it, also as an adult.
+- **The user: "is there a way to force key items open without any medals/stones?"** Read from the game's
+  program (`image.bin`, read only; the one place that uses the text label `Unopened`): the tab bar walks the
+  rows of the pause menu table's `StoneArray` and asks, for each row, whether Link owns its first item
+  (`Actor[0].ActorShort`); any one owned opens the tab. `MedalArray` is not looked at, which is why a
+  Medallion alone never opens it. The page's own code asks the same of `StoneArray`.
+- **Fourth round, to test in game:** `--fix key_items_tab_try`, an experiment (`KEY_ITEMS_ALWAYS` in
+  `tools/build_mod.py`): two rows more in `StoneArray`, for the two green tunics, which the game's own
+  new-file list gives every file. The rows name no model and no place on the page (as the rows of
+  `NoDisplayArray` name none). **Not known:** what the page does with such a row (nothing, something odd, or
+  a freeze). It is not a fix yet and has no test script.
+- **A size rule for the pause menu's table** (`tools/sizes.py`, `game__ui__PouchTable`): the game has one file
+  of the type, so the rule charges 1024 for each row of `StoneArray` and for each item of a row (far more than
+  an element can cost), spreads the rest evenly, and gives the game's entry for the game's file
+  (`tests/size_check.py`: OK).
 
 - **The boss key anywhere** (`tools/dungeon_items.py`, new): `CHECK_ID=Item_Dungeon_BossKey@ForestTemple`. What
   was found: the boss key, the map and the compass are yes/no fields of the dungeon's saved record

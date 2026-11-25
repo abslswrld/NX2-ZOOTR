@@ -180,8 +180,10 @@ Parts, in order:
    cutscene the Medallion still floats down whatever is given.
    **The Key Items tab (the user, 2026-11-24: "key items tab first"):** it was "???" after the Medallion from
    the pot. In game the same day: a Spiritual Stone found in a chest opens it (no cutscene needed) and the
-   Medallion is then on it; a Medallion alone does not open it. **To test in game:** `--fix medallions_try`
-   (two Medallions with their "adult only" mark changed in two ways).
+   Medallion is then on it; a Medallion alone does not open it, whatever its age mark (third round). The
+   game opens the tab when Link owns the first item of any row of the pause menu table's `StoneArray` (read
+   from its program). **To test in game:** `--fix key_items_tab_try` (two rows more in that list, for the green
+   tunics every file starts with: the tab open from the start).
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.
