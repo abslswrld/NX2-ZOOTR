@@ -121,7 +121,8 @@ Game fixes (--fix NAME, see FIXES and FILE_FIXES):
                              start. In the game it is "???" until Link owns a stone, so a Medallion found
                              first sat in a closed tab; the game opens it for the first item of any row of
                              its pause menu table's StoneArray, which gets two rows for the green tunics
-                             every file starts with (they show nothing on the page)
+                             every file starts with (they show nothing on the page), behind the stones'
+                             and the Medallions' rows (the page's nine places go by the order of the rows)
     bombs_without_bracelet   bombs from the bomb bag can be held without the Goron Bracelet: the bomb's lift
                              grade becomes the "no upgrade" grade of rocks, bushes, pots and Bombchus (bomb
                              flowers have their own copy of the setting and still need the bracelet)
@@ -2839,7 +2840,7 @@ REWARD_ANIM_PARAM = 'Component/AnimationParam/Item_NX2_Spin.engine__component__A
 # color of the keys to the medallions/stones names. Kokiri and Forest Green, Goron and Fire red, Zora and Water
 # Blue, Spirit Orange, Shadow Purple"): the colours of decision 40 (dungeon_keys.COLOURS), in the message of
 # the get window ("You were entrusted with the Forest Medallion!"), as the keys have theirs. The Light
-# Medallion has no temple and keeps the text's own colour. Each language keeps its own text: the item's name
+# Medallion has no temple and is gray (REWARD_COLOUR). Each language keeps its own text: the item's name
 # (its _Name text) is looked for in its get message, capitals or not, and coloured where it stands once. A
 # message with reading marks over its characters (the tag 0,0: Japanese) is left as it is: the name's first
 # character is tied to the mark in front of it, and a colour tag between the two is not tried.
@@ -2848,6 +2849,9 @@ REWARD_TEMPLE = {'Item_Stone_Forest': 'ForestTemple', 'Item_Medal_Forest': 'Fore
                  'Item_Stone_Fire': 'FireTemple', 'Item_Medal_Fire': 'FireTemple',
                  'Item_Stone_Water': 'WaterTemple', 'Item_Medal_Water': 'WaterTemple',
                  'Item_Medal_Spirit': 'SpiritTemple', 'Item_Medal_Shadow': 'ShadowTemple'}
+# the Light Medallion has no temple: gray, the game's own colour number 1 (the user, 2026-11-24: "Light
+# Medallion can get gray i suppose since Yellow isnt an option"; the game's list has no yellow)
+REWARD_COLOUR = {'Item_Medal_Light': 1}
 REWARD_MESSAGE = '_GetMessage'
 
 
@@ -3121,39 +3125,70 @@ POUCH_TABLE = 'UI/Pouch/PouchTable/PouchTable.game__ui__PouchTable.bgyml'
 # "???" until Link owns a Spiritual Stone; a Medallion alone does not open it (in game 2026-11-24, also with
 # the Medallions' age mark removed or made "child"). Read from the game's program: the tab bar asks, for each
 # row of the pause menu table's StoneArray, whether Link owns the first item of the row (its
-# Actor[0].ActorShort), and opens the tab when any is owned; MedalArray is not asked. So a row is added for
-# each of the two green tunics, which the game's own new-file list gives every file (start_state reads that
-# list). The rows name no model to show and no place on the page, as the rows of NoDisplayArray name none.
-# In game 2026-11-24: the tab is "Key Items" on a new file and the page is empty; a Medallion and a stone
-# found afterwards are on it, also after save and reload and as an adult.
+# Actor[0].ActorShort), and opens the tab when any is owned; MedalArray is not asked. So StoneArray gets a row
+# for each of the two green tunics, which the game's own new-file list gives every file (start_state reads
+# that list). The rows name no model to show and no place on the page, as the rows of NoDisplayArray name none.
+#
+# The page has nine places, filled in the order of the rows: StoneArray's, then MedalArray's. In game
+# 2026-11-24, with the two tunic rows behind the three stones, the last two Medallions of MedalArray (Shadow,
+# Spirit) were not shown on the page and the cursor could not leave them: the tunic rows had taken two of the
+# nine places. So the nine real rows come first: StoneArray is the three stones, the six Medallions' rows as
+# they are, and then the two tunic rows; MedalArray keeps a row for each Medallion that names only the item
+# (the program asks MedalArray whether Link owns a Medallion), with no model and no place.
 KEY_ITEMS_ALWAYS = ('Obj_Armor_Child_Normal', 'Armor_Adult_Normal')
 KEY_ITEMS_STONES = ['Item_Stone_Forest', 'Item_Stone_Fire', 'Item_Stone_Water']
+KEY_ITEMS_MEDALS = ['Item_Medal_Light', 'Item_Medal_Forest', 'Item_Medal_Fire', 'Item_Medal_Water',
+                    'Item_Medal_Shadow', 'Item_Medal_Spirit']
+KEY_ITEMS_SHOWN = ('PouchActorShort',)               # of a row's item: the model on the page
+KEY_ITEMS_PLACE = ('BtnName',)                       # of a row: its place on the page
+
+
+def key_items_rows(root):
+    """what the fix makes of the table's two lists: (StoneArray, MedalArray) as plain lists of dicts"""
+    stones = [dict(r, Actor=[dict(a) for a in r['Actor']]) for r in root['StoneArray']]
+    medals = [dict(r, Actor=[dict(a) for a in r['Actor']]) for r in root['MedalArray']]
+    bare = [{'Actor': [{k: v for k, v in r['Actor'][0].items() if k not in KEY_ITEMS_SHOWN}]} for r in medals]
+    return stones + medals + [{'Actor': [{'ActorShort': n}]} for n in KEY_ITEMS_ALWAYS], bare
 
 
 def key_items_tab_open(data):
-    """the pause menu's table (POUCH_TABLE): StoneArray gets one row for each item of KEY_ITEMS_ALWAYS"""
+    """the pause menu's table (POUCH_TABLE): StoneArray becomes the stones' rows, the Medallions' rows and one
+    row for each item of KEY_ITEMS_ALWAYS; MedalArray's rows keep only their item"""
     doc = byml.loads(data)
-    rows = doc.root['StoneArray']
-    have = [row['Actor'][0]['ActorShort'] for row in rows]
-    if have != KEY_ITEMS_STONES:
-        raise SystemExit('StoneArray is not as expected: %s (game files differ from what this was made for)' % have)
-    row_type, list_type, actor_type = type(rows[0]), type(rows[0]['Actor']), type(rows[0]['Actor'][0])
+    stones, medals = doc.root['StoneArray'], doc.root['MedalArray']
+    have = [str(row['Actor'][0]['ActorShort']) for row in stones]
+    have_m = [str(row['Actor'][0]['ActorShort']) for row in medals]
+    if (have != KEY_ITEMS_STONES or have_m != KEY_ITEMS_MEDALS
+            or any(len(r['Actor']) != 1 or not all(k in r for k in KEY_ITEMS_PLACE)
+                   or not all(k in r['Actor'][0] for k in KEY_ITEMS_SHOWN) for r in list(stones) + list(medals))):
+        raise SystemExit('StoneArray / MedalArray are not as expected: %s, %s (game files differ from what this '
+                         'was made for)' % (have, have_m))
+    row_type, list_type, actor_type = type(stones[0]), type(stones[0]['Actor']), type(stones[0]['Actor'][0])
+    want_stones, want_medals = key_items_rows(byml.loads(data).root)
+    for row in list(medals):
+        stones.append(row)                             # the Medallion's row as it is, behind the stones
     for name in KEY_ITEMS_ALWAYS:
         actor = actor_type()
         actor['ActorShort'] = name
         row = row_type()
         row['Actor'] = list_type([actor])
-        rows.append(row)
+        stones.append(row)
+    for i, row in enumerate(list(medals)):
+        actor = actor_type((k, v) for k, v in row['Actor'][0].items() if k not in KEY_ITEMS_SHOWN)
+        bare = row_type()
+        bare['Actor'] = list_type([actor])
+        medals[i] = bare
     new = byml.dumps(doc)
-    # read back: the three stones' rows as they were, then ours; nothing else changed
+    # read back: the two lists as intended; nothing else changed
     want = byml.loads(data).root
     got = byml.loads(new).root
-    if (got['StoneArray'][:3] != want['StoneArray']
-            or [dict(r) for r in got['StoneArray'][3:]] != [{'Actor': [{'ActorShort': n}]} for n in KEY_ITEMS_ALWAYS]
-            or {k: v for k, v in got.items() if k != 'StoneArray'}
-            != {k: v for k, v in want.items() if k != 'StoneArray'}):
+    plain = lambda rows: [dict(r, Actor=[dict(x) for x in r['Actor']]) for r in rows]   # noqa: E731
+    if (plain(got['StoneArray']) != want_stones or plain(got['MedalArray']) != want_medals
+            or {k: v for k, v in got.items() if k not in ('StoneArray', 'MedalArray')}
+            != {k: v for k, v in want.items() if k not in ('StoneArray', 'MedalArray')}):
         raise SystemExit('read-back: the pause menu\'s table differs from what was intended')
-    return new, ['StoneArray + %s' % n for n in KEY_ITEMS_ALWAYS]
+    return new, (['StoneArray + %s' % n for n in KEY_ITEMS_MEDALS + list(KEY_ITEMS_ALWAYS)]
+                 + ['MedalArray: only the item of %s' % n for n in KEY_ITEMS_MEDALS])
 
 
 # name -> (file, function(data) -> (new data, list of what changed))
@@ -5054,8 +5089,9 @@ def main(argv):
     # placed stones and Medallions: their names in their temple's colour (REWARD_TEMPLE)
     reward_colours = {item: key_colours[REWARD_TEMPLE[item]] for item in rewards
                       if item in REWARD_TEMPLE and REWARD_TEMPLE[item] in key_colours}
+    reward_colours.update({item: REWARD_COLOUR[item] for item in rewards if item in REWARD_COLOUR})
     for dungeon in sorted(set(key_colours) - set(named_keys)):
-        if dungeon in key_colour_asked and dungeon not in {REWARD_TEMPLE[i] for i in reward_colours}:
+        if dungeon in key_colour_asked and dungeon not in {REWARD_TEMPLE.get(i) for i in reward_colours}:
             raise SystemExit('--key-colour %s: no key of this build names %s (%s@%s%s)'
                              % (dungeon, dungeon, dungeon_keys.KEY_ITEM, dungeon, dungeon_keys.NAMED))
         del key_colours[dungeon]

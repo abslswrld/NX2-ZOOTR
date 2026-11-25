@@ -3,7 +3,9 @@
 The pause menu's Key Items tab (Spiritual Stones and Medallions) is "???" until Link owns a stone: the game's
 program opens it when Link owns the first item of any row of the pause menu table's StoneArray (read from the
 program; in game 2026-11-24 a Medallion alone left it closed and the Kokiri Emerald opened it). The fix adds a
-row for each of the two green tunics every file starts with.
+row for each of the two green tunics every file starts with. The page has nine places, filled in the order of
+the rows (StoneArray's, then MedalArray's): with the tunic rows right behind the stones, the last two
+Medallions were not shown (in game 2026-11-24). So the fix puts the nine real rows first.
 
 Read from the game's own files: the table's lists, the three stones' rows and the six Medallions' rows, that
 rows naming no model and no place exist in the game (NoDisplayArray), and that the game's own new-file list
@@ -85,24 +87,33 @@ def main(romfs):
     path, fn = build_mod.TABLE_FIXES[FIX]
     new, said = fn(old)
     got = byml.loads(new).root
-    good &= check('the fix adds two rows behind the stones\' three, one for each tunic, naming only the item',
-                  path == TABLE and firsts(got['StoneArray']) == STONES + list(TUNICS)
-                  and [dict(r) for r in got['StoneArray'][3:]] == [{'Actor': [{'ActorShort': t}]} for t in TUNICS]
-                  and len(said) == 2, (firsts(got['StoneArray']), said))
-    good &= check('  the stones\' rows and every other list and setting of the table are as they were',
-                  got['StoneArray'][:3] == game['StoneArray']
-                  and {k: v for k, v in got.items() if k != 'StoneArray'}
-                  == {k: v for k, v in game.items() if k != 'StoneArray'})
+    good &= check('the fix: the first list is the three stones, then the six Medallions, then a row for each '
+                  'tunic, so the nine real rows have the page\'s nine places',
+                  path == TABLE and firsts(got['StoneArray']) == STONES + MEDALS + list(TUNICS)
+                  and len(said) == 14, (firsts(got['StoneArray']), said))
+    good &= check('  the stones\' and the Medallions\' rows there are the game\'s own, whole (item, model, place); '
+                  'the tunics\' rows name only the item',
+                  got['StoneArray'][:3] == game['StoneArray'] and got['StoneArray'][3:9] == game['MedalArray']
+                  and [dict(r) for r in got['StoneArray'][9:]] == [{'Actor': [{'ActorShort': t}]} for t in TUNICS])
+    good &= check('  the Medallions\' own list still has a row for each (the program asks it whether Link owns '
+                  'a Medallion), naming only the item: no model and no place a second time',
+                  firsts(got['MedalArray']) == MEDALS
+                  and all(set(r) == {'Actor'} and len(r['Actor']) == 1
+                          and dict(r['Actor'][0]) == {'ActorShort': m, 'IsUsableAdult': True}
+                          for m, r in zip(MEDALS, got['MedalArray'])))
+    good &= check('  every other list and setting of the table is as it was',
+                  {k: v for k, v in got.items() if k not in ('StoneArray', 'MedalArray')}
+                  == {k: v for k, v in game.items() if k not in ('StoneArray', 'MedalArray')})
     need = sizes.rule(TABLE, new)
     good &= check('  the size rule asks for more for the longer list: 1024 for each new row and each new item '
                   '(%d -> %d)' % (GAME_ENTRY, need),
-                  need == GAME_ENTRY + sizes.size32(len(new)) - sizes.size32(len(old)) + 4 * 1024, need)
+                  need == GAME_ENTRY + sizes.size32(len(new)) - sizes.size32(len(old)) + 16 * 1024, need)
     twice = None
     try:
         fn(new)
     except SystemExit as e:
         twice = str(e)
-    good &= check('the fix refuses a table whose StoneArray is not the game\'s three stones (here: its own output)',
+    good &= check('the fix refuses a table whose two lists are not the game\'s (here: its own output)',
                   bool(twice) and 'not as expected' in twice, twice)
 
     # ---- a whole build

@@ -63,6 +63,24 @@ no builder change, the Forest Medallion in a pot and the Kokiri Emerald and the 
   `tests/run_all.py`).
 - **Decision 43 (the user, 2026-11-24): the Key Items tab is open from the start in every build,** test
   builds included (`docs/ROADMAP_DECISIONS.md`).
+- **Sixth round in game (user, 2026-11-24): the colours are right; two Medallions were missing on the Key
+  Items page.** All eight names had their colour (green, green, orange, purple in Mido's chests; red, red from
+  the pots; blue, blue in Saria's house), the Light Medallion's was plain and it turns, and only the name was
+  coloured. **Wrong:** on the Key Items page the Spirit and the Shadow Medallion were not shown; the cursor
+  could go to their places and open "Details", but could not leave them without closing the menu. The save
+  screen's small picture showed all nine.
+  - **Why (my mistake in `key_items_tab_open`):** the page has nine places and fills them in the order of
+    the table's rows, the stones' list first, then the Medallions'. The two tunic rows stood right behind the
+    three stones, so they took two of the nine places and the last two Medallions of the list (Shadow, Spirit)
+    got none. The fourth round had only one Medallion and one stone, so it did not show.
+  - **Corrected, to test in game:** the nine real rows come first. The stones' list is now the three stones,
+    the six Medallions' rows as the game has them, and then the two tunic rows; the Medallions' own list keeps
+    a row for each Medallion that names only the item, because the game's program asks that list whether
+    Link owns a Medallion. **Not known:** whether the page is right with the Medallions' rows in the stones'
+    list (their places, the cursor, "Details").
+- **The Light Medallion's name is gray** (the user, 2026-11-24: "Light Medallion can get gray i suppose since
+  Yellow isnt an option"): the game's own colour number 1, as the Bottom of the Well's keys. The name on the
+  Key Items page stays plain (the user: "no, leave plain").
 - **The stones' and Medallions' names in their temple's colour** (the user, 2026-11-24: "id like to add the
   color of the keys to the medallions/stones names. Kokiri and Forest Green, Goron and Fire red, Zora and
   Water Blue, Spirit Orange, Shadow Purple"). Built, to test in game; decision 44. A placed stone or Medallion
@@ -70,7 +88,7 @@ no builder change, the Forest Medallion in a pot and the Kokiri Emerald and the 
   the colours of decision 40: Kokiri Emerald and Forest Medallion green, Goron Ruby and Fire Medallion red,
   Zora Sapphire and Water Medallion blue, Spirit Medallion orange, Shadow Medallion purple
   (`REWARD_TEMPLE`, `reward_name_lines`, `change_messages` in `tools/build_mod.py`). The Light Medallion has no
-  temple and keeps its text. Only the message is changed: the name on the Key Items page and in hints stays
+  temple (first left plain, then gray: above). Only the message is changed: the name on the Key Items page and in hints stays
   plain. Each language keeps its own text and the name is coloured where it stands in it: 15 of the 16
   languages; Japanese is left as it is (its reading marks are tied to the name's first character).
   **Test:** `tests/reward_names_check.py` (new, 10 checks; a row of `STEPS` in `tests/run_all.py`).

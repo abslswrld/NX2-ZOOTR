@@ -129,8 +129,9 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     **passed in game 2026-11-24.** Every build has it, test builds included.
 44. **A stone or a Medallion says its name in its temple's colour** (2026-11-24), the colours of decision 40:
     Kokiri Emerald and Forest Medallion green, Goron Ruby and Fire Medallion red, Zora Sapphire and Water
-    Medallion blue, Spirit Medallion orange, Shadow Medallion purple. The Light Medallion has no temple and
-    keeps its text. Built in phase 1, part 7, for the message of the get window.
+    Medallion blue, Spirit Medallion orange, Shadow Medallion purple. The Light Medallion has no temple: gray
+    (the game has no yellow). Built in phase 1, part 7, for the message of the get window only: the name on
+    the Key Items page stays plain. The eight temple colours **passed in game 2026-11-24.**
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".
