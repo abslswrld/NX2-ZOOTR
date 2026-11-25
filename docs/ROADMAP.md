@@ -45,8 +45,11 @@ For each area, both ages:
 2. Regions and logic rules for every check, and the area's exits.
 3. Each kind of check works there, with families.
 4. The area's own settings and cutscenes (see the table below) built.
-5. Test scripts pass. In game: every chest, gift, song, scrub, shop shelf and Gold Skulltula; for pots, rocks,
-   bushes, crates and loose rupees and hearts (D35), each new kind plus samples. Beehives are left out for now. Flat grass tufts are never checks (D30).
+5. Test scripts pass, including one that builds an item onto every spot of the area and reads each one back. In
+   game (changed 2026-11-24): each check kind once (in each of its forms, unless it passed in an earlier area),
+   plus every unusual spot (it appears from a switch, a fight or an event, its contents can't be read from the
+   files, it sits in a special room, or a cutscene gives it); samples for the rest, loose rupees and hearts
+   (D35) included. Beehives are left out for now. Flat grass tufts are never checks (D30).
 6. Results in CHANGELOG.md; the area is then not reopened except for bugs.
 
 Each area's settings and cutscenes are built with the area, so nothing is left over for the end:

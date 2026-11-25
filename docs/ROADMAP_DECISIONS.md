@@ -68,9 +68,20 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
 
 26. **The first dungeon is the Forest Temple.** Tests reach it with Longshot's debug menu.
 
-27. **When an area counts as done (in-game tests):** every chest, gift, song, scrub, shop shelf and Gold Skulltula
-    in game; for pots, grass, rocks, bushes and crates, each new kind of object in the area plus a few samples. The
-    test scripts check every check's files regardless. Full seed playthroughs come at the end, with the generator.
+27. **When an area counts as done (in-game tests; changed by the user 2026-11-24):**
+    - **In game: each check kind once, plus every unusual spot.** A check kind is a kind of check in each of its
+      forms (a small chest, a small chest without a baked shadow, a big chest, a Gold Skulltula, a gift, a song,
+      a scrub, a shop shelf, a pot...): one of each that the area has, unless it already passed in an earlier
+      area. An unusual spot is one that differs from the others of its kind: it appears from a switch, a fight
+      or an event, its contents can't be read from the game's files, it sits in a special room, or it is given
+      by a cutscene.
+    - **A build script for every spot:** each area's test script builds an item onto every one of its spots and
+      reads each one back (right ID, right object, every file written). It needs no play time.
+    - **Samples for the rest.**
+    - Full seed playthroughs come at the end, with the generator (phase 6), and touch every check; anything
+      broken found then is a bug fix (rule 6 of "an area is done" in the roadmap).
+    - Before (2026-11-23): every chest, gift, song, scrub, shop shelf and Gold Skulltula in game. The user:
+      "Testing EVERY spot is going to take a long time. We already tested a bunch and they all work."
     Forest count from the project's data: 159 check IDs (155 Kokiri Forest, 4 Lost Woods). Whole-game count
     (read-only, `docs/RESEARCH_check_count.md`): 1,286 spots, about 12 times the three forest areas; 344 of them in
     the kinds tested one by one (185 chests, 100 Gold Skulltulas, 15 scrubs, 44 shop shelves), plus event checks

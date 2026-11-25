@@ -4,6 +4,22 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
+### D27 changed: in game, each check kind once plus the unusual spots (no game changes)
+The user: "is this excessive? Testing EVERY spot is going to take a long time. We already tested a bunch and
+they all work." Decided: "each check kind once plus unusual spots in game, a build script for every spot,
+samples for the rest" (`docs/ROADMAP_DECISIONS.md` D27, `docs/ROADMAP.md` "What an area is done means", rule 5).
+- **In game:** each check kind once, in each of its forms (unless it passed in an earlier area), plus every
+  unusual spot: one that appears from a switch, a fight or an event, whose contents can't be read from the
+  game's files, that sits in a special room, or that a cutscene gives. Samples for the rest.
+- **A build script for every spot:** each area's test script builds an item onto every one of its spots and
+  reads each one back. It needs no play time.
+- Full seeds (phase 6) touch every check; anything broken found then is a bug fix.
+- **Where the Forest Temple stands:** every chest form it has passed in game (small, small without a baked
+  shadow, big, big without a shadow, the boss key's), and the Gold Skulltula. Not tried: 6 of its 12 chests
+  and 3 of its 5 Gold Skulltulas. The one unusual spot among them is `FT_FALLING_CEILING_ROOM_CHEST`, whose
+  contents the data could not read from the game's files. Beth's and Joelle's chests may appear after their
+  Poe is beaten (not checked in the remake's files). No build script for every spot yet.
+
 ### Phase 1, part 7: boss key, boss door, boss heart and the Medallion (passed in game 2026-11-24)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
 
