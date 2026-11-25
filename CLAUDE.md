@@ -39,8 +39,8 @@ These are the project owner's standing rules. Every session follows them, in thi
 - **One checklist, `out\TEST_CHECKLIST.md`, plus `out\TEST_ANSWERS.md`** for the user's answers. Short lists the
   user can do in a day; no "does it load" steps. Dungeons are reached with Longshot's debug menu (it leaves an
   area untouched on a new file).
-- **Run `run_tests.bat`** (all test scripts) before saying a change works. New work adds its own test script and
-  a row in README.md.
+- **Run `run_tests.bat`** (all test scripts) before saying a change works. New work adds its own test script, a
+  row in `STEPS` of `tests/run_all.py` (the list `run_tests.bat` runs) and a row in README.md.
 - **In-game results go into CHANGELOG.md.**
 
 ## Git

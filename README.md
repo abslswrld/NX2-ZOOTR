@@ -113,7 +113,11 @@ Needs Python 3.13 or newer. Python 3.14+ is much faster (it has zstd built in). 
 nothing in the game folder is changed: the tests only read.
 
 - Double-click `run_tests.bat` (it takes the romfs folder from its first argument, the `ROMFS` environment
-  variable, or a one-line `romfs_path.txt` next to it, which is not uploaded; otherwise it asks), or
+  variable, or a one-line `romfs_path.txt` next to it, which is not uploaded; otherwise it asks). It runs every
+  test script through `tests/run_all.py`, 8 at a time, slowest first: about 2.5 minutes for all of them
+  (about 17 one after another). It says which passed; each script's whole output is in `test_logs\` (not
+  uploaded) and a failing script's last lines are shown at the end. A quick check of a few while working:
+  `python tests/run_all.py "<romfs folder>" --only families_check,hint_check`, or
 - `python tests/roundtrip.py "<romfs folder>" [folders...] --report report.txt`
 - `python tests/edit_check.py "<romfs folder>"`
 
@@ -161,6 +165,7 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `tools/dungeon_items.py` | a dungeon's boss key, map or compass wherever it is found (`Item_Dungeon_BossKey@<dungeon>`, `Item_Dungeon_Map@...`, `Item_Dungeon_Compass@...`): the item's version for a pot, rock, bush or freestanding item, for a Gold Skulltula and for a chest outside the dungeon, which sets the dungeon's saved yes/no (`DungeonInfo.<dungeon>.IsGetBossKey` / `IsGetMap` / `IsGetCompass`); in a chest of its own dungeon the builder uses the game's own item; used by `tools/build_mod.py` |
 | `tests/boss_check.py` | the boss key, boss door, boss heart and Medallion of the Forest Temple: where the game saves a dungeon's boss key, map and compass and what sets them, the boss key chest's own event, the boss room's logic, the Medallion's cutscene and the file of it the game loads; the nine versions read back, what is refused, and a whole build read back from the mod folder (in `run_tests.bat`) |
 | `tests/dungeon_keys_check.py` | a small key that counts for one dungeon wherever it is found (`CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`): where the game saves a dungeon's key count, that its own key steps name no dungeon, the game's models for the two new steps, the key's three versions (ground, Gold Skulltula, chest) read back, what is refused, and a whole build read back from the mod folder (in `run_tests.bat`) |
+| `tests/run_all.py` | runs every test script of `run_tests.bat` side by side (`--jobs N` at once, default 8; `--only NAME,...` for a few) and says which passed; the round-trip test is shown as its summary (it always lists the same known differences). A new test script adds its row to `STEPS` there; a `*_check.py` left out is named when it runs |
 | `tests/size_check.py` | checks those rules against the entry of every game file they cover (reads every pack: several minutes; not part of `run_tests.bat`) |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):

@@ -1,6 +1,6 @@
 @echo off
 setlocal
-rem Read-and-write test of the game's file formats. Only reads the game files.
+rem Every test script, several at a time (tests\run_all.py has the list). Only reads the game files.
 rem The game's romfs folder comes from, in order: the first argument, the ROMFS environment variable,
 rem or romfs_path.txt next to this file (one line; not uploaded to GitHub). Otherwise it asks.
 cd /d "%~dp0"
@@ -11,77 +11,7 @@ if "%ROMFS%"=="" (echo No romfs folder given.& pause & exit /b 1)
 where py >nul 2>nul && (set "PY=py -3") || (set "PY=python")
 echo Game files: %ROMFS%
 echo.
-echo === Edit check ===
-%PY% tests\edit_check.py "%ROMFS%"
+%PY% tests\run_all.py "%ROMFS%"
 echo.
-echo === Event flow add check ===
-%PY% tests\evfl_add_check.py "%ROMFS%"
-echo.
-echo === Checking chest check ===
-%PY% tests\chest_check.py "%ROMFS%"
-echo.
-echo === Ocarina fix check ===
-%PY% tests\ocarina_fix_check.py "%ROMFS%"
-echo.
-echo === Turning items check ===
-%PY% tests\ground_prog_check.py "%ROMFS%"
-echo.
-echo === Ground lift check ===
-%PY% tests\ground_lift_check.py "%ROMFS%"
-echo.
-echo === Three-level chest check ===
-%PY% tests\three_chest_check.py "%ROMFS%"
-echo.
-echo === Progressive gift check ===
-%PY% tests\gift_check.py "%ROMFS%"
-echo.
-echo === Families on songs and the bridge gift check ===
-%PY% tests\event_families_check.py "%ROMFS%"
-echo.
-echo === Cutscene gift check ===
-%PY% tests\saria_check.py "%ROMFS%"
-echo.
-echo === Pairs on rocks, bushes and scrubs check ===
-%PY% tests\pairs_more_check.py "%ROMFS%"
-echo.
-echo === Skip-level guard check ===
-%PY% tests\skip_level_check.py "%ROMFS%"
-echo.
-echo === Progressive families check ===
-%PY% tests\families_check.py "%ROMFS%"
-echo.
-echo === Gossip stone text check ===
-%PY% tests\gossip_check.py "%ROMFS%"
-echo.
-echo === Gossip stone hints check ===
-%PY% tests\hint_check.py "%ROMFS%"
-echo.
-echo === Progressive families on Gold Skulltulas check ===
-%PY% tests\skulltula_prog_check.py "%ROMFS%"
-echo.
-echo === One-time drops (rocks, bushes, pots) check ===
-%PY% tests\one_time_check.py "%ROMFS%"
-echo.
-echo === Forest Temple data check ===
-%PY% tests\forest_temple_check.py "%ROMFS%"
-echo.
-echo === Forest Temple items check ===
-%PY% tests\forest_temple_items_check.py "%ROMFS%"
-echo.
-echo === Forest Temple keys check ===
-%PY% tests\forest_temple_keys_check.py "%ROMFS%"
-echo.
-echo === Dungeon keys check ===
-%PY% tests\dungeon_keys_check.py "%ROMFS%"
-echo.
-echo === Boss key, boss door, boss heart and Medallion check ===
-%PY% tests\boss_check.py "%ROMFS%"
-echo.
-echo === Starting state of a new file check ===
-%PY% tests\start_state_check.py "%ROMFS%"
-echo.
-echo === Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence) ===
-%PY% tests\roundtrip.py "%ROMFS%" Event RSDB Mals GameData Pack System AI Logic Sequence --report report.txt
-echo.
-echo The full report is in report.txt
+echo Each script's whole output is in test_logs\, the round-trip test's full report in report.txt
 pause
