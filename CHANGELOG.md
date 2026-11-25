@@ -4,8 +4,30 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
-### Phase 1, part 7: boss key, boss door, boss heart and the Medallion (to test in game)
+### Phase 1, part 7: boss key, boss door, boss heart and the Medallion (passed in game 2026-11-24)
 Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+**In game (user, 2026-11-24): every line of the checklist "good".**
+- **Mido's house:** the 2nd chest "You found the dungeon map! (Forest Temple)" and the 3rd "You found the
+  compass! (Forest Temple)", the name in green. In the temple as a child the Map page had the map and the
+  compass in their slots and the chests marked.
+- **House of the Know-It-All Brothers:** the boss key from a pot lay on the floor properly and said "You found
+  the boss key! (Forest Temple)" with the name in green. The Forest Medallion from the other pot was picked up
+  and shown without a freeze; **it did not spin on the floor.**
+- **In the temple as an adult:** the first room's chest gave the Fairy Bow; the boss key's chest held the
+  Megaton Hammer and opened without Navi's message; **the boss door opened with the boss key from the pot.**
+- **The boss:** the last cutscene played to its end with the Boomerang in the Heart Container's place (the
+  unknown is answered: the cutscene does not stop); the Boomerang lay there and was picked up; Saria's cutscene
+  played and its window said "You got a silver scale!". After save and reload both were kept and the temple
+  was done.
+- **As expected, and kept:** in Saria's cutscene the Forest Medallion still floats down above Link while the
+  window names the other item (the user's screenshot). It is an actor of the cutscene, not the item given.
+- **Open (the user's note):** a tab of the pause menu was "???" after the Medallion from the pot. What the
+  files show: "???" is the pause menu's text for a tab that is not opened yet (`LayoutMsg/MenuOverlay_00`,
+  label `Unopened`), and the Key Items tab is opened by the Great Deku Tree's cutscene when he gives the Kokiri
+  Emerald (`Dm_Kokiri_0130`, step `Event52`: `UISystemActor.EventOpenPerformanceImportantMenu`; its text is
+  "Kokiri Emerald added to Key Items"). So a stone or Medallion found before that cutscene may be in a tab that
+  is still closed. What keeps the tab open in the save file is not found yet. Not part of part 7.
 
 - **The boss key anywhere** (`tools/dungeon_items.py`, new): `CHECK_ID=Item_Dungeon_BossKey@ForestTemple`. What
   was found: the boss key, the map and the compass are yes/no fields of the dungeon's saved record
@@ -28,9 +50,9 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
 - **The boss door** needs no change: its lock (`Obj_DoorChainLock_A_02`) opens with the dungeon's field. **Start
   with the boss key:** `--start-flag DungeonInfo.ForestTemple.IsGetBossKey=true` (part 6's start flags).
 - **The boss's heart:** it is a placed `Obj_Heart_Container` that the boss room's logic brings in once the boss
-  is beaten, by its place in the map, so another item put there is brought in the same way. **Not known:** the
-  boss's last cutscene (`Dm_ForestTemple_BossOut`) shows the Heart Container coming down, by the actor's name.
-  With another item there the cutscene may show nothing, or stop: the in-game test decides.
+  is beaten, by its place in the map, so another item put there is brought in the same way. The boss's last
+  cutscene (`Dm_ForestTemple_BossOut`) shows the Heart Container coming down, by the actor's name; with another
+  item there it plays to its end (in game, above).
 - **The Medallion:** the cutscene `Dm_Awake_Forest_Get` hands it over with one step (the get window and the
   item), now in the temple's data, so `FT_FOREST_MEDALLION_GIFT=<item>` gives another item there, and
   `Item_Medal_Forest` can be put on another check. The medallion that floats down in the cutscene stays.

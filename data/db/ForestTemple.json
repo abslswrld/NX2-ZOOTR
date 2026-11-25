@@ -825,8 +825,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): held the Megaton Hammer and opened without Navi's message (the boss key was in a pot in Kokiri Forest and opened the boss door)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1551,8 +1551,8 @@
    "source": "event flow Dm_Awake_Forest_Get, Event13",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): Saria's cutscene gave the Silver Scale (\"You got a silver scale!\", with the Forest Medallion still floating above Link); kept after save and reload. The Forest Medallion itself was picked up from a pot in Kokiri Forest",
   "requirements": {
    "child": null,
    "adult": [
@@ -2101,8 +2101,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): the Boomerang lay there after the boss and was picked up; the boss's last cutscene played to its end; kept after save and reload",
   "requirements": {
    "child": null,
    "adult": [

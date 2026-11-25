@@ -171,8 +171,15 @@ Parts, in order:
    "anywhere" (D11).
    **Built 2026-11-24, to test in game:** the boss key anywhere (`Item_Dungeon_BossKey@<dungeon>`; the map and
    the compass the same way), another item in the boss key's chest, on the boss's heart and where the
-   Medallion is given, the Medallion on another check. **Not known:** what the boss's last cutscene does when
-   the Heart Container is another item; a Medallion picked up from the ground.
+   Medallion is given, the Medallion on another check.
+   **Passed in game 2026-11-24:** the map and the compass from Mido's chests and the boss key from a pot in
+   Kokiri Forest (each with "(Forest Temple)" in green), the boss door opened with that key, the Megaton
+   Hammer in the boss key's chest (no message from Navi), the Boomerang in the Heart Container's place (the
+   boss's last cutscene plays to its end), the Silver Scale from Saria, the Forest Medallion from a pot.
+   **Open:** a family where the Medallion is given; the Medallion on the ground does not spin; in Saria's
+   cutscene the Medallion still floats down whatever is given; a pause-menu tab was "???" after the Medallion
+   from the pot (the Key Items tab is opened by the Kokiri Emerald's cutscene, `Dm_Kokiri_0130`: for phase 2,
+   with the Deku Tree).
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.

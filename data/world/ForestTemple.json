@@ -315,8 +315,8 @@
     "id": "FT_BOSS_KEY_CHEST",
     "spot": "chest@-49.5,-63.5",
     "note": "the game puts the boss key here, in a big chest (Obj_TBox_A_03_NoBake; GetEventName ForesetTemple_GetBossKey: the usual opening, then Navi's message 361; flag ForestTemple_Room23_GetBossKey). The builder removes that event when another item is put here",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): held the Megaton Hammer and opened without Navi's message (the boss key was in a pot in Kokiri Forest and opened the boss door)"
    }
   },
   "exits": {
@@ -631,8 +631,8 @@
     "rule": "'Forest Temple Clear'",
     "kind": "freestanding",
     "note": "the boss heart (Obj_Heart_Container): the boss room's logic (ForestTemple_Level_Room_22_Prefab_c724) brings it in once the boss is beaten (SageOfForest_IsAfter_Step08_Exp), by its place in the map; the cutscene Dm_ForestTemple_BossOut shows it coming down, by the actor's name",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): the Boomerang lay there after the boss and was picked up; the boss's last cutscene played to its end; kept after save and reload"
    },
    "FT Forest Medallion": {
     "id": "FT_FOREST_MEDALLION_GIFT",
@@ -649,8 +649,8 @@
      -62.5
     ],
     "note": "the dungeon reward: the Forest Medallion, given after the boss by the cutscene Dm_Awake_Forest_Get (Saria in the Chamber of Sages): its step Event13 is a call of GetPouchContent<GetPouchContentByActorName> with Item_Medal_Forest, the get window and the item. The game loads the file Dm_Awake_Forest_Get.110.bfevfl for it (Event/EventFlow/EventFlowFileEntry). The medallion that floats down in the cutscene is an actor of the cutscene and stays",
-    "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable": "yes",
+    "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): Saria's cutscene gave the Silver Scale (\"You got a silver scale!\", with the Forest Medallion still floating above Link); kept after save and reload. The Forest Medallion itself was picked up from a pot in Kokiri Forest"
    }
   },
   "events": {
