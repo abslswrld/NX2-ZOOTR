@@ -210,6 +210,31 @@ Parts, in order:
    after a save and reload. 21 of the temple's 47 checks are now changed in game, the other 26 are covered by
    the build script.
 
+**Added 2026-11-25 (the user: "id like to finish these in Phase 1 if possible"; D45):** the open items of parts
+3 to 7, in three more parts.
+
+9. **The Forest Temple's loose ends** (one round in the temple): an upgrade family where the Medallion is given
+   (the builder refuses it today); Saria's cutscene shows what is given instead of always the Forest Medallion
+   (and how a changed Medallion looks in that cutscene); an upgrade family in a big chest (the game checks what
+   Link owns only through the small chest; the Bow room's chest is a big one); the dungeon's name on a key in
+   its own dungeon (the game's own key has one text for every dungeon; a named key may lose the count shown,
+   so the round settles which is kept).
+   **Built 2026-11-25, to test in game:** a family on the Medallion's check (the game's question in front of
+   the cutscene's get); the cutscene shows what it gives (its Medallion actor renamed, one actor per level of a
+   family, nothing for a heart); a family in a big chest makes it the game's checking chest, a small chest at
+   the same spot (the game has no big one); `Item_Dungeon_SmallKey@ForestTemple+name` in the temple is the
+   named key. `tests/forest_temple_loose_ends_check.py`.
+10. **Kokiri Forest and its neighbours** (one round on a new file, child): a small key, the boss key, the map
+   or the compass on a person's gift, a scrub and a shop shelf; a stone or a Medallion given by a person; the
+   starting state's leftovers (hearts and rupees, items the game files under another name: Fairy Slingshot,
+   Fairy Bow, the gauntlets; a chest open from the start). If Longshot's debug menu can start the staff roll,
+   one line for the credits' colours (decision 40).
+11. **The Forest Temple's own cutscenes** (D15; rule 4 of "an area is done"): skippable or shortened, from the
+   cutscene list; in game, what the game's own skip keeps and how long a flowchart cutscene really runs.
+
+Left with their areas: the other 10 cutscenes that show a stone or a Medallion (each plays after its own
+dungeon's boss), and the credits if the debug menu cannot start them.
+
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.
 **The cutscene list is done (2026-11-25): `docs/CUTSCENES.md`** (the same as data: `data/cutscenes.json`), made

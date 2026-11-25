@@ -144,6 +144,12 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     Medallion blue, Spirit Medallion orange, Shadow Medallion purple. The Light Medallion has no temple: gray
     (the game has no yellow). Built in phase 1, part 7, for the message of the get window only: the name on
     the Key Items page stays plain. All nine **passed in game 2026-11-24.**
+45. **Phase 1 finishes its open items** (the user, 2026-11-25: "id like to finish these in Phase 1 if possible").
+    Three more parts, in this order: 9, the Forest Temple's loose ends (a family where the Medallion is given,
+    Saria's cutscene showing what is given, a family in a big chest, the name on a key in its own dungeon); 10,
+    Kokiri Forest and its neighbours (keys on gifts, scrubs and shelves; a stone or Medallion from a person;
+    the starting state's leftovers; the credits if the debug menu reaches them); 11, the Forest Temple's own
+    cutscenes (D15). The other 10 stone and Medallion cutscenes stay with their areas.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".

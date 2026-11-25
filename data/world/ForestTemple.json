@@ -648,7 +648,7 @@
      74.7,
      -62.5
     ],
-    "note": "the dungeon reward: the Forest Medallion, given after the boss by the cutscene Dm_Awake_Forest_Get (Saria in the Chamber of Sages): its step Event13 is a call of GetPouchContent<GetPouchContentByActorName> with Item_Medal_Forest, the get window and the item. The game loads the file Dm_Awake_Forest_Get.110.bfevfl for it (Event/EventFlow/EventFlowFileEntry). The medallion that floats down in the cutscene is an actor of the cutscene and stays",
+    "note": "the dungeon reward: the Forest Medallion, given after the boss by the cutscene Dm_Awake_Forest_Get (Saria in the Chamber of Sages): its step Event13 is a call of GetPouchContent<GetPouchContentByActorName> with Item_Medal_Forest, the get window and the item. The game loads the file Dm_Awake_Forest_Get.110.bfevfl for it (Event/EventFlow/EventFlowFileEntry). The medallion that floats down in the cutscene is an actor of the cutscene (Item_Medal_Forest: Event39 size, Event15 bind to Dm_Locator, Event20 glitter); since phase 1, part 9 it is renamed to the item given, one actor per level of a family behind the game's inventory question, or its steps are left out for an item the cutscene cannot show (a heart)",
     "randomizable": "yes",
     "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): Saria's cutscene gave the Silver Scale (\"You got a silver scale!\", with the Forest Medallion still floating above Link); kept after save and reload. The Forest Medallion itself was picked up from a pot in Kokiri Forest"
    }

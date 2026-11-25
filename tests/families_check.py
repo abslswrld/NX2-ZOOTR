@@ -539,8 +539,11 @@ def checks(romfs, builds):
             lines += len(files)
         good &= check('built: every family in a small chest (%d files in two builds): the pairs in the game\'s '
                       'checking chest, the three-level families in a chest of their own' % lines, ok)
-        good &= check('  refused: a three-level family in a big chest (it has no checking version)',
-                      refused(run, 'no', '%s=%s' % (BIG_CHEST, text['Quiver'])))
+        said, _ = run('big', '%s=%s' % (BIG_CHEST, text['Quiver']))
+        good &= check('  a three-level family in a big chest (the Kokiri Sword\'s) becomes our three-level chest, a '
+                      'small one (phase 1, part 9: the game has no big checking chest)',
+                      'becomes a small checking chest' in said
+                      and any('Obj_TBox_A_02%s -> Obj_TBox_NX2_Quiver%s' % (t, t) in said for t in ('', '_NoBake')))
 
         # freestanding items, rocks, bushes, pots: every family as a turning item (on a rock, a bush or a pot:
         # its version that is given once, which turns into the next level's turning item)

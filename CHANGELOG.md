@@ -4,6 +4,47 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 9: the Forest Temple's loose ends (to test in game)
+Branch `claude/forest-temple-loose-ends`. Parts 9 to 11 were added to phase 1 today (the user: "id like to
+finish these in Phase 1 if possible"; decision 45). Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **A family where the Medallion is given** (`FT_FOREST_MEDALLION_GIFT=First>Second[>Third]`): the builder
+  refused it ("event Event13 is not the call that gives ..."): its family code for gifts only knew the shared
+  get flow (`Dm_SY_GetInEvent`), and Saria's cutscene gives with the get window itself
+  (`GetPouchContent<GetPouchContentByActorName>`). Now every level of such a gift is given that way, with the
+  game's inventory question in front (`gift_pair_edit`).
+- **What floats down in Saria's cutscene is what it gives.** Read from `Dm_Awake_Forest_Get`: the Medallion is
+  an actor of the cutscene named after the item, `Item_Medal_Forest`, used by three steps before the get:
+  `Event39` (its size), `Event15` (bound to the locator `Dm_Locator` that floats down) and `Event20` (its
+  glitter). The game shows one of several items that way itself: `Dm_LostWood_0040` (the target practice)
+  asks whether Link has the bigger seed bag and then binds one of two bag actors. So now (`reward_shown_edit`,
+  read back by `reward_shown_check`):
+  - one item: the actor is renamed to the item (as Saria's bridge cutscene does). A rupee shows the version a
+    chest holds (`TBox_Rupee_Red`), an ocarina its held-up version;
+  - a family: one actor per level, and the game's question in front of each run of those steps, so the
+    Longshot floats down when the cutscene gives the Longshot;
+  - an item the cutscene cannot show (a Piece of Heart or a Heart Container: no actor of that kind): the three
+    steps are left out, so nothing floats down instead of the Medallion.
+  Every gift whose cutscene shows its item as an actor of its own gets the same (today only the Medallion's
+  in the areas with data).
+- **A family in a big chest:** the game has no big checking chest, and the checking chest's AI cannot drive a
+  big one: it asks for the sensor body `GeneralSensor/Sensor`, which the big chest's physics does not have (it
+  has `GeneralSensor/EnemyCheck`, and its own AI, `Obj_TBox_A_02.root`). So a big chest that holds a family
+  becomes the checking chest of its small twin (`BIG_CHEST`): a small chest at the same spot, which appears the
+  same way (both AIs play `SpawnMagic` and `SpawnFall`). Pairs go into the game's checking chest, three levels
+  into our three-level chest. `tests/chest_check.py`, `tests/families_check.py` and
+  `tests/three_chest_check.py` said "refused in a big chest"; they now check the swap.
+- **The dungeon's name on a key in its own dungeon:** `Item_Dungeon_SmallKey@ForestTemple+name` on a check of
+  the Forest Temple is now the named key (the one every key outside its dungeon is, counted by our own step)
+  instead of the game's own key. Without `+name` it is still the game's key (decision 41). The round settles
+  which is kept: the named key may not show the count on screen.
+- **`tests/forest_temple_loose_ends_check.py`** (new; a row of `STEPS` and of `README.md`): three builds read
+  back (the round's build, a Piece of Heart and a red rupee on the Medallion's check), and from the game's
+  files the cutscene's three steps, the Lost Woods pattern and the big chest's missing sensor.
+- `data/world/ForestTemple.json`: the Medallion's note says what floats down now.
+- **Tests:** `run_tests.bat` (all 29 scripts): 28 passed, `three_chest_check` failed on its old "refused in a
+  big chest" line; changed to the swap, it passes on its own.
+
 ### The area checklist template (phase 1 "alongside"; docs only, no game changes)
 - **`docs/AREA_CHECKLIST_TEMPLATE.md`** (new): the shape of every area's in-game test list, so each area is
   tested the same way.
