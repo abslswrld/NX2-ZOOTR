@@ -2,6 +2,80 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-25
+
+### The cutscene list, and the reader takes timeline files (phase 1 "alongside"; no game changes)
+Branch `claude/cutscene-list-57492a`. Nothing in the game's folder or in `out` was touched; nothing to test in
+game.
+
+- **The reader (`formats/evfl.py`) now reads and writes every event flow file: 914 of 914 byte for byte**
+  (before: 650; 264 refused). The 264 were 261 timeline files and 3 files with entry point variables
+  (`Dm_SY_Get`, `Dm_SY_Ocarina`, `LinkSleepInBed`).
+  - **Timelines** (worked out from the files; not in the public documentation for this version): one `TLIN`
+    block per file with a length in frames, actors, clips ("this actor does this from frame A for N frames",
+    on a track), triggers (each clip's start and end in time order), cuts (the frame each camera cut starts
+    at) and the names of its sub-timelines (`<name>_Effect`, `<name>_Env`). Details: README, "Timelines".
+  - **60 frames are one second:** 12 movie cutscenes have a timeline beside their video file, and for 11 it
+    is as long as the video to within 2% (`Dm_Kokiri_0095`: 7040 frames, video 117.33 s; the exception is
+    `Dm_FinalBattle_0002`, 1732 frames against 33.0 s).
+  - **A changed timeline can be written:** `evfl.timeline_triggers` gives exactly the trigger list of all 261
+    files; `dumps_checked` and `differences` cover timelines. Not tried in game.
+  - **Entry point variables** (`EntryPoint.variables`): a name list and 16 bytes per variable in place of the
+    entry point's 24 empty bytes; the game has five, all read.
+  - The round-trip test now shows `evfl 914 identical`. Tests that skipped "the flows the reader refuses"
+    still pass (a timeline file simply has no flowchart).
+- **The list: `docs/CUTSCENES.md` (to read) and `data/cutscenes.json` (the same as data),** made by the new
+  `tools/cutscene_list.py` from the game's files, for the whole game, one section per area with the game's own
+  area names. 12 seconds to make.
+  - **319 story cutscenes** (events named `Dm_...`): 83 timelines, 25 movies, 210 flowcharts, 1 with no file.
+    The timelines and movies run **117 minutes** in all (the longest: the credits 5 min 08 s, `Dm_Kokiri_0030`
+    3 min 29 s, `Dm_Kokiri_0140` 3 min 28 s).
+  - **217 lead-in events:** not cutscene files, they run a story cutscene as a step. **363 small scenes:**
+    flowchart events placed in a map (a door opens, a chest appears). **79 system scenes** (`Dm_SY_...`).
+  - For each: its files, kind, length, what starts it and when, what it sets (flags, challenge steps, time of
+    day) and gives (items, with the game's names), what it runs next and where it sends Link, whether the game
+    lets it be skipped, which logic graphs and flows ask whether it has been played, and its check
+    (`LW_SARIA_GIFT`, `Song from Saria`, `FT Forest Medallion`...).
+  - All 480 `Dm_` flow names are accounted for: 473 in an entry, 7 that have no event of their own (run as
+    steps of other flows: `Dm_SY_GetInEvent`, `Dm_SY_ShopGet`, four ocarina files, `Dm_LostWood_0030`).
+- **Found while building it (all in the document):**
+  - **A timeline cannot set a flag or give an item.** None of the 261 files has such a step (94 kinds of step:
+    camera, animation, voice, light, effect, rumble, weather; five timelines set the time of day). What a
+    timeline cutscene "sets" is set by the flowchart that runs it: e.g. `KokiriForest_ArriveLostWood` runs
+    `Dm_Kokiri_0150` (Saria on the bridge, 1 min 42 s), then `Dm_Kokiri_0155` (the ocarina), sets
+    `HyruleField_ChangeENV` and sends Link to Hyrule Field.
+  - **Where the start condition is:** an `EventRequestActor` in the map only names the event; the logic graph
+    of its group (`Logic/*.ainb`, also inside nested modules) says when: e.g. Saria's Song: "Link in
+    Area_0b11, which is there while `DoorOfTime_IsAfter_Step01_Exp` is set and `Dm_MelodyGet_Saria` is not
+    played". The same graphs set flags when the event ends (the Forest Temple's ice: on EventFinish
+    `ForestTemple_Room14_MeltedIce`). Of the 740 requests placed in the maps for listed events, 698 have their
+    condition read out; 40 have a graph that gives them no trigger of their own (another actor asks for the
+    event), 2 have no graph.
+  - **Other starters:** actor parameter files (Link's house door names `Dm_Kokiri_0045` as its open event;
+    each boss names its "die" event: Phantom Ganon's runs `Dm_ForestTemple_BossOut`) and the game's sequence
+    graph (`Sequence/Opening.module` asks for the opening). What starts a story cutscene is found for 318 of
+    319 (not `Dm_MelodyGet_Manegement`, which has no file).
+  - **Only 8 cutscenes have the game's own skip turned off** (`DisableSkip` in their settings list): the
+    opening movie `Dm_Kokiri_0000`, the title movies and one credits movie. Every other one can be skipped by
+    the game itself.
+  - **66 events of the list are asked about later** ("has it been played?") by a logic graph or a flow, 52 of
+    them story cutscenes: removing or skipping one of those has to keep the answer true.
+  - The forest: Kokiri Forest 22 story cutscenes (10 timelines and movies, 17 min 50 s), Great Deku Tree 5
+    (1 min 01 s), Lost Woods 7 (1 min 22 s), Sacred Grove 3 (flowcharts), Forest Temple 18 (the boss's two
+    timelines, 2 min 14 s) and 19 small scenes.
+- **Not known (the files don't say):**
+  - how long a flowchart cutscene runs: only the frames of its wait steps are counted ("waits", the least it
+    can take), and that those are 60 a second too is assumed, not checked in game;
+  - what the game's own skip keeps of a skipped cutscene (flags, items, the "played" mark): to try in game
+    with the first area's cutscene work;
+  - the condition of an NPC's own events (talking to it): it is in the NPC's program, not in a file read here.
+- **Files:** `formats/evfl.py` (timelines, entry point variables), `tools/cutscene_list.py` (new),
+  `data/cutscenes.json` and `docs/CUTSCENES.md` (new, made by the tool), `tests/cutscene_list_check.py` (new,
+  35 lines of checks, in `run_tests.bat` through `tests/run_all.py`), README ("Timelines", "The cutscene
+  list", the status table), `docs/ROADMAP.md` and `docs/ROADMAP_DECISIONS.md` (the list is done).
+- **Tests:** `run_tests.bat` (all 28 scripts): all 27 checks passed; the round-trip report: `evfl 914
+  identical` (before: 650 identical, 264 errors); the other formats as before (`byml 5 differs`).
+
 ## 2026-11-24
 
 ### D27 changed: in game, each check kind once plus the unusual spots (no game changes)
