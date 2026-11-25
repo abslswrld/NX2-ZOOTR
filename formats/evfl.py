@@ -1,10 +1,11 @@
 """Event flows (.bfevfl): reading into plain objects, and writing back.
 
 Written from the public BFEVFL documentation (ZeldaMods wiki), checked against the remake's files
-(version 0.4.0.0, little endian, flowcharts only).
+(version 0.4.0.0, little endian). The timeline part (cutscene files) is not in the public documentation for this
+version; it was worked out from the remake's 261 timeline files and is written back byte for byte.
 
 Model
-    EventFlow(name, flowcharts)
+    EventFlow(name, flowcharts, timelines)      a game file holds one flowchart or one timeline, never both
     Flowchart(name, actors, events, entry_points)
     Actor(name, secondary, argument, actions, queries, params, entry_point, cut)
     Event(name, type, ...)   type: 'action' | 'switch' | 'fork' | 'join' | 'subflow' | 'callswitch' | 'return'
@@ -19,10 +20,26 @@ Model
                    runs entry point `entry` of `flowchart` ('' = this file) and branches on the value it returns
         return     (type 6): value (32-bit hash), ends an entry point returning that value to a callswitch
       Event links (next, cases, forks, join, entry point main event) are event indexes; None = no event.
-    EntryPoint(name, subflows, main)
+    EntryPoint(name, subflows, main, variables)
+        variables: None, or a dict {name: value} of the entry point's own variables with their starting values
+                   (whole numbers and True/False; 5 entry points in 3 files have one)
     Params: an ordered dict {key: value}; values are int, bool, float, str, Argument(str),
             WString(str), lists of those (IntArray/BoolArray/FloatArray/StrArray/WStrArray), ActorId(a, b),
             or a nested Params.
+
+    Timeline(name, duration, actors, clips, triggers, subtimelines, cuts, oneshots, params)
+        A cutscene's time track. Times are in frames, 60 a second (seconds() converts).
+        duration     : length of the whole cutscene, in frames
+        actors       : Actor, as in a flowchart (no queries, no entry point); `cut` is here the number of
+                       tracks the actor's clips are laid on
+        clips        : Clip(start, duration, actor, action, params, track): `actor` does `action` from frame
+                       `start` for `duration` frames; clips of one actor on one track never overlap
+        triggers     : [(clip index, 1 = the clip starts | 2 = the clip ends)], in time order (kept as read;
+                       timeline_triggers() works them out again for a changed timeline)
+        subtimelines : names of other timeline files run alongside (<name>_Effect, <name>_Env)
+        cuts         : Cut(start, name, params): camera cuts, by the frame each starts at
+        oneshots     : Oneshot(time, actor, action, params); no file of the game has one
+    Links (actor, action) are indexes, as in a flowchart.
 
 Adding to a flowchart (new steps, not only changed ones)
     fc.add_actor(name, secondary, params=...)                 -> actor index
@@ -149,9 +166,10 @@ class Event:
 
 
 class EntryPoint:
-    def __init__(self, name, main=None, subflows=None):
+    def __init__(self, name, main=None, subflows=None, variables=None):
         self.name, self.main = name, main
         self.subflows = list(subflows or [])
+        self.variables = variables
 
 
 class Flowchart:
@@ -394,21 +412,100 @@ class Flowchart:
             for what, v in [('start', ep.main)] + [('subflow list', s) for s in ep.subflows]:
                 if v is not None and not (isinstance(v, int) and 0 <= v < ne):
                     bad.append('entry point %s: %s points at event %r, there are %d' % (ep.name, what, v, ne))
+            for vn, v in (ep.variables or {}).items():
+                if not isinstance(v, int) or not -2 ** 31 <= v < 2 ** 31:
+                    bad.append('entry point %s: variable %s must be a whole number or True/False' % (ep.name, vn))
         if bad:
             raise ValueError('%s: %s' % (self.name, '; '.join(bad[:10])
                                          + ('; and %d more' % (len(bad) - 10) if len(bad) > 10 else '')))
 
 
+FPS = 60.0
+
+
+def seconds(frames):
+    """timeline frames as seconds: the timelines count 60 frames a second (the game's movie cutscenes have a
+    timeline as long as their video file: Dm_Kokiri_0095 is 7040 frames, its video 117.33 s)"""
+    return frames / FPS
+
+
+class Clip:
+    def __init__(self, start, duration, actor, action, params=None, track=0):
+        self.start, self.duration, self.actor, self.action = start, duration, actor, action
+        self.params, self.track = params, track
+
+    @property
+    def end(self):
+        return self.start + self.duration
+
+
+class Oneshot:
+    def __init__(self, time, actor, action, params=None):
+        self.time, self.actor, self.action, self.params = time, actor, action, params
+
+
+class Cut:
+    def __init__(self, start, name, params=None):
+        self.start, self.name, self.params = start, name, params
+
+
+class Timeline:
+    def __init__(self, name, duration=0.0, actors=None, clips=None, triggers=None, subtimelines=None,
+                 cuts=None, oneshots=None, params=None):
+        self.name, self.duration, self.params = name, duration, params
+        self.actors = list(actors or [])
+        self.clips = list(clips or [])
+        self.triggers = list(triggers or [])
+        self.subtimelines = list(subtimelines or [])
+        self.cuts = list(cuts or [])
+        self.oneshots = list(oneshots or [])
+
+    def clip_names(self, clip):
+        """(actor name, action name) of a clip"""
+        a = self.actors[clip.actor]
+        return a.name, a.actions[clip.action]
+
+    def check(self):
+        """raises ValueError when the timeline can't be written as meant"""
+        bad = []
+        for i, c in enumerate(list(self.clips) + list(self.oneshots)):
+            if not isinstance(c.actor, int) or not 0 <= c.actor < len(self.actors):
+                bad.append('clip %d: no actor %r' % (i, c.actor))
+            elif not isinstance(c.action, int) or not 0 <= c.action < len(self.actors[c.actor].actions):
+                bad.append('clip %d: actor %s has no action number %r' % (i, self.actors[c.actor].name, c.action))
+            _check_params(bad, 'clip %d' % i, c.params)
+        for a in self.actors:
+            _check_params(bad, 'actor %s' % a.name, a.params)
+        for c, t in self.triggers:
+            if not 0 <= c < len(self.clips) or t not in (1, 2):
+                bad.append('trigger (%r, %r)' % (c, t))
+        if bad:
+            raise ValueError('%s: %s' % (self.name, '; '.join(bad[:10])))
+
+
+def timeline_triggers(tl):
+    """The trigger list of a timeline, worked out from its clips: every clip's start (1) and end (2) in time
+    order; at the same frame the ends come before the starts, each by clip number. (This gives the list of
+    every one of the game's 261 timeline files.)"""
+    out = [(c.start, 1, i, 1) for i, c in enumerate(tl.clips)] + [(c.end, 0, i, 2) for i, c in enumerate(tl.clips)]
+    return [(i, t) for _, _, i, t in sorted(out)]
+
+
 class EventFlow:
-    def __init__(self, name, flowcharts=None):
+    def __init__(self, name, flowcharts=None, timelines=None):
         self.name = name
         self.flowcharts = list(flowcharts or [])
+        self.timelines = list(timelines or [])
         self.version = (0, 4, 0, 0)
         self.string_order = []          # pool order of the file read (kept so unchanged files rewrite identically)
 
     @property
     def flowchart(self):
         return self.flowcharts[0]
+
+    @property
+    def timeline(self):
+        return self.timelines[0]
 
 
 # ============================================================================ reading
@@ -499,17 +596,18 @@ def loads(data):
         raise ValueError('not a BFEVFL file')
     r = _Reader(data)
     nflow, ntime = r.u16(0x20), r.u16(0x22)
-    if ntime:
-        raise ValueError('timelines are not supported')
     fname = data[r.u32(0x10):data.index(b'\0', r.u32(0x10))].decode('utf-8')
     flow = EventFlow(fname)
     flow.version = tuple(data[8:12])
     arr = r.ptr(0x28)
     for i in range(nflow):
         flow.flowcharts.append(_read_flowchart(r, r.ptr(arr + 8 * i)))
+    tarr = r.ptr(0x38)
+    for i in range(ntime):
+        flow.timelines.append(_read_timeline(r, r.ptr(tarr + 8 * i)))
     # string pool order
     pool = None
-    for fc_off in (r.ptr(arr + 8 * i) for i in range(nflow)):
+    for fc_off in [r.ptr(arr + 8 * i) for i in range(nflow)] + [r.ptr(tarr + 8 * i) for i in range(ntime)]:
         pool = fc_off + r.u32(fc_off + 4)
     if pool is not None and data[pool:pool + 4] == b'STR ':
         count = r.u32(pool + 0x10) + 1          # the count leaves out the empty string that starts the pool
@@ -522,20 +620,60 @@ def loads(data):
     return flow
 
 
-def _read_flowchart(r, p):
-    if r.d[p:p + 4] != b'EVFL':
-        raise ValueError('bad flowchart')
-    nact, _nacts, _nq, nev, nep = (r.u16(p + 0x10 + 2 * i) for i in range(5))
-    fc = Flowchart(r.pstr(r.ptr(p + 0x20)))
-    ap, ep, dp, epp = r.ptr(p + 0x28), r.ptr(p + 0x30), r.ptr(p + 0x38), r.ptr(p + 0x40)
+def _read_actors(r, ap, nact):
+    out = []
     for i in range(nact):
         a = ap + 0x38 * i
         na, nq = r.u16(a + 0x30), r.u16(a + 0x32)
         acts = [r.pstr(r.ptr(r.ptr(a + 0x18) + 8 * k)) for k in range(na)]
         qs = [r.pstr(r.ptr(r.ptr(a + 0x20) + 8 * k)) for k in range(nq)]
         epi = r.u16(a + 0x34)
-        fc.actors.append(Actor(r.pstr(r.ptr(a)), r.pstr(r.ptr(a + 8)), r.pstr(r.ptr(a + 0x10)), acts, qs,
-                               _read_params(r, r.ptr(a + 0x28)), None if epi == NONE16 else epi, r.u8(a + 0x36)))
+        out.append(Actor(r.pstr(r.ptr(a)), r.pstr(r.ptr(a + 8)), r.pstr(r.ptr(a + 0x10)), acts, qs,
+                         _read_params(r, r.ptr(a + 0x28)), None if epi == NONE16 else epi, r.u8(a + 0x36)))
+    return out
+
+
+def _read_timeline(r, p):
+    """TLIN block (0x60 bytes): 'TLIN', u32 offset to the string pool, 8 zero bytes, float duration, u16 counts
+    (actors, actions, clips, oneshots, subtimelines, cuts), then 8 pointers: name, actors, clips, oneshots,
+    triggers, subtimelines, cuts, parameters."""
+    if r.d[p:p + 4] != b'TLIN':
+        raise ValueError('bad timeline')
+    f32 = lambda o: struct.unpack_from('<f', r.d, o)[0]
+    nact, _nacts, nclip, nos, nsub, ncut = (r.u16(p + 0x14 + 2 * i) for i in range(6))
+    name, ap, cp, op, tp, sp, kp, pp = (r.ptr(p + 0x20 + 8 * i) for i in range(8))
+    tl = Timeline(r.pstr(name), f32(p + 0x10), params=_read_params(r, pp))
+    tl.actors = _read_actors(r, ap, nact)
+    for i in range(nclip):                      # 0x18: float start, float duration, u16 actor, u16 action,
+        c = cp + 0x18 * i                       #       u8 track, 3 zero bytes, pointer to parameters
+        if r.d[c + 0xD:c + 0x10] != bytes(3):
+            raise ValueError('clip %d: unknown bytes' % i)
+        tl.clips.append(Clip(f32(c), f32(c + 4), r.u16(c + 8), r.u16(c + 0xA), _read_params(r, r.ptr(c + 0x10)),
+                             r.u8(c + 0xC)))
+    for i in range(nos):                        # 0x10 (as in the public documentation; no file has one)
+        c = op + 0x10 * i
+        tl.oneshots.append(Oneshot(f32(c), r.u16(c + 4), r.u16(c + 6), _read_params(r, r.ptr(c + 8))))
+    for i in range(2 * nclip if tp else 0):     # 4: u16 clip, u8 type (1 start, 2 end), u8 zero
+        t = tp + 4 * i
+        if r.u8(t + 3):
+            raise ValueError('trigger %d: unknown byte' % i)
+        tl.triggers.append((r.u16(t), r.u8(t + 2)))
+    tl.subtimelines = [r.pstr(r.ptr(sp + 8 * i)) for i in range(nsub)]
+    for i in range(ncut):                       # 0x18: float start, u32 zero, name, parameters
+        c = kp + 0x18 * i
+        if r.u32(c + 4):
+            raise ValueError('cut %d: unknown bytes' % i)
+        tl.cuts.append(Cut(f32(c), r.pstr(r.ptr(c + 8)), _read_params(r, r.ptr(c + 0x10))))
+    return tl
+
+
+def _read_flowchart(r, p):
+    if r.d[p:p + 4] != b'EVFL':
+        raise ValueError('bad flowchart')
+    nact, _nacts, _nq, nev, nep = (r.u16(p + 0x10 + 2 * i) for i in range(5))
+    fc = Flowchart(r.pstr(r.ptr(p + 0x20)))
+    ap, ep, dp, epp = r.ptr(p + 0x28), r.ptr(p + 0x30), r.ptr(p + 0x38), r.ptr(p + 0x40)
+    fc.actors = _read_actors(r, ap, nact)
     for i in range(nev):
         e = ep + EVENT_SIZE * i
         name, t = r.pstr(r.ptr(e)), r.u8(e + 8)
@@ -566,12 +704,22 @@ def _read_flowchart(r, p):
     names = r.dic_names(dp)
     for i, n in enumerate(names):
         e = epp + 0x20 * i
-        nsub = r.u16(e + 0x18)
-        if r.u16(e + 0x1A):
-            raise ValueError('entry point variables are not supported')
+        nsub, nvar = r.u16(e + 0x18), r.u16(e + 0x1A)
+        variables = None
+        if nvar:
+            # a DIC of names and, per variable, 0x10 bytes: value (8 bytes), u16 count (1), u16 type
+            # (2 number, 3 true/false, stored as 1 / 0), u32 zero
+            variables = {}
+            vd = r.ptr(e + 0x10)
+            for k, vn in enumerate(r.dic_names(r.ptr(e + 8))):
+                v = vd + 0x10 * k
+                count, t = r.u16(v + 8), r.u16(v + 0xA)
+                if count != 1 or t not in (2, 3) or r.u32(v + 4) or r.u32(v + 0xC) or (t == 3 and r.u32(v) > 1):
+                    raise ValueError('entry point %s: unknown kind of variable %r' % (n, vn))
+                variables[vn] = r.s32(v) if t == 2 else bool(r.u32(v))
         main = r.u16(e + 0x1C)
         fc.entry_points.append(EntryPoint(n, None if main == NONE16 else main,
-                                          [r.u16(r.ptr(e) + 2 * k) for k in range(nsub)]))
+                                          [r.u16(r.ptr(e) + 2 * k) for k in range(nsub)], variables))
     return fc
 
 
@@ -765,7 +913,7 @@ def _write_params(o, key, params):
 
 def dumps(flow):
     o = _Out()
-    fcs = flow.flowcharts
+    fcs, tls = flow.flowcharts, flow.timelines
     # file header (0x48)
     o.b += b'BFEVFL\0\0' + bytes(flow.version)
     o.u16(0xFEFF)
@@ -775,28 +923,38 @@ def dumps(flow):
     o.u16(0)                                  # first block, set later
     o.u32(0)                                  # RELT, set later
     o.u32(0)                                  # file size, set later
-    o.u16(len(fcs)); o.u16(0); o.u32(0)
-    o.ptr('fc_array' if fcs else None)
+    o.u16(len(fcs)); o.u16(len(tls)); o.u32(0)
+    o.ptr('fc_array' if fcs else None, listed=True)
     o.ptr('fc_dic')
-    o.ptr(None, listed=True)
+    o.ptr('tl_array' if tls else None, listed=True)
     o.ptr('tl_dic')
     if fcs:
         o.mark('fc_array')
         for i in range(len(fcs)):
             o.ptr(('fc', i))
     _write_dic(o, 'fc_dic', [fc.name for fc in fcs])
-    _write_dic(o, 'tl_dic', [])
+    if tls:
+        o.mark('tl_array')
+        for i in range(len(tls)):
+            o.ptr(('tl', i))
+    _write_dic(o, 'tl_dic', [tl.name for tl in tls])
     first_block = None
     for i, fc in enumerate(fcs):
         o.align(8)
         if first_block is None:
             first_block = o.tell()
         _write_flowchart(o, ('fc', i), fc)
+    for i, tl in enumerate(tls):
+        _write_actor_data(o, ('tl', i), tl.actors)        # a timeline's actor data comes before its block
+        o.align(8)
+        if first_block is None:
+            first_block = o.tell()
+        _write_timeline(o, ('tl', i), tl)
     # string pool
     o.align(8)
     pool = o.tell()
-    for i, fc in enumerate(fcs):
-        struct.pack_into('<I', o.b, o.addr[('fc', i)] + 4, pool - o.addr[('fc', i)])
+    for key in [('fc', i) for i in range(len(fcs))] + [('tl', i) for i in range(len(tls))]:
+        struct.pack_into('<I', o.b, o.addr[key] + 4, pool - o.addr[key])
     o.b += b'STR ' + b'\0' * 12
     used = []
     seen = set()
@@ -858,6 +1016,86 @@ def dumps(flow):
     return bytes(o.b)
 
 
+def _write_actors(o, key, actors):
+    o.mark((key, 'actors'))
+    for i, a in enumerate(actors):
+        k = (key, 'actor', i)
+        o.sptr(a.name)
+        o.sptr(a.secondary)
+        o.sptr(a.argument)
+        o.ptr((k, 'actions') if a.actions else None, listed=True)
+        o.ptr((k, 'queries') if a.queries else None, listed=True)
+        o.ptr((k, 'params') if a.params is not None else None)
+        o.u16(len(a.actions)); o.u16(len(a.queries))
+        o.u16(NONE16 if a.entry_point is None else a.entry_point)
+        o.u8(a.cut); o.u8(0)
+
+
+def _write_actor_data(o, key, actors):
+    """actor data: parameters, then action and query name arrays"""
+    for i, a in enumerate(actors):
+        k = (key, 'actor', i)
+        _write_params(o, (k, 'params'), a.params)
+        if a.actions:
+            o.align(8)
+            o.mark((k, 'actions'))
+            for n in a.actions:
+                o.sptr(n)
+        if a.queries:
+            o.align(8)
+            o.mark((k, 'queries'))
+            for n in a.queries:
+                o.sptr(n)
+
+
+def _write_timeline(o, key, tl):
+    o.mark(key)
+    o.b += b'TLIN'
+    o.u32(0)                                  # string pool offset, set later
+    o.u32(0); o.u32(0)
+    o.b += struct.pack('<f', tl.duration)
+    for v in (len(tl.actors), sum(len(a.actions) for a in tl.actors), len(tl.clips), len(tl.oneshots),
+              len(tl.subtimelines), len(tl.cuts)):
+        o.u16(v)
+    o.sptr(tl.name)
+    # empty arrays: the null pointer is still listed in the RELT (as in the game's files)
+    o.ptr((key, 'actors') if tl.actors else None, listed=True)
+    o.ptr((key, 'clips') if tl.clips else None, listed=True)
+    o.ptr((key, 'oneshots') if tl.oneshots else None, listed=True)
+    o.ptr((key, 'triggers') if tl.triggers else None, listed=True)
+    o.ptr((key, 'subs') if tl.subtimelines else None, listed=True)
+    o.ptr((key, 'cuts') if tl.cuts else None, listed=True)
+    o.ptr((key, 'params') if tl.params is not None else None)
+    _write_actors(o, key, tl.actors)
+    o.mark((key, 'clips'))
+    for i, c in enumerate(tl.clips):
+        o.b += struct.pack('<ffHHBxxx', c.start, c.duration, c.actor, c.action, c.track)
+        o.ptr((key, 'clip', i) if c.params is not None else None)
+    o.mark((key, 'oneshots'))
+    for i, c in enumerate(tl.oneshots):
+        o.b += struct.pack('<fHH', c.time, c.actor, c.action)
+        o.ptr((key, 'oneshot', i) if c.params is not None else None)
+    o.mark((key, 'subs'))
+    for n in tl.subtimelines:
+        o.sptr(n)
+    o.mark((key, 'triggers'))
+    for c, t in tl.triggers:
+        o.b += struct.pack('<HBx', c, t)
+    o.align(8)
+    o.mark((key, 'cuts'))
+    for i, c in enumerate(tl.cuts):
+        o.b += struct.pack('<fI', c.start, 0)
+        o.sptr(c.name)
+        o.ptr((key, 'cut', i) if c.params is not None else None)
+    for i, c in enumerate(tl.clips):
+        _write_params(o, (key, 'clip', i), c.params)
+    for i, c in enumerate(tl.oneshots):
+        _write_params(o, (key, 'oneshot', i), c.params)
+    for i, c in enumerate(tl.cuts):
+        _write_params(o, (key, 'cut', i), c.params)
+    _write_params(o, (key, 'params'), tl.params)
+
+
 def _write_flowchart(o, key, fc):
     o.mark(key)
     nacts = sum(len(a.actions) for a in fc.actors)
@@ -873,19 +1111,7 @@ def _write_flowchart(o, key, fc):
     o.ptr((key, 'events') if fc.events else None, listed=True)
     o.ptr((key, 'epdic'))
     o.ptr((key, 'eps') if fc.entry_points else None, listed=True)
-    # actors
-    o.mark((key, 'actors'))
-    for i, a in enumerate(fc.actors):
-        k = (key, 'actor', i)
-        o.sptr(a.name)
-        o.sptr(a.secondary)
-        o.sptr(a.argument)
-        o.ptr((k, 'actions') if a.actions else None, listed=True)
-        o.ptr((k, 'queries') if a.queries else None, listed=True)
-        o.ptr((k, 'params') if a.params is not None else None)
-        o.u16(len(a.actions)); o.u16(len(a.queries))
-        o.u16(NONE16 if a.entry_point is None else a.entry_point)
-        o.u8(a.cut); o.u8(0)
+    _write_actors(o, key, fc.actors)
     # events
     nx = lambda v: NONE16 if v is None else v
     o.mark((key, 'events'))
@@ -926,8 +1152,9 @@ def _write_flowchart(o, key, fc):
     for i, ep in enumerate(fc.entry_points):
         k = (key, 'ep', i)
         o.ptr((k, 'subs') if ep.subflows else None, listed=True)
-        o.ptr(None); o.ptr(None, listed=True)
-        o.u16(len(ep.subflows)); o.u16(0); o.u16(nx(ep.main)); o.u16(0)
+        o.ptr((k, 'vdic') if ep.variables else None)
+        o.ptr((k, 'vdefs') if ep.variables else None, listed=True)
+        o.u16(len(ep.subflows)); o.u16(len(ep.variables or ())); o.u16(nx(ep.main)); o.u16(0)
     # event data: cases / forks, then parameters
     for i, e in enumerate(fc.events):
         k = (key, 'event', i)
@@ -942,20 +1169,7 @@ def _write_flowchart(o, key, fc):
             for f in e.forks:
                 o.u16(f)
         _write_params(o, (k, 'params'), e.params)
-    # actor data: parameters, then action and query name arrays
-    for i, a in enumerate(fc.actors):
-        k = (key, 'actor', i)
-        _write_params(o, (k, 'params'), a.params)
-        if a.actions:
-            o.align(8)
-            o.mark((k, 'actions'))
-            for n in a.actions:
-                o.sptr(n)
-        if a.queries:
-            o.align(8)
-            o.mark((k, 'queries'))
-            for n in a.queries:
-                o.sptr(n)
+    _write_actor_data(o, key, fc.actors)
     # entry point extra data
     for i, ep in enumerate(fc.entry_points):
         k = (key, 'ep', i)
@@ -963,6 +1177,12 @@ def _write_flowchart(o, key, fc):
         o.mark((k, 'subs'))
         for s in ep.subflows:
             o.u16(s)
+        if ep.variables:                      # in place of the 0x18 empty bytes
+            _write_dic(o, (k, 'vdic'), list(ep.variables))
+            o.mark((k, 'vdefs'))
+            for v in ep.variables.values():
+                o.b += struct.pack('<iIHHI', int(v), 0, 1, 3 if isinstance(v, bool) else 2, 0)
+            continue
         o.align(8)
         o.b += b'\0' * 0x18
 
@@ -1016,12 +1236,43 @@ def _actor_fields(a):
 
 
 def _entry_fields(ep):
-    return {'name': ep.name, 'main': ep.main, 'subflows': list(ep.subflows)}
+    return {'name': ep.name, 'main': ep.main, 'subflows': list(ep.subflows),
+            'variables': [(k, type(v).__name__, v) for k, v in (ep.variables or {}).items()]}
+
+
+def _clip_fields(c):
+    return {'start': _f32(c.start), 'duration': _f32(c.duration), 'actor': c.actor, 'action': c.action,
+            'track': c.track, 'params': _norm(c.params)}
+
+
+def _timeline_differences(out, ta, tb):
+    w = ta.name
+    for k in ('name', 'duration', 'triggers', 'subtimelines'):
+        if getattr(ta, k) != getattr(tb, k):
+            out.append('%s: %s: %r / %r' % (w, k, getattr(ta, k), getattr(tb, k)))
+    if _norm(ta.params) != _norm(tb.params):
+        out.append('%s: parameters differ' % w)
+    lists = (('actor', ta.actors, tb.actors, _actor_fields, lambda x: x.name),
+             ('clip', ta.clips, tb.clips, _clip_fields, lambda x: 'frame %g' % x.start),
+             ('oneshot', ta.oneshots, tb.oneshots,
+              lambda c: {'time': _f32(c.time), 'actor': c.actor, 'action': c.action, 'params': _norm(c.params)},
+              lambda x: 'frame %g' % x.time),
+             ('cut', ta.cuts, tb.cuts,
+              lambda c: {'start': _f32(c.start), 'name': c.name, 'params': _norm(c.params)}, lambda x: x.name))
+    for what, la, lb, fields, label in lists:
+        if len(la) != len(lb):
+            out.append('%s: %d %ss / %d' % (w, len(la), what, len(lb)))
+        for i, (x, y) in enumerate(zip(la, lb)):
+            dx, dy = fields(x), fields(y)
+            for k in sorted(dx.keys() | dy.keys()):
+                if dx.get(k) != dy.get(k):
+                    out.append('%s: %s %d (%s) %s: %r / %r' % (w, what, i, label(x), k, dx.get(k), dy.get(k)))
 
 
 def differences(a, b):
     """What differs between two event flows, as a list of lines (empty = the same): every flowchart, actor,
-    action, query, event, link, parameter (with its type) and entry point is compared."""
+    action, query, event, link, parameter (with its type) and entry point is compared; of a timeline, its
+    length, actors, clips, triggers, cuts and sub-timelines."""
     out = []
     if a.name != b.name:
         out.append('file name: %r / %r' % (a.name, b.name))
@@ -1029,6 +1280,10 @@ def differences(a, b):
         out.append('version: %r / %r' % (a.version, b.version))
     if len(a.flowcharts) != len(b.flowcharts):
         out.append('flowcharts: %d / %d' % (len(a.flowcharts), len(b.flowcharts)))
+    if len(a.timelines) != len(b.timelines):
+        out.append('timelines: %d / %d' % (len(a.timelines), len(b.timelines)))
+    for ta, tb in zip(a.timelines, b.timelines):
+        _timeline_differences(out, ta, tb)
     for fa, fb in zip(a.flowcharts, b.flowcharts):
         w = fa.name
         if fa.name != fb.name:
@@ -1054,6 +1309,8 @@ def dumps_checked(flow, update_entry_points=True):
         if update_entry_points:
             fc.update_entry_points()
         fc.check()
+    for tl in flow.timelines:
+        tl.check()
     data = dumps(flow)
     diff = differences(flow, loads(data))
     if diff:

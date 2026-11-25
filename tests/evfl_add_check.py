@@ -3,7 +3,7 @@ was read is what was meant. Reads only; writes nothing to the romfs and builds n
 
     python tests/evfl_add_check.py "C:\\...\\romfs"
 
-1. Every event flow our reader takes (the others have timelines or entry point variables):
+1. Every event flow (a timeline file has no flowchart: it is only written back unchanged):
    - unchanged, it passes the checks, its entry point lists are what we would work out, and
      `dumps_checked` gives the game's bytes back;
    - then one event of every type, a new actor, a new action and a new query are added and linked in, and
@@ -277,7 +277,7 @@ def main(romfs):
         try:
             flow = evfl.loads(raw)
         except ValueError:
-            continue                                    # timelines / entry point variables: refused on purpose
+            continue                                    # a file the reader refuses (none since 2026-11-25)
         read += 1
         try:
             before = [list(ep.subflows) for fc in flow.flowcharts for ep in fc.entry_points]
