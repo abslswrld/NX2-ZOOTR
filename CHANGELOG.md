@@ -22,12 +22,15 @@ Test build and checklist: `out\TEST_CHECKLIST.md`.
   was done.
 - **As expected, and kept:** in Saria's cutscene the Forest Medallion still floats down above Link while the
   window names the other item (the user's screenshot). It is an actor of the cutscene, not the item given.
-- **Open (the user's note):** a tab of the pause menu was "???" after the Medallion from the pot. What the
-  files show: "???" is the pause menu's text for a tab that is not opened yet (`LayoutMsg/MenuOverlay_00`,
-  label `Unopened`), and the Key Items tab is opened by the Great Deku Tree's cutscene when he gives the Kokiri
-  Emerald (`Dm_Kokiri_0130`, step `Event52`: `UISystemActor.EventOpenPerformanceImportantMenu`; its text is
-  "Kokiri Emerald added to Key Items"). So a stone or Medallion found before that cutscene may be in a tab that
-  is still closed. What keeps the tab open in the save file is not found yet. Not part of part 7.
+- **Open (the user's note): the Key Items tab, the one with the stones and Medallions, was "???"** after the
+  Medallion from the pot. What the files show: "???" is the pause menu's text for a tab that is not opened yet
+  (`LayoutMsg/MenuOverlay_00`, label `Unopened`), and the Key Items tab is opened by the Great Deku Tree's
+  cutscene when he gives the Kokiri Emerald (`Dm_Kokiri_0130`, step `Event52`:
+  `UISystemActor.EventOpenPerformanceImportantMenu`; its text is "Kokiri Emerald added to Key Items"). So a
+  Medallion found before that cutscene sits in a tab that is still closed. **Not found: what the game keeps in
+  the save file for an opened tab.** Two candidates to try in game: the saved yes/no
+  `HavePlayedEvent.Dm_Kokiri_0130` (the game keeps one for each of its 3,647 events; setting it may also skip
+  the Deku Tree's cutscene), or simply owning a Spiritual Stone. Not part of part 7.
 
 - **The boss key anywhere** (`tools/dungeon_items.py`, new): `CHECK_ID=Item_Dungeon_BossKey@ForestTemple`. What
   was found: the boss key, the map and the compass are yes/no fields of the dungeon's saved record

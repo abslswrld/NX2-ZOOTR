@@ -177,9 +177,9 @@ Parts, in order:
    Hammer in the boss key's chest (no message from Navi), the Boomerang in the Heart Container's place (the
    boss's last cutscene plays to its end), the Silver Scale from Saria, the Forest Medallion from a pot.
    **Open:** a family where the Medallion is given; the Medallion on the ground does not spin; in Saria's
-   cutscene the Medallion still floats down whatever is given; a pause-menu tab was "???" after the Medallion
-   from the pot (the Key Items tab is opened by the Kokiri Emerald's cutscene, `Dm_Kokiri_0130`: for phase 2,
-   with the Deku Tree).
+   cutscene the Medallion still floats down whatever is given; the Key Items tab (stones and Medallions) was
+   "???" after the Medallion from the pot: the tab is opened by the Kokiri Emerald's cutscene
+   (`Dm_Kokiri_0130`), so a randomizer has to open it itself (for phase 2, with the Deku Tree).
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.
