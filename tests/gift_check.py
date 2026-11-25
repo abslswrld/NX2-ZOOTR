@@ -95,7 +95,7 @@ def main(romfs):
         try:
             fc = evfl.loads(rd(f)).flowchart
         except Exception:
-            continue                                   # flows the reader refuses (timelines): see README
+            continue                                   # timeline files have no flowchart: see README
         heads = {x for e in fc.events if e.type == 'fork' for x in e.forks}
         for a in fc.actors:
             if a.name == 'PouchSystemActor':
