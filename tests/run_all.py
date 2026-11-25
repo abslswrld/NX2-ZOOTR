@@ -55,6 +55,7 @@ STEPS = [
     ('key_items_tab_check', 'Key Items tab open from the start check'),
     ('reward_spin_check', 'Stones and Medallions turn check'),
     ('reward_names_check', 'Stones\' and Medallions\' names in colour check'),
+    ('forest_temple_every_spot_check', 'Forest Temple, every spot check'),
     ('roundtrip', 'Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence)'),
 ]
 

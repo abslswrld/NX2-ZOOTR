@@ -4,6 +4,37 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-24
 
+### Phase 1: the Forest Temple's every-spot build script, and its unusual spots (to test in game)
+Test build and checklist: `out\TEST_CHECKLIST.md`. Decision 27 as changed today: in game each check kind once
+plus every unusual spot; a build script for every spot.
+
+- **`tests/forest_temple_every_spot_check.py`** (new, 16 checks; a row of `STEPS` in `tests/run_all.py`): one
+  build puts a different item on each of the temple's 47 checks (12 chests, 28 pots, 5 Gold Skulltulas, the
+  boss's heart, the Medallion's cutscene) and every one is read back from the mod folder. Each chest holds its
+  item, each pot drops the one-time version of its item and names no drop table any more, each Gold Skulltula
+  drops the token-built version, the boss's heart is the ground version, the Medallion's cutscene gives its
+  item in the file the game loads. The 46 objects hold 46 different things: 12 are the game's own actors, 34
+  are new and each was written as a pack with its row in the actor table. The other 3,167 objects of the two
+  maps are as the game has them, and every one of the build's 81 files has its entry in the resource size
+  table. No builder change was needed: all 47 built at the first try.
+- **Why `FT_FALLING_CEILING_ROOM_CHEST` shows no contents:** its map entry names no item, as 9 of the game's 235
+  chests (the others: 3 in the Gerudo Training Ground, 4 in Ganon's Castle, 1 in the Spirit Temple). Such a
+  chest gives from the chest's own drop table (`Drop/DropSubTable/Obj_TBox`, one entry of the type
+  `MostDepletedResource`): the supply Link is shortest of among magic, arrows or Deku Seeds, Deku Nuts and
+  bombs. The chest's default drop actor is `Obj_Rupee_Green`. So it is a refill chest, and the builder gives
+  it an item like any chest.
+- **Which chests only appear** (read from each room's logic module): six of the 12. After a fight: the first
+  Stalfos room's, the Floormaster's (both through the module `Gimmick_TreasureBoxAppear_Any_Magic`) and the
+  Bow's. After a Poe is beaten: Joelle's (`ForestTemple_DefeatJoe`, the same module as the first Stalfos
+  room's) and Beth's (`ForestTemple_DefeatBeth`, through `Gimmick_TreasureBoxAppear_02_Any_Any_Magic`, which
+  no other chest of the temple uses). From an eye switch: the block room's. The first Stalfos room's, the
+  Bow's and the block room's passed in game in part 3.
+- **Nothing unusual in the files** about the basement's chest (a small chest that names its item), the well's
+  chest (a small chest whose room logic only notes that it was opened, as the first room's) and the three Gold
+  Skulltulas not yet tried (all five run the same module, `Gimmick_AllDay_Skulltula`): no in-game test.
+- **In game, to test** (unusual spots not tried yet): the falling ceiling room's chest (names nothing),
+  Joelle's and Beth's chests (appear after a Poe), and the Floormaster's chest (appears after a fight).
+
 ### D27 changed: in game, each check kind once plus the unusual spots (no game changes)
 The user: "is this excessive? Testing EVERY spot is going to take a long time. We already tested a bunch and
 they all work." Decided: "each check kind once plus unusual spots in game, a build script for every spot,

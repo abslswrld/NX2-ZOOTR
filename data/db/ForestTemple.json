@@ -1339,7 +1339,7 @@
   "check_rule": "True",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "its map entry names no item (no Drop__DropActor): what the game gives here is to be seen in game"
+  "notes": "its map entry names no item (no Drop__DropActor), as 9 of the game's 235 chests: it then gives from the chest's own drop table (Drop/DropSubTable/Obj_TBox: one entry of the type MostDepletedResource), the supply Link is shortest of among magic, arrows or Deku Seeds, Deku Nuts and bombs; the chest's default drop actor is Obj_Rupee_Green"
  },
  {
   "unique_check_id": "FT_FIRST_STALFOS_ROOM_CHEST",

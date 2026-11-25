@@ -520,7 +520,7 @@
    "FT Falling Ceiling Room Chest": {
     "id": "FT_FALLING_CEILING_ROOM_CHEST",
     "spot": "chest@56.0,-23.0",
-    "note": "its map entry names no item (no Drop__DropActor): what the game gives here is to be seen in game",
+    "note": "its map entry names no item (no Drop__DropActor), as 9 of the game's 235 chests: it then gives from the chest's own drop table (Drop/DropSubTable/Obj_TBox: one entry of the type MostDepletedResource), the supply Link is shortest of among magic, arrows or Deku Seeds, Deku Nuts and bombs; the chest's default drop actor is Obj_Rupee_Green",
     "randomizable": "untested",
     "randomizable_note": "not yet changed in game"
    }
