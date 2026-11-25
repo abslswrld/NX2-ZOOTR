@@ -117,6 +117,11 @@ Game fixes (--fix NAME, see FIXES and FILE_FIXES):
                              appeared (decision 39). In the game it stays locked until the eye switch behind
                              the bars is shot with an arrow, saving is off in the room, and dying loses what
                              was picked up there: without the Bow nothing found in the room could be kept
+    key_items_tab_open       the pause menu's Key Items tab (Spiritual Stones and Medallions) is open from the
+                             start. In the game it is "???" until Link owns a stone, so a Medallion found
+                             first sat in a closed tab; the game opens it for the first item of any row of
+                             its pause menu table's StoneArray, which gets two rows for the green tunics
+                             every file starts with (they show nothing on the page)
     bombs_without_bracelet   bombs from the bomb bag can be held without the Goron Bracelet: the bomb's lift
                              grade becomes the "no upgrade" grade of rocks, bushes, pots and Bombchus (bomb
                              flowers have their own copy of the setting and still need the bracelet)
@@ -2942,22 +2947,25 @@ def bombchus_without_bag(data):
 
 
 POUCH_TABLE = 'UI/Pouch/PouchTable/PouchTable.game__ui__PouchTable.bgyml'
-# AN EXPERIMENT (to test in game, 2026-11-24), not a fix yet: the Key Items tab of the pause menu open from the
-# start. The tab stays "???" until Link owns a Spiritual Stone; a Medallion alone does not open it (in game
-# 2026-11-24, also with the Medallions' age mark removed or made "child"). Read from the game's program: the
-# tab bar asks, for each row of the pause menu table's StoneArray, whether Link owns the first item of the row
-# (its Actor[0].ActorShort), and opens the tab when any is owned. So a row is added for each of the two green
-# tunics, which the game's own new-file list gives every file. The rows name no model to show and no place
-# on the page (as the rows of NoDisplayArray name none). NOT KNOWN: what the page does with such a row.
+# The Key Items tab of the pause menu open from the start (--fix key_items_tab_open). In the game the tab is
+# "???" until Link owns a Spiritual Stone; a Medallion alone does not open it (in game 2026-11-24, also with
+# the Medallions' age mark removed or made "child"). Read from the game's program: the tab bar asks, for each
+# row of the pause menu table's StoneArray, whether Link owns the first item of the row (its
+# Actor[0].ActorShort), and opens the tab when any is owned; MedalArray is not asked. So a row is added for
+# each of the two green tunics, which the game's own new-file list gives every file (start_state reads that
+# list). The rows name no model to show and no place on the page, as the rows of NoDisplayArray name none.
+# In game 2026-11-24: the tab is "Key Items" on a new file and the page is empty; a Medallion and a stone
+# found afterwards are on it, also after save and reload and as an adult.
 KEY_ITEMS_ALWAYS = ('Obj_Armor_Child_Normal', 'Armor_Adult_Normal')
+KEY_ITEMS_STONES = ['Item_Stone_Forest', 'Item_Stone_Fire', 'Item_Stone_Water']
 
 
-def key_items_tab_try(data):
+def key_items_tab_open(data):
     """the pause menu's table (POUCH_TABLE): StoneArray gets one row for each item of KEY_ITEMS_ALWAYS"""
     doc = byml.loads(data)
     rows = doc.root['StoneArray']
     have = [row['Actor'][0]['ActorShort'] for row in rows]
-    if have != ['Item_Stone_Forest', 'Item_Stone_Fire', 'Item_Stone_Water']:
+    if have != KEY_ITEMS_STONES:
         raise SystemExit('StoneArray is not as expected: %s (game files differ from what this was made for)' % have)
     row_type, list_type, actor_type = type(rows[0]), type(rows[0]['Actor']), type(rows[0]['Actor'][0])
     for name in KEY_ITEMS_ALWAYS:
@@ -2980,7 +2988,7 @@ def key_items_tab_try(data):
 
 # name -> (file, function(data) -> (new data, list of what changed))
 TABLE_FIXES = {
-    'key_items_tab_try': (POUCH_TABLE, key_items_tab_try),
+    'key_items_tab_open': (POUCH_TABLE, key_items_tab_open),
     'bombchus_without_bag': ('RSDB/PouchActorInfo.Product.111.rstbl.byml', bombchus_without_bag),
     'magic_is_separate': ('RSDB/PouchActorInfo.Product.111.rstbl.byml', magic_is_separate),
 }

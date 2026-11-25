@@ -53,11 +53,17 @@ no builder change, the Forest Medallion in a pot and the Kokiri Emerald and the 
   rows of the pause menu table's `StoneArray` and asks, for each row, whether Link owns its first item
   (`Actor[0].ActorShort`); any one owned opens the tab. `MedalArray` is not looked at, which is why a
   Medallion alone never opens it. The page's own code asks the same of `StoneArray`.
-- **Fourth round, to test in game:** `--fix key_items_tab_try`, an experiment (`KEY_ITEMS_ALWAYS` in
+- **Fourth round in game (user, 2026-11-24): passed. `--fix key_items_tab_open`** (`KEY_ITEMS_ALWAYS` in
   `tools/build_mod.py`): two rows more in `StoneArray`, for the two green tunics, which the game's own
   new-file list gives every file. The rows name no model and no place on the page (as the rows of
-  `NoDisplayArray` name none). **Not known:** what the page does with such a row (nothing, something odd, or
-  a freeze). It is not a fix yet and has no test script.
+  `NoDisplayArray` name none). On a new file the tab was named "Key Items" and its page was empty, with
+  nothing odd when moving the cursor; the other tabs as usual; the Forest Medallion from a chest was on the
+  page in its place and could be selected, then the Kokiri Emerald with it; the same after save and reload
+  and as an adult (debug menu). **Test:** `tests/key_items_tab_check.py` (new, 13 checks; a row of `STEPS` in
+  `tests/run_all.py`).
+- **Open (the user's note, same test):** "medallions and stones still dont spin when link holds them up". In
+  the game they are only ever given in cutscenes, so they have no turning animation for Link's hands (the
+  songs' harp got one of its own for the same reason). Not built.
 - **A size rule for the pause menu's table** (`tools/sizes.py`, `game__ui__PouchTable`): the game has one file
   of the type, so the rule charges 1024 for each row of `StoneArray` and for each item of a row (far more than
   an element can cost), spreads the rest evenly, and gives the game's entry for the game's file

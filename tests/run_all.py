@@ -52,6 +52,7 @@ STEPS = [
     ('dungeon_keys_check', 'Dungeon keys check'),
     ('start_state_check', 'Starting state of a new file check'),
     ('boss_check', 'Boss key, boss door, boss heart and Medallion check'),
+    ('key_items_tab_check', 'Key Items tab open from the start check'),
     ('roundtrip', 'Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence)'),
 ]
 

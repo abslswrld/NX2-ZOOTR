@@ -176,14 +176,16 @@ Parts, in order:
    Kokiri Forest (each with "(Forest Temple)" in green), the boss door opened with that key, the Megaton
    Hammer in the boss key's chest (no message from Navi), the Boomerang in the Heart Container's place (the
    boss's last cutscene plays to its end), the Silver Scale from Saria, the Forest Medallion from a pot.
-   **Open:** a family where the Medallion is given; the Medallion on the ground does not spin; in Saria's
+   **Open:** a family where the Medallion is given; in Saria's
    cutscene the Medallion still floats down whatever is given.
    **The Key Items tab (the user, 2026-11-24: "key items tab first"):** it was "???" after the Medallion from
    the pot. In game the same day: a Spiritual Stone found in a chest opens it (no cutscene needed) and the
    Medallion is then on it; a Medallion alone does not open it, whatever its age mark (third round). The
    game opens the tab when Link owns the first item of any row of the pause menu table's `StoneArray` (read
-   from its program). **To test in game:** `--fix key_items_tab_try` (two rows more in that list, for the green
-   tunics every file starts with: the tab open from the start).
+   from its program). **Passed in game 2026-11-24:** `--fix key_items_tab_open` (two rows more in that list,
+   for the green tunics every file starts with): the tab is open and empty on a new file, and a Medallion or
+   a stone found afterwards is on it.
+   **Open:** a stone or a Medallion does not spin when Link holds it up or when it lies on the ground.
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.
