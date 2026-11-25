@@ -185,7 +185,10 @@ Parts, in order:
    from its program). **Passed in game 2026-11-24:** `--fix key_items_tab_open` (two rows more in that list,
    for the green tunics every file starts with): the tab is open and empty on a new file, and a Medallion or
    a stone found afterwards is on it.
-   **Open:** a stone or a Medallion does not spin when Link holds it up or when it lies on the ground.
+   **Decision 43:** the tab is open from the start in every build.
+   **Built 2026-11-24, to test in game:** a placed stone or Medallion turns when Link holds it up and when it
+   lies on the ground (it gets the Boomerang's animation settings, as the songs' harp did). **Not known:** how
+   the changed actor looks in the 11 cutscenes that show a stone or a Medallion (each with its area).
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.

@@ -61,9 +61,25 @@ no builder change, the Forest Medallion in a pot and the Kokiri Emerald and the 
   page in its place and could be selected, then the Kokiri Emerald with it; the same after save and reload
   and as an adult (debug menu). **Test:** `tests/key_items_tab_check.py` (new, 13 checks; a row of `STEPS` in
   `tests/run_all.py`).
-- **Open (the user's note, same test):** "medallions and stones still dont spin when link holds them up". In
-  the game they are only ever given in cutscenes, so they have no turning animation for Link's hands (the
-  songs' harp got one of its own for the same reason). Not built.
+- **Decision 43 (the user, 2026-11-24): the Key Items tab is open from the start in every build,** test
+  builds included (`docs/ROADMAP_DECISIONS.md`).
+- **The user's note, same test: "medallions and stones still dont spin when link holds them up".** Built, to
+  test in game. Why they stood still: the game only gives them in cutscenes, so their nine actors have no
+  animation (`ASRef` names an empty placeholder, `AS/DemoDummy.root.asb`, 231 bytes with no command, and the
+  stones' `AS/Dummy.root.asb` is not even a file; `AnimationRef` is an empty list; no `ASInfoRef`). Their
+  models do have the two bones the game's item spin turns and lifts (`Root`, `Skl_Root`).
+  **A placed stone or Medallion now gets what the Boomerang has,** as the songs' harp did: the get-demo
+  animation settings (nothing plays by itself), the items' shared animation file (`AS/Item_Common.root.asb`:
+  `Rotate_GetDemo` in Link's hands, `Rotate_Obj` on the ground) and a list of only the game's
+  `Item_Common_Animation` (`reward_spin_pack`, `reward_spin_rows` in `tools/build_mod.py`). The actor itself
+  is changed, so its versions on the ground and from a Gold Skulltula turn too. Only the ones a build places
+  are changed.
+  **Not known:** how the changed actor looks in the 11 cutscenes that show these actors (the five
+  `Dm_Awake_*_Get`, `Dm_Kokiri_0130`, `Dm_DeathMtTrail_0025`, `Dm_InsideJabu_Jabu_0030`,
+  `Dm_ZoraFountain_0030`, `Dm_SageRoom_0005`, `Dm_InsideGanonCastle_0000`). They move the actor by a locator
+  and its old animation file was empty, so nothing should differ; each is to be looked at with its area. A
+  stone or Medallion given as a gift is now held up like other items instead of shown in the window (not
+  tested). **Test:** `tests/reward_spin_check.py` (new, 14 checks; a row of `STEPS` in `tests/run_all.py`).
 - **A size rule for the pause menu's table** (`tools/sizes.py`, `game__ui__PouchTable`): the game has one file
   of the type, so the rule charges 1024 for each row of `StoneArray` and for each item of a row (far more than
   an element can cost), spreads the rest evenly, and gives the game's entry for the game's file

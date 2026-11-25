@@ -2815,6 +2815,105 @@ def song_harp_rows(data, songs, models=None, anim_projects=()):
     return out
 
 
+# The Spiritual Stones and the Medallions turn when Link holds them up and when they lie on the ground (the
+# user, 2026-11-24: "medallions and stones still dont spin when link holds them up"). The game only ever gives
+# them in cutscenes, so their actors have no animation: ASRef names an empty placeholder (AS/DemoDummy.root.asb,
+# 231 bytes, no command; the stones' AS/Dummy.root.asb is not even a file), AnimationRef an empty list, and
+# there is no ASInfoRef. Their models have the two bones the game's item spin turns and lifts (Root, Skl_Root).
+# A placed stone or Medallion gets what the Boomerang has, as the songs do (song_spin_pack): the get-demo
+# animation settings (ASInfo Item_GetDemo: nothing plays by itself), the items' shared animation file
+# (AS/Item_Common.root.asb: Rotate_GetDemo in Link's hands, Rotate_Obj on the ground) and an animation list of
+# only the game's Item_Common_Animation. The actor itself is changed, so every version made of it (on the
+# ground, from a Gold Skulltula) turns too. The 11 cutscenes that show these actors (the five Dm_Awake_*_Get,
+# Dm_Kokiri_0130, Dm_DeathMtTrail_0025, Dm_InsideJabu_Jabu_0030, Dm_ZoraFountain_0030, Dm_SageRoom_0005,
+# Dm_InsideGanonCastle_0000) move them by a locator, not by their own animation; NOT KNOWN for each of them
+# whether the changed actor looks the same there (to test with each area).
+REWARD_ITEMS = ('Item_Stone_Forest', 'Item_Stone_Fire', 'Item_Stone_Water', 'Item_Medal_Light',
+                'Item_Medal_Forest', 'Item_Medal_Fire', 'Item_Medal_Water', 'Item_Medal_Shadow', 'Item_Medal_Spirit')
+REWARD_NO_AS = ('?AS/Dummy.root.asb', '?AS/DemoDummy.root.asb')
+REWARD_NO_ANIM = '?Component/AnimationParam/Dummy.engine__component__AnimationParam.bgyml'
+REWARD_ANIM_PARAM = 'Component/AnimationParam/Item_NX2_Spin.engine__component__AnimationParam.bgyml'
+
+
+def reward_spin_files(boomerang_pack):
+    """the files a stone's or Medallion's pack gets for the spin: the Boomerang's animation settings file as it
+    is, and an animation list of only the game's Item_Common_Animation (the songs' list, song_spin_files, under a
+    name of its own)"""
+    spin = song_spin_files(boomerang_pack)
+    return {harp_colors.AS_INFO: spin[harp_colors.AS_INFO], REWARD_ANIM_PARAM: spin[harp_colors.ANIM_PARAM]}
+
+
+def reward_spin_pack(pack_data, item, spin):
+    """a stone's or Medallion's pack with the Boomerang's animation components instead of its empty ones, and
+    their files (spin: reward_spin_files); returns (new pack, (actor file's path, its contents before, after));
+    read back"""
+    archive = sarc.Sarc.read(pack_data)
+    inner = 'Actor/%s.engine__actor__ActorParam.bgyml' % item
+    if inner not in archive.files or set(spin) & set(archive.files):
+        raise SystemExit('%s: pack not as expected (no %s, or the spin files already there)' % (item, inner))
+    old_inner = archive.files[inner]
+    doc = byml.loads(old_inner)
+    comps = doc.root['Components']
+    if (comps.get('ASRef') not in REWARD_NO_AS or comps.get('AnimationRef') != REWARD_NO_ANIM
+            or 'ASInfoRef' in comps):
+        raise SystemExit('%s: its animation components are not the empty ones expected (ASRef %r, AnimationRef %r'
+                         '%s): game files differ from what this was made for'
+                         % (item, comps.get('ASRef'), comps.get('AnimationRef'),
+                            ', an ASInfoRef' if 'ASInfoRef' in comps else ''))
+    add = {'ASInfoRef': '?' + harp_colors.AS_INFO, 'ASRef': '?' + harp_colors.AS_REF,
+           'AnimationRef': '?' + REWARD_ANIM_PARAM}
+    kind = type(comps['ModelInfoRef'])
+    for k, v in add.items():
+        comps[k] = kind(v)
+    new_inner = byml.dumps(doc)
+    archive.files[inner] = new_inner
+    archive.files.update(spin)
+    new_pack = archive.write()
+    back, before = sarc.Sarc.read(new_pack).files, sarc.Sarc.read(pack_data).files
+    if (set(back) != set(before) | set(spin) or any(back[n] != before[n] for n in before if n != inner)
+            or any(back[n] != spin[n] for n in spin)):
+        raise SystemExit('read-back: %s pack' % item)
+    want = byml.loads(old_inner).root
+    want['Components'].update(add)
+    if byml.loads(back[inner]).root != want:
+        raise SystemExit('read-back: %s differs from what was intended' % inner)
+    return new_pack, (inner, old_inner, new_inner)
+
+
+def reward_spin_rows(data, items):
+    """ActorInfo rows of `items` (stones, Medallions): the animation list of the spin, as SPIN_LIKE's row lists
+    its own, and heaps at least SPIN_LIKE's; read back"""
+    doc = byml.loads(data)
+    rows = {str(r['__RowId']): r for r in doc.root}
+    like = rows.get(SPIN_LIKE)
+    if like is None or not like.get('AnimationResources'):
+        raise SystemExit('%s: no %s row with an animation list' % (ACTOR_INFO, SPIN_LIKE))
+    res = like['AnimationResources']
+    want = {}
+    for i, r in enumerate(doc.root):
+        name = str(r['__RowId'])
+        if name not in items:
+            continue
+        if 'AnimationResources' in r:
+            raise SystemExit('%s: %s already has an animation list' % (ACTOR_INFO, name))
+        new = type(r)(r)
+        for k in ('InstanceHeapSize', 'PreActorRenderInfoHeapSize'):
+            new[k] = type(r[k])(max(int(r[k]), int(like[k])))
+        entry = type(res[0])(res[0])
+        entry['ModelProjectName'] = type(res[0]['ModelProjectName'])(harp_colors.ANIM_PROJECT)
+        new['AnimationResources'] = type(res)([entry])
+        doc.root[i] = new
+        want[name] = dict(new)
+    if set(want) != set(items):
+        raise SystemExit('%s: rows not found: %s' % (ACTOR_INFO, ', '.join(sorted(set(items) - set(want)))))
+    out = byml.dumps(doc)
+    back = {str(r['__RowId']): r for r in byml.loads(out).root}
+    before = {str(r['__RowId']): r for r in byml.loads(data).root}
+    if set(back) != set(before) or any(back[n] != (want.get(n) or before[n]) for n in back):
+        raise SystemExit('read-back: %s differs from what was intended' % ACTOR_INFO)
+    return out
+
+
 MAGIC_BLESSINGS = ('Item_FairyBless_MP', 'Pouch_FairyBless_MP', 'Item_FairyBless_MPDouble', 'Pouch_FairyBless_MPDouble')
 
 
@@ -4037,6 +4136,29 @@ def main(argv):
             old, set(songs), models,
             harp_colors.SPIN_PROJECTS if harp_colors.SPIN else ()))
         print('%-18s %s: model %s (Sheik\'s harp) instead of the rupee' % ('songs', ', '.join(songs), HARP_MODEL))
+
+    # placed Spiritual Stones and Medallions turn when held up and on the ground (before any ground or token
+    # version copies their animation settings)
+    rewards = sorted({item for _, item in assignments if item in REWARD_ITEMS})
+    if rewards:
+        boomerang = out.read(ground_items.pack_path(SPIN_LIKE))[1]
+        spin = reward_spin_files(boomerang)
+        spin_floor = out.table.get('Actor/%s.engine__actor__ActorParam.bgyml' % SPIN_LIKE)
+        if spin_floor is None:
+            raise SystemExit('%s: no size entry for its actor file' % SPIN_LIKE)
+        out.add(REWARD_ANIM_PARAM, spin[REWARD_ANIM_PARAM], harp_colors.ANIM_PARAM_LIKE,
+                sarc.Sarc.read(boomerang).files[harp_colors.ANIM_PARAM_LIKE])
+        for item in rewards:
+            pack = ground_items.pack_path(item)
+            src, old = out.read(pack)
+            new, (inner, old_inner, new_inner) = reward_spin_pack(old, item, spin)
+            out.write(pack, src, old, new)
+            # at least the size entry of SPIN_LIKE's actor file, as for the songs
+            out.size(inner, old_inner, new_inner, floor=spin_floor)
+        src, old = out.read(ACTOR_INFO)
+        out.write(ACTOR_INFO, src, old, reward_spin_rows(old, set(rewards)))
+        print('%-18s %s: turn when held up and on the ground (animation %s)'
+              % ('stones, Medallions', ', '.join(rewards), harp_colors.ANIM_PROJECT))
 
     # items that lie on the ground (freestanding, pot drops) and only exist as the model shown when received
     # get a ground version; items a chest gives that have no get-demo settings (ocarinas: Link's instrument)
