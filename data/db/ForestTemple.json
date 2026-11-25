@@ -429,8 +429,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Lens of Truth; the chest appeared after Beth as in the game, nothing odd when it was opened",
   "requirements": {
    "child": null,
    "adult": [
@@ -1313,8 +1313,8 @@
    "source": null,
    "note": "no item or drop table in the map data"
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Megaton Hammer and opened like any small chest",
   "requirements": {
    "child": null,
    "adult": [
@@ -1339,7 +1339,7 @@
   "check_rule": "True",
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
-  "notes": "its map entry names no item (no Drop__DropActor): what the game gives here is to be seen in game"
+  "notes": "its map entry names no item (no Drop__DropActor), as 9 of the game's 235 chests: it then gives from the chest's own drop table (Drop/DropSubTable/Obj_TBox: one entry of the type MostDepletedResource), the supply Link is shortest of among magic, arrows or Deku Seeds, Deku Nuts and bombs; the chest's default drop actor is Obj_Rupee_Green"
  },
  {
   "unique_check_id": "FT_FIRST_STALFOS_ROOM_CHEST",
@@ -1511,8 +1511,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Iron Boots; the chest appeared after the Floormaster as in the game",
   "requirements": {
    "child": null,
    "adult": [
@@ -1707,8 +1707,8 @@
    "source": "map data",
    "note": null
   },
-  "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable": "yes",
+  "randomizable_note": "changed in game on 2026-11-25 (tools/build_mod.py): gave the Hover Boots; the chest appeared after Joelle as in the game",
   "requirements": {
    "child": null,
    "adult": [
