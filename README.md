@@ -113,7 +113,11 @@ Needs Python 3.13 or newer. Python 3.14+ is much faster (it has zstd built in). 
 nothing in the game folder is changed: the tests only read.
 
 - Double-click `run_tests.bat` (it takes the romfs folder from its first argument, the `ROMFS` environment
-  variable, or a one-line `romfs_path.txt` next to it, which is not uploaded; otherwise it asks), or
+  variable, or a one-line `romfs_path.txt` next to it, which is not uploaded; otherwise it asks). It runs every
+  test script through `tests/run_all.py`, 8 at a time, slowest first: about 2.5 minutes for all of them
+  (about 17 one after another). It says which passed; each script's whole output is in `test_logs\` (not
+  uploaded) and a failing script's last lines are shown at the end. A quick check of a few while working:
+  `python tests/run_all.py "<romfs folder>" --only families_check,hint_check`, or
 - `python tests/roundtrip.py "<romfs folder>" [folders...] --report report.txt`
 - `python tests/edit_check.py "<romfs folder>"`
 
@@ -159,6 +163,7 @@ events (Mido shown the sword and shield, the Deku Tree beaten...) unlock more as
 | `tests/forest_temple_items_check.py` | items on the Forest Temple's chests, pots and Gold Skulltulas, and the Bow room's door: how the temple's pots and chests name what they give, a pot or chest of each form given an item and read back, the chests' opening events, the Bow room's shutter lock before and after `--fix forest_temple_bow_room_door` (one node differs), and a whole build of the test sample read back from the mod folder (in `run_tests.bat`) |
 | `tests/forest_temple_keys_check.py` | the Forest Temple's small keys on other checks of the temple: what makes an item a small key in the game, the key versions the builder makes for a pot and a Gold Skulltula (the same inventory settings, given as the key itself), the test placement walked with the logic (every locked door reached with enough keys), placements that must get stuck, and a whole build read back from the mod folder (in `run_tests.bat`) |
 | `tests/dungeon_keys_check.py` | a small key that counts for one dungeon wherever it is found (`CHECK_ID=Item_Dungeon_SmallKey@ForestTemple`): where the game saves a dungeon's key count, that its own key steps name no dungeon, the game's models for the two new steps, the key's three versions (ground, Gold Skulltula, chest) read back, what is refused, and a whole build read back from the mod folder (in `run_tests.bat`) |
+| `tests/run_all.py` | runs every test script of `run_tests.bat` side by side (`--jobs N` at once, default 8; `--only NAME,...` for a few) and says which passed; the round-trip test is shown as its summary (it always lists the same known differences). A new test script adds its row to `STEPS` there; a `*_check.py` left out is named when it runs |
 | `tests/size_check.py` | checks those rules against the entry of every game file they cover (reads every pack: several minutes; not part of `run_tests.bat`) |
 
 Mapped so far: **Kokiri Forest** (with the bridge to Hyrule Field, which is part of that map in the remake):
