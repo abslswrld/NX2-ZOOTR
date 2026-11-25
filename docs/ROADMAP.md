@@ -218,6 +218,12 @@ cutscenes, the 217 events that run them, 363 small scenes. The reader now takes 
 (`formats/evfl.py`: all 914 event flow files, byte for byte). Not in it, because the files don't say: how long
 a flowchart cutscene runs (only its wait steps), and what the game's own skip keeps of a cutscene (to try in
 game with the first area's D15 work).
+**The area checklist template is done (2026-11-25): `docs/AREA_CHECKLIST_TEMPLATE.md`.** What goes on an
+area's list and in what order (new check kinds and forms, every unusual spot, the area's settings and
+cutscenes, samples, save and reload), how it is written (by age, along the way through the area, the remake's
+names, the debug-menu warp), the two blocks to copy into `out\TEST_CHECKLIST.md` and `out\TEST_ANSWERS.md`,
+what is recorded after the answers, and a table of the check kinds already passed in game, so a later area
+tests only what is new.
 
 (The debug-menu warp was checked on 2026-11-23: it leaves the temple untouched.)
 
@@ -311,7 +317,8 @@ models; barren and "always" hints; trade quest items.
 
 ## Testing
 - **Daily test lists**, short, in `out\TEST_CHECKLIST.md` with `out\TEST_ANSWERS.md` (D5); a long day takes
-  several. Each test build has the gold rupee on the Kokiri Shop floor.
+  several. Each area's list has the shape of `docs/AREA_CHECKLIST_TEMPLATE.md`. A test build that sells
+  anything has the gold rupee on the Kokiri Shop floor.
 - **Platform:** Longshot only (D6).
 - **Saves:** Longshot's debug menu to reach areas (D26); first check that the warp leaves an area untouched.
 - **Test scripts** on every build; every area adds its own.
