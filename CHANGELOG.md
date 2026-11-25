@@ -63,8 +63,24 @@ no builder change, the Forest Medallion in a pot and the Kokiri Emerald and the 
   `tests/run_all.py`).
 - **Decision 43 (the user, 2026-11-24): the Key Items tab is open from the start in every build,** test
   builds included (`docs/ROADMAP_DECISIONS.md`).
-- **The user's note, same test: "medallions and stones still dont spin when link holds them up".** Built, to
-  test in game. Why they stood still: the game only gives them in cutscenes, so their nine actors have no
+- **The stones' and Medallions' names in their temple's colour** (the user, 2026-11-24: "id like to add the
+  color of the keys to the medallions/stones names. Kokiri and Forest Green, Goron and Fire red, Zora and
+  Water Blue, Spirit Orange, Shadow Purple"). Built, to test in game; decision 44. A placed stone or Medallion
+  has its name coloured in the get window's message ("You were entrusted with the Forest Medallion!"), with
+  the colours of decision 40: Kokiri Emerald and Forest Medallion green, Goron Ruby and Fire Medallion red,
+  Zora Sapphire and Water Medallion blue, Spirit Medallion orange, Shadow Medallion purple
+  (`REWARD_TEMPLE`, `reward_name_lines`, `change_messages` in `tools/build_mod.py`). The Light Medallion has no
+  temple and keeps its text. Only the message is changed: the name on the Key Items page and in hints stays
+  plain. Each language keeps its own text and the name is coloured where it stands in it: 15 of the 16
+  languages; Japanese is left as it is (its reading marks are tied to the name's first character).
+  **Test:** `tests/reward_names_check.py` (new, 10 checks; a row of `STEPS` in `tests/run_all.py`).
+- **Fifth round in game (user, 2026-11-24): the stones and Medallions turn.** The Forest Medallion and the
+  Kokiri Emerald from Mido's chests turn in Link's hands and sit right; the Fire Medallion and the Goron Ruby
+  from the pots turn on the floor at a good height and in Link's hands; the Zora Sapphire as a loose item in
+  Saria's house too; all five on the Key Items page as before, also after save and reload. **Not tried:**
+  Saria's cutscene with the changed Medallion (none of the 11 cutscenes is seen yet).
+- **The user's note, fourth round: "medallions and stones still dont spin when link holds them up".** Built
+  and passed in game (above). Why they stood still: the game only gives them in cutscenes, so their nine actors have no
   animation (`ASRef` names an empty placeholder, `AS/DemoDummy.root.asb`, 231 bytes with no command, and the
   stones' `AS/Dummy.root.asb` is not even a file; `AnimationRef` is an empty list; no `ASInfoRef`). Their
   models do have the two bones the game's item spin turns and lifts (`Root`, `Skl_Root`).

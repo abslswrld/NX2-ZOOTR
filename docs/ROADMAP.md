@@ -186,9 +186,11 @@ Parts, in order:
    for the green tunics every file starts with): the tab is open and empty on a new file, and a Medallion or
    a stone found afterwards is on it.
    **Decision 43:** the tab is open from the start in every build.
-   **Built 2026-11-24, to test in game:** a placed stone or Medallion turns when Link holds it up and when it
-   lies on the ground (it gets the Boomerang's animation settings, as the songs' harp did). **Not known:** how
-   the changed actor looks in the 11 cutscenes that show a stone or a Medallion (each with its area).
+   **Passed in game 2026-11-24:** a placed stone or Medallion turns when Link holds it up and when it lies
+   on the ground (it gets the Boomerang's animation settings, as the songs' harp did). **Not known:** how the
+   changed actor looks in the 11 cutscenes that show a stone or a Medallion (each with its area).
+   **Built 2026-11-24, to test in game (decision 44):** a placed stone or Medallion says its name in its
+   temple's colour in the get window (the keys' colours); the Light Medallion keeps its text.
 
 Alongside (no game changes): the **cutscene list** (every story cutscene, how long, what it sets and gives;
 needed by D15 in every area) and the **area checklist template**, so each area's test list has the same shape.

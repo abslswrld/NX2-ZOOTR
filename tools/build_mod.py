@@ -2835,6 +2835,77 @@ REWARD_NO_ANIM = '?Component/AnimationParam/Dummy.engine__component__AnimationPa
 REWARD_ANIM_PARAM = 'Component/AnimationParam/Item_NX2_Spin.engine__component__AnimationParam.bgyml'
 
 
+# A placed stone or Medallion says its name in its temple's colour (the user, 2026-11-24: "id like to add the
+# color of the keys to the medallions/stones names. Kokiri and Forest Green, Goron and Fire red, Zora and Water
+# Blue, Spirit Orange, Shadow Purple"): the colours of decision 40 (dungeon_keys.COLOURS), in the message of
+# the get window ("You were entrusted with the Forest Medallion!"), as the keys have theirs. The Light
+# Medallion has no temple and keeps the text's own colour. Each language keeps its own text: the item's name
+# (its _Name text) is looked for in its get message, capitals or not, and coloured where it stands once. A
+# message with reading marks over its characters (the tag 0,0: Japanese) is left as it is: the name's first
+# character is tied to the mark in front of it, and a colour tag between the two is not tried.
+RUBY_TAG = (0, 0)
+REWARD_TEMPLE = {'Item_Stone_Forest': 'ForestTemple', 'Item_Medal_Forest': 'ForestTemple',
+                 'Item_Stone_Fire': 'FireTemple', 'Item_Medal_Fire': 'FireTemple',
+                 'Item_Stone_Water': 'WaterTemple', 'Item_Medal_Water': 'WaterTemple',
+                 'Item_Medal_Spirit': 'SpiritTemple', 'Item_Medal_Shadow': 'ShadowTemple'}
+REWARD_MESSAGE = '_GetMessage'
+
+
+def reward_name_lines(texts, numbers, encoding=0):
+    """{label: new text} for the get messages of the items of `numbers` ({item: colour number}), from a
+    language's texts {label: text}: the item's name coloured where it stands in the message. An item whose name
+    is not in its message exactly once (another form of the word) is left out"""
+    start_end = dungeon_keys.colour_tag(dungeon_keys.COLOUR_END)
+    out = {}
+    for item, number in sorted(numbers.items()):
+        label = item + REWARD_MESSAGE
+        if label not in texts or item + '_Name' not in texts:
+            raise SystemExit('%s: no %s or no name in the item texts' % (item, label))
+        name, text = msg_plain(texts[item + '_Name'], encoding), texts[label]
+        low = text.lower()
+        if not name or low.count(name.lower()) != 1 or len(low) != len(text):
+            continue
+        if any(not isinstance(x, str) and tuple(x[:2]) == RUBY_TAG for x in msbt.tags(text, encoding)):
+            continue
+        at = low.index(name.lower())
+        out[label] = (text[:at] + dungeon_keys.colour_tag(number) + text[at:at + len(name)] + start_end
+                      + text[at + len(name):])
+    return out
+
+
+def change_messages(out, romfs, lines, msg_file):
+    """texts that exist changed in every language's message archive: lines(archive's files, the file's texts,
+    its encoding) -> {label: new text}; returns {language file: the labels changed}; read back"""
+    changed = {}
+    for fn in sorted(os.listdir(os.path.join(romfs, 'Mals'))):
+        if not fn.endswith('.sarc.zs'):
+            continue
+        path = 'Mals/' + fn[:-3]
+        src, old = out.read(path)
+        arc = sarc.Sarc.read(old)
+        m = msbt.Msbt.read(arc.files[msg_file])
+        if m.write() != arc.files[msg_file]:
+            raise SystemExit('%s: %s does not round-trip' % (path, msg_file))
+        new_lines = lines(arc.files, dict(m.texts), m.encoding)
+        if not set(new_lines) <= set(m.texts):
+            raise SystemExit('%s: %s has no %s' % (path, msg_file, sorted(set(new_lines) - set(m.texts))))
+        changed[fn[:-len('.sarc.zs')]] = sorted(new_lines)
+        if not new_lines:
+            continue
+        want = dict(m.texts, **new_lines)
+        m.texts.update(new_lines)
+        new_msg = m.write()
+        if msbt.Msbt.read(new_msg).texts != want:
+            raise SystemExit('read-back: %s in %s' % (msg_file, path))
+        arc.files[msg_file] = new_msg
+        new = arc.write()
+        back = sarc.Sarc.read(new)
+        if set(back.files) != set(arc.files) or any(back.files[k] != v for k, v in arc.files.items()):
+            raise SystemExit('read-back: %s differs from what was intended' % path)
+        out.write(path, src, old, new)
+    return changed
+
+
 def reward_spin_files(boomerang_pack):
     """the files a stone's or Medallion's pack gets for the spin: the Boomerang's animation settings file as it
     is, and an animation list of only the game's Item_Common_Animation (the songs' list, song_spin_files, under a
@@ -4980,19 +5051,24 @@ def main(argv):
     named_items = sorted({(base, dungeon) for base, dungeon, _ in item_versions})
     named_keys = sorted({dungeon for dungeon, _, named in key_versions if named} | {d for _, d in named_items})
     key_only = {dungeon for dungeon, _, named in key_versions if named}
+    # placed stones and Medallions: their names in their temple's colour (REWARD_TEMPLE)
+    reward_colours = {item: key_colours[REWARD_TEMPLE[item]] for item in rewards
+                      if item in REWARD_TEMPLE and REWARD_TEMPLE[item] in key_colours}
     for dungeon in sorted(set(key_colours) - set(named_keys)):
-        if dungeon in key_colour_asked:
+        if dungeon in key_colour_asked and dungeon not in {REWARD_TEMPLE[i] for i in reward_colours}:
             raise SystemExit('--key-colour %s: no key of this build names %s (%s@%s%s)'
                              % (dungeon, dungeon, dungeon_keys.KEY_ITEM, dungeon, dungeon_keys.NAMED))
         del key_colours[dungeon]
-    if named_keys:
+    if named_keys or reward_colours:
         # the colour of each name: a place in the game's list of text colours; one of ours takes a place no
         # text of the game uses, when a name of this build has it
         src, old = out.read(dungeon_keys.COLOUR_PACK)
         arc = sarc.Sarc.read(old)
         old_table = arc.files[dungeon_keys.COLOUR_TABLE]
         key_numbers = {x: dungeon_keys.colour_number(c) for x, c in key_colours.items()}
-        ours = sorted({c for c in key_colours.values() if c in dungeon_keys.OUR_COLOURS})
+        reward_numbers = {x: dungeon_keys.colour_number(c) for x, c in reward_colours.items()}
+        ours = sorted({c for c in list(key_colours.values()) + list(reward_colours.values())
+                       if c in dungeon_keys.OUR_COLOURS})
         new_table = dungeon_keys.colour_table(old_table, ours)
         if new_table is not None:
             arc.files[dungeon_keys.COLOUR_TABLE] = new_table
@@ -5008,6 +5084,19 @@ def main(argv):
                                % (dungeon_keys.OUR_COLOURS[n][0], n, dungeon_keys.OUR_COLOURS[n][1])
                                for n in ours if dungeon_keys.OUR_COLOURS[n][1])))
 
+    if reward_colours:
+        changed = change_messages(
+            out, a.romfs, lambda files, texts, encoding: reward_name_lines(texts, reward_numbers, encoding),
+            dungeon_keys.MESSAGE_FILE)
+        left = {lang: sorted(set(reward_colours) - {x[:-len(REWARD_MESSAGE)] for x in labels})
+                for lang, labels in changed.items()}
+        print('%-18s %s: the name in the get message coloured, %s; in %d of %d languages%s'
+              % ('stones, Medallions', dungeon_keys.MESSAGE_FILE,
+                 ', '.join('%s %s (number %d)' % (x, reward_colours[x], reward_numbers[x])
+                           for x in sorted(reward_colours)),
+                 sum(1 for v in left.values() if not v), len(left),
+                 '' if not any(left.values()) else ' (the text is left as it is in: %s)' % ', '.join('%s' % lang for lang, v in sorted(left.items()) if v)))
+    if named_keys:
         def key_lines(arc):
             places = msbt.Msbt.read(arc.files[dungeon_keys.LOCATION_FILE]).texts
             lines = {}

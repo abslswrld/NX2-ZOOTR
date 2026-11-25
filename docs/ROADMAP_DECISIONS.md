@@ -127,6 +127,10 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     for the Spiritual Stones and Medallions is "???" until Link owns a stone, so a Medallion found first sat in
     a closed tab. `--fix key_items_tab_open` (phase 1, part 7) opens it on a new file, with an empty page;
     **passed in game 2026-11-24.** Every build has it, test builds included.
+44. **A stone or a Medallion says its name in its temple's colour** (2026-11-24), the colours of decision 40:
+    Kokiri Emerald and Forest Medallion green, Goron Ruby and Fire Medallion red, Zora Sapphire and Water
+    Medallion blue, Spirit Medallion orange, Shadow Medallion purple. The Light Medallion has no temple and
+    keeps its text. Built in phase 1, part 7, for the message of the get window.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".
