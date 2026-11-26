@@ -287,6 +287,12 @@ Parts, in order:
    (the one the gift and the scrub use, passed in game). The shelf's AI is not touched, so no guard is needed.
    In front of the flow's "can Link carry it" question the same name question leads ours to "yes" (what that
    question answers for an item that is not put in the inventory is not known).
+   **In game 2026-11-25:** the four shelves sold the Forest Temple's small key, boss key, map and compass,
+   each once, with the right texts; the temple's map shows the map, the compass and the boss key; the shelves
+   stay empty after coming back and after save and reload. **Not seen:** that the shop's key counts (the door
+   in the temple was left blank). **Fixed after:** the boss key and the compass sat in the shelf. Their poses
+   are centred on the shelf point, and so is the map's: lifted 0.22, 0.13 and 0.20 m (`SHELF_LIFT`, measured
+   on the models as the Hookshot's was). To see once more.
 
 Left with their areas: the other 10 cutscenes that show a stone or a Medallion (each plays after its own
 dungeon's boss), and the credits if the debug menu cannot start them.

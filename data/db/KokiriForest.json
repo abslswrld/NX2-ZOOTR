@@ -2867,7 +2867,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Goron Ruby for 15 rupees: bought, its name in red, on the Key Items tab, the shelf empty after leaving and coming back",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Goron Ruby for 15 rupees: bought, its name in red, on the Key Items tab, the shelf empty after leaving and coming back; on 2026-11-25 (part 12) a small key of the Forest Temple for 15 rupees: bought, \"(Forest Temple)\" in green, the shelf empty and still empty after coming back (that it counts: not seen yet, the door in the temple was skipped)",
   "requirements": {
    "child": [
     []
@@ -2915,7 +2915,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 12) the Forest Temple's boss key for 20 rupees: bought, \"You found the Boss Key! (Forest Temple)\", on the temple's map, the shelf empty (the model sat in the shelf: lifted 0.22 m now)",
   "requirements": {
    "child": [
     []
@@ -2963,7 +2963,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 12) the Forest Temple's map for 30 rupees: bought, on the temple's map, the shelf empty (lifted 0.20 m now: its model hangs 0.201 m under the shelf point)",
   "requirements": {
    "child": [
     []
@@ -3011,7 +3011,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 12) the Forest Temple's compass for 30 rupees: bought, on the temple's map, the shelf empty (the model sat in the shelf: lifted 0.13 m now)",
   "requirements": {
    "child": [
     []

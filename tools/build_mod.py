@@ -4862,8 +4862,8 @@ def main(argv):
             raise SystemExit('%s cannot be put on a shop shelf: %s' % (item, why))
         price = shop_items.price_of(table_rows, shelf_actor)
         name = shops.setdefault((item, price), shop_items.shop_name(item, price, once=True))
-        if item in shop_items.SHELF_LIFT:
-            shelf_lift[name] = shop_items.SHELF_LIFT[item]
+        if made_of in shop_items.SHELF_LIFT:
+            shelf_lift[name] = shop_items.SHELF_LIFT[made_of]
         return name
 
     planned = plan(world, assignments, on_ground, in_chest, on_shelf, gs_drop, once_drop)

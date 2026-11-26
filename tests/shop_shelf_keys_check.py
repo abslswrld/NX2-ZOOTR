@@ -29,6 +29,7 @@ import build_mod  # noqa: E402
 import dungeon_items  # noqa: E402
 import dungeon_keys  # noqa: E402
 import ground_items  # noqa: E402
+import item_pose  # noqa: E402
 import shop_items  # noqa: E402
 from formats import zstd, byml, sarc, evfl, restbl  # noqa: E402
 from logic.world import World  # noqa: E402
@@ -151,6 +152,27 @@ def main(romfs):
                           % (len(sold), version, action, params['GameDataName']),
                           len(qs) == len(sold) + 1 and all(counted) and len(carry) == 1
                           and own(dict(back.events[carry[0]].cases)[1]) == can, (len(qs), counted, carry))
+        # the boss key, the compass and the map have a centred pose: lifted on the shelf by what their model
+        # hangs under the shelf point (in game 2026-11-25 the boss key and the compass sat in the shelf)
+        lows = {}
+        for item in ('Item_Dungeon_BossKey', 'Item_Dungeon_Compass', 'Item_Dungeon_Map', 'Item_Dungeon_SmallKey'):
+            pack = sarc.Sarc.read(plain(ground_items.pack_path(item))).files
+            anims = byml.loads(pack[ground_items._ref_path(ground_items.resolved_components(pack, item)[
+                'AnimationRef'])]).root['AnimationResources']
+            project, = [x['ModelProjectName'] for x in anims if x['ModelProjectName'] != shop_items.COMMON_ANIM]
+            pose = item_pose.read_pose(plain(item_pose.model_path(project)))
+            points, bind, _ = item_pose.model_points(plain('Model/%s.%s.bfres' % (rows[item]['ModelProjectName'],
+                                                                                  rows[item]['FmdbName'])))
+            lows[item] = item_pose.extent(points, bind, pose['scale'], pose['rot'], pose['move'])[0][1]
+        lifted = {k: v for k, v in shop_items.SHELF_LIFT.items() if k in lows}
+        good &= check('  shelf lifts: the boss key, the compass and the map stand on the shelf (lifted by what '
+                      'hangs under the shelf point: %s); the small key stands on it by itself (%+.3f)'
+                      % (', '.join('%s %.2f for %.3f' % (k[len('Item_Dungeon_'):], v, -lows[k])
+                                   for k, v in sorted(lifted.items())), lows['Item_Dungeon_SmallKey']),
+                      sorted(lifted) == ['Item_Dungeon_BossKey', 'Item_Dungeon_Compass', 'Item_Dungeon_Map']
+                      and all(abs(v + lows[k]) <= 0.01 for k, v in lifted.items())
+                      and abs(lows['Item_Dungeon_SmallKey']) <= 0.03
+                      and out.count('shelf lift') == 2 and '0.22 m higher' in out and '0.20 m higher' in out, lows)
         kept = all((o.type, o.name, o.params) == (b.type, b.name, b.params)
                    and [own(x) for x in build_mod._flow_links(b)] == build_mod._flow_links(o)
                    for o, b in zip(game.events, back.events))

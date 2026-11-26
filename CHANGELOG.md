@@ -4,6 +4,23 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 12: in-game results; the boss key, the compass and the map lifted on the shelf
+The user's answers (new file, child; one screenshot of the shop):
+- **The four shelves** (`KF_KOKIRI_CHILD_SHOP_01` to `_04`) showed the Forest Temple's small key, boss key, map
+  and compass, each named with "(Forest Temple)". Each was bought once with the right text ("You found the
+  Boss Key! (Forest Temple)" for the boss key, the temple's name green), the shelf was empty after its sale,
+  nothing was sold twice, and the shelves stayed empty after leaving the shop and after save and reload.
+- **The temple's map** shows the map, the compass and the boss key: the sale flow's step sets them.
+- **Not seen: the small key's count.** The line for the locked door in the temple was left blank. It is the
+  same step in the same place as the three that set their fields, but only a door shows it.
+- **"Boss key and compass in shelf"** (the screenshot: both models half inside the shelf). Found, measured on
+  the models as the Hookshot's lift was (`item_pose.extent` on the vertices in `Pose_Common`): their poses are
+  centred on the point they are placed at, the lowest vertex 0.220 m (boss key) and 0.134 m (compass) under
+  it. The map's is centred too, 0.201 m under it. The small key stands on its point (+0.008). **Fixed:**
+  `shop_items.SHELF_LIFT` gets the three (0.22, 0.13, 0.20 m); a version of ours is lifted as the game's item
+  it is made of (`on_shelf`). `tests/shop_shelf_keys_check.py` measures the four models and checks the table
+  against them. To see in game.
+
 ### Phase 1, part 12: a dungeon's key, boss key, map or compass on a shop shelf (to test in game)
 Branch `claude/shop-shelf-dungeon-items`. The user chose this before part 11 ("Shop shelf first"; decision
 47). Test build and checklist: `out\TEST_CHECKLIST.md`.
