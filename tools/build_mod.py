@@ -60,7 +60,10 @@ game's checking chest, a small chest at the same spot: the game has no big check
 The first level of the seed bags and the quivers is the weapon (Item_Range_SlingShot, Item_Range_Bow). The game's
 chests give the small bag and 30 seeds or arrows with it (the shared chest module, read by
 turn_items.first_get); only chests do. So the first level's turning item gives the same, and a gift or a scrub
-adds the small bag after it (SCRUB_COMPANIONS: the bag comes filled).
+adds the small bag after it (SCRUB_COMPANIONS: the bag comes filled). The weapon placed alone on a freestanding
+item, a rock, a bush, a pot or a Gold Skulltula (to test in game; in game 2026-11-25 a Fairy Bow alone in a pot
+came without its quiver) is built the same way, as a family of one level (LONE_WEAPON_KINDS): it gives the bag
+and the 30 when it is picked up.
 
 The same on a gift that has flow data (to test in game): the giver's own flow asks the inventory in front of
 its call of the shared get flow, as the game's own flows do for upgrades, and gives First or Second
@@ -77,7 +80,12 @@ A dungeon's small key anywhere (to test in game): CHECK_ID=Item_Dungeon_SmallKey
 that counts for the Forest Temple on the check, in the temple or outside it (tools/dungeon_keys.py). The game
 itself counts a key for the dungeon Link is in. On a pot, a rock, a bush, a freestanding item or a Gold Skulltula
 the key adds to the temple's key count when it is picked up (its own AI); in a chest the chest gets an opening
-event of our own around its usual one that adds to it (TBOX_KEY_FLOW). Not on gifts, scrubs or shelves yet.
+event of our own around its usual one that adds to it (TBOX_KEY_FLOW). From a person (a gift with flow data)
+and from a Deku Scrub (to test in game): the key as a chest holds it, handed over as any item, and right after
+it the same step as the chest's event has (GameDataActor.EventTriggerAddOrSubGameDataInt + 1 on the dungeon's
+count; for a boss key, a map or a compass EventTriggerSetGameDataBool on its field): in the giver's own flow
+behind the get, in the scrub flow behind a successful buy (KEY_GIVEN_KINDS). Not on cutscene gifts, songs or
+shelves yet.
 On a check of its own dungeon too it is the named key, counted by our own step (decision 46, the user
 2026-11-25: "keep name, no count"; passed in game: the name shows, the door opens, no count on screen). The
 game's own key, Item_Dungeon_SmallKey without a dungeon, is still placed as it is (its dungeon is where Link
@@ -105,6 +113,11 @@ module Sequence/SetPouchAndStatusForGameStart, which the new-game sequence runs 
 loaded (tools/start_state.py). Files that already exist are not changed:
 
     python tools/build_mod.py ... --start Item_Boomerang --start-flag KokiriForest_Npc_Kokiri_Mido_Child_Blocker=false
+
+An item the inventory keeps under another name is given as it is placed (to test in game): --start
+Item_Range_SlingShot, Item_Range_Bow (each with the small bag and the 30 seeds or arrows a chest gives with it),
+Item_Gauntlet_Goron. --start-hearts N: the hearts of a new file (the game's 3; 1 to 20). --start-rupees N: its
+rupees (0 to what the wallets of the new file hold).
 
 Game fixes (--fix NAME, see FIXES and FILE_FIXES):
     kokiri_shop_full_stock   the Kokiri Shop sells the same 8 shelves as a child before and after meeting the
@@ -338,6 +351,11 @@ def checking_chest(gyaml, family=None):
 GS_KINDS = {'skulltula'}
 PAIR_KINDS = ('chest', 'freestanding', 'rock', 'bush', 'pot')
 TURN_KINDS = ('freestanding', 'rock', 'bush', 'pot')   # the kinds whose pair is a turning item
+# A first weapon placed alone (the Fairy Slingshot, the Fairy Bow: SCRUB_COMPANIONS) on one of these kinds is its
+# turning item as a family of one level: only the chests' shared module gives the small bag and the 30 seeds or
+# arrows with the weapon, so a plain ground version came with no bag (in game 2026-11-25: a Fairy Bow alone in a
+# pot, no quiver). The turning item gives what a chest gives when it is picked up (turn_items.first_get).
+LONE_WEAPON_KINDS = TURN_KINDS + ('skulltula',)
 # Two turning items of one family must not lie where Link can touch both at once: the second could be picked up
 # in the frame the first's scene ends, before it has turned (it would give the first level again). Metres,
 # between their map positions (for a rock or a bush: where it stands; a rock carried and thrown next to another
@@ -350,6 +368,14 @@ def skulltula_pair_kind(world, cid):
     r, name, loc = find_check(world, cid)
     kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
     return kinds == GS_KINDS
+
+
+def lone_weapon_kind(world, cid):
+    """the kind of check (one of LONE_WEAPON_KINDS) a first weapon placed alone is built as a family of one
+    level on, or None: every placement of the check is of that one kind"""
+    r, name, loc = find_check(world, cid)
+    kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
+    return next(iter(kinds)) if len(kinds) == 1 and kinds <= set(LONE_WEAPON_KINDS) else None
 
 
 def pair_kind(world, cid):
@@ -662,6 +688,11 @@ KEY_SET_FLOW = 'Event/EventFlow/Npc_Kokiri_003_Child.bfevfl'
 KEY_SET = ('GameDataActor', 'EventTriggerSetGameDataBool')
 
 
+# Where a dungeon's key, boss key, map or compass is handed over by an event: the version a chest holds, and the
+# chests' step right behind the get (phase 1, part 10; to test in game)
+KEY_GIVEN_KINDS = ('gift', 'scrub')
+
+
 def key_what_flag(what):
     """the saved number or yes/no the chest's step changes"""
     return dungeon_keys.flag(what) if isinstance(what, str) else dungeon_items.flag(*what)
@@ -963,13 +994,14 @@ def song_skip_check(orig, back, cid, levels, sync, template=None, asked=None):
             bad('after the get of %s the cutscene does not end' % want)
 
 
-def gift_edit(fc, events, direct=(), sync=None):
+def gift_edit(fc, events, direct=(), sync=None, after=None):
     """set the item of each gift event (a call of Dm_SY_GetInEvent). An item in `direct` (Link can't hold it up
     in that event: ground_items.can_hold_up) is given by a call of GetPouchContent<GetPouchContentByActorName>
     in its place (the "You got ..." window and the item, as the game's cutscenes give ocarinas and songs);
-    sync {item: sync steps (sync_template)}: steps to run after it (an ocarina). Returns (lines saying what was
-    changed, {event name: (flow file called, entry point, parameters, name of the next event)} as intended,
-    names of the new events)."""
+    sync {item: sync steps (sync_template)}: steps to run after it (an ocarina). after {check id: steps}: steps
+    to run right after the get however it is given (a dungeon's key: one more on its count, key_add_step).
+    Returns (lines saying what was changed, {event name: (flow file called, entry point, parameters, name of
+    the next event)} as intended, names of the new events)."""
     said, want = [], {}
     first_new = len(fc.events)
     by_name = {e.name: e for e in fc.events}
@@ -1001,6 +1033,11 @@ def gift_edit(fc, events, direct=(), sync=None):
                         'it up)%s' % (cid, ev, old, item, DIRECT_GET[0], DIRECT_GET[1], was,
                                       ', then Link\'s equipment is brought in line (%s)' % fc.events[e.next].name
                                       if steps else ''))
+        more = (after or {}).get(cid)
+        if more:
+            e.next = sync_steps(fc, more, e.next)
+            said.append('%-18s %s: then %s' % (cid, ev, ', '.join(
+                '%s.%s %s (%s)' % (a.name, n, dict(p), fc.events[e.next].name) for a, n, p in more)))
         want[ev] = (e.flowchart, e.entry, dict(e.params), None if e.next is None else fc.events[e.next].name)
     return said, want, [x.name for x in fc.events[first_new:]]
 
@@ -1274,15 +1311,37 @@ def _msg_name(name):
 # "Ah, the <item>! It's <price> rupees. Wanna buy it?" (English, in every language), built from the game's own
 # tags: the scrub lines' start (3,0) and price (2,12), the shop's item-name tag (2,3) with the (201,15) it has
 # before it (Npc_Kokiri_001_Shop_Child Shop_01), colour on/off (0,3), the pause (5,0). Confirmed in game.
-SCRUB_LINE = (_msg_tag(3, 0, b'\x0f\x00\x00') + 'Ah, the ' + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(201, 15)
-              + _msg_tag(2, 3, _msg_name(SCRUB_VAR)) + _msg_tag(0, 3, b'\xff\xff') + "! It's "
-              + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(2, 12, _msg_name('SimpleShop_Price')) + ' rupees'
-              + _msg_tag(0, 3, b'\xff\xff') + '.' + _msg_tag(5, 0) + ' Wanna buy it?\x00')
+# Two lines, the item's name on the first: the game does not wrap a line, and on one line a long name ran out
+# of the box (in game 2026-11-25: "Ah, the boss key (Forest temple)! It's 40 rupees. Wanna buy it?").
+# The item's name is in the colour the game gives a name in talk (number 0), or, for a dungeon's key, boss key,
+# map or compass, in its dungeon's colour (the user, 2026-11-25: "entire item name should be Green in the
+# scrubs text box"; decision 40's colours): a line of its own per colour (scrub_label), named by the sale's
+# SellerMessageId.
+SCRUB_NAME_COLOUR = 0
+
+
+def scrub_line(colour=SCRUB_NAME_COLOUR):
+    return (_msg_tag(3, 0, b'\x0f\x00\x00') + 'Ah, the ' + _msg_tag(0, 3, struct.pack('<H', colour))
+            + _msg_tag(201, 15) + _msg_tag(2, 3, _msg_name(SCRUB_VAR)) + _msg_tag(0, 3, b'\xff\xff') + "!\nIt's "
+            + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(2, 12, _msg_name('SimpleShop_Price')) + ' rupees'
+            + _msg_tag(0, 3, b'\xff\xff') + '.' + _msg_tag(5, 0) + ' Wanna buy it?\x00')
+
+
+def scrub_label(colour=SCRUB_NAME_COLOUR):
+    return SCRUB_LABEL if colour == SCRUB_NAME_COLOUR else '%s_Colour%d' % (SCRUB_LABEL, colour)
+
+
+SCRUB_LINE = scrub_line()
 
 
 # what an item needs to be usable, given with it when a scrub sells it (silently, after a successful buy: held up
 # alone the seed bag froze the game). The slingshot sold alone came with no seed bag: 0/0 seeds (seen in game).
 SCRUB_COMPANIONS = {'Item_Range_SlingShot': ['Item_BulletBag_Small'], 'Item_Range_Bow': ['Item_Quiver_Small']}
+# the wallet every new file has (the game's own new-file list pushes it), and the ones that hold more: what
+# --start-rupees may give is what the biggest of the new file's wallets holds (PouchActorInfo:
+# AfterExpansionMaxNum)
+START_WALLET = 'Item_Wallet_Small'
+WALLET_FAMILY = ('Item_Wallet_Medium', 'Item_Wallet_Large')
 SEED_BAG = 'Item_BulletBag_Small'
 SEED_SELL = 'SimpleShopSub_Scrub_Business_Seed_Consume'
 SCRUB_NOBAG_LABEL = 'Enemy_Scrub_Business_NX2_NoSeedBag'
@@ -1636,8 +1695,12 @@ def scrub_pair_check(fc, first, second, third=None, asked=None):
     return got
 
 
-def scrub_flow_edit(fc, sales, direct=(), sync=None, pairs=None, asked=None):
+def scrub_flow_edit(fc, sales, direct=(), sync=None, pairs=None, asked=None, after=None, labels=None):
     """sales: [(check id, new item, [(talk event, original item)])]. Every changed scrub sells its item once.
+    labels {item: the label of its sales line} for an item whose line is not the generic one (scrub_label: the
+    name in its dungeon's colour).
+    after {item: steps}: steps run after a successful buy of that item (a dungeon's key: one more on its count,
+    key_add_step), where what an item needs is added (SCRUB_COMPANIONS).
     direct: the items Link can't hold up (ground_items.can_hold_up); sync {item: sync steps}: see point 3.
     pairs: {check id: (first, second) or (first, second, third)} for the scrubs that hold a progressive pair or
     a three-level family (their item in `sales` is First): see point 4. asked(item): the name the inventory
@@ -1766,12 +1829,13 @@ def scrub_flow_edit(fc, sales, direct=(), sync=None, pairs=None, asked=None):
         params = evfl.Params(template.params)
         params['ActorName'] = item
         params['Price'] = price
-        params['SellerMessageId'] = 'EventFlowMsg/Enemy_Event:' + SCRUB_LABEL
+        params['SellerMessageId'] = 'EventFlowMsg/Enemy_Event:' + (labels or {}).get(item, SCRUB_LABEL)
         sell = fc.add_subflow('', SCRUB_SELL, params)
         extra = SCRUB_COMPANIONS.get(item, [])
-        if extra:
+        more = (after or {}).get(item, [])
+        if extra or more:
             # after a successful buy only (ScrubBusiness_BuySuccess, as the game's own callers check it)
-            nxt = None
+            nxt = sync_steps(fc, more) if more else None
             for companion in reversed(extra):
                 nxt = fc.add_action('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent',
                                     evfl.Params(Num=1, Actor=companion, IsGetEvent=False,
@@ -1812,8 +1876,9 @@ def scrub_flow_edit(fc, sales, direct=(), sync=None, pairs=None, asked=None):
         if fc.repoint(head, sw, keep=(sw,)) < 1:
             raise SystemExit('%s: nothing led to %s' % (SCRUB_ROOT, by[head].name))
         head = sw
-        said.append('%s sells %s at %s rupees, once (new branch %s)%s' % (cid, item, price, fc.events[sw].name,
-                    ', with %s' % ', '.join(extra) if extra else ''))
+        said.append('%s sells %s at %s rupees, once (new branch %s)%s%s' % (
+            cid, item, price, fc.events[sw].name, ', with %s' % ', '.join(extra) if extra else '',
+            ', then %s' % ', '.join('%s.%s %s' % (a.name, n, dict(p)) for a, n, p in more) if more else ''))
         said += lines
     hard = sorted(i for i in both if i in direct)
     if hard:
@@ -4148,6 +4213,10 @@ def main(argv):
     ap.add_argument('--start-flag', action='append', default=[], metavar='NAME=VALUE',
                     help='a flag set on every new file (a Bool: true or false, an Int: a number, a String64: '
                          'text); see tools/start_state.py')
+    ap.add_argument('--start-hearts', type=int, metavar='N',
+                    help='the hearts every new file starts with (the game: 3); see tools/start_state.py')
+    ap.add_argument('--start-rupees', type=int, metavar='N',
+                    help='the rupees every new file starts with (the game: 0); see tools/start_state.py')
     ap.add_argument('--key-colour', action='append', default=[], metavar='DUNGEON=COLOUR',
                     help='the colour of the dungeon\'s name in its named keys\' get message '
                          '(Item_Dungeon_SmallKey@DUNGEON+name), in place of the one in dungeon_keys.COLOURS: a '
@@ -4155,8 +4224,10 @@ def main(argv):
                          'tools/dungeon_keys.py')
     ap.add_argument('assign', nargs='*', help='CHECK_ID=ItemActorName')
     a = ap.parse_args(argv)
-    if not a.assign and not a.fix and not a.gossip and not a.start and not a.start_flag:
-        ap.error('nothing to do: give CHECK_ID=Item assignments, --fix, --gossip, --start and/or --start-flag')
+    start_asked = a.start or a.start_flag or a.start_hearts is not None or a.start_rupees is not None
+    if not a.assign and not a.fix and not a.gossip and not start_asked:
+        ap.error('nothing to do: give CHECK_ID=Item assignments, --fix, --gossip, --start, --start-flag, '
+                 '--start-hearts and/or --start-rupees')
     start_items, start_flags = start_state.parse_items(a.start), start_state.parse_flags(a.start_flag)
     if 'skippable_opening' in a.fix and not any(name == OPENING_VISITED for name, _ in start_flags):
         # the map of Kokiri Forest is open from the start (the user, 2026-11-24): see OPENING_VISITED
@@ -4242,6 +4313,26 @@ def main(argv):
         if item in FAMILY_ALIASES:
             print('%-18s %s placed: gives %s with it instead (the weapon first)' % (cid, item, FAMILY_ALIASES[item]))
             assignments[k] = (cid, FAMILY_ALIASES[item])
+    # a first weapon placed alone where only a chest would give its bag with it: its turning item as a family
+    # of one level (LONE_WEAPON_KINDS), on a rock, a bush, a pot or a Gold Skulltula the one-time one
+    for k, (cid, item) in enumerate(assignments):
+        if item not in SCRUB_COMPANIONS:
+            continue
+        kind = lone_weapon_kind(world, cid)
+        if kind is None:
+            continue
+        clash = sorted(c for c, f in turning.items() if len(f) > 1 and f[0] == item)
+        if clash:
+            raise SystemExit('%s: %s alone, and its family on %s: the same item on two checks (give the family '
+                             'on both, or the weapon alone on one)' % (cid, item, ', '.join(clash)))
+        turning[cid] = (item,)
+        if kind == 'freestanding':
+            assignments[k] = (cid, turn_items.turn_name(item))
+        else:
+            once_turning[cid] = (item,)
+            assignments[k] = (cid, once_items.once_name(item))
+        print('%-18s %s alone on a %s: built as its turning item of one level, which gives what a chest gives '
+              'with it (%s first)' % (cid, item, kind, SCRUB_COMPANIONS[item][0]))
     # CHECK_ID=Item_Dungeon_SmallKey@Dungeon: a key that counts for that dungeon wherever it is found
     # (tools/dungeon_keys.py): planned as the key's own version for the kind of check
     key_versions = {}                                  # (dungeon, kind of version, named) -> name
@@ -4257,7 +4348,20 @@ def main(argv):
         key_colours[dungeon] = int(colour) if colour.isdigit() else colour
         key_colour_asked.add(dungeon)
     key_chests = {}                                    # check id -> what the chest's own step is for (TBOX_KEY_FLOW)
+    key_given = {}                                     # check id -> the same for a gift or a scrub (KEY_GIVEN_KINDS)
     item_versions = {}                                 # (item, dungeon, kind of version) -> name (dungeon_items)
+
+    def key_kind(cid):
+        """the kind of version a dungeon's key, boss key, map or compass is on this check, and whether it is
+        handed over by a person or a scrub (KEY_GIVEN_KINDS: what a chest holds, with the count step after)"""
+        kind = check_kind(world, cid)
+        if kind not in KEY_GIVEN_KINDS:
+            return dungeon_keys.kind_for(kind, cid), False
+        r, _, loc = find_check(world, cid)
+        if kind == 'gift' and (not loc.get('gift') or loc.get('cutscene') or loc.get('song')):
+            raise SystemExit('%s: a dungeon\'s key, boss key, map or compass cannot be put on a cutscene gift or '
+                             'a song yet (only on a gift with flow data)' % cid)
+        return 'chest', True
     for k, (cid, item) in enumerate(assignments):
         flagged = dungeon_items.parse(item)
         if flagged is not None or item in dungeon_items.ITEMS:
@@ -4271,7 +4375,12 @@ def main(argv):
                                      % (cid, item, item, dungeon_keys.SEP))
                 continue
             base, dungeon = flagged
-            kind = dungeon_keys.kind_for(check_kind(world, cid), cid)
+            kind, given = key_kind(cid)
+            if given:
+                key_given[cid] = (base, dungeon)
+                assignments[k] = (cid, item_versions.setdefault((base, dungeon, kind),
+                                                                dungeon_items.name(base, dungeon, kind)))
+                continue
             if kind == 'chest' and scenes == {dungeon}:
                 print('%-18s %s of %s in a chest of %s itself: the game\'s own item' % (cid, base, dungeon, dungeon))
                 assignments[k] = (cid, base)
@@ -4287,7 +4396,9 @@ def main(argv):
         if parsed is None:
             continue
         dungeon, named = parsed
-        kind = dungeon_keys.kind_for(check_kind(world, cid), cid)
+        kind, given = key_kind(cid)
+        if given:
+            key_given[cid] = dungeon
         r, _, loc = find_check(world, cid)
         if {scene for scene, _, _ in world.placements_of(r, loc)} == {dungeon}:
             # in its own dungeon too: the named key, as outside it (decision 46: the game's own key has one text
@@ -4297,16 +4408,44 @@ def main(argv):
                                                        dungeon_keys.name(dungeon, kind, named)))
         if named:                                      # the item its name stands for: the named chest key
             key_versions.setdefault((dungeon, 'chest', True), dungeon_keys.name(dungeon, 'chest', True))
-        if kind == 'chest':
+        if kind == 'chest' and not given:
             key_chests[cid] = dungeon
     dicts = zstd.Dictionaries.from_pack(open(os.path.join(a.romfs, 'Pack', 'ZsDic.pack.zs'), 'rb').read())
-    if start_items or start_flags:                     # the starting state: refused here, with nothing touched
+    start_status = []                                  # [(field of PlayerStatus, value)]: hearts, rupees
+    start_said = []
+    if start_asked or start_flags:                     # the starting state: refused here, with nothing touched
         game_file = lambda path: zstd.decompress(                                        # noqa: E731
             open(os.path.join(a.romfs, *(path + '.zs').split('/')), 'rb').read(), dicts)
         start_data = start_state.GameData(game_file(start_state.GAME_DATA))
-        start_state.check_items(start_items, start_data,
-                                {r['__RowId'] for r in byml.loads(game_file(start_state.ITEM_TABLE)).root},
-                                NEVER_GIVEN, UPGRADE_FAMILIES)
+        start_rows = {r['__RowId']: r for r in byml.loads(game_file(start_state.ITEM_TABLE)).root}
+        stand = start_state.check_items(
+            start_items, start_data, set(start_rows), NEVER_GIVEN, UPGRADE_FAMILIES,
+            {r['__RowId']: r.get('ActorName')
+             for r in byml.loads(game_file(ground_items.table_path('ActorInfo'))).root}
+            if any(not start_data.owns(x) for x, _ in start_items) else None)
+        for item, inv in sorted(stand.items()):
+            start_said.append('start item %s: the inventory keeps it as %s' % (item, inv))
+        # a first weapon comes with what the game's chests give with it (the small bag, 30 seeds or arrows):
+        # pushes of their own, right behind the weapon's
+        with_weapons = []
+        for item, num in list(start_items):
+            if item not in SCRUB_COMPANIONS:
+                continue
+            _, gives = turn_items.first_get(sarc.Sarc.read(game_file(turn_items.AI_PACK)).files,
+                                            stand.get(item, item))
+            if [x for x, _ in gives][:len(SCRUB_COMPANIONS[item])] != SCRUB_COMPANIONS[item]:
+                raise SystemExit('--start %s: the game\'s chests give %r with it, not %s first as expected'
+                                 % (item, gives, SCRUB_COMPANIONS[item]))
+            with_weapons += gives
+            at = start_items.index((item, num))
+            start_items[at + 1:at + 1] = gives
+            start_said.append('start item %s: with what a chest gives with it (%s)'
+                              % (item, ', '.join('%d %s' % (n, x) for x, n in gives)))
+        start_state.check_with([x for x in start_items if x not in with_weapons], with_weapons, start_data,
+                               set(start_rows))
+        wallets = [START_WALLET] + [x for x, _ in start_items if x in WALLET_FAMILY]
+        start_status = start_state.parse_status(a.start_hearts, a.start_rupees, max(
+            int(start_rows[w]['AfterExpansionMaxNum']) for w in wallets))
         start_flags = start_state.check_flags(start_flags, start_data)
     mod_romfs = os.path.join(a.out, a.name, 'romfs')
     if os.path.isdir(mod_romfs):
@@ -4540,17 +4679,38 @@ def main(argv):
         Dm_SY_GetInEvent: given with the get window, {ocarina: the sync steps to run after its get})"""
         deals = {r['__RowId']: r.get('PouchSpecialDeal') for r in byml.loads(plain(
             ground_items.table_path('PouchActorInfo'))).root}
+        # a dungeon's key, boss key, map or compass as a chest holds it: the game's item under another name
+        made_of = {item: dungeon_base(item) for item in items}
         for item in items:
-            if item not in deals:
+            if made_of[item] not in deals:
                 raise SystemExit('%s has no row in PouchActorInfo: not an item' % item)
-        direct = {item for item in items if not ground_items.can_hold_up(plain, item)}
+        direct = {item for item in items if not ground_items.can_hold_up(plain, made_of[item])}
         if direct:
             direct_get_allowed(byml.loads(plain(EVENT_INFO)).root)
         sync = {}
-        if any(deals[item] == SYNC_DEAL for item in items):
+        if any(deals[made_of[item]] == SYNC_DEAL for item in items):
             steps = sync_template(evfl.loads(plain(SYNC_FLOW)).flowchart)
-            sync = {item: steps for item in items if deals[item] == SYNC_DEAL}
+            sync = {item: steps for item in items if deals[made_of[item]] == SYNC_DEAL}
         return direct, sync
+
+    def dungeon_base(item):
+        """the game's item a version of a dungeon's key, boss key, map or compass is made of (any other item:
+        itself)"""
+        if dungeon_keys.is_ours(item):
+            return dungeon_keys.KEY_ITEM
+        if dungeon_items.is_ours(item):
+            return next(base for (base, dungeon, kind), name in item_versions.items() if name == item)
+        return item
+
+    key_step_tpl = []
+
+    def key_steps(what):
+        """the step that counts a dungeon's key (or sets its boss key, map or compass) after it was handed
+        over: the chests' own (key_add_step), as a list of steps"""
+        if not key_step_tpl:
+            key_step_tpl.append((key_add_template(evfl.loads(plain(KEY_ADD_FLOW)).flowchart),
+                                 key_set_template(evfl.loads(plain(KEY_SET_FLOW)).flowchart)))
+        return [key_add_step(key_step_tpl[0], what)]
 
     # shelves: a game shelf actor (Shop_...) is used as it is; any other item gets a shop version at the price
     # of what the shelf sold, sold once (tools/shop_items.py)
@@ -4683,7 +4843,11 @@ def main(argv):
             if found[h] != expected_old:
                 print('  note: %s placement %s held %s (data says %s)' % (cid, h, found[h], expected_old))
             print('%-18s %s: %s -> %s' % (cid, path.split('/')[-1], found[h], item))
-            if cid in turning:
+            if cid in turning and len(turning[cid]) == 1:
+                print('%-18s   a first weapon alone%s: %s with its bag, on the ground while Link has no %s'
+                      % (cid, '' if kind == 'freestanding' else ' as the %s\'s drop' % kind, turning[cid][0],
+                         turning[cid][0]))
+            elif cid in turning:
                 print('%-18s   a turning item%s: %s on the ground while Link has no %s, then %s'
                       % (cid, '' if kind == 'freestanding' else ' as the %s\'s drop' % kind, turning[cid][0],
                          turning[cid][0], turning[cid][1]))
@@ -4836,7 +5000,8 @@ def main(argv):
         src, old = out.read(path)
         ef = evfl.loads(old)
         direct, sync = get_plan(sorted({item for _, item, _ in events.values()}))
-        said, intended, added = gift_edit(ef.flowchart, events, direct, sync)
+        after = {cid: key_steps(key_given[cid]) for cid, _, _ in events.values() if cid in key_given}
+        said, intended, added = gift_edit(ef.flowchart, events, direct, sync, after)
         new = flow_write_checked(ef)
         back_fc, orig_fc = evfl.loads(new).flowchart, evfl.loads(old).flowchart
         back = {e.name: e for e in back_fc.events}
@@ -4853,18 +5018,25 @@ def main(argv):
             e, want = back[name], call(orig_fc, o)
             if name in events:
                 item = events[name][1]
+                # the steps behind the get (an ocarina's sync, a dungeon's count), if any, lead to what
+                # followed the gift
+                behind = (list(sync.get(item, ())) if item in direct else []) + list(after.get(events[name][0], ()))
+                last = e
+                for actor, action, params in behind:
+                    last = back_fc.events[last.next]
+                    if last.name not in added or (back_fc.actors[last.actor].name, _action_name(back_fc, last)) \
+                            != (actor.name, action) or (dict(last.params) if isinstance(last.params, dict)
+                                                        else last.params) != (dict(params) if isinstance(
+                                                            params, dict) else params):
+                        raise SystemExit('read-back: %s %s: the steps behind the get are not as intended'
+                                         % (path, name))
+                if call(back_fc, last)[3] != call(orig_fc, o)[3]:
+                    raise SystemExit('read-back: %s %s does not lead on as the gift did' % (path, name))
+                leads = want[3] if not behind else back_fc.events[e.next].name
                 if item in direct:
-                    after = e                          # the sync steps, if any, lead to what followed the gift
-                    for _ in range(len(sync.get(item, ()))):
-                        after = back_fc.events[after.next]
-                        if after.name not in added:
-                            raise SystemExit('read-back: %s %s: sync steps not as intended' % (path, name))
-                    want = (DIRECT_GET[0], DIRECT_GET[1], {'ActorName': item},
-                            want[3] if not sync.get(item) else back_fc.events[e.next].name)
-                    if call(back_fc, after)[3] != call(orig_fc, o)[3]:
-                        raise SystemExit('read-back: %s %s does not lead on as the gift did' % (path, name))
+                    want = (DIRECT_GET[0], DIRECT_GET[1], {'ActorName': item}, leads)
                 else:
-                    want = (want[0], want[1], dict(want[2], ActorName=item), want[3])
+                    want = (want[0], want[1], dict(want[2], ActorName=item), leads)
                 if intended[name] != want:
                     raise SystemExit('read-back: %s %s was not edited as intended' % (path, name))
             if call(back_fc, e) != want or e.type != o.type or e.cases != o.cases or e.forks != o.forks:
@@ -4973,9 +5145,21 @@ def main(argv):
         src, old = out.read(SCRUB_FLOW)
         ef = evfl.loads(old)
         direct, sync = get_plan(sorted({i for _, i, _ in scrubs} | {x for p in scrub_pairs.values() for x in p}))
+        # a dungeon's key, boss key, map or compass: its name in the dungeon's colour in the scrub's line
+        scrub_colours = {}                             # item -> the number of its dungeon's colour
+        for c, i, _ in scrubs:
+            dungeon = key_given.get(c)
+            dungeon = dungeon if isinstance(dungeon, str) or dungeon is None else dungeon[1]
+            if dungeon in key_colours:
+                scrub_colours[i] = dungeon_keys.colour_number(key_colours[dungeon])
         said = scrub_flow_edit(ef.flowchart, [(c, i, [(t, w) for _, _, t, w in rows]) for c, i, rows in scrubs],
-                               direct, sync, scrub_pairs, flow_name) if scrubs else []
+                               direct, sync, scrub_pairs, flow_name,
+                               {i: key_steps(key_given[c]) for c, i, _ in scrubs if c in key_given},
+                               {i: scrub_label(n) for i, n in scrub_colours.items()}) if scrubs else []
         lines = {SCRUB_LABEL: SCRUB_LINE} if scrubs else {}
+        for i, n in sorted(scrub_colours.items()):
+            lines[scrub_label(n)] = scrub_line(n)
+            said.append('%s: its line is %s: the name in its dungeon\'s colour (number %d)' % (i, scrub_label(n), n))
         if guard:
             said += seed_bag_guard(ef.flowchart)
             lines[SCRUB_NOBAG_LABEL] = SCRUB_NOBAG_LINE
@@ -5513,11 +5697,12 @@ def main(argv):
 
     # The starting state of a new file: one more push per item and one more setter per flag in the game's own
     # new-game module (tools/start_state.py: read back against the game's files before it is written)
-    if start_items or start_flags:
+    if start_items or start_flags or start_status:
         src, old = out.read(start_state.MODULE)
-        new, said = start_state.edit(old, out.read(start_state.SETTER_SOURCE)[1], start_items, start_flags)
+        new, said = start_state.edit(old, out.read(start_state.SETTER_SOURCE)[1], start_items, start_flags,
+                                     start_status)
         out.write(start_state.MODULE, src, old, new)
-        for line in said:
+        for line in said + start_said:
             print('%s (%s)' % (line, start_state.MODULE))
         for name, _, _, note in start_flags:
             if note:

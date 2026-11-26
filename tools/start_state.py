@@ -20,11 +20,26 @@ three. Nothing else changes: the game's own nodes stay as they are, the new ones
 linked under the module's two groups (pushes, status).
 
 What is accepted, and why:
-- an item must be an inventory item under its own name: a row in RSDB/PouchActorInfo and the saved pair
-  `IsGet.<item>` / `PouchData.<item>.StockNum` in GameDataList. That is true of three of the game's own four
-  pushes; the fourth, Obj_Armor_Adult_Normal, has a row but no saved pair, so a push can also name something
-  that stands for another inventory name. That case is not tried yet and is refused for now: the Fairy
-  Slingshot and the Fairy Bow as they are placed (Item_Range_SlingShot, Item_Range_Bow) are such names;
+- an item must be an inventory item: a row in RSDB/PouchActorInfo and the saved pair `IsGet.<item>` /
+  `PouchData.<item>.StockNum` in GameDataList. That is true of three of the game's own four pushes; the fourth,
+  Obj_Armor_Adult_Normal, has a row but no saved pair: it stands for another inventory name, the one its row in
+  RSDB/ActorInfo gives as `ActorName` (Armor_Adult_Normal; its actor file's `ActorNameRef` names the same). So
+  an item kept under another name is accepted when that name has the saved pair (phase 1, part 10, to test in
+  game): the Fairy Slingshot and the Fairy Bow as they are placed (Item_Range_SlingShot -> Weapon_Range_SlingShot,
+  Item_Range_Bow -> Weapon_Range_Bow) and the strength upgrades (Item_Gauntlet_Goron ->
+  Armor_Child_Gauntlet_Goron, Item_Gauntlet_Silver, Item_Gauntlet_Gold). The push names the item as it is
+  placed, as the game's own push of Obj_Armor_Adult_Normal does;
+- a first weapon comes with what the game's chests give with it (tools/build_mod.py reads it from the shared
+  chest module, turn_items.first_get): the Fairy Slingshot with Item_BulletBag_Small and 30 Item_DekuSeed, the
+  Fairy Bow with Item_Quiver_Small and 30 Item_Arrow_Normal, as pushes of their own behind the weapon's;
+- hearts and rupees (phase 1, part 10, to test in game): Link's hearts are the module's own two sets on
+  PlayerStatus, `Life` and `MaxLife` (12 each: 4 per heart), so starting hearts change those two values; his
+  rupees are `PlayerStatus.CurrentRupee` (an Int, saved, 0 by default), set by one more
+  `SeqOneShotSetGameDataInt` node, a copy of the module's `Life` node, which reads the struct from the module's
+  own finder of PlayerStatus (`status` in edit);
+- not possible: a chest (or any map object) opened from the start. A placement's saved flag is an entry of
+  `Bool64bitKey` in GameDataList, which has only `Hash`, `ResetTypeValue`, `SaveFileIndex` (and `ExtraByte`):
+  no default value to change, and no sequence node sets a flag by its 64-bit number;
 - the project's item rules hold here too: nothing the game never gives as such, and no later level of an
   upgrade family without the levels in front of it;
 - a flag must be a Bool, an Int or a String64 of GameDataList, saved in the save slot (progress.sav), and no
@@ -66,6 +81,11 @@ MEMBER_PREFIX = 'DungeonInfo.'
 MEMBER_PREFIXES = (MEMBER_PREFIX, 'IsVisitLocation.')
 MEMBER_SETTERS = {'Bool': ('SeqOneShotSetGameDataBool', 'bool'), 'Int': (N_STATUS, 'int')}
 MEMBER = 'Member'                                              # kind of such a flag: 'MemberBool', 'MemberInt'
+STATUS = 'PlayerStatus'                                        # the struct the module's own setters write to
+HEART = 4                                                      # Life and MaxLife count quarters of a heart
+HEARTS = (1, 20)
+STATUS_HEARTS = ('MaxLife', 'Life')
+STATUS_RUPEES = 'CurrentRupee'
 STRUCT_QUERY = 'SeqQueryGetNonStructGameDataStruct'
 VALUE_LINK = 0                                                 # link type: a value handed to another node
 SIMULTANEOUS = 3                                               # node type Element_Simultaneous
@@ -151,11 +171,13 @@ class GameData:
         return bool(got and got[0] == 'Bool' and stock and stock[0] == 'Int')
 
 
-def check_items(items, game_data, item_rows, never_given=(), families=()):
-    """stops the build when a starting item is no inventory item under its own name, is never given as such
-    (never_given: {item: why}) or is a later level of an upgrade family (families: tuples, lowest level first)
-    without every level in front of it"""
+def check_items(items, game_data, item_rows, never_given=(), families=(), known_as=None):
+    """stops the build when a starting item is no inventory item, is never given as such (never_given: {item:
+    why}) or is a later level of an upgrade family (families: tuples, lowest level first) without every level
+    in front of it. known_as: {item: the name its row in RSDB/ActorInfo gives it}; an item with no saved pair
+    of its own is accepted when that name has one. Returns {item: that name} for those items"""
     names = [x for x, _ in items]
+    stand = {}
     for item, _ in items:
         if item in never_given:
             raise SystemExit('--start %s: cannot be given: the game never gives it as an item (%s)'
@@ -163,9 +185,12 @@ def check_items(items, game_data, item_rows, never_given=(), families=()):
         if item not in item_rows:
             raise SystemExit('--start %s: has no row in %s: not an inventory item' % (item, ITEM_TABLE))
         if not game_data.owns(item):
-            raise SystemExit('--start %s: %s has no IsGet.%s / PouchData.%s.StockNum: the inventory keeps it '
-                             'under another name, which is not supported yet (the Fairy Slingshot and the '
-                             'Fairy Bow as they are placed are such items)' % (item, GAME_DATA, item, item))
+            inv = (known_as or {}).get(item)
+            if not inv or inv == item or inv not in item_rows or not game_data.owns(inv):
+                raise SystemExit('--start %s: %s has no IsGet.%s / PouchData.%s.StockNum, and neither has the '
+                                 'name its row in RSDB/ActorInfo gives it (%s): not an item the inventory keeps'
+                                 % (item, GAME_DATA, item, item, inv))
+            stand[item] = inv
         for family in families:
             if item not in family:
                 continue
@@ -174,6 +199,33 @@ def check_items(items, game_data, item_rows, never_given=(), families=()):
                 raise SystemExit('--start %s: it is a later level of the upgrade family %s; a family never '
                                  'skips a level: also give --start %s'
                                  % (item, ' > '.join(family), ' --start '.join(missing)))
+    return stand
+
+
+def check_with(items, more, game_data, item_rows):
+    """stops the build when what comes with a starting item (more: [(item, count)], what the game's chests
+    give with a first weapon) is no inventory item under its own name or is given twice"""
+    for item, num in more:
+        if item not in item_rows or not game_data.owns(item) or num < 1:
+            raise SystemExit('--start: %s x%d comes with a starting item, but is no inventory item under its own '
+                             'name' % (item, num))
+        if [x for x, _ in list(items) + list(more)].count(item) != 1:
+            raise SystemExit('--start: %s comes with a starting item and is given again' % item)
+
+
+def parse_status(hearts, rupees, max_rupees):
+    """--start-hearts N and --start-rupees N -> [(field of PlayerStatus, value)]. max_rupees: what the
+    wallets of the new file hold"""
+    out = []
+    if hearts is not None:
+        if not HEARTS[0] <= hearts <= HEARTS[1]:
+            raise SystemExit('--start-hearts %d: give %d to %d hearts' % ((hearts,) + HEARTS))
+        out += [(f, hearts * HEART) for f in STATUS_HEARTS]
+    if rupees is not None:
+        if not 0 <= rupees <= max_rupees:
+            raise SystemExit('--start-rupees %d: the wallet of a new file holds 0 to %d' % (rupees, max_rupees))
+        out.append((STATUS_RUPEES, rupees))
+    return out
 
 
 def check_flags(flags, game_data):
@@ -403,24 +455,83 @@ def read_members(module_data, prefix=MEMBER_PREFIXES):
     return out
 
 
-def edit(module_data, source_data, items, flags):
+def status_nodes(doc):
+    """{field: node number} of the module's own sets on PlayerStatus (Life, MaxLife, MP...), each a
+    SeqOneShotSetGameDataInt that reads the struct from the module's finder of PlayerStatus"""
+    out = {}
+    for i, n in enumerate(doc.nodes):
+        if n.name != N_STATUS or not n.inputs['userdefined'] or n.inputs['userdefined'][0].node < 0:
+            continue
+        q = doc.nodes[n.inputs['userdefined'][0].node]
+        if q.name != STRUCT_QUERY or q.inputs['string'][0].value != STATUS:
+            continue
+        field = n.inputs['string'][0].value
+        if field in out or any(n.links):
+            raise SystemExit('%s: its sets on %s are not as expected' % (MODULE, STATUS))
+        out[field] = i
+    if not set(STATUS_HEARTS) <= set(out):
+        raise SystemExit('%s: no sets of %s on %s' % (MODULE, ' and '.join(STATUS_HEARTS), STATUS))
+    return out
+
+
+def _value(n):
+    hits = [x for x in n.inputs['int'] if x.name == 'Value']
+    if len(hits) != 1 or hits[0].node >= 0 or hits[0].sources:
+        raise SystemExit('%s: a %s node without a plain Value' % (MODULE, n.name))
+    return hits[0]
+
+
+def _status_split(doc, status):
+    """(the fields of PlayerStatus the module sets itself, the others) of `status`, each [(field, value)]"""
+    own = status_nodes(doc)
+    return [s for s in status if s[0] in own], [s for s in status if s[0] not in own]
+
+
+def status_node(doc, field, value, taken):
+    """a set of one more field of PlayerStatus: a copy of the module's own set of Life (it reads the struct
+    from the module's finder and waits for it, as the copy does)"""
+    n = _copy_linked(doc.nodes[status_nodes(doc)[STATUS_HEARTS[1]]], 'status %s' % field, taken)
+    n.preconditions = list(doc.nodes[status_nodes(doc)[STATUS_HEARTS[1]]].preconditions)
+    _set(n.inputs['string'][0], field)
+    _set(_value(n), value)
+    return n
+
+
+def read_status(module_data):
+    """{field: value} of the fields of PlayerStatus a new-game module sets"""
+    return {name[len(STATUS) + 1:]: value for name, value in read_members(module_data, STATUS + '.')}
+
+
+def edit(module_data, source_data, items, flags, status=()):
     """the new-game module with a push per starting item and a setter per starting flag added.
-    items: [(item, count)]; flags: [(name, type, value, note)] (check_flags). Returns (new data, lines said);
-    read back against both game files before it is returned"""
+    items: [(item, count)]; flags: [(name, type, value, note)] (check_flags); status: [(field of PlayerStatus,
+    value)] (parse_status): a field the module sets itself gets the value, another one a set of its own.
+    Returns (new data, lines said); read back against both game files before it is returned"""
     doc = ainb.Ainb.read(module_data)
-    pushes, status = _group(doc, N_PUSH), _group(doc, N_STATUS)
+    pushes, status_group = _group(doc, N_PUSH), _group(doc, N_STATUS)
     taken = {bytes(n.guid) for n in doc.nodes}
     template = doc.nodes[doc.nodes[pushes].links[FLOW][0].node]
     all_flags = flags
     flags, members = _split(flags)
     templates = setter_templates(source_data) if flags else {}
     said = []
+    changed, more = _status_split(doc, list(status))
+    own = status_nodes(doc)
+    more_nodes = [status_node(doc, field, value, taken) for field, value in more]
+    for field, value in changed:
+        x = _value(doc.nodes[own[field]])
+        said.append('start %s.%s = %d on a new file (the module\'s own set, was %d)' % (STATUS, field, value, x.value))
+        _set(x, value)
+    status = status_group
     for where, new, line in ([(pushes, push_node(template, item, num, taken),
                                'start item %s x%d: pushed to the inventory on a new file' % (item, num))
                               for item, num in items]
                              + [(status, setter_node(templates, name, kind, value, taken),
                                  'start flag %s (%s) = %r on a new file' % (name, kind, value))
-                                for name, kind, value, _ in flags]):
+                                for name, kind, value, _ in flags]
+                             + [(status, n, 'start %s.%s = %d on a new file (one more set, a copy of the '
+                                            'module\'s set of %s)' % (STATUS, field, value, STATUS_HEARTS[1]))
+                                for n, (field, value) in zip(more_nodes, more)]):
         link = copy.deepcopy(doc.nodes[where].links[FLOW][0])
         link.node = len(doc.nodes)
         doc.nodes[where].links[FLOW].append(link)
@@ -438,7 +549,7 @@ def edit(module_data, source_data, items, flags):
         said += ['start flag %s (%s, a field of a struct) = %r on a new file' % (name, kind[len(MEMBER):], value)
                  for name, kind, value, _ in members]
     new_data = doc.write()
-    read_back(module_data, source_data, new_data, items, all_flags)
+    read_back(module_data, source_data, new_data, items, all_flags, changed + more)
     return new_data, said
 
 
@@ -474,17 +585,26 @@ def _fixed(n):
     return {(t, x.name): (x.value, x.flags) for t in ainb.PARAM_TYPES for x in n.inputs[t]}
 
 
-def read_back(module_data, source_data, new_data, items, flags):
+def read_back(module_data, source_data, new_data, items, flags, status=()):
     """the written module, read again, against the game's two files: the game's own nodes are unchanged but
-    for the new children of the two groups; every new node is the game's node it was copied from with only the
-    intended inputs different; nothing else in the file changed. Stops the build otherwise."""
+    for the new children of the two groups and the values of its own sets on PlayerStatus that `status` names;
+    every new node is the game's node it was copied from with only the intended inputs different; nothing else
+    in the file changed. Stops the build otherwise."""
     def fail(what):
         raise SystemExit('read-back: %s: %s' % (MODULE, what))
     a, b = ainb.Ainb.read(module_data), ainb.Ainb.read(new_data)
     if ainb.Ainb.read(new_data).write() != new_data:
         fail('does not write back the same')
     flags, members = _split(flags)
-    n0, added = len(a.nodes), len(items) + len(flags)
+    changed, more = _status_split(a, list(status))
+    own = status_nodes(a)
+    for field, value in changed:                       # the game's own node with the value asked for
+        _set(_value(a.nodes[own[field]]), value)
+    got_status = read_status(new_data)
+    if any(got_status.get(field) != value for field, value in status) \
+            or set(got_status) != set(own) | {field for field, _ in more}:
+        fail('the fields of %s set are not the ones asked for: %r' % (STATUS, got_status))
+    n0, added = len(a.nodes), len(items) + len(flags) + len(more)
     structs = []
     for name, _, _, _ in members:
         if name.rpartition('.')[0] not in structs:
@@ -540,6 +660,15 @@ def read_back(module_data, source_data, new_data, items, flags):
         if (n.type, n.name, n.name_hash, n.flags) != (wallet.type, N_PUSH, wallet.name_hash, wallet.flags) \
                 or _fixed(n) != want or _params(n)['immediates'] != _params(wallet)['immediates'] or not _plain(n):
             fail('the push of %s is not the wallet\'s node with its item and count' % item)
+    life = a.nodes[own[STATUS_HEARTS[1]]]
+    for k, (field, value) in enumerate(more):          # the module's set of Life with another field and value
+        n = b.nodes[n0 + len(items) + len(flags) + k]
+        want = copy.deepcopy(life)
+        _set(want.inputs['string'][0], field)
+        _set(_value(want), value)
+        if _node(n)[:4] + _node(n)[5:] != _node(want)[:4] + _node(want)[5:]:
+            fail('the set of %s.%s is not the module\'s set of %s with its field and value'
+                 % (STATUS, field, STATUS_HEARTS[1]))
     for k, (name, kind, value, _) in enumerate(flags):
         n, t = b.nodes[n0 + len(items) + k], templates[kind]
         want = dict(_fixed(t))

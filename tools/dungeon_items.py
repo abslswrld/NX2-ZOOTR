@@ -23,7 +23,7 @@ So `CHECK_ID=Item_Dungeon_BossKey@ForestTemple` (and `Item_Dungeon_Map@...`, `It
 - in a chest outside the dungeon: the item's own actor under the dungeon's name, and the chest's opening event
   gets a step after it that sets the field (tools/build_mod.py, as for a dungeon's small key).
 Every version says the dungeon's name in the dungeon's colour, as a small key does (tools/dungeon_keys.py: an
-item's two names; the name is the chest version, which is named itself): "You found the boss key! (Forest
+item's two names; the name is the chest version, which is named itself): "You found the Boss Key! (Forest
 Temple)".
 
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
@@ -47,7 +47,7 @@ from shop_items import ai_path, ai_info_path, _node_state, _doc_state  # noqa: E
 # its texts: the game's own with the dungeon's name behind them)
 ITEMS = {
     'Item_Dungeon_BossKey': ('B', 'IsGetBossKey', 'BossKey', (
-        ('_Name', 'Boss Key (%s)'), ('_GetMessage', 'You found the boss key! (%s)'),
+        ('_Name', 'Boss Key (%s)'), ('_GetMessage', 'You found the Boss Key! (%s)'),
         ('_GetCaption', 'It opens the chamber where the boss\nof that place lurks, wherever you found it.'))),
     'Item_Dungeon_Map': ('M', 'IsGetMap', 'Map', (
         ('_Name', 'Dungeon Map (%s)'), ('_GetMessage', 'You found the dungeon map! (%s)'),
@@ -107,7 +107,10 @@ def messages(item, dungeon, place, colour=None):
         shown = place
         if colour is not None and tail == COLOURED:
             shown = dungeon_keys.colour_tag(colour) + place + dungeon_keys.colour_tag(COLOUR_END)
-        out[message_name(item, dungeon) + tail] = (text % shown if '%s' in text else text) + '\x00'
+        line = text % shown if '%s' in text else text
+        # an item's name keeps its capitals in a sentence (dungeon_keys.proper)
+        out[message_name(item, dungeon) + tail] = (dungeon_keys.proper(line) if tail == dungeon_keys.PROPER
+                                                   else line) + '\x00'
     return out
 
 

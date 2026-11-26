@@ -4,6 +4,127 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 10: the fourth look passed; "Boss Key" capitalised in its get text
+The user's answers: the scrub's line says "Boss Key (Forest Temple)", the whole name green, on two lines
+inside the box: good. After buying, the window says "You found the boss key! (Forest Temple)" with the
+temple's name green: good. And: "Boss Key should be capitalized in the \"You found the Boss Key! (Forest
+Temple)\" Text".
+- **Changed:** the get text of a dungeon's boss key placed by the builder is "You found the Boss Key! (%s)"
+  (`tools/dungeon_items.py`, `ITEMS`; `tests/boss_check.py` expects it). The game's own boss key, in a chest
+  of its own dungeon, keeps the game's text ("You found the boss key!"). The small key's, the map's and the
+  compass's get texts are as they were ("You found a small key!", "You found the dungeon map!", "You found
+  the compass!"): not asked for.
+- **Tests:** `boss_check`, `dungeon_keys_check` and `kokiri_neighbours_check` pass. The new text is not seen
+  in game yet.
+
+### Phase 1, part 10: "Boss Key" capitalised and green in the scrub's line
+The user's answer to the third look: "Forest Temple" has its capital T, on two lines inside the box. And:
+"\"Boss Key\" in scrub text should be capitalized, entire item name should be Green in the scrubs text box".
+- **Capitals:** every capitalised word of the name of a dungeon's key, boss key, map or compass now has the
+  game's "keeps its capital" tag (201, 13), the item's own words too (`dungeon_keys.proper` on the whole
+  name): "Boss Key (Forest Temple)" stays as written when a talk line names it.
+- **Colour:** the scrub's generic line had the item's name in the colour the game gives a name in talk (number
+  0, red). For a dungeon's key, boss key, map or compass the scrub now uses a line of its own per colour
+  (`scrub_line`, `scrub_label`: `Enemy_Scrub_Business_NX2_Item_Colour<n>`, named by the sale's
+  `SellerMessageId`) with the name in its dungeon's colour (decision 40's colours: the Forest Temple's is
+  number 3, green). Any other item's line is unchanged.
+- **Tests:** `tests/kokiri_neighbours_check.py` reads the scrub's line and its colour;
+  `tests/dungeon_keys_check.py` the four tags of a name. The scripts that read the scrub flow and its lines
+  pass (`pairs_more_check`, `gossip_check`, `families_check`, `boss_check`, `hint_check`,
+  `forest_temple_keys_check`). To see in game.
+
+### Phase 1, part 10: the retest's results, and the capital T
+The user's answers (one screenshot):
+- **The scrub's line fits its box** on two lines ("Ah, the boss key (Forest temple)!" / "It's 40 rupees. Wanna
+  buy it?"). The whole name is red there, as the game colours an item's name in a talk line; the dungeon's own
+  colour (green) is in the get window's text.
+- **A key from a person counts:** with only the Kokiri's key, the first locked door of the Forest Temple opened.
+- **"Temple should have a capital T".** Found in the game's texts: a talk line that names an item in a
+  sentence (the tag (201, 15) in front of the name, in the shop's and the scrubs' lines) writes the name's
+  words small, and the game's own names mark each word that keeps its capital with the tag (201, 13) in front
+  of it ("Deku Shield": one before each word; "Bigger Deku-Stick Bag": one before "Deku-Stick"; 57 of the 185
+  item names have it). Our names for a dungeon's key, boss key, map and compass had none. **Fixed:** in the
+  `_Name` text every capitalised word of the dungeon's name gets that tag (`dungeon_keys.proper`), so the line
+  says "boss key (Forest Temple)". To see in game.
+- **The staff roll:** "no easy way to check". The credits' colours stay with the areas, as the roadmap says for
+  that case.
+- **Tests:** `dungeon_keys_check` (it reads the tag now), `boss_check`, `forest_temple_keys_check`,
+  `hint_check`, the two Forest Temple build scripts and `kokiri_neighbours_check` pass.
+
+### Phase 1, part 10: in-game results and one fix
+The user's answers (new file, child; two screenshots):
+- **The start of a new file:** 5 hearts, 50 rupees, the Fairy Slingshot with 30 Deku Seeds (one shot: 29),
+  the Goron Bracelet in the menu. All good. The Forest Temple's map opens as a child (the place is marked as
+  visited); as an adult the page is still "???" (the adult made with the debug menu, as found on 2026-11-24).
+- **`KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01`, the Fairy Bow alone:** the menu shows it with 30 arrows. Good: the
+  first weapon alone gives its bag. **`..._POT_02`, a small key of the Spirit Temple:** "(Spirit Temple)" in
+  orange. The pots did not come back after leaving the house, so neither gave its item again.
+- **`KF_KOKIRI_CHILD_SHOP_01`, the Goron Ruby:** bought for 15 rupees, its name in red, on the Key Items tab;
+  the shelf was empty after leaving and coming back.
+- **`KF_CIRCLE_KOKIRI_GIFT`, a small key of the Forest Temple:** the Kokiri gave it, "(Forest Temple)" in
+  green. **"The map shows 1 key": no key on the map.** That line of the checklist was wrong: the Map page
+  shows no key count at all (found on 2026-11-24, part 6; the page has the map, the compass and the boss
+  key). So whether the key counted is not seen yet: to see at a locked door of the temple.
+  `docs/AREA_CHECKLIST_TEMPLATE.md` now says never to ask for a key count on the Map page.
+- **`LW_NEAR_BRIDGE_SCRUB`, the Forest Temple's boss key:** sold for 40 rupees, "You found the boss key!
+  (Forest Temple)", the scrub left, and the temple's map shows the boss key. Good. **Its line ran out of the
+  box** (the screenshot: "Ah, the boss key (Forest temple)! It's 40 rupees. Wanna buy it?" on one line, wider
+  than the box). Found: the game does not wrap a line, and the generic line (`SCRUB_LINE`) was one line.
+  **Fixed:** it is two lines, as the game's own scrub lines are written ("Ah, the <item>!" / "It's <price>
+  rupees. Wanna buy it?"). To see in game.
+- **`LW_SARIA_GIFT`, the Fire Medallion:** Link held it up, its name in red, on the Key Items tab. Good.
+- **Save and reload:** good. **The staff roll:** left blank.
+- **Tests:** the scripts that read the scrub's line (`tests/pairs_more_check.py`, `tests/gossip_check.py`) and
+  `tests/kokiri_neighbours_check.py` pass.
+
+### Phase 1, part 10: Kokiri Forest and its neighbours (to test in game)
+Branch `claude/kokiri-forest-neighbours`. Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **The starting state's leftovers** (`tools/start_state.py`, `tools/build_mod.py`):
+  - **Items the inventory keeps under another name.** Read from the game: an item's inventory name is the
+    `ActorName` of its row in `RSDB/ActorInfo` (`Item_Range_SlingShot` -> `Weapon_Range_SlingShot`,
+    `Item_Range_Bow` -> `Weapon_Range_Bow`, `Item_Gauntlet_Goron` -> `Armor_Child_Gauntlet_Goron`), and the
+    game's own new-file list pushes such a stand-in itself (`Obj_Armor_Adult_Normal`, kept as
+    `Armor_Adult_Normal`). So `--start Item_Range_SlingShot`, `--start Item_Range_Bow` and `--start
+    Item_Gauntlet_Goron` are now accepted and pushed as they are placed (before: refused, "under another name").
+  - **A first weapon comes with its bag:** behind the weapon's push, one push each for what the game's chests
+    give with it, read from the shared chest module (`turn_items.first_get`): `Item_BulletBag_Small` and 30
+    `Item_DekuSeed`, or `Item_Quiver_Small` and 30 `Item_Arrow_Normal`.
+  - **`--start-hearts N`** (1 to 20): the list's own two sets on `PlayerStatus`, `Life` and `MaxLife` (12
+    each, 4 per heart), get the new value. **`--start-rupees N`** (0 to what the new file's wallets hold; the
+    small wallet: 200): one more `SeqOneShotSetGameDataInt` node, a copy of the list's `Life` node, sets
+    `PlayerStatus.CurrentRupee` (found by its name's hash among the 41 fields of `PlayerStatus`).
+  - **Not possible: a chest open from the start.** A placement's saved flag is an entry of `Bool64bitKey` in
+    `GameData/GameDataList` with only `Hash`, `ResetTypeValue`, `SaveFileIndex` (2,424 also `ExtraByte`): no
+    default value to change, and no node of the new-file sequence sets a flag by its 64-bit number.
+- **A first weapon placed alone gives its bag** (part 9's find: a Fairy Bow alone in a pot came without its
+  quiver). `Item_Range_SlingShot` or `Item_Range_Bow` alone on a freestanding item, a rock, a bush, a pot or
+  a Gold Skulltula is now built as its turning item of one level (`LONE_WEAPON_KINDS`;
+  `tools/turn_items.py` takes a family of one level): it gives what a chest gives with the weapon when it is
+  picked up, has no next level and no drop part, and removes itself once Link owns the weapon. The weapon
+  alone and its family in one build is refused (the same item on two checks).
+- **A dungeon's small key, boss key, map or compass from a person and from a Deku Scrub**
+  (`KEY_GIVEN_KINDS`): the version a chest holds is handed over as any item, and the step the chests' own
+  event runs follows the get (`GameDataActor.EventTriggerAddOrSubGameDataInt` + 1 on
+  `DungeonInfo.<dungeon>.SmallKeyNum`, or `EventTriggerSetGameDataBool` on `IsGetBossKey` / `IsGetMap` /
+  `IsGetCompass`): in the giver's own flow behind its call of the get (`gift_edit`, `after`), in the scrub
+  flow behind a successful buy, where a first weapon's bag is added (`scrub_flow_edit`, `after`). Refused on
+  a cutscene gift and a song for now.
+- **Left out of this round: the same on a shop shelf.** A shelf is not an event. Its own AI would have to
+  count the key, and that AI's "sold out" side runs again in every state of the shelf (it only hides the
+  model and marks the placement, both harmless twice), so a count there needs a guard that holds exactly
+  once; and the shop version would have to be built from an item of ours. Proposed as its own small part.
+- **A stone or a Medallion from a person, a cutscene gift, a scrub and a shelf** already built (part 7's
+  work); they are in this round's build to be seen in game.
+- **`tests/kokiri_neighbours_check.py`** (new; a row of `STEPS` and of `README.md`): four builds read back,
+  three refusals, and the facts above from the game's files. `tests/start_state_check.py`: the three items
+  it expected refused are accepted now; it checks the new refusals instead.
+- **Tests:** the full run (`tests/run_all.py`): 27 of 30 passed; the three that failed held expectations
+  this part changes, and pass with them updated: `tests/dungeon_keys_check.py` and `tests/boss_check.py`
+  (a key on a scrub is no longer refused; a cutscene gift's refusal has new words; a shelf's refusal is
+  checked instead) and `tests/forest_temple_every_spot_check.py` (the Fairy Slingshot alone in a Forest
+  Temple pot is now the version that gives its bag).
+
 ### Phase 1, part 9: in-game results, two fixes, and decision 46
 The user's answers (new file, the debug-menu warp, adult):
 - **The named key in the temple** (the first room's chest and a lobby pot): "(Forest Temple)" in green, the

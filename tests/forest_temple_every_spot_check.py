@@ -197,6 +197,9 @@ def main(romfs):
             if item == BOSS_KEY:
                 return dungeon_items.name('Item_Dungeon_BossKey', AREA, 'once')
             what = ground_items.kind_of(plain, item)
+            if item in build_mod.SCRUB_COMPANIONS and kind in build_mod.LONE_WEAPON_KINDS:
+                # a first weapon alone: its turning item of one level, which gives its bag (part 10)
+                return once_items.once_name(item)
             if kind == 'chest':
                 return ground_items.ground_name(item, 'held') if what == 'equipment' else item
             if kind == 'skulltula':

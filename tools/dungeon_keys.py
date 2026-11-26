@@ -97,7 +97,12 @@ Spirit Temple orange, Gerudo Training Ground "different orange?", Bottom of the 
 Castle none. In game 2026-11-24: all seven are as the user wants them (purple as the added place, the
 oranges in places 4 and 5), and a red word in someone's talk is red. The credits were not looked at.
 
-Not yet: gifts, scrubs, shop shelves, songs.
+From a person (a gift with flow data) and from a Deku Scrub (phase 1, part 10, to test in game): the version
+a chest holds is handed over as any item, and the chests' own step follows the get in the giver's flow or, at
+a scrub, a successful buy (tools/build_mod.py: KEY_GIVEN_KINDS, key_add_step).
+Not yet: cutscene gifts, songs, shop shelves. A shelf is not an event: the shelf's AI would have to count the
+key, and its "sold out" side is run again in every state of the shelf, so a count there needs a guard that
+holds exactly once (to be worked out and seen in game).
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
 """
 import copy
@@ -249,6 +254,27 @@ def colour_table(table_data, colours):
     return new
 
 
+# A word of an item's name that keeps its capital in a sentence: the game's own names have the tag (201, 13) in
+# front of each such word ("<tag>Deku <tag>Shield", "Bigger <tag>Deku-Stick Bag", "<tag>Zelda's Letter"). A talk
+# line that names an item in a sentence (the shop's and the scrubs' lines: the tag (201, 15) in front of the
+# name) writes the other words small. In game 2026-11-25 the scrub said "the boss key (Forest temple)": the
+# dungeon's name had no such tag. So in an item's name (PROPER) every capitalised word gets it, the item's own
+# words too (the user, 2026-11-25: "Boss Key" in the scrub's text should be capitalised): "Boss Key (Forest
+# Temple)" stays as it is written.
+KEEP_CAPITAL = (201, 13)
+PROPER = '_Name'
+
+
+def proper(name):
+    """a name with the game's "keeps its capital" tag in front of the first letter of each capitalised word"""
+    tag = (b'\x0e' + struct.pack('<HHH', KEEP_CAPITAL[0], KEEP_CAPITAL[1], 0)).decode('utf-8', 'surrogateescape')
+    words = []
+    for w in name.split(' '):
+        at = next((i for i, c in enumerate(w) if c.isalpha()), None)
+        words.append(w[:at] + tag + w[at:] if at is not None and w[at].isupper() else w)
+    return ' '.join(words)
+
+
 def messages(dungeon, place, colour=None):
     """the texts of a named key: {label: text}; `place`: the dungeon's name as the game writes it; `colour`:
     the number of the colour the name has in the get message (colour_number; None: the text's own)"""
@@ -257,7 +283,8 @@ def messages(dungeon, place, colour=None):
         shown = place
         if colour is not None and tail == COLOURED:
             shown = colour_tag(colour) + place + colour_tag(COLOUR_END)
-        out[(MESSAGE_NAME % dungeon) + tail] = (text % shown if '%s' in text else text) + '\x00'
+        line = text % shown if '%s' in text else text
+        out[(MESSAGE_NAME % dungeon) + tail] = (proper(line) if tail == PROPER else line) + '\x00'
     return out
 
 

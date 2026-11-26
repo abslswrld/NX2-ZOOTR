@@ -1980,7 +1980,7 @@
    "note": null
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-17 with --fix kokiri_circle_after_dungeons (tools/build_mod.py sets the ActorName of his Dm_SY_GetInEvent call): gave a gold rupee",
+  "randomizable_note": "changed in game on 2026-11-17 with --fix kokiri_circle_after_dungeons (tools/build_mod.py sets the ActorName of his Dm_SY_GetInEvent call): gave a gold rupee; on 2026-11-25 (part 10) a small key of the Forest Temple: the Kokiri gave it, \"(Forest Temple)\" in green (the count is not shown anywhere outside the temple: to see at a door of the temple); retest 2026-11-25: with only this key a locked door of the Forest Temple opened (the key counts)",
   "requirements": {
    "child": [
     []
@@ -2407,7 +2407,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee, but the pot refills on every visit",
+  "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee, but the pot refills on every visit; on 2026-11-25 (part 10) the Fairy Bow alone: it came with its Quiver and 30 arrows, and the pot did not come back",
   "requirements": {
    "child": [
     []
@@ -2443,7 +2443,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) a small key of the Spirit Temple: \"(Spirit Temple)\" in orange, and the pot did not come back",
   "requirements": {
    "child": [
     []
@@ -2867,7 +2867,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Goron Ruby for 15 rupees: bought, its name in red, on the Key Items tab, the shelf empty after leaving and coming back",
   "requirements": {
    "child": [
     []
@@ -4933,7 +4933,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Forest Temple's boss key: sold for 40 rupees, \"You found the boss key! (Forest Temple)\", the scrub left, the temple's map shows the boss key (the scrub's line ran out of its box on one line: two lines now); retest 2026-11-25: the line fits its box on two lines (\"Forest temple\" had a small t: the dungeon's name in an item's name now has the game's \"keeps its capital\" tag); third look 2026-11-25: \"Forest Temple\" with its capital T. The user: \"Boss Key\" capitalised too, and the whole name green in the scrub's box: every capitalised word of the name has the tag now, and the scrub's line colours a dungeon item's name in its dungeon's colour; fourth look 2026-11-25: the line says \"Boss Key (Forest Temple)\", the whole name green, on two lines; the get window's text passed too (the user: \"Boss Key\" capitalised there as well: \"You found the Boss Key! (Forest Temple)\" now)",
   "requirements": {
    "child": [
     [
@@ -5005,7 +5005,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "tools/build_mod.py changes it (cutscene_gift_edit, 2026-11-19); not yet changed in game",
+  "randomizable_note": "tools/build_mod.py changes it (cutscene_gift_edit, 2026-11-19); not yet changed in game; on 2026-11-25 (part 10) the Fire Medallion: Link held it up, its name in red, on the Key Items tab",
   "requirements": {
    "child": [
     [

@@ -48,8 +48,8 @@ SAMPLE = [
 ]
 REFUSED = [(['KF_MIDO_CHEST_01=%s@Nowhere' % KEY], 'no dungeon Nowhere'),
            (['KF_MIDO_CHEST_01=Item_Hammer@%s' % D], 'only %s@<dungeon>' % KEY),
-           (['LW_SARIA_GIFT=%s@%s' % (KEY, D)], 'cannot be put on a gift yet'),
-           (['LW_NEAR_BRIDGE_SCRUB=%s@%s' % (KEY, D)], 'cannot be put on a scrub yet')]
+           (['LW_SARIA_GIFT=%s@%s' % (KEY, D)], 'cannot be put on a cutscene gift or a song yet'),
+           (['--fix', 'kokiri_shop_full_stock', 'KF_KOKIRI_CHILD_SHOP_01=%s@%s' % (KEY, D)], 'cannot be put on a shop yet')]
 
 
 def check(name, ok, detail=''):
@@ -162,7 +162,7 @@ def main(romfs):
             said = refused(run, 'no', *args)
             if not said or want not in said:
                 wrong.append('%s -> %s' % (' '.join(args), said))
-        good &= check('%d requests are refused with their reason (no such dungeon, another item, a gift, a scrub)'
+        good &= check('%d requests are refused with their reason (no such dungeon, another item, a cutscene gift, a shelf)'
                       % len(REFUSED), not wrong, wrong)
         said, folder = run('keys', *['%s=%s' % x for x in SAMPLE])
         read = lambda f: zstd.decompress(open(os.path.join(folder, *f.split('/')) + '.zs', 'rb').read(), d)   # noqa: E731
@@ -231,7 +231,10 @@ def main(romfs):
                       and refs[dungeon_keys.name(D, 'once')] == game_ref
                       and refs[dungeon_keys.name(D, 'chest')] == game_ref
                       and built['once'][3]['ActorInfo']['ActorName'] == KEY
-                      and texts['USen'].get(msg + '_Name') == 'Small Key (Forest Temple)\x00'
+                      and build_mod.msg_plain(texts['USen'].get(msg + '_Name', '')) == 'Small Key (Forest Temple)'
+                      and texts['USen'].get(msg + '_Name') == dungeon_keys.proper('Small Key (Forest Temple)') + '\x00'
+                      and texts['USen'].get(msg + '_Name').count('\x0e') == 4
+                      and dungeon_keys.proper('Boss Key (Bottom of the Well)').count('\x0e') == 4
                       and all(msg + t in texts[lang] for lang in texts for t, _ in dungeon_keys.MESSAGES)
                       and texts['USen']['%s_Name' % KEY] == 'Small Key\x00')
         got = texts['USen'].get(msg + '_GetMessage', '')
