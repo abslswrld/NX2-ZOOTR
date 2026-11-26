@@ -350,8 +350,9 @@ def main(romfs):
         scales, hooks, ocarinas = ('>'.join(p) for p in (SCALES, HOOKS, OCARINAS))
         # (a pair on a pot or a Gold Skulltula builds since 2026-11-22: tests/one_time_check.py,
         # tests/skulltula_prog_check.py)
-        good &= check('the build refuses: a pair on a shelf; two rocks of one family side by side',
-                      refused(run, 'no3', 'KF_KOKIRI_CHILD_SHOP_01=' + scales)
+        # (a pair on a shelf builds since 2026-11-26: tests/shop_family_check.py)
+        good &= check('the build refuses: three levels on a shelf; two rocks of one family side by side',
+                      refused(run, 'no3', '--fix', 'kokiri_shop_full_stock', 'KF_KOKIRI_CHILD_SHOP_01=Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large')
                       and refused(run, 'no4', *[c + '=' + scales for c in CLOSE]))
         base0, _, files0 = run('fixes')
         base, said, files = run('pairs', *([c + '=' + scales for c in ROCKS] + [c + '=' + hooks for c in BUSHES]

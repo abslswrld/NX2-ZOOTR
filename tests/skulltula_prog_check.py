@@ -165,11 +165,11 @@ def main(romfs):
                       DROP_GLOBAL not in files and 'Pack/Actor/Obj_NX2_GS_Scale_Silver.pack.zs' in files
                       and not any('/Obj_NX2S_' in f or '/Obj_NX2Q_' in f for f in files))
         # (a family on a pot builds since 2026-11-22: tests/one_time_check.py)
-        good &= check('still refused: a later level alone on a skulltula, a family that is none, a family on a '
+        good &= check('still refused: a later level alone on a skulltula, a family that is none, three levels on a '
                       'shelf',
                       refused(run, 'no1', '%s=Item_Scale_Gold' % SKULLTULAS[0])
                       and refused(run, 'no2', '%s=Item_Scale_Gold>Item_Scale_Silver' % SKULLTULAS[0])
-                      and refused(run, 'no4', 'KF_KOKIRI_CHILD_SHOP_01=Item_Scale_Silver>Item_Scale_Gold'))
+                      and refused(run, 'no4', '--fix', 'kokiri_shop_full_stock', 'KF_KOKIRI_CHILD_SHOP_01=Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large'))
 
     print()
     print('ALL OK' if good else 'SOME CHECKS FAILED')

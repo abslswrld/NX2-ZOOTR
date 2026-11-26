@@ -4,6 +4,77 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-26
 
+### Phase 2, part 1: the retest passed; the look is not good enough (decision 50)
+The user's answers (new file, child):
+- **The scales stand on their shelves,** not in them. The lifts (0.19 m) are right.
+- **The shopkeeper's line names the Golden Scale** for the second shelf: writing the name right after the shelf
+  is picked works. The shelf's own label (shown while browsing) still says "Silver Scale": it is the shelf
+  object's name, not the flow's.
+- **"You got a golden scale!",** the price taken, the Golden Scale in the menu; both shelves still empty after
+  leaving the shop and coming back.
+- **The user's decision (decision 50):** it is not good enough that the shelf shows the Silver Scale's label
+  and model, on the shelf and held up, when it sells the Golden Scale: "two shelf objects on one spot,
+  switched by whether Link has the first level". That is phase 2's new part 2; the parts behind it move down
+  by one (nine parts). Part 1's way stays in the builder: it gives the right level today, and it is the
+  fallback for a second shelf of a pair bought in the same visit, should the game only switch shelf objects
+  when the area is loaded.
+
+### Phase 2, part 1: in-game results of the shelf pair, and two fixes
+The user's answers (new file, child; two screenshots):
+- **The method works.** The pair Silver Scale > Golden Scale on `KF_KOKIRI_CHILD_SHOP_01` and `_02`: the first
+  one bought was the Silver Scale (line, window, price, menu), the second gave "You got a golden scale!" and
+  the Golden Scale in the menu, the price taken. Each shelf was empty after its sale, nothing was sold twice,
+  and it held after save and reload. (Leaving the shop and coming back was left blank.)
+- **"Scale in shelf, needs to be raised"** (the screenshot: both scales half inside their shelves). Measured
+  on the models as the other lifts were: the Silver Scale's pose is centred, its lowest vertex 0.192 m under
+  the shelf point, the Golden Scale's 0.203 m. **Fixed:** `shop_items.SHELF_LIFT` gets both (0.19, 0.20 m).
+- **The shopkeeper's line called the second shelf "Silver Scale".** Found: his line ("The <item>? That'll
+  cost...", `Shop_01`) reads `Shop_SelectItemName` too, but it is shown before the "can Link carry it"
+  question, where the name was written. The flow runs `Npc_EventStarter.EventTriggerShopItemFocus` when a
+  shelf is picked (two such steps), then asks about the name and shows the line. **Fixed:** the question
+  "is it First? Link has First?" and the write now stand right behind each of those two steps
+  (`shop_focus_steps`), so the line, the question and everything after name Second. To see in game.
+- **Link holds up the Silver Scale's model when he gets the Golden Scale** (the screenshot). As expected: the
+  shelf is one object and shows its own model. Not changed: the user's decision.
+- **Tests:** `tests/shop_family_check.py` (it reads the new place of the write) and
+  `tests/shop_shelf_keys_check.py` pass.
+
+### Phase 2, part 1: an upgrade pair on a shop shelf, a trial (to test in game)
+Branch `claude/shop-families-trial`. Phase 2's eight parts are in the roadmap since today (decision 49). Test
+build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **`SHELF=First>Second` on a shop shelf** (pairs only; three levels are refused until part 2). It was the one
+  place a family could not go (decision 9: "unproven"). The earlier research (2026-11-23) saw three ways, each
+  with a cost: more placements in the map, a "sold out" flag, or taking an item back after the sale. Part 12
+  of phase 1 found what makes a fourth way possible: the sale is an event, and the flow keeps the picked
+  item's name in the saved string `Shop_SelectItemName`.
+- **How it works** (`shop_family_edit`, read back by `shop_family_check`; the shelf is First's shop version,
+  sold once, as any item on a shelf):
+  - In front of the flow's "can Link carry it" question: "is the item First?" -> "Link has First?" (the game's
+    inventory question, `PouchSystemActor.EventQueryIsExistInPouch`) -> yes: Second's name is written into
+    `Shop_SelectItemName` (`GameDataActor.EventTriggerSetGameDataString64`), two frames pass (the wait the
+    scrubs' pairs need between a write and its use), then the game's question, which now asks about Second.
+    From there the flow's buy line, its get window, its sound and its effects are Second's, since they all
+    read that name.
+  - What goes into the inventory is the shelf's own item, by one of five steps (three
+    `EventTriggerGetItemAtShop`, two `EventTriggerShopItemPutInPouch`). In front of each: "is the item
+    Second?" -> yes: Second is added (`PouchSystemActor.EventTriggerAddOrRemovePouchContent`, the step the
+    scrubs add a bag with) and the shelf's step is passed by, so First is not added a second time.
+  - A Link who has both levels is asked about by the game itself: its "can Link carry it" question then
+    names Second.
+- **Known before the test:** a shelf is one actor, so it shows First's model on the shelf and in Link's
+  hands whichever level it sells. Only the name, the texts and what Link gets follow the level.
+- **Refused:** three levels on a shelf; First alone on one shelf with its pair on another (the flow cannot
+  tell the two shelves apart); a Second that one of the game's own shelves is named as (none is today).
+- **A fault of part 10 found and fixed:** in `tools/build_mod.py` a name was used twice (`given`: the
+  assignments as given, for `--hint`, and "handed over by a person"), so a build with a dungeon's key, boss
+  key, map or compass **and** a `--hint` stopped with an error. `tests/kokiri_neighbours_check.py` now builds
+  that combination.
+- **`tests/shop_family_check.py`** (new; a row of `STEPS` and of `README.md`). `tests/pairs_more_check.py` and
+  `tests/skulltula_prog_check.py` expected a pair on a shelf to be refused: they expect three levels refused
+  instead.
+- **Tests:** the full run (`tests/run_all.py`): all 32 checks passed.
+
 ### Phase 1, part 11: the Forest Temple's cutscenes are skippable, and that is enough (decision 48)
 Nothing built. Phase 1 is complete with this (milestone M1).
 - **Read from the game's files:** the temple has 47 scenes in the cutscene list: 18 story cutscenes (16
