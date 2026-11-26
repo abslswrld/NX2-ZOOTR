@@ -4,6 +4,37 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-26
 
+### Phase 2, part 2: a family shelf that looks like the level it sells (to test in game)
+Branch `claude/shop-families-look`. Decision 50. Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **Read from the game's maps:** a placement can have a `Presence` setting, `{FlagName, IsCheckLazy,
+  IsNegation}`: the object is only there while the saved flag is set (with `IsNegation`: while it is not).
+  2,793 placements have one, on 424 flags. The game uses `IsGet.<item>` flags for it
+  (`IsGet.Item_FairyBless_MP`). The Kokiri Shop's child map has two sets of shelves on the same spots, two
+  placements per shelf number, one for each answer of `Meet_DekuTree_IsAfter_Step02_Exp` (`IsCheckLazy` true);
+  the Happy Mask Shop's masks, which appear while Link is in the shop, have `IsCheckLazy` false.
+- **Two shelf objects on one spot** (`shelf_twin_map_edit`, read back): for `SHELF=First>Second` the shelf's
+  placement (First's shop version) gets `Presence` "not `IsGet.<First>`", and a twin of it gets
+  "`IsGet.<First>`": the same placement under another hash with Second's shop version, lifted for Second's
+  own model. Both are `IsCheckLazy` false. Every link to the shelf (the shopkeeper's `ForSale` and
+  `Reference`) is also made to the twin, and the twin is in the shelf's groups. The twin's hash is the one the
+  shelf had in the game: free, since the shelf takes over a removed shop board's hash for its saved flag.
+- **One item from the two objects** (`keep_sold_counts`): both have the same shelf number
+  (`ShopItemIndex`), and the shopkeeper counts a sale under that number
+  (`Shop_SoldNum.<shopkeeper>.<number>`, a saved Int of its own per shelf). Once one object is sold, the other
+  is "sold out" for the shopkeeper and hides. The game resets that count when the shops restock (reset type
+  2); for a family shelf it now has the reset type of an ordinary saved flag (8), so the shelf stays sold.
+- **Part 1's choice in the sale flow stays:** if the game only places objects when the area is loaded, a
+  second shelf of the pair still shows the first level until then, and the flow gives the second level.
+- **A guard of part 1 corrected:** "the game's own shelves sell Second" looked at the build's own shelf
+  versions too; it looks at the game's only.
+- **Not known from the files, to see in game:** whether the second object appears at once; whether the
+  shopkeeper's line, label and price are right for the twin (his list names the first object for that shelf
+  number).
+- **`tests/shop_family_check.py`:** three more checks (the game's facts above; the two placements and the
+  shopkeeper's links; the sold count's reset type).
+- **Tests:** the full run (`tests/run_all.py`): all 32 checks passed.
+
 ### Phase 2, part 1: the retest passed; the look is not good enough (decision 50)
 The user's answers (new file, child):
 - **The scales stand on their shelves,** not in them. The lifts (0.19 m) are right.

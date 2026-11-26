@@ -368,6 +368,17 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    such a condition is looked at while Link is in the shop or only when the area is loaded. Part 1's name
    swap in the sale flow stays for the case it is only on load (a second shelf of the pair bought in the same
    visit).
+   **Built 2026-11-26, to test in game** (`tests/shop_family_check.py`). Read from the game's maps: a
+   placement can have a `Presence` setting (`FlagName`, `IsCheckLazy`, `IsNegation`): it is only there while
+   the saved flag holds. 2,793 placements have one; the game uses `IsGet.<item>` flags for it, and the Kokiri
+   Shop has two placements of one shelf number on one spot. So the shelf (First's shop version) gets "not
+   `IsGet.<First>`", and a twin of it (Second's shop version, under the hash the shelf had in the game) gets
+   "`IsGet.<First>`", both `IsCheckLazy` false, as the Happy Mask Shop's masks, which appear while Link is in
+   the shop. The shopkeeper links to both. **So that the two objects sell one item:** both have the same
+   shelf number, the shopkeeper counts a sale under that number, and the count (a saved number of its own,
+   `Shop_SoldNum.<shopkeeper>.<number>`) is no longer reset when the shops restock. **Not known from the
+   files:** whether the second object appears at once or only when the area is loaded again; whether the
+   shopkeeper names and prices the twin right (his list names the first object for that shelf).
 3. **Shop families, the rest:** a three-level family, one family on two shelves, and the setting for how many
    shelves per shop are randomized (D37).
 4. **Kokiri Forest closed out:** its every-spot build script, the Kokiri Forest exit setting (D14: closed until
