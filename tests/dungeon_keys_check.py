@@ -48,8 +48,7 @@ SAMPLE = [
 ]
 REFUSED = [(['KF_MIDO_CHEST_01=%s@Nowhere' % KEY], 'no dungeon Nowhere'),
            (['KF_MIDO_CHEST_01=Item_Hammer@%s' % D], 'only %s@<dungeon>' % KEY),
-           (['LW_SARIA_GIFT=%s@%s' % (KEY, D)], 'cannot be put on a cutscene gift or a song yet'),
-           (['--fix', 'kokiri_shop_full_stock', 'KF_KOKIRI_CHILD_SHOP_01=%s@%s' % (KEY, D)], 'cannot be put on a shop yet')]
+           (['LW_SARIA_GIFT=%s@%s' % (KEY, D)], 'cannot be put on a cutscene gift or a song yet')]
 
 
 def check(name, ok, detail=''):
@@ -162,7 +161,7 @@ def main(romfs):
             said = refused(run, 'no', *args)
             if not said or want not in said:
                 wrong.append('%s -> %s' % (' '.join(args), said))
-        good &= check('%d requests are refused with their reason (no such dungeon, another item, a cutscene gift, a shelf)'
+        good &= check('%d requests are refused with their reason (no such dungeon, another item, a cutscene gift)'
                       % len(REFUSED), not wrong, wrong)
         said, folder = run('keys', *['%s=%s' % x for x in SAMPLE])
         read = lambda f: zstd.decompress(open(os.path.join(folder, *f.split('/')) + '.zs', 'rb').read(), d)   # noqa: E731

@@ -2,7 +2,62 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-26
+
+### Phase 1, part 12: the retest passed
+The user's answers (new file, child):
+- **The shelves' look:** the boss key and the compass stand on their shelves, not in them; the map stands on
+  its shelf and does not float; the small key looks as before. The three lifts (0.22, 0.13, 0.20 m) are right.
+- **A key from a shelf counts:** with only the small key bought in the Kokiri Shop, the first locked door of
+  the Forest Temple opened. So the sale flow's step runs for the key as it does for the boss key, the map and
+  the compass.
+Part 12 has passed in game: a dungeon's small key, boss key, map and compass on a shop shelf.
+
 ## 2026-11-25
+
+### Phase 1, part 12: in-game results; the boss key, the compass and the map lifted on the shelf
+The user's answers (new file, child; one screenshot of the shop):
+- **The four shelves** (`KF_KOKIRI_CHILD_SHOP_01` to `_04`) showed the Forest Temple's small key, boss key, map
+  and compass, each named with "(Forest Temple)". Each was bought once with the right text ("You found the
+  Boss Key! (Forest Temple)" for the boss key, the temple's name green), the shelf was empty after its sale,
+  nothing was sold twice, and the shelves stayed empty after leaving the shop and after save and reload.
+- **The temple's map** shows the map, the compass and the boss key: the sale flow's step sets them.
+- **Not seen: the small key's count.** The line for the locked door in the temple was left blank. It is the
+  same step in the same place as the three that set their fields, but only a door shows it.
+- **"Boss key and compass in shelf"** (the screenshot: both models half inside the shelf). Found, measured on
+  the models as the Hookshot's lift was (`item_pose.extent` on the vertices in `Pose_Common`): their poses are
+  centred on the point they are placed at, the lowest vertex 0.220 m (boss key) and 0.134 m (compass) under
+  it. The map's is centred too, 0.201 m under it. The small key stands on its point (+0.008). **Fixed:**
+  `shop_items.SHELF_LIFT` gets the three (0.22, 0.13, 0.20 m); a version of ours is lifted as the game's item
+  it is made of (`on_shelf`). `tests/shop_shelf_keys_check.py` measures the four models and checks the table
+  against them. To see in game.
+
+### Phase 1, part 12: a dungeon's key, boss key, map or compass on a shop shelf (to test in game)
+Branch `claude/shop-shelf-dungeon-items`. The user chose this before part 11 ("Shop shelf first"; decision
+47). Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **Found: a sale is an event.** Part 10 left the shelves out because the shelf's own AI could not count a
+  key exactly once. The sale itself runs in the shops' shared flow, `Event/EventFlow/DisplayShop.bfevfl` (547
+  events): it keeps the name of the item Link picked in the saved string `Shop_SelectItemName`, asks about
+  that name itself (`GameDataActor.EventQueryIsGameDataString64`: the two tunics, the masks; 9 names), and
+  counts a sale with `Npc_EventStarter.EventTriggerAddShopItemSoldNum`, once on each of its five ways through
+  a sale. The name is the shelf's inventory name (`ActorInfo`: `Shop_Armor_Zora` is `Armor_Adult_Zora`).
+- **The shelf** (`KEY_GIVEN_KINDS` now has `shop`): a shop version, sold once, of the version a chest holds
+  (`Shop_NX2_NX2KN_ForestTemple_15_Once` for a Forest Temple key on a 15-rupee shelf). `tools/shop_items.py`
+  is unchanged: the builder hands it this build's pack and table rows of that version (`shop_read`,
+  `shop_rows`), since the game has none.
+- **The count** (`shop_key_edit`, read back by `shop_key_check`): behind each of the five steps that count a
+  sale, "is the item <that version>?" -> yes: the chests' own step (`EventTriggerAddOrSubGameDataInt` + 1 on
+  `DungeonInfo.<dungeon>.SmallKeyNum`, or `EventTriggerSetGameDataBool` on the boss key's, the map's or the
+  compass's field), then on as before; no: on as before. It is the step the gift and the scrub use, which
+  passed in game in part 10. The shelf's AI is not touched.
+- **"Can Link carry it":** before a sale the flow asks `PouchSystemActor.EventQueryCanAddToPorchByGameData`
+  (yes, no, an error). Our versions are "not put in the inventory", and what the question answers for such
+  an item is not known from the files, so the same name question stands in front of it and leads ours to its
+  "yes".
+- **`tests/shop_shelf_keys_check.py`** (new; a row of `STEPS` and of `README.md`). `tests/dungeon_keys_check.py`
+  and `tests/kokiri_neighbours_check.py` no longer expect a shelf to be refused.
+- **Tests:** the full run (`tests/run_all.py`): all 31 checks passed.
 
 ### Phase 1, part 10: the fourth look passed; "Boss Key" capitalised in its get text
 The user's answers: the scrub's line says "Boss Key (Forest Temple)", the whole name green, on two lines

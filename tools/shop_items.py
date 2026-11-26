@@ -95,7 +95,13 @@ ROW_FROM_ITEM = ('ActorName', 'FmdbName', 'ModelAabbMax', 'ModelAabbMin', 'Model
 # The Hover Boots' pose is centred too (lowest vertex 0.190 under the point, default size 0.44 x 0.40 x 0.43 m):
 # lifted the same way. (Their pose sets 18 bones, legs and wings; no game project with a shelf pose has them, so
 # they get no pose of their own, SHELF_POSE.)
-SHELF_LIFT = {'Item_Hookshot': 0.25, 'Item_HoverBoot': 0.19}
+# A dungeon's boss key, compass and map (phase 1, part 12; in game 2026-11-25 the boss key and the compass sat in
+# the shelf): their poses are centred too, lowest vertex 0.220, 0.134 and 0.201 under the point (measured as
+# the Hookshot's: item_pose.extent on the model's vertices in Pose_Common). The small key stands on its point
+# (lowest vertex +0.008) and is not lifted. The names are the game's items; a version of ours is lifted as the
+# item it is made of (tools/build_mod.py: on_shelf).
+SHELF_LIFT = {'Item_Hookshot': 0.25, 'Item_HoverBoot': 0.19,
+              'Item_Dungeon_BossKey': 0.22, 'Item_Dungeon_Compass': 0.13, 'Item_Dungeon_Map': 0.20}
 # SHELF_POSE: items that get a shelf pose (Pose_Shop) of their own, as the game's own shelf items have (bomb, Deku
 # Stick, arrows, Hylian Shield: their Pose_Common times one number): how many times its Pose_Common the item is on
 # the shelf. The Giant's Knife's pose lays it nearly flat, 1.53 m wide (0.50 m tall, 0.56 m deep), centred on the

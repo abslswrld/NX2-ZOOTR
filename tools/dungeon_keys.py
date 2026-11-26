@@ -100,9 +100,13 @@ oranges in places 4 and 5), and a red word in someone's talk is red. The credits
 From a person (a gift with flow data) and from a Deku Scrub (phase 1, part 10, to test in game): the version
 a chest holds is handed over as any item, and the chests' own step follows the get in the giver's flow or, at
 a scrub, a successful buy (tools/build_mod.py: KEY_GIVEN_KINDS, key_add_step).
-Not yet: cutscene gifts, songs, shop shelves. A shelf is not an event: the shelf's AI would have to count the
-key, and its "sold out" side is run again in every state of the shelf, so a count there needs a guard that
-holds exactly once (to be worked out and seen in game).
+On a shop shelf (phase 1, part 12, to test in game): a shop version, sold once, of the version a chest holds
+(tools/shop_items.py builds it from this build's pack and rows), and the chests' step in the shops' shared sale
+flow, DisplayShop. A sale is an event after all: the flow keeps the picked item's name in the saved string
+Shop_SelectItemName and counts the sale with EventTriggerAddShopItemSoldNum; behind each such step stands "is
+it <our version>?" -> the step (tools/build_mod.py: shop_key_edit). The shelf's own AI is not touched (its
+"sold out" side runs again in every state of the shelf, so it could not count a key exactly once).
+Not yet: cutscene gifts, songs.
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
 """
 import copy
