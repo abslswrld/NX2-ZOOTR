@@ -78,9 +78,10 @@ that counts for the Forest Temple on the check, in the temple or outside it (too
 itself counts a key for the dungeon Link is in. On a pot, a rock, a bush, a freestanding item or a Gold Skulltula
 the key adds to the temple's key count when it is picked up (its own AI); in a chest the chest gets an opening
 event of our own around its usual one that adds to it (TBOX_KEY_FLOW). Not on gifts, scrubs or shelves yet.
-On a check of its own dungeon it is the game's own small key: the game counts and shows that one itself.
-...@ForestTemple+name (to test in game): the key says the dungeon's name in its own dungeon too ("You found a
-small key! (Forest Temple)"), the named key every key outside its dungeon is, counted by our own step.
+On a check of its own dungeon too it is the named key, counted by our own step (decision 46, the user
+2026-11-25: "keep name, no count"; passed in game: the name shows, the door opens, no count on screen). The
+game's own key, Item_Dungeon_SmallKey without a dungeon, is still placed as it is (its dungeon is where Link
+uses it). ...@ForestTemple+name is still read and means the same.
 
 Gossip stone text (to test in game): --gossip STONE=TEXT (repeatable) sets what a stone says, in every language
 (English text everywhere). STONE is the stone's check ID or its name in the map. In TEXT, \\n is a new line, \\p a
@@ -221,6 +222,11 @@ PLAIN_CHEST = {v: k for k, v in CHECKING_CHEST.items()}
 # and its own AI, Obj_TBox_A_02.root, 67 nodes, is another one). A chest that appears (a fight, an eye switch)
 # appears the same way: both chests' AIs play the same SpawnMagic and SpawnFall commands.
 BIG_CHEST = {'Obj_TBox_A_02': 'Obj_TBox_A_01', 'Obj_TBox_A_02_NoBake': 'Obj_TBox_A_01_NoBake'}
+# Opening events kept on a changed chest (CHEST_EVENTS 'keep') that are only the big chest's usual opening
+# (PlayDemo Dm_SY_Treasurebox): on a big chest made small they go, so the small chest plays its own opening (in
+# game 2026-11-25 the map's chest made small still played the big chest's opening with ForesetTemple_GetMap).
+# A big chest made small with a kept event not listed here stops the build: it needs a decision.
+BIG_OPENING_EVENTS = ('ForesetTemple_GetMap', 'ForesetTemple_GetCompass')
 CHECK_SETTINGS = ('Drop__CheckActor', 'Drop__DropActor_Substitute', 'Drop__CheckCondition')
 POT_TABLE_KEY = 'Drop__DropTable'                 # a pot's drop table: removed where we place an item
 # The upgrade families, declared once: name -> the levels as they are placed, lowest first (the user's list,
@@ -2398,6 +2404,14 @@ def patch_file(data, changes, checking=None, three=None, wrap=None):
             dyn = a.get('Dynamic')
             if h in checking and a['Gyaml'] in BIG_CHEST:
                 a['Gyaml'] = BIG_CHEST[a['Gyaml']]        # a big chest: its small twin's checking chest
+                event = (dyn or {}).get('GetEventName')
+                if event is not None and CHEST_EVENTS.get(event, ('remove',))[0] == 'keep':
+                    if event not in BIG_OPENING_EVENTS:
+                        raise SystemExit('%s: big chest %s made small keeps the opening event %r: not in '
+                                         'BIG_OPENING_EVENTS yet, decide what to do with it first'
+                                         % (changes[h][0], h, event))
+                    dyn = type(dyn)(dyn)
+                    del dyn['GetEventName']               # the big chest's opening: the small chest plays its own
             if h in checking and a['Gyaml'] not in CHECKING_CHEST and a['Gyaml'] not in PLAIN_CHEST:
                 raise SystemExit('%s: placement %s is a %s: only the small chest (%s) has a checking version'
                                  % (changes[h][0], h, a['Gyaml'], ', '.join(sorted(CHECKING_CHEST))))
@@ -4276,15 +4290,9 @@ def main(argv):
         kind = dungeon_keys.kind_for(check_kind(world, cid), cid)
         r, _, loc = find_check(world, cid)
         if {scene for scene, _, _ in world.placements_of(r, loc)} == {dungeon}:
-            if not item.endswith(dungeon_keys.NAMED):
-                # in its own dungeon: the game's own key, which the game counts and shows itself
-                print('%-18s a key of %s in %s itself: the game\'s own small key' % (cid, dungeon, dungeon))
-                assignments[k] = (cid, dungeon_keys.KEY_ITEM)
-                continue
-            # asked with its name (+name; phase 1, part 9): the named key, as outside the dungeon (to test in
-            # game: the game's own key has one text for every dungeon)
-            print('%-18s a key of %s in %s itself, with its name: the named key, counted by our own step'
-                  % (cid, dungeon, dungeon))
+            # in its own dungeon too: the named key, as outside it (decision 46: the game's own key has one text
+            # for every dungeon; the named key shows no count on screen, the user's choice)
+            print('%-18s a key of %s in %s itself: the named key, counted by our own step' % (cid, dungeon, dungeon))
         assignments[k] = (cid, key_versions.setdefault((dungeon, kind, named),
                                                        dungeon_keys.name(dungeon, kind, named)))
         if named:                                      # the item its name stands for: the named chest key
@@ -4711,6 +4719,9 @@ def main(argv):
                         if was in BIG_CHEST:
                             print('%-18s   a big chest (%s): becomes a small checking chest, the game has no big one'
                                   % (changes[h][0], was))
+                            if dyn.get('GetEventName') in BIG_OPENING_EVENTS:
+                                print('%-18s   its opening event %s goes (the big chest\'s opening): the small chest '
+                                      'plays its own' % (changes[h][0], dyn.pop('GetEventName')))
                         if h in three:
                             twin = PLAIN_CHEST.get(small, small) != three_chest.PLAIN
                             want['Gyaml'] = three_chest.chest_name(three[h], twin)

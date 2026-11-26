@@ -4,6 +4,29 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 9: in-game results, two fixes, and decision 46
+The user's answers (new file, the debug-menu warp, adult):
+- **The named key in the temple** (the first room's chest and a lobby pot): "(Forest Temple)" in green, the
+  next locked door opened with it, **no key count on screen**. The user's choice: "keep name, no count".
+  **Decision 46:** `Item_Dungeon_SmallKey@<dungeon>` is the named key in its own dungeon too (`+name` is still
+  read and means the same); `tests/dungeon_keys_check.py`, `tests/forest_temple_every_spot_check.py` and
+  `tests/forest_temple_loose_ends_check.py` expect it.
+- **The Bow's big chest:** a small chest appeared in its place and gave the Gold Scale; the door opened. Good.
+- **The map's big chest:** a small chest gave the bigger Bomb Bag, **but it played the big chest's opening.**
+  Found: its opening event `ForesetTemple_GetMap` was kept (it is only the chest's usual opening, with no
+  message), and that usual opening is the big chest's (`Dm_SY_Treasurebox`). **Fixed:** on a big chest made
+  small, the events that are only the big chest's opening (`BIG_OPENING_EVENTS`: the map's and the compass's)
+  go, so the small chest plays its own; any other kept event on such a chest stops the build. To see in game.
+- **Saria's cutscene:** the Longshot floated down (not the Medallion) and the window said Longshot. Good.
+- **Save and reload:** good.
+- **The Fairy Bow from a lobby pot came without its quiver.** Found: a first weapon placed alone (the Fairy Bow,
+  the Fairy Slingshot) on the ground, in a pot, a rock or a bush, or on a Gold Skulltula is built as a plain
+  one-time or ground version, which gives no bag; only chests (the game's own chest module), gifts and scrubs
+  (`SCRUB_COMPANIONS`) and the families' turning items add it. Not part of part 9: proposed for part 10 with the
+  starting state's Fairy Bow and Fairy Slingshot.
+- **Tests:** the scripts the fixes touch (`forest_temple_loose_ends_check`, `forest_temple_every_spot_check`,
+  `dungeon_keys_check`, `forest_temple_keys_check`, `chest_check`, `three_chest_check`, `boss_check`) pass.
+
 ### Phase 1, part 9: the Forest Temple's loose ends (to test in game)
 Branch `claude/forest-temple-loose-ends`. Parts 9 to 11 were added to phase 1 today (the user: "id like to
 finish these in Phase 1 if possible"; decision 45). Test build and checklist: `out\TEST_CHECKLIST.md`.

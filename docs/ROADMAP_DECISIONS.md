@@ -128,8 +128,8 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     place 2 of the game's list (no text uses it), purple is one colour added behind the list, and the two
     oranges take the staff roll's two places (4 and 5), so those lines of the credits change colour. All
     seven colours **passed in game 2026-11-24**; the credits were not looked at.
-41. **Every small key says its dungeon's name** (2026-11-24): a dungeon's key placed outside that dungeon always
-    has the name in its messages ("You found a small key! (Forest Temple)"), which also keeps the game from
+41. **Every small key says its dungeon's name** (2026-11-24; inside its own dungeon too since decision 46): a
+    dungeon's key placed outside that dungeon always has the name in its messages ("You found a small key! (Forest Temple)"), which also keeps the game from
     showing the key count of the place Link is in. In its own dungeon the key is the game's own small key, with
     the game's text and count.
 42. **Kokiri Forest's map is open from the start** (2026-11-24): with the opening skippable, a new file starts
@@ -150,6 +150,11 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     Kokiri Forest and its neighbours (keys on gifts, scrubs and shelves; a stone or Medallion from a person;
     the starting state's leftovers; the credits if the debug menu reaches them); 11, the Forest Temple's own
     cutscenes (D15). The other 10 stone and Medallion cutscenes stay with their areas.
+46. **A placed small key says its dungeon's name in its own dungeon too** (the user, 2026-11-25: "keep name, no
+    count"). In part 9's test the named key in the Forest Temple said "You found a small key! (Forest Temple)"
+    in green and opened the next door, but no key count showed on screen; the game's own key shows the count and
+    has one text for every dungeon. So `Item_Dungeon_SmallKey@<dungeon>` is the named key everywhere, counted by
+    our own step. (The game's own key, `Item_Dungeon_SmallKey` without a dungeon, is still placed as it is.)
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".

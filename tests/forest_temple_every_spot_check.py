@@ -192,8 +192,8 @@ def main(romfs):
         def want(cid, item):
             """what the check's object should name"""
             kind = kinds[cid]
-            if item == KEY:                            # in its own dungeon: the game's own key (decision 41)
-                return once_items.plain_name(dungeon_keys.KEY_ITEM)
+            if item == KEY:                            # in its own dungeon: the named key (decision 46)
+                return dungeon_keys.name(AREA, 'once', True)
             if item == BOSS_KEY:
                 return dungeon_items.name('Item_Dungeon_BossKey', AREA, 'once')
             what = ground_items.kind_of(plain, item)

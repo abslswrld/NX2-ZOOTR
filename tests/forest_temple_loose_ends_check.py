@@ -8,8 +8,11 @@
   bags; an item the cutscene cannot show (a heart) leaves those steps out, so nothing floats down.
 - An upgrade family in a big chest: the chest becomes the game's checking chest, a small chest at the same spot
   (the checking chest's AI asks for a sensor body the big chest does not have).
-- A small key with the dungeon's name in its own dungeon (Item_Dungeon_SmallKey@ForestTemple+name): the named
-  key, counted by our own step, instead of the game's own key (which has one text for every dungeon).
+- A small key with the dungeon's name in its own dungeon (Item_Dungeon_SmallKey@ForestTemple, with or without
+  +name): the named key, counted by our own step, instead of the game's own key (which has one text for every
+  dungeon). Passed in game 2026-11-25; the user chose the name over the count on screen (decision 46).
+- A big chest made small loses its kept opening event when that is only the big chest's opening (the map's
+  chest played the big chest's opening in game).
 
 Three builds, each read back from the mod folder. Only reads the game; the builds go to a temporary folder that
 is removed again.
@@ -198,8 +201,15 @@ def main(romfs):
                       dyn(pot).get('Drop__DropActor') == once and dyn(well).get('Drop__DropActor') == chest
                       and str(dyn(well).get(build_mod.TBOX_EVENT_KEY, '')).startswith('NX2_TBoxKey_' + AREA)
                       and once in info and chest in info, (dyn(pot), dyn(well)))
-        good &= check('  a key without the name in its own temple is still the game\'s own key (decision 41)',
-                      dyn(entrance).get('Drop__DropActor') == dungeon_keys.KEY_ITEM, dyn(entrance))
+        good &= check('  without +name too (decision 46): the named key with its opening event',
+                      dyn(entrance).get('Drop__DropActor') == chest
+                      and str(dyn(entrance).get(build_mod.TBOX_EVENT_KEY, '')).startswith('NX2_TBoxKey_' + AREA),
+                      dyn(entrance))
+        good &= check('  the map\'s chest made small loses ForesetTemple_GetMap (the big chest\'s opening), the Bow\'s '
+                      'its ForestTemple_GetBow (as before)',
+                      spot('FT_EAST_COURTYARD_CHEST')[0].get('Dynamic', {}).get('GetEventName') == 'ForesetTemple_GetMap'
+                      and 'GetEventName' not in dyn(spot('FT_EAST_COURTYARD_CHEST')[1])
+                      and 'GetEventName' not in dyn(spot('FT_BOW_CHEST')[1]))
 
         # ---- one item, and an item the cutscene cannot show
         fc = flow_of('rupee')

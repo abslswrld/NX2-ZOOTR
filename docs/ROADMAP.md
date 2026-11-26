@@ -224,11 +224,18 @@ Parts, in order:
    family, nothing for a heart); a family in a big chest makes it the game's checking chest, a small chest at
    the same spot (the game has no big one); `Item_Dungeon_SmallKey@ForestTemple+name` in the temple is the
    named key. `tests/forest_temple_loose_ends_check.py`.
+   **In game 2026-11-25:** all passed: the Longshot floated down in Saria's cutscene and was given, the Bow's
+   big chest gave the Gold Scale as a small chest, the map's the bigger Bomb Bag, the named key said "(Forest
+   Temple)" and opened a door (no count on screen; the user kept the name: D46). **Fixed after:** the map's
+   chest made small still played the big chest's opening (its kept event goes now; to see once more).
+   **Found, for part 10:** the Fairy Bow alone in a pot came without its quiver (a first weapon alone on the
+   ground, a pot, a rock, a bush or a Gold Skulltula gets no bag).
 10. **Kokiri Forest and its neighbours** (one round on a new file, child): a small key, the boss key, the map
    or the compass on a person's gift, a scrub and a shop shelf; a stone or a Medallion given by a person; the
    starting state's leftovers (hearts and rupees, items the game files under another name: Fairy Slingshot,
    Fairy Bow, the gauntlets; a chest open from the start). If Longshot's debug menu can start the staff roll,
-   one line for the credits' colours (decision 40).
+   one line for the credits' colours (decision 40). Proposed from part 9: the Fairy Bow or Fairy Slingshot
+   placed alone on the ground, in a pot, a rock or a bush, or on a Gold Skulltula, given with its bag.
 11. **The Forest Temple's own cutscenes** (D15; rule 4 of "an area is done"): skippable or shortened, from the
    cutscene list; in game, what the game's own skip keeps and how long a flowchart cutscene really runs.
 
