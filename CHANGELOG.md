@@ -2,6 +2,17 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-26
+
+### Phase 1, part 12: the retest passed
+The user's answers (new file, child):
+- **The shelves' look:** the boss key and the compass stand on their shelves, not in them; the map stands on
+  its shelf and does not float; the small key looks as before. The three lifts (0.22, 0.13, 0.20 m) are right.
+- **A key from a shelf counts:** with only the small key bought in the Kokiri Shop, the first locked door of
+  the Forest Temple opened. So the sale flow's step runs for the key as it does for the boss key, the map and
+  the compass.
+Part 12 has passed in game: a dungeon's small key, boss key, map and compass on a shop shelf.
+
 ## 2026-11-25
 
 ### Phase 1, part 12: in-game results; the boss key, the compass and the map lifted on the shelf

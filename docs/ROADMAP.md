@@ -293,6 +293,8 @@ Parts, in order:
    in the temple was left blank). **Fixed after:** the boss key and the compass sat in the shelf. Their poses
    are centred on the shelf point, and so is the map's: lifted 0.22, 0.13 and 0.20 m (`SHELF_LIFT`, measured
    on the models as the Hookshot's was). To see once more.
+   **Retest in game 2026-11-26: passed.** The boss key, the compass and the map stand on their shelves, the
+   small key as before; with only the key from the shop the first locked door of the Forest Temple opened.
 
 Left with their areas: the other 10 cutscenes that show a stone or a Medallion (each plays after its own
 dungeon's boss), and the credits if the debug menu cannot start them.
