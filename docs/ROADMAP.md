@@ -333,6 +333,38 @@ tests only what is new.
 - Inside the Deku Tree (39 spots, 18 of them bushes) with Gohma's heart and the reward.
 - **Milestone M2:** the forest region and the Deku Tree are done.
 
+Parts, in order (added 2026-11-26, the user: "Yes"; D49). Where the forest stood that day: Kokiri Forest 120
+checks, all with IDs, no every-spot build script; Lost Woods 22 map spots (9 bushes, 5 scrubs, 3 Gold
+Skulltulas, 3 boulders, 1 chest, 1 gossip stone) and 5 event checks, none with an ID; Sacred Grove
+(`SacredForestMeadow`) 14 map spots (7 bushes, 4 gossip stones, 2 chests, 1 Gold Skulltula) and 2 event
+checks, none with an ID; Inside the Deku Tree no data yet.
+1. **Shop families, a trial:** one Kokiri Shop shelf, one pair (Silver Scale > Gold Scale), in game. Part 12
+   of phase 1 found that a sale runs through the shops' shared flow (`DisplayShop`), so the level can be
+   chosen there. If it fails, it comes back to the user as a decision.
+   **Built 2026-11-26, to test in game** (`tests/shop_family_check.py`): `SHELF=First>Second` (pairs only).
+   The shelf is First's shop version, sold once. The sale flow keeps the picked item's name in
+   `Shop_SelectItemName` and uses it for its "can Link carry it" question, the buy line, the get window and
+   the sound; so when Link has First, Second's name is written there before that question (two frames' wait,
+   as the scrubs' pairs do), and in front of each of the five steps that put the shelf's item in the inventory
+   Second is added in its place. **Known before the test:** the shelf itself is one actor, so it shows First's
+   model on the shelf and held up, whichever level it sells. The test build has the pair on two shelves, so
+   one file sees both levels.
+2. **Shop families, the rest** (only if part 1 passes): a three-level family, one family on two shelves, and
+   the setting for how many shelves per shop are randomized (D37).
+3. **Kokiri Forest closed out:** its every-spot build script, the Kokiri Forest exit setting (D14: closed until
+   the Deku Tree / open), and the check that its cutscenes can be skipped (D48).
+4. **Lost Woods, the map spots:** check IDs, regions and rules for the 22 spots, the every-spot script, an
+   in-game round. A boulder is a kind the builder does not place an item in yet.
+5. **Lost Woods, the five event checks** (the Skull Kid, the ocarina memory game, the target practice, the Deku
+   Theater twice): each one's hand-over found in the game's flows, then in game. The target practice gives a
+   seed bag upgrade (the family rule). May be played in one round with part 4.
+6. **Sacred Grove:** check IDs, regions and rules for the 14 spots, Saria's song and Sheik's song, the
+   every-spot script, an in-game round.
+7. **Inside the Deku Tree, the spots:** check IDs, regions and rules for the 39 spots, the every-spot script,
+   an in-game round (the debug menu's warp).
+8. **Inside the Deku Tree, the end:** Gohma's heart, the Kokiri Emerald as the reward, the map and compass
+   settings in a second dungeon, and the check that its cutscenes can be skipped (D48).
+
 ### Phase 3: The child-era world, in game order
 Each overworld area is done for both ages when first reached.
 - Hyrule Field with Lake Hylia and Lon Lon Ranch (109 spots, 11 Gold Skulltulas; the biggest overworld area).

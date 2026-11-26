@@ -59,6 +59,7 @@ STEPS = [
     ('forest_temple_loose_ends_check', 'Forest Temple loose ends check (Medallion family, big chests, named keys)'),
     ('kokiri_neighbours_check', 'Kokiri Forest and neighbours check (start leftovers, lone weapons, keys from people)'),
     ('shop_shelf_keys_check', 'Dungeon keys, boss key, map and compass on a shop shelf check'),
+    ('shop_family_check', 'Upgrade pair on a shop shelf check'),
     ('cutscene_list_check', 'Timeline reader and cutscene list check'),
     ('roundtrip', 'Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence)'),
 ]
@@ -74,7 +75,7 @@ SECONDS = {'ground_lift_check': 114, 'roundtrip': 103, 'families_check': 70, 'sk
            'forest_temple_items_check': 26, 'ocarina_fix_check': 19,
            'start_state_check': 10, 'chest_check': 8, 'three_chest_check': 7, 'forest_temple_keys_check': 6,
            'gift_check': 6, 'ground_prog_check': 5, 'kokiri_neighbours_check': 25,
-           'shop_shelf_keys_check': 15}
+           'shop_shelf_keys_check': 15, 'shop_family_check': 15}
 
 
 def mmss(s):

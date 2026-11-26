@@ -4,6 +4,42 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-26
 
+### Phase 2, part 1: an upgrade pair on a shop shelf, a trial (to test in game)
+Branch `claude/shop-families-trial`. Phase 2's eight parts are in the roadmap since today (decision 49). Test
+build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **`SHELF=First>Second` on a shop shelf** (pairs only; three levels are refused until part 2). It was the one
+  place a family could not go (decision 9: "unproven"). The earlier research (2026-11-23) saw three ways, each
+  with a cost: more placements in the map, a "sold out" flag, or taking an item back after the sale. Part 12
+  of phase 1 found what makes a fourth way possible: the sale is an event, and the flow keeps the picked
+  item's name in the saved string `Shop_SelectItemName`.
+- **How it works** (`shop_family_edit`, read back by `shop_family_check`; the shelf is First's shop version,
+  sold once, as any item on a shelf):
+  - In front of the flow's "can Link carry it" question: "is the item First?" -> "Link has First?" (the game's
+    inventory question, `PouchSystemActor.EventQueryIsExistInPouch`) -> yes: Second's name is written into
+    `Shop_SelectItemName` (`GameDataActor.EventTriggerSetGameDataString64`), two frames pass (the wait the
+    scrubs' pairs need between a write and its use), then the game's question, which now asks about Second.
+    From there the flow's buy line, its get window, its sound and its effects are Second's, since they all
+    read that name.
+  - What goes into the inventory is the shelf's own item, by one of five steps (three
+    `EventTriggerGetItemAtShop`, two `EventTriggerShopItemPutInPouch`). In front of each: "is the item
+    Second?" -> yes: Second is added (`PouchSystemActor.EventTriggerAddOrRemovePouchContent`, the step the
+    scrubs add a bag with) and the shelf's step is passed by, so First is not added a second time.
+  - A Link who has both levels is asked about by the game itself: its "can Link carry it" question then
+    names Second.
+- **Known before the test:** a shelf is one actor, so it shows First's model on the shelf and in Link's
+  hands whichever level it sells. Only the name, the texts and what Link gets follow the level.
+- **Refused:** three levels on a shelf; First alone on one shelf with its pair on another (the flow cannot
+  tell the two shelves apart); a Second that one of the game's own shelves is named as (none is today).
+- **A fault of part 10 found and fixed:** in `tools/build_mod.py` a name was used twice (`given`: the
+  assignments as given, for `--hint`, and "handed over by a person"), so a build with a dungeon's key, boss
+  key, map or compass **and** a `--hint` stopped with an error. `tests/kokiri_neighbours_check.py` now builds
+  that combination.
+- **`tests/shop_family_check.py`** (new; a row of `STEPS` and of `README.md`). `tests/pairs_more_check.py` and
+  `tests/skulltula_prog_check.py` expected a pair on a shelf to be refused: they expect three levels refused
+  instead.
+- **Tests:** the full run (`tests/run_all.py`): all 32 checks passed.
+
 ### Phase 1, part 11: the Forest Temple's cutscenes are skippable, and that is enough (decision 48)
 Nothing built. Phase 1 is complete with this (milestone M1).
 - **Read from the game's files:** the temple has 47 scenes in the cutscene list: 18 story cutscenes (16

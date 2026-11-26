@@ -57,6 +57,9 @@ BUILDS = {
                        '%s=%s' % (GROUND, BOW)],
     'rewards': CIRCLE + ['--fix', 'kokiri_shop_full_stock', '%s=Item_Stone_Forest' % GIFT,
                          '%s=Item_Medal_Water' % SCRUB, '%s=Item_Stone_Fire' % SHELF, '%s=Item_Medal_Fire' % CUTSCENE],
+    # a hint beside a dungeon's key (2026-11-26: the build stopped here, a name used twice in the builder)
+    'hint': ['%s=Item_Dungeon_SmallKey@%s' % (POT, D), '%s=Item_Boomerang' % GROUND,
+             '--hint', 'KF_NEAR_LOST_WOODS_GOSSIP=Item_Boomerang'],
 }
 REFUSED = [
     (['%s=Item_Dungeon_SmallKey@%s' % (CUTSCENE, D)], 'cutscene gift or a song'),
@@ -229,6 +232,9 @@ def main(romfs):
                       and 'adds Item_Medal_Fire' in out and 'sells Item_Medal_Water' in out
                       and any(f.startswith('Pack/Actor/%sStone_Fire' % shop_items.PREFIX) for f in files),
                       [f for f in files if 'Shop_' in f])
+
+        good &= check("hint: a gossip stone hint builds beside a dungeon key in a pot",
+                      'Boomerang' in builds['hint'][0] and dungeon_keys.name(D, 'once', True) in builds['hint'][0])
 
         short = []
         for name, (_, folder, files) in builds.items():

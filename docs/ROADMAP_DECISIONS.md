@@ -162,6 +162,10 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     automatic shortening, no removing. An area's cutscene work is to see from the cutscene list that each of
     its scenes can be skipped, and to open up one that cannot (only the opening, the title screen and the
     staff credits have the "no skip" setting; the opening is opened by `--fix skippable_opening`).
+49. **Phase 2 is worked in eight parts** (the user, 2026-11-26, to the breakdown: "Yes"): shop families as a
+    trial, then the rest of them; Kokiri Forest closed out with its exit setting; the Lost Woods' map spots,
+    then its five event checks; Sacred Grove; Inside the Deku Tree's spots, then its end. They are in the
+    roadmap under phase 2.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".
