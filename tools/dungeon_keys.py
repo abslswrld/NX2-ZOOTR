@@ -30,8 +30,10 @@ small key (the game's "dungeon Link is in" code must not run for it, in D or out
 Each has the key's model, name and get scene; its item settings are the key's with `NotPushToPouch`, no
 inventory item named, not counted; its row in PouchActorInfo says the same.
 
-In its own dungeon the key is the game's own small key (tools/build_mod.py decides by the check's map): there
-the game counts and shows it itself, exactly as it does its own (in game 2026-11-24: a dungeon's key picked up
+In its own dungeon the key is the named key too (decision 46, 2026-11-25; phase 1, part 9 in game: "You found a
+small key! (Forest Temple)", the door opened, no count on screen, and the user chose the name over the count).
+Before, it was the game's own small key (tools/build_mod.py decided by the check's map): there the game counted
+and showed it itself, exactly as it does its own (in game 2026-11-24: a dungeon's key picked up
 in its dungeon showed the count from before the key, and a chest showed none). Outside, the count on screen
 is the count of the place Link is in, so a key of another dungeon cannot show its own.
 

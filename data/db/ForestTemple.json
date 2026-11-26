@@ -877,7 +877,7 @@
    "note": null
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Ice Arrow, with no message from Navi about the Bow (its opening event removed); on 2026-11-24 a small key (counted, opened the Bow room's east door)",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Ice Arrow, with no message from Navi about the Bow (its opening event removed); on 2026-11-24 a small key (counted, opened the Bow room's east door); on 2026-11-25 (part 9) Silver > Gold Scale with the Silver Scale owned: a small chest appeared in its place and gave the Gold Scale, the door opened",
   "requirements": {
    "child": null,
    "adult": [
@@ -1122,7 +1122,7 @@
    "note": null
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Fairy Bow with its quiver and arrows (the chest's own opening event kept)",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Fairy Bow with its quiver and arrows (the chest's own opening event kept); on 2026-11-25 (part 9) the three bomb bags with the small one owned: a small chest in its place gave the bigger Bomb Bag (it still played the big chest's opening: its event ForesetTemple_GetMap now goes on a chest made small; retest in game 2026-11-25: the small chest's opening, good)",
   "requirements": {
    "child": null,
    "adult": [
@@ -1220,7 +1220,7 @@
    "note": null
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): gave the Megaton Hammer (its small key was on the Gold Skulltula)",
+  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): gave the Megaton Hammer (its small key was on the Gold Skulltula); on 2026-11-25 (part 9) the temple's own key with its name: \"(Forest Temple)\" in green, no count on screen, the next door opened",
   "requirements": {
    "child": null,
    "adult": [
@@ -1552,7 +1552,7 @@
    "note": null
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): Saria's cutscene gave the Silver Scale (\"You got a silver scale!\", with the Forest Medallion still floating above Link); kept after save and reload. The Forest Medallion itself was picked up from a pot in Kokiri Forest",
+  "randomizable_note": "changed in game on 2026-11-24 (tools/build_mod.py): Saria's cutscene gave the Silver Scale (\"You got a silver scale!\", with the Forest Medallion still floating above Link); kept after save and reload. The Forest Medallion itself was picked up from a pot in Kokiri Forest; on 2026-11-25 (part 9) the family Hookshot > Longshot with the Hookshot owned: the cutscene gave the Longshot and the Longshot floated down, not the Medallion",
   "requirements": {
    "child": null,
    "adult": [
@@ -1580,7 +1580,7 @@
   "verification_status": "not verified in game",
   "requirements_note": "the adult answer still goes through placeholder regions (not mapped yet): it will change as the world is mapped",
   "object_id_note": "no map placement (an event); its ID in the game is still to be found",
-  "notes": "the dungeon reward: the Forest Medallion, given after the boss by the cutscene Dm_Awake_Forest_Get (Saria in the Chamber of Sages): its step Event13 is a call of GetPouchContent<GetPouchContentByActorName> with Item_Medal_Forest, the get window and the item. The game loads the file Dm_Awake_Forest_Get.110.bfevfl for it (Event/EventFlow/EventFlowFileEntry). The medallion that floats down in the cutscene is an actor of the cutscene and stays"
+  "notes": "the dungeon reward: the Forest Medallion, given after the boss by the cutscene Dm_Awake_Forest_Get (Saria in the Chamber of Sages): its step Event13 is a call of GetPouchContent<GetPouchContentByActorName> with Item_Medal_Forest, the get window and the item. The game loads the file Dm_Awake_Forest_Get.110.bfevfl for it (Event/EventFlow/EventFlowFileEntry). The medallion that floats down in the cutscene is an actor of the cutscene (Item_Medal_Forest: Event39 size, Event15 bind to Dm_Locator, Event20 glitter); since phase 1, part 9 it is renamed to the item given, one actor per level of a family behind the game's inventory question, or its steps are left out for an item the cutscene cannot show (a heart)"
  },
  {
   "unique_check_id": "FT_FROZEN_EYE_SWITCH_ROOM_POT_01",
@@ -1808,7 +1808,7 @@
    "note": "random drop (DropTable_Obj_Heart)"
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Megaton Hammer (its drop table removed: only the item came out), and stayed gone after it was taken; on 2026-11-24 a small key (counted)",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Megaton Hammer (its drop table removed: only the item came out), and stayed gone after it was taken; on 2026-11-24 a small key (counted); on 2026-11-25 (part 9) the temple's own key with its name: the name shown, no count",
   "requirements": {
    "child": null,
    "adult": [
@@ -1857,7 +1857,7 @@
    "note": "no item or drop table in the map data"
   },
   "randomizable": "yes",
-  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Hover Boots (they lay slightly in the floor), and stayed gone after they were taken; on 2026-11-24 the Hover Boots again, now lying on the floor (the height fix)",
+  "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Hover Boots (they lay slightly in the floor), and stayed gone after they were taken; on 2026-11-24 the Hover Boots again, now lying on the floor (the height fix); on 2026-11-25 (part 9) the Fairy Bow, but without its quiver (a weapon alone on the ground or in a pot is built without its bag: proposed for part 10)",
   "requirements": {
    "child": null,
    "adult": [

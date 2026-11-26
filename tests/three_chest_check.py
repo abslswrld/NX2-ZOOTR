@@ -188,10 +188,14 @@ def main(romfs):
                   'scrub',
                   build_mod.three_level_parse(world, left) == {} and left == [(c, text) for c in OTHER_WAYS])
     old = plain(MIDO[0])
-    good &= check('refused: in a big chest (the Kokiri Sword chest)',
+    # a big chest becomes our chest, a small one (phase 1, part 9: the game has no big checking chest)
+    big, _, _ = build_mod.patch_file(old, {BIG[1]: ('TEST', FAMILY[0], None, 'chest')}, {BIG[1]: FAMILY[:2]},
+                                     {BIG[1]: 'BombBag'})
+    sword = [a['Gyaml'] for a in byml.loads(big).root['Actors'] if str(int(a['Hash'])) == BIG[1]]
+    good &= check('in a big chest (the Kokiri Sword chest): it becomes the family\'s chest, a small one (%s)'
+                  % (sword and sword[0]),
                   build_mod.three_level_parse(world, [(BIG[0], text)]) == {BIG[0]: FAMILY}
-                  and refused(build_mod.patch_file, old, {BIG[1]: ('TEST', FAMILY[0], None, 'chest')},
-                              {BIG[1]: FAMILY[:2]}, {BIG[1]: 'BombBag'}))
+                  and sword in (['Obj_TBox_NX2_BombBag'], ['Obj_TBox_NX2_BombBag_NoBake']))
 
     # the maps: Mido's three chests, both ages
     ok = same = True

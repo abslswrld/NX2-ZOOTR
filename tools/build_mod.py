@@ -55,7 +55,8 @@ Link has Second, else Second when Link has First, else First; only the families 
 
 Three levels go wherever a pair goes (to test in game): on a freestanding item the turning
 item has three levels (the first turns into the second, the second into the third); a gift and a Deku Scrub ask
-two questions ("has Second?" then "has First?"). Not in a big chest (it has no checking version).
+two questions ("has Second?" then "has First?"). In a big chest (to test in game) the chest becomes the
+game's checking chest, a small chest at the same spot: the game has no big checking chest (BIG_CHEST).
 The first level of the seed bags and the quivers is the weapon (Item_Range_SlingShot, Item_Range_Bow). The game's
 chests give the small bag and 30 seeds or arrows with it (the shared chest module, read by
 turn_items.first_get); only chests do. So the first level's turning item gives the same, and a gift or a scrub
@@ -77,8 +78,10 @@ that counts for the Forest Temple on the check, in the temple or outside it (too
 itself counts a key for the dungeon Link is in. On a pot, a rock, a bush, a freestanding item or a Gold Skulltula
 the key adds to the temple's key count when it is picked up (its own AI); in a chest the chest gets an opening
 event of our own around its usual one that adds to it (TBOX_KEY_FLOW). Not on gifts, scrubs or shelves yet.
-On a check of its own dungeon it is the game's own small key: the game counts and shows that one itself.
-...@ForestTemple+name (an experiment): the key's messages name the dungeon ("Small Key (Forest Temple)").
+On a check of its own dungeon too it is the named key, counted by our own step (decision 46, the user
+2026-11-25: "keep name, no count"; passed in game: the name shows, the door opens, no count on screen). The
+game's own key, Item_Dungeon_SmallKey without a dungeon, is still placed as it is (its dungeon is where Link
+uses it). ...@ForestTemple+name is still read and means the same.
 
 Gossip stone text (to test in game): --gossip STONE=TEXT (repeatable) sets what a stone says, in every language
 (English text everywhere). STONE is the stone's check ID or its name in the map. In TEXT, \\n is a new line, \\p a
@@ -212,6 +215,18 @@ CHEST_EVENTS = {
 # not "only on enter"), handing the chosen holder to the shared chest module that requests the opening event.
 CHECKING_CHEST = {'Obj_TBox_A_01': 'Obj_TBox_A_06', 'Obj_TBox_A_01_NoBake': 'Obj_TBox_A_06_NoBake'}
 PLAIN_CHEST = {v: k for k, v in CHECKING_CHEST.items()}
+# A big chest that holds a family (phase 1, part 9; to test in game) becomes the checking chest of its small
+# twin, so it is a small chest at the same spot. The game has no big checking chest, and the checking chest's
+# AI (Obj_TBox_A_06.root, made on the small chest's) cannot drive a big one: it asks for the sensor body
+# GeneralSensor/Sensor, which the big chest does not have (its physics has GeneralSensor/EnemyCheck instead,
+# and its own AI, Obj_TBox_A_02.root, 67 nodes, is another one). A chest that appears (a fight, an eye switch)
+# appears the same way: both chests' AIs play the same SpawnMagic and SpawnFall commands.
+BIG_CHEST = {'Obj_TBox_A_02': 'Obj_TBox_A_01', 'Obj_TBox_A_02_NoBake': 'Obj_TBox_A_01_NoBake'}
+# Opening events kept on a changed chest (CHEST_EVENTS 'keep') that are only the big chest's usual opening
+# (PlayDemo Dm_SY_Treasurebox): on a big chest made small they go, so the small chest plays its own opening (in
+# game 2026-11-25 the map's chest made small still played the big chest's opening with ForesetTemple_GetMap).
+# A big chest made small with a kept event not listed here stops the build: it needs a decision.
+BIG_OPENING_EVENTS = ('ForesetTemple_GetMap', 'ForesetTemple_GetCompass')
 CHECK_SETTINGS = ('Drop__CheckActor', 'Drop__DropActor_Substitute', 'Drop__CheckCondition')
 POT_TABLE_KEY = 'Drop__DropTable'                 # a pot's drop table: removed where we place an item
 # The upgrade families, declared once: name -> the levels as they are placed, lowest first (the user's list,
@@ -269,7 +284,7 @@ if any(len(levels) not in (2, 3) for levels in FAMILIES.values()) \
         or len({x for levels in FAMILIES.values() for x in levels}) != sum(len(v) for v in FAMILIES.values()):
     raise SystemExit('FAMILIES: every family has two or three levels, and no item is in two families')
 # where the progressive forms can be placed (said in messages)
-PROGRESSIVE_WHERE = ('on a small chest, a freestanding item, a rock, a bush, a pot, a Gold Skulltula, a Deku Scrub '
+PROGRESSIVE_WHERE = ('in a chest (a big one becomes a small checking chest), on a freestanding item, a rock, a bush, a pot, a Gold Skulltula, a Deku Scrub '
                      'that sells once or a gift with flow data')
 
 
@@ -278,7 +293,7 @@ def three_level_parse(world, assignments):
     (CHECK_ID, First), as a pair's; returns {check id: family}. Stops the build for a family that is not in
     THREE_LEVEL_FAMILIES, and for a check of a kind no progressive form can be put on (a shelf). A family
     on a freestanding item, a rock, a bush, a pot, a Gold Skulltula, a scrub or a gift is left as it is: sorted out
-    with the pairs (main). A big chest is refused when its map is changed (patch_file)."""
+    with the pairs (main). A big chest becomes a small one when its map is changed (patch_file, BIG_CHEST)."""
     out = {}
     for k, (cid, item) in enumerate(assignments):
         if item.count('>') != 2:
@@ -1003,6 +1018,8 @@ CUTSCENE_WINDOW = ('GetPouchContent', 'DisplayGetByActorName')
 CUTSCENE_ADD = ('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent')
 CUTSCENE_BIND = 'EventTriggerModelBind'
 CUTSCENE_SHOWN_KIND = 'item'                       # ground_items.kind_of: built on Item_EventObject_Base
+# a rupee shown in a cutscene: the version a chest holds (Obj_Rupee_Red -> TBox_Rupee_Red), built like the items
+REWARD_RUPEE = ('Obj_Rupee_', 'TBox_Rupee_')
 
 
 def plan_cutscene_gifts(world, assignments):
@@ -2385,6 +2402,16 @@ def patch_file(data, changes, checking=None, three=None, wrap=None):
             continue
         if h in changes:
             dyn = a.get('Dynamic')
+            if h in checking and a['Gyaml'] in BIG_CHEST:
+                a['Gyaml'] = BIG_CHEST[a['Gyaml']]        # a big chest: its small twin's checking chest
+                event = (dyn or {}).get('GetEventName')
+                if event is not None and CHEST_EVENTS.get(event, ('remove',))[0] == 'keep':
+                    if event not in BIG_OPENING_EVENTS:
+                        raise SystemExit('%s: big chest %s made small keeps the opening event %r: not in '
+                                         'BIG_OPENING_EVENTS yet, decide what to do with it first'
+                                         % (changes[h][0], h, event))
+                    dyn = type(dyn)(dyn)
+                    del dyn['GetEventName']               # the big chest's opening: the small chest plays its own
             if h in checking and a['Gyaml'] not in CHECKING_CHEST and a['Gyaml'] not in PLAIN_CHEST:
                 raise SystemExit('%s: placement %s is a %s: only the small chest (%s) has a checking version'
                                  % (changes[h][0], h, a['Gyaml'], ', '.join(sorted(CHECKING_CHEST))))
@@ -2601,12 +2628,15 @@ def gift_pair_edit(fc, events, template, direct=(), asked=None):
         if i is None:
             raise SystemExit('%s: event %s not in the flow' % (cid, ev))
         e = fc.events[i]
-        how = DIRECT_GET[0] if first in direct else GIFT_FLOW
+        # a gift the game itself gives with the get window (a Medallion: Dm_Awake_*_Get, see gift_edit): every
+        # level is given that way, held up or not
+        windowed = e.type == 'subflow' and (e.flowchart, e.entry) == DIRECT_GET
+        how = DIRECT_GET[0] if first in direct or windowed else GIFT_FLOW
         if e.type != 'subflow' or e.flowchart != how or not isinstance(e.params, dict) \
                 or e.params.get('ActorName') != first:
             raise SystemExit('%s: event %s is not the call that gives %s' % (cid, ev, first))
         for later in levels[1:]:
-            if (first in direct) != (later in direct):
+            if not windowed and (first in direct) != (later in direct):
                 raise SystemExit('%s: %s and %s are not given the same way (one is held up, the other only has '
                                  'the get window): not as a pair on a gift' % (cid, first, later))
             if SCRUB_COMPANIONS.get(later):
@@ -2753,6 +2783,168 @@ def gift_pair_read_back(path, before, after, events, made, template, asked=None)
         if to_q.get(name_of(before, o.main), name_of(before, o.main)) != name_of(after, p.main) \
                 or got[:len(calls)] != calls or sorted(got[len(calls):]) != sorted(extra):
             raise bad('entry point %s differs from what was intended' % p.name)
+
+# What floats down in a Medallion's cutscene (phase 1, part 9; the user, 2026-11-25: Saria's cutscene showed the
+# Forest Medallion whatever it gave). The cutscene (Dm_Awake_Forest_Get) shows the reward as an actor of its own
+# named after the item (Item_Medal_Forest), used by three steps: EventTriggerSetModelLodManual, then
+# EventTriggerModelBind to the locator that floats down (Dm_Locator), and EventTriggerEmitXLink for its glitter.
+# The game itself shows one of several items that way in Dm_LostWood_0040 (the target practice: the inventory
+# question PouchSystemActor.EventQueryIsExistInPouch on Item_BulletBag_Medium, then the LOD and the bind of
+# Item_BulletBag_Large or of Item_BulletBag_Medium, each an actor of the flow; the other is never used).
+# So: one item -> the actor is renamed to the item's (as Saria's bridge cutscene does, cutscene_gift_edit); a
+# family -> one actor per level, and in front of each run of the actor's steps the game's inventory questions
+# (level_switch), as the get itself asks them (gift_pair_edit); an item the cutscene cannot show (no actor built
+# like the others: a heart) -> those steps are left out, so nothing floats down.
+def reward_shown_runs(fc, old):
+    """(the actor index, [runs]) of the item actor `old` a cutscene shows (bound to someone with
+    EventTriggerModelBind), each run a list of its steps' event indexes one after another; None when the flow
+    has no such actor"""
+    hits = [i for i, a in enumerate(fc.actors) if a.name == old and not a.secondary]
+    if len(hits) != 1 or CUTSCENE_BIND not in fc.actors[hits[0]].actions:
+        return None
+    ai = hits[0]
+    own = [k for k, e in enumerate(fc.events) if e.type in ('action', 'switch') and e.actor == ai]
+    if any(fc.events[k].type != 'action' for k in own):
+        raise SystemExit('%s: the cutscene asks something of %s: not only shown' % (fc.name, old))
+    nexts = {fc.events[k].next for k in own}
+    runs = []
+    for head in [k for k in own if k not in nexts]:
+        run = [head]
+        while fc.events[run[-1]].next in own:
+            run.append(fc.events[run[-1]].next)
+        runs.append(run)
+    if sorted(k for r in runs for k in r) != sorted(own):
+        raise SystemExit('%s: the steps of %s go round in a circle' % (fc.name, old))
+    return ai, runs
+
+
+def reward_shown_edit(fc, cid, old, shown, gift, template, asked):
+    """the cutscene shows what it gives: shown = [(level, the actor to show or None)], one per level of the
+    family (one for an item alone); gift: the name of the event giving the item (every question goes in front
+    of it). Returns lines saying what was changed."""
+    ai, runs = reward_shown_runs(fc, old)
+    after_gift = set(fc.reachable(fc.event_index(gift)))
+    if any(r[0] in after_gift for r in runs):
+        raise SystemExit('%s: %s is shown after the cutscene gives the item' % (cid, old))
+    names = [n for _, n in shown]
+    said = []
+    if len(shown) == 1:
+        name = names[0]
+        if name is None:
+            for run in runs:
+                end = fc.events[run[-1]].next
+                if end is None and any(run[0] in e.forks or e.join == run[0] for e in fc.events):
+                    raise SystemExit('%s: %s cannot be left out (a branch of the cutscene is only its steps)'
+                                     % (cid, old))
+                fc.repoint(run[0], end)
+            fc.update_entry_points()
+            said.append('%-18s nothing floats down in the cutscene: %s has no actor the cutscene can show (%s '
+                        'left out: %s)' % (cid, shown[0][0], old, ', '.join(fc.events[k].name for r in runs
+                                                                            for k in r)))
+            return said
+        if name != old and any(a.name == name for a in fc.actors):
+            raise SystemExit('%s: the cutscene already has an actor %s' % (cid, name))
+        fc.actors[ai].name = name
+        said.append('%-18s the cutscene shows %s (its actor %s renamed)' % (cid, name, old))
+        return said
+    if None in names:
+        raise SystemExit('%s: %s: the cutscene cannot show %s' % (cid, '>'.join(l for l, _ in shown),
+                                                                  ', '.join(l for l, n in shown if n is None)))
+    if len(set(names)) != len(names) or any(n != old and any(a.name == n for a in fc.actors) for n in names):
+        raise SystemExit('%s: the levels\' actors clash with the cutscene\'s own' % cid)
+    a = fc.actors[ai]
+    a.name = names[0]
+    actors = [ai] + [fc.add_actor(n, params=evfl.Params(a.params) if a.params is not None else None,
+                                  actions=list(a.actions), queries=list(a.queries), cut=a.cut) for n in names[1:]]
+    for run in runs:
+        end = fc.events[run[-1]].next
+        heads = [run[0]]
+        for k in range(1, len(names)):
+            nxt = end
+            for i in reversed(run):
+                e = fc.events[i]
+                nxt = fc.add_action(actors[k], a.actions[e.action],
+                                    evfl.Params(e.params) if e.params is not None else None, next=nxt)
+            heads.append(nxt)
+        top, questions = level_switch(fc, [l for l, _ in shown], heads, template, asked)
+        if not fc.repoint(run[0], top, keep=questions):
+            raise SystemExit('%s: nothing leads to %s' % (cid, fc.events[run[0]].name))
+        said.append('%-18s %s: the cutscene asks %s and then runs it with %s'
+                    % (cid, ' > '.join(fc.events[i].name for i in run),
+                       ', then '.join('has %s?' % fc.events[q].params['Actor'] for q in reversed(questions)),
+                       ' or '.join(names)))
+    fc.update_entry_points()
+    return said
+
+
+def reward_shown_check(before, after, cid, old, shown, template, asked):
+    """read-back of reward_shown_edit (before: the flow it was given): every event and actor of `before` is as
+    it was but for the shown actor's name and the links to the starts of its runs; for every number of levels
+    Link may own, what leads to a run's start now reaches that level's copy of the run, with that level's actor
+    and the run's steps and parameters, leading on as the run did (an item that cannot be shown: the run is
+    skipped). Stops the build otherwise."""
+    def bad(what):
+        raise SystemExit('read-back: %s: %s' % (cid, what))
+    ai, runs = reward_shown_runs(before, old)
+    names = [n for _, n in shown]
+    levels = [l for l, _ in shown]
+    heads = {r[0]: r for r in runs}
+    name_of = lambda fc, i: None if i is None else fc.events[i].name   # noqa: E731
+    new = {e.name: k for k, e in enumerate(after.events)}
+    if any(e.name not in new for e in before.events):
+        bad('an event of the cutscene is gone')
+    if len(after.actors) != len(before.actors) + (len(names) - 1 if len(names) > 1 else 0):
+        bad('actors differ from what was intended')
+    for k, (x, y) in enumerate(zip(before.actors, after.actors)):
+        want = names[0] if k == ai and names[0] is not None else x.name
+        if (y.name, y.secondary, y.actions, y.queries, y.params) != (want, x.secondary, x.actions, x.queries,
+                                                                     x.params):
+            bad('actor %s differs from what was intended' % x.name)
+
+    def reached(i, owned):
+        return level_reached(after, i, owned, template) if len(levels) > 1 else i
+
+    def run_from(i, k, n):                             # level k's copy of a run of n steps from event i
+        steps = []
+        while len(steps) < n and i is not None and after.events[i].type == 'action'                 and after.actors[after.events[i].actor].name == names[k]:
+            steps.append(i)
+            i = after.events[i].next
+        return steps, i
+
+    for o in before.events:
+        e = after.events[new[o.name]]
+        for field in ('type', 'params', 'flowchart', 'entry', 'value'):
+            if getattr(e, field) != getattr(o, field):
+                bad('%s differs from what was intended' % o.name)
+        links_old = [o.next, o.join] + [c for _, c in o.cases] + list(o.forks)
+        links_new = [e.next, e.join] + [c for _, c in e.cases] + list(e.forks)
+        if len(links_old) != len(links_new):
+            bad('%s differs from what was intended' % o.name)
+        for lo, ln in zip(links_old, links_new):
+            if lo not in heads:
+                if name_of(before, lo) != name_of(after, ln):
+                    bad('%s leads on differently' % o.name)
+                continue
+            run, end = heads[lo], name_of(before, before.events[heads[lo][-1]].next)
+            for k in range(len(levels)):
+                at = reached(ln, set(asked(x) for x in levels[:k]))
+                if names[k] is None:
+                    if name_of(after, at) != end:
+                        bad('%s: %s is not left out as intended' % (o.name, before.events[lo].name))
+                    continue
+                steps, nxt = run_from(at, k, len(run))
+                want = [(before.actors[before.events[i].actor].actions[before.events[i].action],
+                         before.events[i].params) for i in run]
+                got = [(after.actors[after.events[i].actor].actions[after.events[i].action],
+                        after.events[i].params) for i in steps]
+                if got != want or name_of(after, nxt) != end:
+                    bad('owning %s, %s is not shown with %s as intended'
+                        % (', '.join(levels[:k]) or 'nothing', before.events[lo].name, names[k]))
+    for p, o in zip(after.entry_points, before.entry_points):
+        if p.name != o.name:
+            bad('entry points differ')
+        if o.main not in heads and name_of(after, p.main) != name_of(before, o.main):
+            bad('entry point %s differs' % p.name)
 
 
 # Songs as items: their actors (Item_Melody_*) borrow the rupee model (Obj_Rupee), so a song held up, on a
@@ -4098,10 +4290,9 @@ def main(argv):
         kind = dungeon_keys.kind_for(check_kind(world, cid), cid)
         r, _, loc = find_check(world, cid)
         if {scene for scene, _, _ in world.placements_of(r, loc)} == {dungeon}:
-            # in its own dungeon: the game's own key, which the game counts and shows itself
-            print('%-18s a key of %s in %s itself: the game\'s own small key' % (cid, dungeon, dungeon))
-            assignments[k] = (cid, dungeon_keys.KEY_ITEM)
-            continue
+            # in its own dungeon too: the named key, as outside it (decision 46: the game's own key has one text
+            # for every dungeon; the named key shows no count on screen, the user's choice)
+            print('%-18s a key of %s in %s itself: the named key, counted by our own step' % (cid, dungeon, dungeon))
         assignments[k] = (cid, key_versions.setdefault((dungeon, kind, named),
                                                        dungeon_keys.name(dungeon, kind, named)))
         if named:                                      # the item its name stands for: the named chest key
@@ -4523,9 +4714,16 @@ def main(argv):
                     # the chest's check settings: a progressive pair's, or none left (an ordinary chest)
                     dyn = {k: v for k, v in dyn.items() if k not in CHECK_SETTINGS}
                     if h in checking:
-                        want['Gyaml'] = CHECKING_CHEST.get(was, was)
+                        small = BIG_CHEST.get(was, was)
+                        want['Gyaml'] = CHECKING_CHEST.get(small, small)
+                        if was in BIG_CHEST:
+                            print('%-18s   a big chest (%s): becomes a small checking chest, the game has no big one'
+                                  % (changes[h][0], was))
+                            if dyn.get('GetEventName') in BIG_OPENING_EVENTS:
+                                print('%-18s   its opening event %s goes (the big chest\'s opening): the small chest '
+                                      'plays its own' % (changes[h][0], dyn.pop('GetEventName')))
                         if h in three:
-                            twin = PLAIN_CHEST.get(was, was) != three_chest.PLAIN
+                            twin = PLAIN_CHEST.get(small, small) != three_chest.PLAIN
                             want['Gyaml'] = three_chest.chest_name(three[h], twin)
                         dyn.update(Drop__CheckActor=checking[h][0], Drop__DropActor_Substitute=checking[h][1])
                         print('%-18s   %s -> %s: gives %s while Link has no %s, then %s'
@@ -4694,6 +4892,40 @@ def main(argv):
         out.write(path, src, old, new)
         for line in said:
             print(line, '(%s)' % path.split('/')[-1])
+
+    # what floats down in a Medallion's cutscene: the item given (its actor, one per level of a family with the
+    # game's inventory questions in front), or nothing for an item the cutscene cannot show (reward_shown_edit;
+    # read back against the flow as the gift edits left it)
+    def shown_actor(item):
+        kind = ground_items.kind_of(plain, item)
+        if kind == CUTSCENE_SHOWN_KIND:
+            return item
+        if kind == 'equipment':                        # an ocarina: its held-up version, built further down
+            return grounds.setdefault((item, 'held'), ground_items.ground_name(item, 'held'))
+        if kind == 'ground' and item.startswith(REWARD_RUPEE[0]):
+            tbox = REWARD_RUPEE[1] + item[len(REWARD_RUPEE[0]):]
+            if ground_items.kind_of(plain, tbox) == CUTSCENE_SHOWN_KIND:
+                return tbox                            # a rupee: the one a chest holds
+        return None
+
+    for path, events in sorted(plan_gifts(world, assignments).items()):
+        src, old = out.read(path)
+        ef = evfl.loads(old)
+        said = []
+        for ev, (cid, item, was) in sorted(events.items()):
+            levels = gift_pairs.get(cid, (item,))
+            if levels == (was,) or reward_shown_runs(ef.flowchart, was) is None:
+                continue                               # not a cutscene that shows its item as an actor of its own
+            template = gift_pair_template(evfl.loads(plain(GIFT_PAIR_FLOW)).flowchart)
+            shown = [(lv, shown_actor(lv)) for lv in levels]
+            before = evfl.loads(flow_write_checked(ef)).flowchart
+            said += reward_shown_edit(ef.flowchart, cid, was, shown, ev, template, flow_name)
+            reward_shown_check(before, evfl.loads(flow_write_checked(ef)).flowchart, cid, was, shown, template,
+                               flow_name)
+        if said:
+            out.write(path, src, old, flow_write_checked(ef))
+            for line in said:
+                print(line, '(%s)' % path.split('/')[-1])
 
     # cutscene gifts: the item the cutscene adds, names in its window and puts in Link's hand (read back and
     # compared with the original: nothing else differs)

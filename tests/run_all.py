@@ -56,6 +56,7 @@ STEPS = [
     ('reward_spin_check', 'Stones and Medallions turn check'),
     ('reward_names_check', 'Stones\' and Medallions\' names in colour check'),
     ('forest_temple_every_spot_check', 'Forest Temple, every spot check'),
+    ('forest_temple_loose_ends_check', 'Forest Temple loose ends check (Medallion family, big chests, named keys)'),
     ('cutscene_list_check', 'Timeline reader and cutscene list check'),
     ('roundtrip', 'Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence)'),
 ]

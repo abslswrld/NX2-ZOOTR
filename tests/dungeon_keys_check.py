@@ -40,7 +40,7 @@ SAMPLE = [
     ('KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01', KEY + '@' + D),     # a Forest Temple key in a pot outside the temple
     ('KF_MIDO_CHEST_01', KEY + '@' + D),                      # and in a chest
     ('KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02', 'Obj_Dungeon_SmallKey'),   # the control: the game's own key outside
-    ('FT_ENTRANCE_GS', KEY + '@' + D),                        # in the temple itself: the game's own key
+    ('FT_ENTRANCE_GS', KEY + '@' + D),                        # in the temple itself: the named key (D46)
     ('KF_HOUSE_OF_TWINS_CHILD_POT_01', KEY + '@' + D + '+name'),   # with the temple's name in its messages
     ('KF_MIDO_CHEST_02', KEY + '@' + D + '+name'),            # and so in a chest
     ('KF_MIDO_CHEST_03', KEY + '@WaterTemple+name'),          # a name in a colour of our own (blue)
@@ -179,10 +179,10 @@ def main(romfs):
         good &= check('the sample builds; read back from the mod folder: the pot drops %s, the chest holds %s and '
                       'runs our event, the Gold Skulltula drops %s, the control pot the game\'s own key'
                       % (dungeon_keys.name(D, 'once', True), dungeon_keys.name(D, 'chest', True),
-                         'the game\'s own key (it is in its own temple)'),
+                         dungeon_keys.name(D, 'token', True) + ' (in its own temple too: decision 46)'),
                       held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once', True), None)}
                       and held['KF_MIDO_CHEST_01'] == {(dungeon_keys.name(D, 'chest', True), event)}
-                      and held['FT_ENTRANCE_GS'] == {('Obj_NX2_GS_Dungeon_SmallKey', None)}
+                      and held['FT_ENTRANCE_GS'] == {(dungeon_keys.name(D, 'token', True), None)}
                       and held['KF_HOUSE_OF_TWINS_CHILD_POT_01'] == {(dungeon_keys.name(D, 'once', True), None)}
                       and {x[0] for x in held['KF_KNOW_IT_ALL_HOUSE_CHILD_POT_02']}
                       == {'Obj_NX2_GS_Obj_Dungeon_SmallKey'}, held)
@@ -204,8 +204,7 @@ def main(romfs):
         good &= check('  the versions built are in the item table as "not put in the inventory"; the game\'s key '
                       'rows are untouched',
                       all(table[dungeon_keys.name(D, k, True)]['PouchSpecialDeal'] == dungeon_keys.NOT_PUSHED
-                          for k in ('once', 'chest')) and dict(table[KEY]) == dict(pouch[KEY])
-                      and dungeon_keys.name(D, 'token', True) not in table
+                          for k in ('once', 'chest', 'token')) and dict(table[KEY]) == dict(pouch[KEY])
                       and not any(dungeon_keys.name(D, k) in table for k in dungeon_keys.NAMES))
         info = {str(r['__RowId']): r for r in byml.loads(read(ground_items.table_path('ActorInfo'))).root}
         msg = dungeon_keys.MESSAGE_NAME % D

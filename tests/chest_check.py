@@ -104,13 +104,17 @@ def main(romfs):
                   all(set(a['Dynamic']) - {'GetEventName'} == {'Drop__CheckActor', 'Drop__DropActor',
                                                                'Drop__DropActor_Substitute'}
                       for a in byml.loads(new).root['Actors'] if str(int(a['Hash'])) in MIDO_CHESTS))
-    try:
-        build_mod.patch_file(old, {'16757992849254467386': ('TEST', PAIR[0], None, 'chest')},
-                             {'16757992849254467386': PAIR})
-        refused = False
-    except SystemExit:
-        refused = True
-    good &= check('progressive pair: refused in a big chest (the Kokiri Sword chest)', refused)
+    # a big chest (the Kokiri Sword chest) becomes the checking chest of its small twin (phase 1, part 9: the
+    # game has no big checking chest)
+    big, _, _ = build_mod.patch_file(old, {'16757992849254467386': ('TEST', PAIR[0], None, 'chest')},
+                                     {'16757992849254467386': PAIR})
+    sword = [a for a in byml.loads(big).root['Actors'] if str(int(a['Hash'])) == '16757992849254467386']
+    was = [a['Gyaml'] for a in byml.loads(old).root['Actors'] if str(int(a['Hash'])) == '16757992849254467386']
+    good &= check('progressive pair in a big chest (the Kokiri Sword chest): it becomes the game\'s checking chest, '
+                  'a small one (%s -> %s)' % (was and was[0], sword and sword[0]['Gyaml']),
+                  was and was[0] in build_mod.BIG_CHEST and len(sword) == 1
+                  and sword[0]['Gyaml'] == build_mod.CHECKING_CHEST[build_mod.BIG_CHEST[was[0]]]
+                  and dict(sword[0]['Dynamic']).get('Drop__CheckActor') == PAIR[0])
 
     # the pairs: their names, and how a chest holds them
     plain = lambda path: rd(os.path.join(romfs, *path.split('/')) + '.zs')   # noqa: E731
