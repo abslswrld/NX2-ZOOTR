@@ -245,7 +245,7 @@ def main(romfs):
         good &= check('  the boss key from the pot is named %s, its chest version, which is built too and is named '
                       'itself; its get message names the temple in the temple\'s colour (%r)' % (msg, parts),
                       info[ours(BOSS_KEY, 'once')]['ActorName'] == msg and info[msg]['ActorName'] == msg
-                      and parts == ['You found the boss key! (', (0, 3, b'\x03\x00'), 'Forest Temple',
+                      and parts == ['You found the Boss Key! (', (0, 3, b'\x03\x00'), 'Forest Temple',
                                     (0, 3, b'\xff\xff'), ')\x00']
                       and all(dungeon_items.message_name(i, D) + t in texts.texts
                               for i in dungeon_items.ITEMS for t, _ in dungeon_items.ITEMS[i][3])

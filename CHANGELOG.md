@@ -4,6 +4,19 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 10: the fourth look passed; "Boss Key" capitalised in its get text
+The user's answers: the scrub's line says "Boss Key (Forest Temple)", the whole name green, on two lines
+inside the box: good. After buying, the window says "You found the boss key! (Forest Temple)" with the
+temple's name green: good. And: "Boss Key should be capitalized in the \"You found the Boss Key! (Forest
+Temple)\" Text".
+- **Changed:** the get text of a dungeon's boss key placed by the builder is "You found the Boss Key! (%s)"
+  (`tools/dungeon_items.py`, `ITEMS`; `tests/boss_check.py` expects it). The game's own boss key, in a chest
+  of its own dungeon, keeps the game's text ("You found the boss key!"). The small key's, the map's and the
+  compass's get texts are as they were ("You found a small key!", "You found the dungeon map!", "You found
+  the compass!"): not asked for.
+- **Tests:** `boss_check`, `dungeon_keys_check` and `kokiri_neighbours_check` pass. The new text is not seen
+  in game yet.
+
 ### Phase 1, part 10: "Boss Key" capitalised and green in the scrub's line
 The user's answer to the third look: "Forest Temple" has its capital T, on two lines inside the box. And:
 "\"Boss Key\" in scrub text should be capitalized, entire item name should be Green in the scrubs text box".

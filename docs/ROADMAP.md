@@ -270,6 +270,10 @@ Parts, in order:
    name has the tag, and the scrub's line colours the name of a dungeon's key, boss key, map or compass in
    its dungeon's colour (D40's colours; any other item's name stays in the game's colour for names in talk).
    To see once more.
+   **Fourth look in game 2026-11-25: passed.** The scrub's line says "Boss Key (Forest Temple)", the whole
+   name green, on two lines inside the box; the get window after buying is right. The user: "Boss Key" should
+   be capitalised in the get window's text too: it says "You found the Boss Key! (Forest Temple)" now (the
+   game's own text for its boss key is "You found the boss key!"; not seen in game after the change).
 11. **The Forest Temple's own cutscenes** (D15; rule 4 of "an area is done"): skippable or shortened, from the
    cutscene list; in game, what the game's own skip keeps and how long a flowchart cutscene really runs.
 
