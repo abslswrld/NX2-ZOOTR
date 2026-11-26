@@ -155,6 +155,8 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     in green and opened the next door, but no key count showed on screen; the game's own key shows the count and
     has one text for every dungeon. So `Item_Dungeon_SmallKey@<dungeon>` is the named key everywhere, counted by
     our own step. (The game's own key, `Item_Dungeon_SmallKey` without a dungeon, is still placed as it is.)
+47. **A dungeon's key, boss key, map or compass on a shop shelf is its own part of phase 1, part 12, done
+    before part 11** (the user, 2026-11-25: "Shop shelf first"). It was left out of part 10 and proposed there.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".

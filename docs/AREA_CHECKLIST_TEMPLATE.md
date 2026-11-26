@@ -173,7 +173,8 @@ A kind or form here is not tested again in a later area (D27), only sampled. Add
 | The start of a new file: items kept under another name, hearts, rupees | Kokiri Forest | 2026-11-25 |
 
 Not proven yet, so tested where first met: an upgrade family on a shop shelf (D9, phase 2) or in a big chest (a
-big chest has no checking version); a dungeon's key, boss key, map or compass on a shop shelf (not built).
+big chest has no checking version); a dungeon's key, boss key, map or compass on a shop shelf (built in
+phase 1, part 12).
 
 Never asked for, because the game does not show it: **a small key count on the Map page** (the page shows the
 map, the compass and the boss key; in game 2026-11-24 and 2026-11-25). A key count is seen in a dungeon: the

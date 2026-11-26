@@ -4,6 +4,33 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 12: a dungeon's key, boss key, map or compass on a shop shelf (to test in game)
+Branch `claude/shop-shelf-dungeon-items`. The user chose this before part 11 ("Shop shelf first"; decision
+47). Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **Found: a sale is an event.** Part 10 left the shelves out because the shelf's own AI could not count a
+  key exactly once. The sale itself runs in the shops' shared flow, `Event/EventFlow/DisplayShop.bfevfl` (547
+  events): it keeps the name of the item Link picked in the saved string `Shop_SelectItemName`, asks about
+  that name itself (`GameDataActor.EventQueryIsGameDataString64`: the two tunics, the masks; 9 names), and
+  counts a sale with `Npc_EventStarter.EventTriggerAddShopItemSoldNum`, once on each of its five ways through
+  a sale. The name is the shelf's inventory name (`ActorInfo`: `Shop_Armor_Zora` is `Armor_Adult_Zora`).
+- **The shelf** (`KEY_GIVEN_KINDS` now has `shop`): a shop version, sold once, of the version a chest holds
+  (`Shop_NX2_NX2KN_ForestTemple_15_Once` for a Forest Temple key on a 15-rupee shelf). `tools/shop_items.py`
+  is unchanged: the builder hands it this build's pack and table rows of that version (`shop_read`,
+  `shop_rows`), since the game has none.
+- **The count** (`shop_key_edit`, read back by `shop_key_check`): behind each of the five steps that count a
+  sale, "is the item <that version>?" -> yes: the chests' own step (`EventTriggerAddOrSubGameDataInt` + 1 on
+  `DungeonInfo.<dungeon>.SmallKeyNum`, or `EventTriggerSetGameDataBool` on the boss key's, the map's or the
+  compass's field), then on as before; no: on as before. It is the step the gift and the scrub use, which
+  passed in game in part 10. The shelf's AI is not touched.
+- **"Can Link carry it":** before a sale the flow asks `PouchSystemActor.EventQueryCanAddToPorchByGameData`
+  (yes, no, an error). Our versions are "not put in the inventory", and what the question answers for such
+  an item is not known from the files, so the same name question stands in front of it and leads ours to its
+  "yes".
+- **`tests/shop_shelf_keys_check.py`** (new; a row of `STEPS` and of `README.md`). `tests/dungeon_keys_check.py`
+  and `tests/kokiri_neighbours_check.py` no longer expect a shelf to be refused.
+- **Tests:** the full run (`tests/run_all.py`): all 31 checks passed.
+
 ### Phase 1, part 10: the fourth look passed; "Boss Key" capitalised in its get text
 The user's answers: the scrub's line says "Boss Key (Forest Temple)", the whole name green, on two lines
 inside the box: good. After buying, the window says "You found the boss key! (Forest Temple)" with the

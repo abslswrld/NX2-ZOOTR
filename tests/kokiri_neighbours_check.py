@@ -14,7 +14,7 @@ What it checks, each on a build read back from the files written:
   pot came without its quiver).
 - A dungeon's small key, boss key, map or compass from a person (a gift with flow data) and from a Deku Scrub:
   the version a chest holds is handed over, and the chests' own step follows the get (one more on the key
-  count, or the item's field set); refused on a cutscene gift and on a shelf.
+  count, or the item's field set); refused on a cutscene gift. (On a shelf: tests/shop_shelf_keys_check.py.)
 - A stone or a Medallion from a person, a cutscene gift, a scrub and a shelf builds.
 """
 import contextlib
@@ -60,7 +60,6 @@ BUILDS = {
 }
 REFUSED = [
     (['%s=Item_Dungeon_SmallKey@%s' % (CUTSCENE, D)], 'cutscene gift or a song'),
-    (['--fix', 'kokiri_shop_full_stock', '%s=Item_Dungeon_Map@%s' % (SHELF, D)], 'cannot be put on a shop'),
     (['%s=%s' % (POT, BOW), '%s=Item_Range_Bow>Item_Quiver_Medium>Item_Quiver_Large' % GROUND],
      'the same item on two checks'),
 ]

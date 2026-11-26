@@ -84,8 +84,10 @@ event of our own around its usual one that adds to it (TBOX_KEY_FLOW). From a pe
 and from a Deku Scrub (to test in game): the key as a chest holds it, handed over as any item, and right after
 it the same step as the chest's event has (GameDataActor.EventTriggerAddOrSubGameDataInt + 1 on the dungeon's
 count; for a boss key, a map or a compass EventTriggerSetGameDataBool on its field): in the giver's own flow
-behind the get, in the scrub flow behind a successful buy (KEY_GIVEN_KINDS). Not on cutscene gifts, songs or
-shelves yet.
+behind the get, in the scrub flow behind a successful buy (KEY_GIVEN_KINDS). Not on cutscene gifts or songs
+yet. On a shop shelf (to test in game): a shop version of the version a chest holds, sold once, and the same
+step in the shops' shared sale flow, DisplayShop, behind each step that counts a sale, for the item of that
+name only (shop_key_edit).
 On a check of its own dungeon too it is the named key, counted by our own step (decision 46, the user
 2026-11-25: "keep name, no count"; passed in game: the name shows, the door opens, no count on screen). The
 game's own key, Item_Dungeon_SmallKey without a dungeon, is still placed as it is (its dungeon is where Link
@@ -690,7 +692,126 @@ KEY_SET = ('GameDataActor', 'EventTriggerSetGameDataBool')
 
 # Where a dungeon's key, boss key, map or compass is handed over by an event: the version a chest holds, and the
 # chests' step right behind the get (phase 1, part 10; to test in game)
-KEY_GIVEN_KINDS = ('gift', 'scrub')
+KEY_GIVEN_KINDS = ('gift', 'scrub', 'shop')
+# On a shop shelf (phase 1, part 12; to test in game). A sale is an event: the shopkeepers' shared flow
+# DisplayShop keeps the name of the item Link picked in the saved string Shop_SelectItemName and asks about it
+# itself (GameDataActor.EventQueryIsGameDataString64 {Value: 'Armor_Adult_Zora'}: the tunics, the masks). A sale
+# is counted by Npc_EventStarter.EventTriggerAddShopItemSoldNum, once on each of the flow's ways through a
+# sale. So behind every such step: "is the item <ours>?" -> yes: the chests' count step (key_add_step), then
+# on; no: on. The item's name there is the shelf's inventory name (the tunic shelf Shop_Armor_Zora is asked
+# about as Armor_Adult_Zora): for a shop version of ours the version a chest holds, which is named itself.
+# Before a sale the flow asks whether Link can carry the item (PouchSystemActor.EventQueryCanAddToPorchByGameData:
+# 0 yes, 1 no, 2 an error). Our versions are "not put in the inventory", and what the question answers for
+# such an item is not known, so the same name question stands in front of it and leads ours to "yes".
+SHOP_SALE_FLOW = 'Event/EventFlow/DisplayShop.bfevfl'
+SHOP_ITEM_VAR = 'Shop_SelectItemName'
+SHOP_SOLD = ('Npc_EventStarter', 'EventTriggerAddShopItemSoldNum')
+SHOP_CAN_ADD = ('PouchSystemActor', 'EventQueryCanAddToPorchByGameData')
+SHOP_NAME_QUERY = ('GameDataActor', 'EventQueryIsGameDataString64')
+
+
+def shop_flow_parts(fc):
+    """what shop_key_edit builds on, each found by what it is: (the steps that count a sale, the "can Link
+    carry it" question with three different answers, the game's own name question's parameters)"""
+    by = fc.events
+    sold = [i for i, e in enumerate(by) if e.type == 'action' and fc.actors[e.actor].name == SHOP_SOLD[0]
+            and _action_name(fc, e) == SHOP_SOLD[1] and e.next is not None]
+    can = [i for i, e in enumerate(by) if e.type == 'switch' and fc.actors[e.actor].name == SHOP_CAN_ADD[0]
+           and fc.actors[e.actor].queries[e.query] == SHOP_CAN_ADD[1] and isinstance(e.params, dict)
+           and e.params.get('GameDataForActorName') == SHOP_ITEM_VAR
+           and sorted(v for v, _ in e.cases) == [0, 1, 2] and len({t for _, t in e.cases}) == 3]
+    names = [e for e in by if e.type == 'switch' and fc.actors[e.actor].name == SHOP_NAME_QUERY[0]
+             and fc.actors[e.actor].queries[e.query] == SHOP_NAME_QUERY[1] and isinstance(e.params, dict)
+             and sorted(e.params) == ['GameDataName', 'Index', 'Value'] and e.params['GameDataName'] == SHOP_ITEM_VAR
+             and e.params['Index'] == -1 and sorted(v for v, _ in e.cases) == [0, 1]]
+    if not sold or len(sold) != sum(1 for e in by if _action_name(fc, e) == SHOP_SOLD[1]) or len(can) != 1 \
+            or not names:
+        raise SystemExit('%s: its sale steps, its "can Link carry it" question or its name question are not as '
+                         'expected (game files differ from what this was made for)' % SHOP_SALE_FLOW)
+    return sold, can[0], names[0].params
+
+
+def shop_key_edit(fc, sales):
+    """sales: {the name the shop asks about: the steps to run when that item is sold (key_add_step)}. Behind
+    every step that counts a sale: the name question, yes (0) -> the steps, then on as before. In front of the
+    "can Link carry it" question: the name question, yes -> that question's own "yes". Returns lines saying
+    what was changed."""
+    sold, can, name_params = shop_flow_parts(fc)
+    by, said, head = fc.events, [], can
+    yes = dict(by[can].cases)[0]
+    for item, steps in sorted(sales.items()):
+        ask = evfl.Params(name_params)
+        ask['Value'] = item
+        new = []
+        for i in sold:
+            nxt = by[i].next
+            sw = fc.add_switch(SHOP_NAME_QUERY[0], SHOP_NAME_QUERY[1], [(0, sync_steps(fc, steps, nxt)), (1, nxt)],
+                               evfl.Params(ask))
+            by[i].next = sw
+            new.append(by[sw].name)
+        sw = fc.add_switch(SHOP_NAME_QUERY[0], SHOP_NAME_QUERY[1], [(0, yes), (1, head)], evfl.Params(ask))
+        if fc.repoint(head, sw, keep=(sw,)) < 1:
+            raise SystemExit('%s: nothing led to its "can Link carry it" question' % SHOP_SALE_FLOW)
+        head = sw
+        said.append('%s: behind each of the %d steps that count a sale (%s): %s; and Link can always carry it '
+                    '(%s in front of %s)' % (item, len(sold), ', '.join(new), ', '.join(
+                        '%s.%s %s' % (a.name, n, dict(p)) for a, n, p in steps), by[sw].name, by[can].name))
+    fc.update_entry_points()
+    return said
+
+
+def shop_key_check(orig, back, sales):
+    """the shop flow read back against the game's: its own events are as they were but for where the sale
+    steps and the "can Link carry it" question are led to; behind each sale step every item's name question
+    with its steps, leading on as before. Stops the build otherwise."""
+    def fail(what):
+        raise SystemExit('read-back: %s: %s' % (SHOP_SALE_FLOW, what))
+    sold, can, name_params = shop_flow_parts(orig)
+    n0, items = len(orig.events), sorted(sales)
+    per_item = len(sold) * (1 + len(next(iter(sales.values())))) + 1 if sales else 0
+    if len(back.events) != n0 + sum(len(sold) * (1 + len(sales[i])) + 1 for i in items) or per_item < 2:
+        fail('%d events, expected %d' % (len(back.events), n0 + per_item * len(items)))
+
+    def asks(e, item):
+        return e.type == 'switch' and back.actors[e.actor].name == SHOP_NAME_QUERY[0] \
+            and back.actors[e.actor].queries[e.query] == SHOP_NAME_QUERY[1] \
+            and dict(e.params) == dict(name_params, Value=item) and sorted(v for v, _ in e.cases) == [0, 1]
+
+    def first_own(i):
+        """the first of the game's own events reached from event `i` by "no" answers of our questions"""
+        while i is not None and i >= n0:
+            i = dict(back.events[i].cases).get(1)
+        return i
+
+    for i, (o, b) in enumerate(zip(orig.events, back.events)):
+        if (o.type, o.name, o.params, o.flowchart, o.entry) != (b.type, b.name, b.params, b.flowchart, b.entry) \
+                or [first_own(x) for x in _flow_links(b)] != _flow_links(o):
+            fail('the game\'s event %s changed otherwise than intended' % o.name)
+        if i in sold:
+            at = b.next
+            for item in reversed(items):               # the last item's question stands first
+                q = back.events[at]
+                if at < n0 or not asks(q, item):
+                    fail('behind %s: no name question for %s' % (o.name, item))
+                step = dict(q.cases)[0]
+                for actor, action, params in sales[item]:
+                    e = back.events[step]
+                    if step < n0 or e.type != 'action' or (back.actors[e.actor].name, _action_name(back, e)) \
+                            != (actor.name, action) or dict(e.params) != dict(params):
+                        fail('behind %s: the steps for %s are not as intended' % (o.name, item))
+                    step = e.next
+                if step != dict(q.cases)[1]:        # on to the next question, or as the sale did
+                    fail('behind %s: the steps for %s do not lead on as the sale did' % (o.name, item))
+                at = dict(q.cases)[1]
+            if at != o.next:
+                fail('behind %s: "no" does not lead on as the sale did' % o.name)
+    yes = dict(orig.events[can].cases)[0]
+    heads = [i for i in range(n0, len(back.events)) if dict(back.events[i].cases).get(0) == yes
+             and back.events[i].type == 'switch']
+    if sorted(dict(back.events[i].params)['Value'] for i in heads) != items \
+            or any(not asks(back.events[i], dict(back.events[i].params)['Value']) for i in heads) \
+            or sorted(first_own(dict(back.events[i].cases)[1]) for i in heads) != [can] * len(items):
+        fail('the name questions in front of "can Link carry it" are not as intended')
 
 
 def key_what_flag(what):
@@ -4353,7 +4474,8 @@ def main(argv):
 
     def key_kind(cid):
         """the kind of version a dungeon's key, boss key, map or compass is on this check, and whether it is
-        handed over by a person or a scrub (KEY_GIVEN_KINDS: what a chest holds, with the count step after)"""
+        handed over by a person, a scrub or a shop (KEY_GIVEN_KINDS: what a chest holds, with the count step
+        after; on a shelf: a shop version of it)"""
         kind = check_kind(world, cid)
         if kind not in KEY_GIVEN_KINDS:
             return dungeon_keys.kind_for(kind, cid), False
@@ -4730,9 +4852,12 @@ def main(argv):
     def on_shelf(item, shelf_actor):
         if item.startswith('Shop_'):
             return item
-        if not shop_items.can_sell(plain, item):
+        # a dungeon's key, boss key, map or compass: the game's item it is made of decides (its own pack and
+        # rows are built further down, and the shop version is made from those: shop_read)
+        made_of = dungeon_base(item)
+        if not shop_items.can_sell(plain, made_of):
             raise SystemExit('%s: cannot be put on a shop shelf' % item)
-        why = shop_items.refusal(item, table_rows)
+        why = shop_items.refusal(made_of, table_rows)
         if why:
             raise SystemExit('%s cannot be put on a shop shelf: %s' % (item, why))
         price = shop_items.price_of(table_rows, shelf_actor)
@@ -5433,11 +5558,13 @@ def main(argv):
                                                                   for x, n in bundle['gives']))
                           if bundle_for else ''))
     # a dungeon's keys (tools/dungeon_keys.py): the key's version for each kind of check it is on
+    built_packs = {}                                   # pack path -> the pack of a version built here
     for (dungeon, kind, named), name in sorted(key_versions.items()):
         got, pack, new_inner, rows, like_pack = dungeon_keys.build(dungeon, kind, plain, table_rows, model_there,
                                                                    once_src, named)
         assert got == name
         path = ground_items.pack_path(name)
+        built_packs[path] = pack
         out.write_new(path, pack, like=like_pack)
         out.add(path, pack, like_pack, plain(like_pack))
         for inner, (data, like, like_data) in sorted(new_inner.items()):
@@ -5469,6 +5596,7 @@ def main(argv):
                                                                            model_there, once_src)
         assert got == name
         path = ground_items.pack_path(name)
+        built_packs[path] = pack
         out.write_new(path, pack, like=like_pack)
         out.add(path, pack, like_pack, plain(like_pack))
         for inner, (data, like, like_data) in sorted(new_inner.items()):
@@ -5646,7 +5774,10 @@ def main(argv):
     for (item, price), name in sorted(shops.items()):
         tpl_pack_path = ground_items.pack_path(shop_items.TEMPLATE)
         tpl_pack = plain(tpl_pack_path)
-        got, pack, new_inner, rows, loose = shop_items.build(item, price, plain, table_rows, once=True)
+        # a version of ours on a shelf: its pack and its rows are this build's, not the game's
+        shop_read = lambda p: built_packs[p] if p in built_packs else plain(p)            # noqa: E731
+        shop_rows = lambda t: list(table_rows(t)) + list(new_rows.get(t, []))            # noqa: E731
+        got, pack, new_inner, rows, loose = shop_items.build(item, price, shop_read, shop_rows, once=True)
         assert got == name
         path = ground_items.pack_path(name)
         out.write_new(path, pack, like=tpl_pack_path)
@@ -5691,6 +5822,19 @@ def main(argv):
         src, old = out.read(path)
         out.write(path, src, old, ground_items.add_rows(old, rws))
         print('table %-16s %d rows added' % (t, len(rws)))
+
+    # a dungeon's key, boss key, map or compass sold on a shelf: counted in the shops' shared sale flow
+    shop_sales = {item: key_steps(key_given[cid]) for cid, item in assignments
+                  if cid in key_given and check_kind(world, cid) == 'shop'}
+    if shop_sales:
+        src, old = out.read(SHOP_SALE_FLOW)
+        ef = evfl.loads(old)
+        said = shop_key_edit(ef.flowchart, shop_sales)
+        new = flow_write_checked(ef)
+        shop_key_check(evfl.loads(old).flowchart, evfl.loads(new).flowchart, shop_sales)
+        out.write(SHOP_SALE_FLOW, src, old, new)
+        for line in said:
+            print('%-18s %s (%s)' % ('shop flow', line, SHOP_SALE_FLOW.split('/')[-1]))
 
     if a.gossip:
         gossip_build(out, a.romfs, gossip)

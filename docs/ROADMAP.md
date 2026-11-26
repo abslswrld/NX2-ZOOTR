@@ -274,8 +274,19 @@ Parts, in order:
    name green, on two lines inside the box; the get window after buying is right. The user: "Boss Key" should
    be capitalised in the get window's text too: it says "You found the Boss Key! (Forest Temple)" now (the
    game's own text for its boss key is "You found the boss key!"; not seen in game after the change).
+   **Merged 2026-11-25 (PR 44).**
 11. **The Forest Temple's own cutscenes** (D15; rule 4 of "an area is done"): skippable or shortened, from the
    cutscene list; in game, what the game's own skip keeps and how long a flowchart cutscene really runs.
+12. **A dungeon's small key, boss key, map or compass on a shop shelf** (left out of part 10; done before
+   part 11: the user, 2026-11-25, "Shop shelf first"; D47).
+   **Built 2026-11-25, to test in game** (`tests/shop_shelf_keys_check.py`). A sale turned out to be an event
+   after all: the shops' shared flow `DisplayShop` keeps the picked item's name in the saved string
+   `Shop_SelectItemName` (it asks about the tunics and the masks by it) and counts a sale with
+   `EventTriggerAddShopItemSoldNum`, in five places. So the shelf is a shop version, sold once, of the version
+   a chest holds, and behind each of those five steps stands "is it <that version>?" -> the chests' count step
+   (the one the gift and the scrub use, passed in game). The shelf's AI is not touched, so no guard is needed.
+   In front of the flow's "can Link carry it" question the same name question leads ours to "yes" (what that
+   question answers for an item that is not put in the inventory is not known).
 
 Left with their areas: the other 10 cutscenes that show a stone or a Medallion (each plays after its own
 dungeon's boss), and the credits if the debug menu cannot start them.
