@@ -265,6 +265,11 @@ Parts, in order:
    said "boss key (Forest temple)"): the dungeon's name in an item's name now has the game's own "keeps its
    capital" tag (to see once more). The staff roll: "no easy way to check", so the credits' colours stay
    with "left with their areas" below.
+   **Third look in game 2026-11-25:** "Forest Temple" has its capital T. The user: "Boss Key" should be
+   capitalised too, and the whole item name green in the scrub's box. Done: every capitalised word of such a
+   name has the tag, and the scrub's line colours the name of a dungeon's key, boss key, map or compass in
+   its dungeon's colour (D40's colours; any other item's name stays in the game's colour for names in talk).
+   To see once more.
 11. **The Forest Temple's own cutscenes** (D15; rule 4 of "an area is done"): skippable or shortened, from the
    cutscene list; in game, what the game's own skip keeps and how long a flowchart cutscene really runs.
 

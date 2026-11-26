@@ -232,8 +232,9 @@ def main(romfs):
                       and refs[dungeon_keys.name(D, 'chest')] == game_ref
                       and built['once'][3]['ActorInfo']['ActorName'] == KEY
                       and build_mod.msg_plain(texts['USen'].get(msg + '_Name', '')) == 'Small Key (Forest Temple)'
-                      and texts['USen'].get(msg + '_Name') == 'Small Key (%s)\x00' % dungeon_keys.proper('Forest Temple')
-                      and dungeon_keys.proper('Bottom of the Well').count('\x0e') == 2
+                      and texts['USen'].get(msg + '_Name') == dungeon_keys.proper('Small Key (Forest Temple)') + '\x00'
+                      and texts['USen'].get(msg + '_Name').count('\x0e') == 4
+                      and dungeon_keys.proper('Boss Key (Bottom of the Well)').count('\x0e') == 4
                       and all(msg + t in texts[lang] for lang in texts for t, _ in dungeon_keys.MESSAGES)
                       and texts['USen']['%s_Name' % KEY] == 'Small Key\x00')
         got = texts['USen'].get(msg + '_GetMessage', '')

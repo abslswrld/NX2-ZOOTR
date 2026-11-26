@@ -207,9 +207,12 @@ def main(romfs):
             bought = fc.events[sells[0].next] if len(sells) == 1 and sells[0].next is not None else None
             step = fc.events[dict(bought.cases)[0]] if bought is not None and bought.type == 'switch' \
                 and dict(bought.cases).get(0) is not None else None
-            good &= check('%s: the scrub sells %s once, and after a successful buy runs %s %s'
-                          % (build, version, action, params['GameDataName']),
+            label = build_mod.scrub_label(dungeon_keys.colour_number(dungeon_keys.COLOURS[D]))
+            good &= check('%s: the scrub sells %s once with the line %s (the name in the dungeon\'s colour), and '
+                          'after a successful buy runs %s %s' % (build, version, label, action, params['GameDataName']),
                           step is not None and bought.params.get('GameDataName') == 'ScrubBusiness_BuySuccess'
+                          and sells[0].params.get('SellerMessageId') == 'EventFlowMsg/Enemy_Event:' + label
+                          and label != build_mod.SCRUB_LABEL and label in builds[build][0]
                           and list(dict(bought.cases)) == [0] and step.type == 'action' and step.next is None
                           and fc.actors[step.actor].name == build_mod.KEY_ADD[0]
                           and fc.actors[step.actor].actions[step.action] == action and dict(step.params) == params

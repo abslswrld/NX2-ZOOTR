@@ -1313,10 +1313,25 @@ def _msg_name(name):
 # before it (Npc_Kokiri_001_Shop_Child Shop_01), colour on/off (0,3), the pause (5,0). Confirmed in game.
 # Two lines, the item's name on the first: the game does not wrap a line, and on one line a long name ran out
 # of the box (in game 2026-11-25: "Ah, the boss key (Forest temple)! It's 40 rupees. Wanna buy it?").
-SCRUB_LINE = (_msg_tag(3, 0, b'\x0f\x00\x00') + 'Ah, the ' + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(201, 15)
-              + _msg_tag(2, 3, _msg_name(SCRUB_VAR)) + _msg_tag(0, 3, b'\xff\xff') + "!\nIt's "
-              + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(2, 12, _msg_name('SimpleShop_Price')) + ' rupees'
-              + _msg_tag(0, 3, b'\xff\xff') + '.' + _msg_tag(5, 0) + ' Wanna buy it?\x00')
+# The item's name is in the colour the game gives a name in talk (number 0), or, for a dungeon's key, boss key,
+# map or compass, in its dungeon's colour (the user, 2026-11-25: "entire item name should be Green in the
+# scrubs text box"; decision 40's colours): a line of its own per colour (scrub_label), named by the sale's
+# SellerMessageId.
+SCRUB_NAME_COLOUR = 0
+
+
+def scrub_line(colour=SCRUB_NAME_COLOUR):
+    return (_msg_tag(3, 0, b'\x0f\x00\x00') + 'Ah, the ' + _msg_tag(0, 3, struct.pack('<H', colour))
+            + _msg_tag(201, 15) + _msg_tag(2, 3, _msg_name(SCRUB_VAR)) + _msg_tag(0, 3, b'\xff\xff') + "!\nIt's "
+            + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(2, 12, _msg_name('SimpleShop_Price')) + ' rupees'
+            + _msg_tag(0, 3, b'\xff\xff') + '.' + _msg_tag(5, 0) + ' Wanna buy it?\x00')
+
+
+def scrub_label(colour=SCRUB_NAME_COLOUR):
+    return SCRUB_LABEL if colour == SCRUB_NAME_COLOUR else '%s_Colour%d' % (SCRUB_LABEL, colour)
+
+
+SCRUB_LINE = scrub_line()
 
 
 # what an item needs to be usable, given with it when a scrub sells it (silently, after a successful buy: held up
@@ -1680,8 +1695,10 @@ def scrub_pair_check(fc, first, second, third=None, asked=None):
     return got
 
 
-def scrub_flow_edit(fc, sales, direct=(), sync=None, pairs=None, asked=None, after=None):
+def scrub_flow_edit(fc, sales, direct=(), sync=None, pairs=None, asked=None, after=None, labels=None):
     """sales: [(check id, new item, [(talk event, original item)])]. Every changed scrub sells its item once.
+    labels {item: the label of its sales line} for an item whose line is not the generic one (scrub_label: the
+    name in its dungeon's colour).
     after {item: steps}: steps run after a successful buy of that item (a dungeon's key: one more on its count,
     key_add_step), where what an item needs is added (SCRUB_COMPANIONS).
     direct: the items Link can't hold up (ground_items.can_hold_up); sync {item: sync steps}: see point 3.
@@ -1812,7 +1829,7 @@ def scrub_flow_edit(fc, sales, direct=(), sync=None, pairs=None, asked=None, aft
         params = evfl.Params(template.params)
         params['ActorName'] = item
         params['Price'] = price
-        params['SellerMessageId'] = 'EventFlowMsg/Enemy_Event:' + SCRUB_LABEL
+        params['SellerMessageId'] = 'EventFlowMsg/Enemy_Event:' + (labels or {}).get(item, SCRUB_LABEL)
         sell = fc.add_subflow('', SCRUB_SELL, params)
         extra = SCRUB_COMPANIONS.get(item, [])
         more = (after or {}).get(item, [])
@@ -5128,10 +5145,21 @@ def main(argv):
         src, old = out.read(SCRUB_FLOW)
         ef = evfl.loads(old)
         direct, sync = get_plan(sorted({i for _, i, _ in scrubs} | {x for p in scrub_pairs.values() for x in p}))
+        # a dungeon's key, boss key, map or compass: its name in the dungeon's colour in the scrub's line
+        scrub_colours = {}                             # item -> the number of its dungeon's colour
+        for c, i, _ in scrubs:
+            dungeon = key_given.get(c)
+            dungeon = dungeon if isinstance(dungeon, str) or dungeon is None else dungeon[1]
+            if dungeon in key_colours:
+                scrub_colours[i] = dungeon_keys.colour_number(key_colours[dungeon])
         said = scrub_flow_edit(ef.flowchart, [(c, i, [(t, w) for _, _, t, w in rows]) for c, i, rows in scrubs],
                                direct, sync, scrub_pairs, flow_name,
-                               {i: key_steps(key_given[c]) for c, i, _ in scrubs if c in key_given}) if scrubs else []
+                               {i: key_steps(key_given[c]) for c, i, _ in scrubs if c in key_given},
+                               {i: scrub_label(n) for i, n in scrub_colours.items()}) if scrubs else []
         lines = {SCRUB_LABEL: SCRUB_LINE} if scrubs else {}
+        for i, n in sorted(scrub_colours.items()):
+            lines[scrub_label(n)] = scrub_line(n)
+            said.append('%s: its line is %s: the name in its dungeon\'s colour (number %d)' % (i, scrub_label(n), n))
         if guard:
             said += seed_bag_guard(ef.flowchart)
             lines[SCRUB_NOBAG_LABEL] = SCRUB_NOBAG_LINE

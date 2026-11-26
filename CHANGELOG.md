@@ -4,6 +4,22 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 10: "Boss Key" capitalised and green in the scrub's line
+The user's answer to the third look: "Forest Temple" has its capital T, on two lines inside the box. And:
+"\"Boss Key\" in scrub text should be capitalized, entire item name should be Green in the scrubs text box".
+- **Capitals:** every capitalised word of the name of a dungeon's key, boss key, map or compass now has the
+  game's "keeps its capital" tag (201, 13), the item's own words too (`dungeon_keys.proper` on the whole
+  name): "Boss Key (Forest Temple)" stays as written when a talk line names it.
+- **Colour:** the scrub's generic line had the item's name in the colour the game gives a name in talk (number
+  0, red). For a dungeon's key, boss key, map or compass the scrub now uses a line of its own per colour
+  (`scrub_line`, `scrub_label`: `Enemy_Scrub_Business_NX2_Item_Colour<n>`, named by the sale's
+  `SellerMessageId`) with the name in its dungeon's colour (decision 40's colours: the Forest Temple's is
+  number 3, green). Any other item's line is unchanged.
+- **Tests:** `tests/kokiri_neighbours_check.py` reads the scrub's line and its colour;
+  `tests/dungeon_keys_check.py` the four tags of a name. The scripts that read the scrub flow and its lines
+  pass (`pairs_more_check`, `gossip_check`, `families_check`, `boss_check`, `hint_check`,
+  `forest_temple_keys_check`). To see in game.
+
 ### Phase 1, part 10: the retest's results, and the capital T
 The user's answers (one screenshot):
 - **The scrub's line fits its box** on two lines ("Ah, the boss key (Forest temple)!" / "It's 40 rupees. Wanna
