@@ -253,6 +253,13 @@ Parts, in order:
    **shop shelf**. A shelf is not an event: its own AI would have to count the key, and the AI's "sold out"
    side runs again in every state of the shelf, so the count needs a guard that holds exactly once; and a shop
    version would have to be built from an item of ours instead of a game item.
+   **In game 2026-11-25:** passed: 5 hearts, 50 rupees, the Fairy Slingshot with 30 seeds, the Goron Bracelet
+   from the start; the Fairy Bow alone in a pot came with 30 arrows; the pots did not come back; the Goron
+   Ruby from the shelf; the Kokiri's small key "(Forest Temple)" in green; the scrub's boss key, shown on the
+   temple's map; Saria's Fire Medallion; save and reload. **Not seen:** that the Kokiri's key counts (the Map
+   page shows no key count, as found on 2026-11-24: the checklist should not have asked for it there): to see
+   at a door of the temple. **Fixed after:** the scrub's line ran out of its box with a long name; it is on
+   two lines now (to see once more). The staff roll's line was left blank.
 11. **The Forest Temple's own cutscenes** (D15; rule 4 of "an area is done"): skippable or shortened, from the
    cutscene list; in game, what the game's own skip keeps and how long a flowchart cutscene really runs.
 

@@ -4,6 +4,32 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 10: in-game results and one fix
+The user's answers (new file, child; two screenshots):
+- **The start of a new file:** 5 hearts, 50 rupees, the Fairy Slingshot with 30 Deku Seeds (one shot: 29),
+  the Goron Bracelet in the menu. All good. The Forest Temple's map opens as a child (the place is marked as
+  visited); as an adult the page is still "???" (the adult made with the debug menu, as found on 2026-11-24).
+- **`KF_KNOW_IT_ALL_HOUSE_CHILD_POT_01`, the Fairy Bow alone:** the menu shows it with 30 arrows. Good: the
+  first weapon alone gives its bag. **`..._POT_02`, a small key of the Spirit Temple:** "(Spirit Temple)" in
+  orange. The pots did not come back after leaving the house, so neither gave its item again.
+- **`KF_KOKIRI_CHILD_SHOP_01`, the Goron Ruby:** bought for 15 rupees, its name in red, on the Key Items tab;
+  the shelf was empty after leaving and coming back.
+- **`KF_CIRCLE_KOKIRI_GIFT`, a small key of the Forest Temple:** the Kokiri gave it, "(Forest Temple)" in
+  green. **"The map shows 1 key": no key on the map.** That line of the checklist was wrong: the Map page
+  shows no key count at all (found on 2026-11-24, part 6; the page has the map, the compass and the boss
+  key). So whether the key counted is not seen yet: to see at a locked door of the temple.
+  `docs/AREA_CHECKLIST_TEMPLATE.md` now says never to ask for a key count on the Map page.
+- **`LW_NEAR_BRIDGE_SCRUB`, the Forest Temple's boss key:** sold for 40 rupees, "You found the boss key!
+  (Forest Temple)", the scrub left, and the temple's map shows the boss key. Good. **Its line ran out of the
+  box** (the screenshot: "Ah, the boss key (Forest temple)! It's 40 rupees. Wanna buy it?" on one line, wider
+  than the box). Found: the game does not wrap a line, and the generic line (`SCRUB_LINE`) was one line.
+  **Fixed:** it is two lines, as the game's own scrub lines are written ("Ah, the <item>!" / "It's <price>
+  rupees. Wanna buy it?"). To see in game.
+- **`LW_SARIA_GIFT`, the Fire Medallion:** Link held it up, its name in red, on the Key Items tab. Good.
+- **Save and reload:** good. **The staff roll:** left blank.
+- **Tests:** the scripts that read the scrub's line (`tests/pairs_more_check.py`, `tests/gossip_check.py`) and
+  `tests/kokiri_neighbours_check.py` pass.
+
 ### Phase 1, part 10: Kokiri Forest and its neighbours (to test in game)
 Branch `claude/kokiri-forest-neighbours`. Test build and checklist: `out\TEST_CHECKLIST.md`.
 

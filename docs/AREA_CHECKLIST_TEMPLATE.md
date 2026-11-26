@@ -166,6 +166,15 @@ A kind or form here is not tested again in a later area (D27), only sampled. Add
 | Boss heart | Forest Temple | 2026-11-24 |
 | A dungeon reward given by a cutscene (the Medallion) | Forest Temple (Saria's cutscene) | 2026-11-24 |
 | Upgrade families (no skipped level) | every kind above except shop shelves and big chests | phase 0 |
+| A dungeon's small key from a person (a gift with flow data) | Kokiri Forest (the Kokiri at the rock circle; the count itself not seen yet) | 2026-11-25 |
+| A dungeon's boss key from a Deku Scrub | Lost Woods (the scrub near the bridge) | 2026-11-25 |
+| A stone on a shop shelf; a Medallion from Saria's bridge cutscene | Kokiri Shop; Lost Woods (the bridge) | 2026-11-25 |
+| A first weapon alone in a pot, with its bag | Kokiri Forest (the Know-It-All Brothers' pot: the Fairy Bow) | 2026-11-25 |
+| The start of a new file: items kept under another name, hearts, rupees | Kokiri Forest | 2026-11-25 |
 
 Not proven yet, so tested where first met: an upgrade family on a shop shelf (D9, phase 2) or in a big chest (a
-big chest has no checking version); a key on a gift, a scrub or a shelf; a stone or Medallion given by a person.
+big chest has no checking version); a dungeon's key, boss key, map or compass on a shop shelf (not built).
+
+Never asked for, because the game does not show it: **a small key count on the Map page** (the page shows the
+map, the compass and the boss key; in game 2026-11-24 and 2026-11-25). A key count is seen in a dungeon: the
+pop-up when a key is picked up there, or a locked door that opens.

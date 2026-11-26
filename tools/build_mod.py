@@ -1311,8 +1311,10 @@ def _msg_name(name):
 # "Ah, the <item>! It's <price> rupees. Wanna buy it?" (English, in every language), built from the game's own
 # tags: the scrub lines' start (3,0) and price (2,12), the shop's item-name tag (2,3) with the (201,15) it has
 # before it (Npc_Kokiri_001_Shop_Child Shop_01), colour on/off (0,3), the pause (5,0). Confirmed in game.
+# Two lines, the item's name on the first: the game does not wrap a line, and on one line a long name ran out
+# of the box (in game 2026-11-25: "Ah, the boss key (Forest temple)! It's 40 rupees. Wanna buy it?").
 SCRUB_LINE = (_msg_tag(3, 0, b'\x0f\x00\x00') + 'Ah, the ' + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(201, 15)
-              + _msg_tag(2, 3, _msg_name(SCRUB_VAR)) + _msg_tag(0, 3, b'\xff\xff') + "! It's "
+              + _msg_tag(2, 3, _msg_name(SCRUB_VAR)) + _msg_tag(0, 3, b'\xff\xff') + "!\nIt's "
               + _msg_tag(0, 3, b'\x00\x00') + _msg_tag(2, 12, _msg_name('SimpleShop_Price')) + ' rupees'
               + _msg_tag(0, 3, b'\xff\xff') + '.' + _msg_tag(5, 0) + ' Wanna buy it?\x00')
 

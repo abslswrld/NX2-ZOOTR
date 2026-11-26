@@ -185,7 +185,7 @@
      -27.8
     ],
     "randomizable": "yes",
-    "randomizable_note": "changed in game on 2026-11-17 with --fix kokiri_circle_after_dungeons (tools/build_mod.py sets the ActorName of his Dm_SY_GetInEvent call): gave a gold rupee"
+    "randomizable_note": "changed in game on 2026-11-17 with --fix kokiri_circle_after_dungeons (tools/build_mod.py sets the ActorName of his Dm_SY_GetInEvent call): gave a gold rupee; on 2026-11-25 (part 10) a small key of the Forest Temple: the Kokiri gave it, \"(Forest Temple)\" in green (the count is not shown anywhere outside the temple: to see at a door of the temple)"
    },
    "KF Child Rock Circle 1": {
     "id": "KF_CIRCLE_CHILD_ROCK_01",
@@ -819,7 +819,7 @@
     "kind": "pot",
     "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee, but the pot refills on every visit"
+    "randomizable_note": "changed in game on 2026-11-16 (tools/build_mod.py, Longshot nightly-178): gave a red rupee, but the pot refills on every visit; on 2026-11-25 (part 10) the Fairy Bow alone: it came with its Quiver and 30 arrows, and the pot did not come back"
    },
    "KF Know It All House Adult Pot 1": {
     "id": "KF_KNOW_IT_ALL_HOUSE_ADULT_POT_01",
@@ -835,7 +835,7 @@
     "kind": "pot",
     "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) a small key of the Spirit Temple: \"(Spirit Temple)\" in orange, and the pot did not come back"
    },
    "KF Know It All House Adult Pot 2": {
     "id": "KF_KNOW_IT_ALL_HOUSE_ADULT_POT_02",
@@ -862,7 +862,7 @@
     "kind": "shop",
     "age": "child",
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Goron Ruby for 15 rupees: bought, its name in red, on the Key Items tab, the shelf empty after leaving and coming back"
    },
    "KF Shop Adult Item 1": {
     "id": "KF_KOKIRI_ADULT_SHOP_01",
@@ -1099,7 +1099,7 @@
      -38.2
     ],
     "randomizable": "untested",
-    "randomizable_note": "tools/build_mod.py changes it (cutscene_gift_edit, 2026-11-19); not yet changed in game"
+    "randomizable_note": "tools/build_mod.py changes it (cutscene_gift_edit, 2026-11-19); not yet changed in game; on 2026-11-25 (part 10) the Fire Medallion: Link held it up, its name in red, on the Key Items tab"
    },
    "LW Deku Scrub Near Bridge": {
     "id": "LW_NEAR_BRIDGE_SCRUB",
@@ -1113,7 +1113,7 @@
      }
     ],
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game"
+    "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Forest Temple's boss key: sold for 40 rupees, \"You found the boss key! (Forest Temple)\", the scrub left, the temple's map shows the boss key (the scrub's line ran out of its box on one line: two lines now)"
    },
    "LW Bridge Chest": {
     "id": "LW_BRIDGE_CHEST",
