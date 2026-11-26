@@ -379,6 +379,13 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    `Shop_SoldNum.<shopkeeper>.<number>`) is no longer reset when the shops restock. **Not known from the
    files:** whether the second object appears at once or only when the area is loaded again; whether the
    shopkeeper names and prices the twin right (his list names the first object for that shelf).
+   **In game 2026-11-26: failed.** With the pair on two shelves the shop's cursor would not go onto either of
+   them, and since they are the two shelves next to the Recovery Heart it could not leave the top left; the
+   shop could be left. Why is not in the game's files. **A diagnostic build** (not a candidate; built with
+   a temporary change that is not in the repository) has one arrangement per shelf: an ordinary item with the
+   sold count kept; a shelf with the `Presence` setting and no twin; the twin as built; the twin linked from
+   the shopkeeper before the shelf; the twin not linked from the shopkeeper. A Silver Scale in Mido's first
+   chest switches them over.
 3. **Shop families, the rest:** a three-level family, one family on two shelves, and the setting for how many
    shelves per shop are randomized (D37).
 4. **Kokiri Forest closed out:** its every-spot build script, the Kokiri Forest exit setting (D14: closed until

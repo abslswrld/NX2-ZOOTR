@@ -4,6 +4,20 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-26
 
+### Phase 2, part 2: the two-object shelf failed in game; a diagnostic build
+- **In game (the user):** "i cannot move my cursor to either scale. and the cursor starts in the top left so
+  its stuck there. i can leave the menu tho." The pair was on `KF_KOKIRI_CHILD_SHOP_01` and `_02`, the two
+  shelves beside the Recovery Heart, so the cursor could go nowhere. The game did not stop.
+- **Not known why.** What the build changed on those shelves: a `Presence` setting on the shelf, a second
+  placement with the same shelf number, the shopkeeper's links to it (`ForSale`, `Reference`), and the sold
+  count's reset type. The game's own shelves placed by a flag (the Happy Mask Shop's masks, the Kokiri
+  Shop's two sets) each have a shelf number of their own under their shopkeeper.
+- **A diagnostic build, to tell which of those the shop refuses** (made with a temporary change to the
+  builder that is not committed; `out\TEST_CHECKLIST.md`): shelf 1 a Boomerang with its sold count kept;
+  shelf 2 a Silver Scale with the `Presence` setting and no twin; shelf 3 the twin as built; shelf 4 the twin
+  linked from the shopkeeper in front of the shelf; shelf 5 the twin not linked from the shopkeeper. Mido's
+  first chest holds a Silver Scale, to switch the shelves over.
+
 ### Phase 2, part 2: a family shelf that looks like the level it sells (to test in game)
 Branch `claude/shop-families-look`. Decision 50. Test build and checklist: `out\TEST_CHECKLIST.md`.
 
