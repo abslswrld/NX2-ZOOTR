@@ -260,6 +260,35 @@ def main(romfs):
           all(not any(n.startswith(KEY) for n in alt) for alt in req['FT_ENTRANCE_CHEST']['adult'])
           and all(KEY in alt for alt in req['FT_LOBBY_POT_01']['adult']))
 
+    # ---- the temple's cutscenes (phase 1, part 11; decision 48: the game's own skip is enough). Every scene
+    # the cutscene list has for the temple must be one the game lets the player skip: its settings list, with
+    # the lists it inherits from, has no SkipSetting (the only one in the game is DisableSkip)
+    listed = json.load(open(os.path.join(ROOT, 'data', 'cutscenes.json'), encoding='utf-8'))['cutscenes']
+    scenes = [c for c in listed if c.get('area') == AREA]
+    kinds = collections.Counter(c['class'] for c in scenes)
+    event_rows = {r['__RowId']: r for r in byml.loads(zstd.decompress(open(os.path.join(
+        romfs, 'RSDB', 'EventSetting.Product.111.rstbl.byml.zs'), 'rb').read(), dicts)).root}
+    lists = os.path.join(romfs, 'Event', 'EventSetting', 'EventSettingComponentList')
+    files = {fn.split('.')[0]: fn for fn in os.listdir(lists)}
+
+    def components(name, depth=0):
+        data = open(os.path.join(lists, files[name]), 'rb').read()
+        doc = byml.loads(zstd.decompress(data, dicts) if files[name].endswith('.zs') else data).root
+        out = components(str(doc['$parent']).split('/')[-1].split('.')[0], depth + 1) \
+            if doc.get('$parent') and depth < 8 else {}
+        out.update(doc.get('Components') or {})
+        return out
+
+    no_skip = sorted(c['name'] for c in scenes if 'SkipSetting' in components(
+        str(event_rows[c['name']]['EventSettingComponentList']).split('/')[-1].split('.')[0]))
+    check('the temple has %d scenes in the cutscene list (%s) and every one can be skipped with the game\'s own '
+          'skip: none has the "no skip" setting'
+          % (len(scenes), ', '.join('%d %s' % (n, k) for k, n in sorted(kinds.items()))),
+          dict(kinds) == {'story': 18, 'lead-in': 9, 'small': 19, 'system': 1} and not no_skip
+          and all(c['can_skip'] for c in scenes), no_skip)
+    check('  in the whole game only the opening, the title screen and the staff credits cannot be skipped',
+          sorted({c['name'].split('_')[1] for c in listed if not c['can_skip']}) == ['Kokiri', 'StaffCredit', 'Title'])
+
     print('\n%s' % ('ALL OK' if all(results) else '%d FAILED' % results.count(False)))
     return 0 if all(results) else 1
 

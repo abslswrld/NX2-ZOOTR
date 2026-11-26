@@ -67,7 +67,7 @@ Each area's settings and cutscenes are built with the area, so nothing is left o
 | Zora's Fountain: closed / adult / both (D14) | Zora's Domain and Fountain |
 | Gerudo Fortress: four / one / open (D14) | Gerudo Fortress |
 | Rainbow Bridge (D12); Ganon's Boss Key (D13); Light Arrow cutscene | Ganon's Castle (last) |
-| Cutscenes skippable / shortened (D15) | Each area its own scenes, from the cutscene list (phase 1) |
+| Cutscenes skippable (D15; D48: the game's own skip is enough, nothing is shortened or removed) | Each area its own scenes, from the cutscene list: every one must be skippable |
 
 ## How a phase is worked: in parts (D38)
 - **One part = one test round:** one build, one short checklist, one sitting of in-game tests.
@@ -277,6 +277,12 @@ Parts, in order:
    **Merged 2026-11-25 (PR 44).**
 11. **The Forest Temple's own cutscenes** (D15; rule 4 of "an area is done"): skippable or shortened, from the
    cutscene list; in game, what the game's own skip keeps and how long a flowchart cutscene really runs.
+   **Done 2026-11-26, with nothing built (D48).** Read from the game's files: every one of the temple's 47
+   scenes in the cutscene list (18 story cutscenes, 9 lead-in events, 19 small scenes, 1 system scene) can be
+   skipped with the game's own skip; none has the "no skip" setting. The user: "If the cutscenes are already
+   skippable then we are good to go". `tests/forest_temple_check.py` now fails if one of them ever gets that
+   setting. **Not done, by that decision:** shortening or removing a scene, and the in-game round (what the
+   skip keeps of each scene was not played through; how long a flowchart cutscene runs was not measured).
 12. **A dungeon's small key, boss key, map or compass on a shop shelf** (left out of part 10; done before
    part 11: the user, 2026-11-25, "Shop shelf first"; D47).
    **Built 2026-11-25, to test in game** (`tests/shop_shelf_keys_check.py`). A sale turned out to be an event
@@ -317,6 +323,7 @@ tests only what is new.
 (The debug-menu warp was checked on 2026-11-23: it leaves the temple untouched.)
 
 - **Milestone M1:** the Forest Temple is done, and the dungeon-item settings work in one dungeon.
+  **Reached 2026-11-26:** parts 1 to 12 are done.
 
 ### Phase 2: Finish the forest, and the Deku Tree
 - **Shop families** (D9, the one unproven method), first: one shelf, one pair, in game. If it fails, it comes back

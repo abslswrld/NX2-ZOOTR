@@ -4,6 +4,24 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-26
 
+### Phase 1, part 11: the Forest Temple's cutscenes are skippable, and that is enough (decision 48)
+Nothing built. Phase 1 is complete with this (milestone M1).
+- **Read from the game's files:** the temple has 47 scenes in the cutscene list: 18 story cutscenes (16
+  flowcharts, 2 timelines: Phantom Ganon's entrance, 41.8 s, and his defeat, 1 min 32 s), 9 lead-in events,
+  19 small scenes and 1 system scene. None has the "no skip" setting (`SkipSetting`: `DisableSkip`, the only
+  skip setting in the game) in its settings list or the lists that one inherits from. In the whole game only
+  the opening, the title screen and the staff credits have it. The 16 flowcharts have no skip steps of their
+  own; the event that runs each of the two timelines asks afterwards whether it was skipped
+  (`EventQueryIsEventSkipedMostRecent`) and has a branch of its own for that. No setting skips a cutscene by
+  itself.
+- **The user's decision (decision 48):** "If the cutscenes are already skippable then we are good to go". The
+  game's own skip is enough for decision 15; nothing is shortened or removed, here or in later areas.
+- **`tests/forest_temple_check.py`:** two new checks: every one of the temple's 47 scenes can be skipped (read
+  from the game's settings lists, and the cutscene list says the same); only those three kinds of scene in
+  the game cannot.
+- **Not done:** no in-game round. What the game's skip keeps of each scene was not played through, and how
+  long a flowchart cutscene really runs was not measured.
+
 ### Phase 1, part 12: the retest passed
 The user's answers (new file, child):
 - **The shelves' look:** the boss key and the compass stand on their shelves, not in them; the map stands on

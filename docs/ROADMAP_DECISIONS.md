@@ -157,12 +157,18 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     our own step. (The game's own key, `Item_Dungeon_SmallKey` without a dungeon, is still placed as it is.)
 47. **A dungeon's key, boss key, map or compass on a shop shelf is its own part of phase 1, part 12, done
     before part 11** (the user, 2026-11-25: "Shop shelf first"). It was left out of part 10 and proposed there.
+48. **For cutscenes (D15), the game's own skip is enough** (the user, 2026-11-26: "If the cutscenes are already
+    skippable then we are good to go"). A cutscene the game lets the player skip needs nothing built: no
+    automatic shortening, no removing. An area's cutscene work is to see from the cutscene list that each of
+    its scenes can be skipped, and to open up one that cannot (only the opening, the title screen and the
+    staff credits have the "no skip" setting; the opening is opened by `--fix skippable_opening`).
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".
 - Starting as adult; Zora's Fountain open for child; moving Malon and Talon home.
 - Shortening each story cutscene (needs a list of every cutscene first: **the list is there since 2026-11-25,
-  `docs/CUTSCENES.md`**; the shortening itself is not tried yet).
+  `docs/CUTSCENES.md`**). **Not needed since decision 48 (2026-11-26):** the game's own skip is enough. The
+  shortening was never tried.
 - Mask of Truth question in front of a stone's words.
 - Shop families (shelves that appear only while a flag holds).
 - Music: how the remake stores it, whether tracks can be added.
