@@ -57,6 +57,7 @@ STEPS = [
     ('reward_names_check', 'Stones\' and Medallions\' names in colour check'),
     ('forest_temple_every_spot_check', 'Forest Temple, every spot check'),
     ('forest_temple_loose_ends_check', 'Forest Temple loose ends check (Medallion family, big chests, named keys)'),
+    ('kokiri_neighbours_check', 'Kokiri Forest and neighbours check (start leftovers, lone weapons, keys from people)'),
     ('cutscene_list_check', 'Timeline reader and cutscene list check'),
     ('roundtrip', 'Round-trip test (Event, RSDB, Mals, GameData, Pack, System, AI, Logic, Sequence)'),
 ]
@@ -71,7 +72,7 @@ SECONDS = {'ground_lift_check': 114, 'roundtrip': 103, 'families_check': 70, 'sk
            'pairs_more_check': 31, 'evfl_add_check': 31, 'cutscene_list_check': 30,
            'forest_temple_items_check': 26, 'ocarina_fix_check': 19,
            'start_state_check': 10, 'chest_check': 8, 'three_chest_check': 7, 'forest_temple_keys_check': 6,
-           'gift_check': 6, 'ground_prog_check': 5}
+           'gift_check': 6, 'ground_prog_check': 5, 'kokiri_neighbours_check': 25}
 
 
 def mmss(s):

@@ -4,6 +4,54 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 10: Kokiri Forest and its neighbours (to test in game)
+Branch `claude/kokiri-forest-neighbours`. Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **The starting state's leftovers** (`tools/start_state.py`, `tools/build_mod.py`):
+  - **Items the inventory keeps under another name.** Read from the game: an item's inventory name is the
+    `ActorName` of its row in `RSDB/ActorInfo` (`Item_Range_SlingShot` -> `Weapon_Range_SlingShot`,
+    `Item_Range_Bow` -> `Weapon_Range_Bow`, `Item_Gauntlet_Goron` -> `Armor_Child_Gauntlet_Goron`), and the
+    game's own new-file list pushes such a stand-in itself (`Obj_Armor_Adult_Normal`, kept as
+    `Armor_Adult_Normal`). So `--start Item_Range_SlingShot`, `--start Item_Range_Bow` and `--start
+    Item_Gauntlet_Goron` are now accepted and pushed as they are placed (before: refused, "under another name").
+  - **A first weapon comes with its bag:** behind the weapon's push, one push each for what the game's chests
+    give with it, read from the shared chest module (`turn_items.first_get`): `Item_BulletBag_Small` and 30
+    `Item_DekuSeed`, or `Item_Quiver_Small` and 30 `Item_Arrow_Normal`.
+  - **`--start-hearts N`** (1 to 20): the list's own two sets on `PlayerStatus`, `Life` and `MaxLife` (12
+    each, 4 per heart), get the new value. **`--start-rupees N`** (0 to what the new file's wallets hold; the
+    small wallet: 200): one more `SeqOneShotSetGameDataInt` node, a copy of the list's `Life` node, sets
+    `PlayerStatus.CurrentRupee` (found by its name's hash among the 41 fields of `PlayerStatus`).
+  - **Not possible: a chest open from the start.** A placement's saved flag is an entry of `Bool64bitKey` in
+    `GameData/GameDataList` with only `Hash`, `ResetTypeValue`, `SaveFileIndex` (2,424 also `ExtraByte`): no
+    default value to change, and no node of the new-file sequence sets a flag by its 64-bit number.
+- **A first weapon placed alone gives its bag** (part 9's find: a Fairy Bow alone in a pot came without its
+  quiver). `Item_Range_SlingShot` or `Item_Range_Bow` alone on a freestanding item, a rock, a bush, a pot or
+  a Gold Skulltula is now built as its turning item of one level (`LONE_WEAPON_KINDS`;
+  `tools/turn_items.py` takes a family of one level): it gives what a chest gives with the weapon when it is
+  picked up, has no next level and no drop part, and removes itself once Link owns the weapon. The weapon
+  alone and its family in one build is refused (the same item on two checks).
+- **A dungeon's small key, boss key, map or compass from a person and from a Deku Scrub**
+  (`KEY_GIVEN_KINDS`): the version a chest holds is handed over as any item, and the step the chests' own
+  event runs follows the get (`GameDataActor.EventTriggerAddOrSubGameDataInt` + 1 on
+  `DungeonInfo.<dungeon>.SmallKeyNum`, or `EventTriggerSetGameDataBool` on `IsGetBossKey` / `IsGetMap` /
+  `IsGetCompass`): in the giver's own flow behind its call of the get (`gift_edit`, `after`), in the scrub
+  flow behind a successful buy, where a first weapon's bag is added (`scrub_flow_edit`, `after`). Refused on
+  a cutscene gift and a song for now.
+- **Left out of this round: the same on a shop shelf.** A shelf is not an event. Its own AI would have to
+  count the key, and that AI's "sold out" side runs again in every state of the shelf (it only hides the
+  model and marks the placement, both harmless twice), so a count there needs a guard that holds exactly
+  once; and the shop version would have to be built from an item of ours. Proposed as its own small part.
+- **A stone or a Medallion from a person, a cutscene gift, a scrub and a shelf** already built (part 7's
+  work); they are in this round's build to be seen in game.
+- **`tests/kokiri_neighbours_check.py`** (new; a row of `STEPS` and of `README.md`): four builds read back,
+  three refusals, and the facts above from the game's files. `tests/start_state_check.py`: the three items
+  it expected refused are accepted now; it checks the new refusals instead.
+- **Tests:** the full run (`tests/run_all.py`): 27 of 30 passed; the three that failed held expectations
+  this part changes, and pass with them updated: `tests/dungeon_keys_check.py` and `tests/boss_check.py`
+  (a key on a scrub is no longer refused; a cutscene gift's refusal has new words; a shelf's refusal is
+  checked instead) and `tests/forest_temple_every_spot_check.py` (the Fairy Slingshot alone in a Forest
+  Temple pot is now the version that gives its bag).
+
 ### Phase 1, part 9: in-game results, two fixes, and decision 46
 The user's answers (new file, the debug-menu warp, adult):
 - **The named key in the temple** (the first room's chest and a lobby pot): "(Forest Temple)" in green, the

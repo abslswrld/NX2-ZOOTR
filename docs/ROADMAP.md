@@ -236,6 +236,23 @@ Parts, in order:
    Fairy Bow, the gauntlets; a chest open from the start). If Longshot's debug menu can start the staff roll,
    one line for the credits' colours (decision 40). Proposed from part 9: the Fairy Bow or Fairy Slingshot
    placed alone on the ground, in a pot, a rock or a bush, or on a Gold Skulltula, given with its bag.
+   **Built 2026-11-25, to test in game** (`tests/kokiri_neighbours_check.py`):
+   - the starting state: `--start Item_Range_SlingShot`, `Item_Range_Bow` (each with the small bag and the 30
+     seeds or arrows a chest gives with it) and `Item_Gauntlet_Goron` are pushed as they are placed (the game's
+     own new-file list pushes such a stand-in itself, `Obj_Armor_Adult_Normal`); `--start-hearts N` changes the
+     list's own `Life` and `MaxLife`; `--start-rupees N` adds one set of `PlayerStatus.CurrentRupee`;
+   - a first weapon placed alone on a freestanding item, a rock, a bush, a pot or a Gold Skulltula is its
+     turning item of one level, which gives the bag and the 30 as a chest does;
+   - a dungeon's small key, boss key, map or compass from a person (a gift with flow data) and from a Deku
+     Scrub: the version a chest holds, and the chests' count step right after the get;
+   - a stone or a Medallion from a person, a cutscene gift, a scrub and a shelf already built: in the round.
+   **Not possible (found in the game's files):** a chest open from the start. A placement's saved flag
+   (`Bool64bitKey` in `GameData/GameDataList`) has no default value to change, and no node of the new-file
+   sequence sets a flag by its 64-bit number.
+   **Left out of this round, proposed as its own small part:** a dungeon's key, boss key, map or compass on a
+   **shop shelf**. A shelf is not an event: its own AI would have to count the key, and the AI's "sold out"
+   side runs again in every state of the shelf, so the count needs a guard that holds exactly once; and a shop
+   version would have to be built from an item of ours instead of a game item.
 11. **The Forest Temple's own cutscenes** (D15; rule 4 of "an area is done"): skippable or shortened, from the
    cutscene list; in game, what the game's own skip keeps and how long a flowchart cutscene really runs.
 
@@ -366,7 +383,7 @@ models; barren and "always" hints; trade quest items.
 ## Unknowns (each settled in the phase named; each failure comes back to you as a decision)
 | Unknown | Phase |
 |---|---|
-| Starting state: setting flags as well as items on a new file | **Answered 2026-11-23: both**, read from the game's files and confirmed in game (part 1's test). The game's own new-file list (`Sequence/SetPouchAndStatusForGameStart`) takes one more item push per item and one more setter per flag (Bool, Int, String64). Not covered yet: struct fields (hearts, rupees), items kept under another inventory name (Fairy Slingshot, Fairy Bow, gauntlets), per-placement flags (an opened chest) |
+| Starting state: setting flags as well as items on a new file | **Answered 2026-11-23: both**, read from the game's files and confirmed in game (part 1's test). The game's own new-file list (`Sequence/SetPouchAndStatusForGameStart`) takes one more item push per item and one more setter per flag (Bool, Int, String64). Built 2026-11-25 (part 10, to test in game): hearts and rupees (`--start-hearts`, `--start-rupees`), items kept under another inventory name (Fairy Slingshot and Fairy Bow with their bag, the Goron Bracelet). Not possible: per-placement flags (an opened chest): those flags have no default value and no sequence node sets one |
 | Keys placed outside their dungeon; "start with" keys | 1 |
 | Debug-menu warp leaves areas untouched | **Settled 2026-11-23:** a new file warped into the Forest Temple keeps its doors locked and 0 small keys |
 | Shortening each cutscene and keeping what it sets | **List done 2026-11-25** (`docs/CUTSCENES.md`: what each one sets, gives and who asks whether it was played; timelines can be read and written). The change itself: every area. Still open: what the game's own skip keeps, and a flowchart cutscene's real length |

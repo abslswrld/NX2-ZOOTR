@@ -64,6 +64,11 @@ those very nodes, read from the module by the weapon's name (first_get): while L
 - Link owns the weapon (asked every frame, beside the guards, should the first not have answered): the same.
 Both ask "Link has no small bag" first, so the bag is given once.
 
+A first weapon placed alone (phase 1, part 10, to test in game; in game 2026-11-25 a Fairy Bow alone in a pot
+came without its quiver): the same item as a family of one level. It has no next level, so it drops nothing
+and has no drop part: it gives the bag and the 30 in the same two places, and deletes itself once Link owns
+the weapon, as a family's last level does.
+
 The three guards keep the item from turning while it is itself being picked up: between the moment it is added
 to the inventory and its death it still exists, and Link owns it. Each is a copy of a game node; which of them
 holds through the whole scene can only be seen in game, so all three are asked.
@@ -283,8 +288,9 @@ def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, n
     doc = ainb.loads(base)
     if doc.filename != BASE_AI + '.root':
         raise SystemExit('%s: not the ground items\' AI expected (%s)' % (ai_path(BASE_AI), doc.filename))
-    if (later_turns or bundle) and not drops or not set(later_turns) <= set(later):
-        raise SystemExit('%s: only a level with a next level turns on a later level or gives more' % name)
+    if later_turns and not drops or not set(later_turns) <= set(later) or bundle and later and not drops:
+        raise SystemExit('%s: only a level with a next level turns on a later level; only a first level gives '
+                         'more' % name)
     src = {k: ainb.loads(d) for k, d in sources.items()}
     n0 = len(doc.nodes)
     if n0 != BASE_NODES:
@@ -423,6 +429,10 @@ def turning_ai(base, sources, drop_ai, request_ai, own, later=(), drops=False, n
         mine = owned(own, 'own, asked for')
         # not owned: nothing, or (a first weapon) what a chest would give with it, as a chest does when opened
         flow(mine, give('asked for') if bundle else idle('asked for'), keep)
+    elif bundle:
+        # a first weapon alone: not owned -> what a chest would give with it; owned -> nothing
+        mine = owned(own, 'own, asked for')
+        flow(mine, give('asked for'), idle('asked for, owned'))
     else:
         mine = idle('asked for')
     flow(asked, mine, sel)                          # True -> stay, False -> go on
@@ -572,9 +582,14 @@ def describe(data):
             nothing(none)
         elif gives(none) != out['bundle']:
             bad('"pick-up asked for" does not give what "Link owns this level" gives beside it')
-        if item != out['own'] or nodes[keep].name != N_VALID or any(nodes[keep].links):
+        if item != out['own']:
+            bad('"pick-up asked for" does not ask for the level owned')
+        if nodes[keep].name == N_IDLE and out['bundle'] is not None:
+            nothing(keep)                          # a first weapon alone: it has no drop to switch on
+        elif nodes[keep].name != N_VALID or any(nodes[keep].links):
             bad('"pick-up asked for" does not switch the drop on for the level owned')
-        out['asked'] = [(nodes[keep].name, [x.value for x in nodes[keep].inputs['bool']])]
+        else:
+            out['asked'] = [(nodes[keep].name, [x.value for x in nodes[keep].inputs['bool']])]
     else:
         nothing(stay[0])
     steps = [turn] if nodes[turn].type != SEQUENTIAL else [c for _, c in kids(turn)]
@@ -598,6 +613,8 @@ def describe(data):
     nothing(rest)
     if out['turn'] != want or out['enter'] != ([(N_VALID, [False])] if out['drops'] else []):
         bad('the turn or the entering step is not as expected: %r, %r' % (out['turn'], out['enter']))
+    if out['asked'] and not out['drops']:
+        bad('"pick-up asked for" switches a drop on that the item does not have')
     reached, todo = set(), [doc.commands[0].left]
     while todo:
         i = todo.pop()
@@ -614,14 +631,16 @@ def describe(data):
 def build(family, level, read_pack, read_table_rows, model_exists=lambda project: False, bundle_for=None,
           version=VERSION, ai=None):
     """the turning item of level `level` (0 = the first) of `family` (the items' own names, in order; two or
-    three levels). bundle_for: for the first level, the name the inventory knows it by when the game's chests
+    three levels; one level: a first weapon placed alone, which only gives what the chests give with it).
+    bundle_for: for the first level, the name the inventory knows it by when the game's chests
     give more with it (a first weapon: its small bag and ammunition, first_get): the turning item gives the same.
     Returns (name, pack data, {inner path: (data, the game file it is made from: its size entry's reference)}
     for the files new to the game, {table: new row}, loose files as ground_items.build).
     version, ai: the kind of version in ground_items.VERSIONS it is built as and the name of its AI, for a
     variant under another name (tools/once_items.py); what it drops is always the next level's turning item."""
-    if len(family) not in (2, 3) or len(set(family)) != len(family):
-        raise SystemExit('%s: only families of two or three levels' % '>'.join(family))
+    if len(family) not in (2, 3) and not (len(family) == 1 and bundle_for) or len(set(family)) != len(family):
+        raise SystemExit('%s: only families of two or three levels (one level: a first weapon alone)'
+                         % '>'.join(family))
     if bundle_for and level:
         raise SystemExit('%s: only a first level gives more with itself' % family[level])
     item = family[level]

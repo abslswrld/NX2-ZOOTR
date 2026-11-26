@@ -45,11 +45,12 @@ ITEMS = [(ITEM, 1), ('Item_ZeldaLetter', 1), ('Item_Hookshot', 1), ('Item_Longsh
 REFUSED = [
     (['--start', 'Item_Longshot'], 'also give --start Item_Hookshot'),
     (['--start', 'Item_BombBag_Large', '--start', 'Item_BombBag_Small'], 'also give --start Item_BombBag_Medium'),
-    (['--start', 'Item_Gauntlet_Goron'], 'under another name'),      # kept as armour
+    (['--start', 'Item_Gauntlet_Silver'], 'also give --start Item_Gauntlet_Goron'),   # kept as armour
     (['--start', 'Item_Wallet_Small'], 'the game never gives it as an item'),
     (['--start', 'Item_StickBag_Small'], 'the game never gives it as an item'),
-    (['--start', 'Item_Range_SlingShot'], 'under another name'),
-    (['--start', 'Item_Range_Bow'], 'under another name'),
+    (['--start', 'Item_Range_Bow', '--start', 'Item_Arrow_Normal=5'], 'comes with a starting item'),
+    (['--start-hearts', '0'], 'give 1 to 20 hearts'),
+    (['--start-rupees', '201'], 'holds 0 to 200'),
     (['--start', 'Item_NoSuchThing'], 'not an inventory item'),
     (['--start', ITEM, '--start', ITEM + '=2'], 'is given twice'),
     (['--start', ITEM + '=0'], 'expected ITEM or ITEM=N'),

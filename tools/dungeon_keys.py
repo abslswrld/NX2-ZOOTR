@@ -97,7 +97,12 @@ Spirit Temple orange, Gerudo Training Ground "different orange?", Bottom of the 
 Castle none. In game 2026-11-24: all seven are as the user wants them (purple as the added place, the
 oranges in places 4 and 5), and a red word in someone's talk is red. The credits were not looked at.
 
-Not yet: gifts, scrubs, shop shelves, songs.
+From a person (a gift with flow data) and from a Deku Scrub (phase 1, part 10, to test in game): the version
+a chest holds is handed over as any item, and the chests' own step follows the get in the giver's flow or, at
+a scrub, a successful buy (tools/build_mod.py: KEY_GIVEN_KINDS, key_add_step).
+Not yet: cutscene gifts, songs, shop shelves. A shelf is not an event: the shelf's AI would have to count the
+key, and its "sold out" side is run again in every state of the shelf, so a count there needs a guard that
+holds exactly once (to be worked out and seen in game).
 Every new node is a copy of a game node of the same type, found by what it is and checked before it is used.
 """
 import copy
