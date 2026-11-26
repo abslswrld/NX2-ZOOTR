@@ -4,6 +4,21 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-26
 
+### Phase 2, part 1: the retest passed; the look is not good enough (decision 50)
+The user's answers (new file, child):
+- **The scales stand on their shelves,** not in them. The lifts (0.19 m) are right.
+- **The shopkeeper's line names the Golden Scale** for the second shelf: writing the name right after the shelf
+  is picked works. The shelf's own label (shown while browsing) still says "Silver Scale": it is the shelf
+  object's name, not the flow's.
+- **"You got a golden scale!",** the price taken, the Golden Scale in the menu; both shelves still empty after
+  leaving the shop and coming back.
+- **The user's decision (decision 50):** it is not good enough that the shelf shows the Silver Scale's label
+  and model, on the shelf and held up, when it sells the Golden Scale: "two shelf objects on one spot,
+  switched by whether Link has the first level". That is phase 2's new part 2; the parts behind it move down
+  by one (nine parts). Part 1's way stays in the builder: it gives the right level today, and it is the
+  fallback for a second shelf of a pair bought in the same visit, should the game only switch shelf objects
+  when the area is loaded.
+
 ### Phase 2, part 1: in-game results of the shelf pair, and two fixes
 The user's answers (new file, child; two screenshots):
 - **The method works.** The pair Silver Scale > Golden Scale on `KF_KOKIRI_CHILD_SHOP_01` and `_02`: the first

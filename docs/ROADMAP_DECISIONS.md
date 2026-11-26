@@ -166,6 +166,12 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     trial, then the rest of them; Kokiri Forest closed out with its exit setting; the Lost Woods' map spots,
     then its five event checks; Sacred Grove; Inside the Deku Tree's spots, then its end. They are in the
     roadmap under phase 2.
+50. **A family on a shop shelf must look like the level it sells** (the user, 2026-11-26, after the trial: "no,
+    two shelf objects on one spot, switched by whether Link has the first level"). The trial's way (one shelf
+    object, the level chosen in the sale flow) gave the right item, window and shopkeeper's line, but the
+    shelf's label and model and what Link holds up stayed the first level's. So a family shelf is one shelf
+    object per level on the same spot, each shown only while it is that level's turn. It is its own part
+    (phase 2, part 2), which makes phase 2 nine parts.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".
