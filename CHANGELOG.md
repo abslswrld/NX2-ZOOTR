@@ -16,7 +16,8 @@ The user's answers (new file, the debug-menu warp, adult):
   Found: its opening event `ForesetTemple_GetMap` was kept (it is only the chest's usual opening, with no
   message), and that usual opening is the big chest's (`Dm_SY_Treasurebox`). **Fixed:** on a big chest made
   small, the events that are only the big chest's opening (`BIG_OPENING_EVENTS`: the map's and the compass's)
-  go, so the small chest plays its own; any other kept event on such a chest stops the build. To see in game.
+  go, so the small chest plays its own; any other kept event on such a chest stops the build. **Retest in game: good** (the small chest's opening,
+  the bigger Bomb Bag).
 - **Saria's cutscene:** the Longshot floated down (not the Medallion) and the window said Longshot. Good.
 - **Save and reload:** good.
 - **The Fairy Bow from a lobby pot came without its quiver.** Found: a first weapon placed alone (the Fairy Bow,

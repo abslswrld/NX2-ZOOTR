@@ -146,7 +146,7 @@
     "rule": "can_use(Hookshot)",
     "note": "the game puts the map here. Hookshot assumed (the target next to it); whether it can be reached without is not known: check in game",
     "randomizable": "yes",
-    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Fairy Bow with its quiver and arrows (the chest's own opening event kept); on 2026-11-25 (part 9) the three bomb bags with the small one owned: a small chest in its place gave the bigger Bomb Bag (it still played the big chest's opening: its event ForesetTemple_GetMap now goes on a chest made small)"
+    "randomizable_note": "changed in game on 2026-11-23 (tools/build_mod.py): gave the Fairy Bow with its quiver and arrows (the chest's own opening event kept); on 2026-11-25 (part 9) the three bomb bags with the small one owned: a small chest in its place gave the bigger Bomb Bag (it still played the big chest's opening: its event ForesetTemple_GetMap now goes on a chest made small; retest in game 2026-11-25: the small chest's opening, good)"
    },
    "FT GS East Courtyard": {
     "id": "FT_EAST_COURTYARD_GS",

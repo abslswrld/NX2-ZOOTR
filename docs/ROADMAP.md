@@ -227,7 +227,7 @@ Parts, in order:
    **In game 2026-11-25:** all passed: the Longshot floated down in Saria's cutscene and was given, the Bow's
    big chest gave the Gold Scale as a small chest, the map's the bigger Bomb Bag, the named key said "(Forest
    Temple)" and opened a door (no count on screen; the user kept the name: D46). **Fixed after:** the map's
-   chest made small still played the big chest's opening (its kept event goes now; to see once more).
+   chest made small still played the big chest's opening (its kept event goes now; retest in game: good, the small chest's opening).
    **Found, for part 10:** the Fairy Bow alone in a pot came without its quiver (a first weapon alone on the
    ground, a pot, a rock, a bush or a Gold Skulltula gets no bag).
 10. **Kokiri Forest and its neighbours** (one round on a new file, child): a small key, the boss key, the map
