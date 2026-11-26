@@ -254,12 +254,28 @@ def colour_table(table_data, colours):
     return new
 
 
+# A word of an item's name that keeps its capital in a sentence: the game's own names have the tag (201, 13) in
+# front of each such word ("<tag>Deku <tag>Shield", "Bigger <tag>Deku-Stick Bag", "<tag>Zelda's Letter"). A talk
+# line that names an item in a sentence (the shop's and the scrubs' lines: the tag (201, 15) in front of the
+# name) writes the other words small. In game 2026-11-25 the scrub said "the boss key (Forest temple)": the
+# dungeon's name had no such tag. So in an item's name (PROPER) every capitalised word of the dungeon's name
+# gets it.
+KEEP_CAPITAL = (201, 13)
+PROPER = '_Name'
+
+
+def proper(place):
+    """a place's name with the game's "keeps its capital" tag in front of each capitalised word"""
+    tag = (b'\x0e' + struct.pack('<HHH', KEEP_CAPITAL[0], KEEP_CAPITAL[1], 0)).decode('utf-8', 'surrogateescape')
+    return ' '.join(tag + w if w[:1].isupper() else w for w in place.split(' '))
+
+
 def messages(dungeon, place, colour=None):
     """the texts of a named key: {label: text}; `place`: the dungeon's name as the game writes it; `colour`:
     the number of the colour the name has in the get message (colour_number; None: the text's own)"""
     out = {}
     for tail, text in MESSAGES:
-        shown = place
+        shown = proper(place) if tail == PROPER else place
         if colour is not None and tail == COLOURED:
             shown = colour_tag(colour) + place + colour_tag(COLOUR_END)
         out[(MESSAGE_NAME % dungeon) + tail] = (text % shown if '%s' in text else text) + '\x00'

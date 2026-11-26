@@ -260,6 +260,11 @@ Parts, in order:
    page shows no key count, as found on 2026-11-24: the checklist should not have asked for it there): to see
    at a door of the temple. **Fixed after:** the scrub's line ran out of its box with a long name; it is on
    two lines now (to see once more). The staff roll's line was left blank.
+   **Retest in game 2026-11-25:** the scrub's line fits its box; with only the Kokiri's key a locked door of the
+   Forest Temple opened, so a key from a person counts. The user: "Temple should have a capital T" (the line
+   said "boss key (Forest temple)"): the dungeon's name in an item's name now has the game's own "keeps its
+   capital" tag (to see once more). The staff roll: "no easy way to check", so the credits' colours stay
+   with "left with their areas" below.
 11. **The Forest Temple's own cutscenes** (D15; rule 4 of "an area is done"): skippable or shortened, from the
    cutscene list; in game, what the game's own skip keeps and how long a flowchart cutscene really runs.
 

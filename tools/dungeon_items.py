@@ -104,7 +104,7 @@ def messages(item, dungeon, place, colour=None):
     it; `colour`: the number of the colour the name has in the get message (None: the text's own)"""
     out = {}
     for tail, text in ITEMS[item][3]:
-        shown = place
+        shown = dungeon_keys.proper(place) if tail == dungeon_keys.PROPER else place   # capitals kept in a sentence
         if colour is not None and tail == COLOURED:
             shown = dungeon_keys.colour_tag(colour) + place + dungeon_keys.colour_tag(COLOUR_END)
         out[message_name(item, dungeon) + tail] = (text % shown if '%s' in text else text) + '\x00'

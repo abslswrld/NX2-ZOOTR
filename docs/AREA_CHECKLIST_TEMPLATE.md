@@ -166,7 +166,7 @@ A kind or form here is not tested again in a later area (D27), only sampled. Add
 | Boss heart | Forest Temple | 2026-11-24 |
 | A dungeon reward given by a cutscene (the Medallion) | Forest Temple (Saria's cutscene) | 2026-11-24 |
 | Upgrade families (no skipped level) | every kind above except shop shelves and big chests | phase 0 |
-| A dungeon's small key from a person (a gift with flow data) | Kokiri Forest (the Kokiri at the rock circle; the count itself not seen yet) | 2026-11-25 |
+| A dungeon's small key from a person (a gift with flow data) | Kokiri Forest (the Kokiri at the rock circle; a door of the Forest Temple opened with it) | 2026-11-25 |
 | A dungeon's boss key from a Deku Scrub | Lost Woods (the scrub near the bridge) | 2026-11-25 |
 | A stone on a shop shelf; a Medallion from Saria's bridge cutscene | Kokiri Shop; Lost Woods (the bridge) | 2026-11-25 |
 | A first weapon alone in a pot, with its bag | Kokiri Forest (the Know-It-All Brothers' pot: the Fairy Bow) | 2026-11-25 |

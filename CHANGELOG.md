@@ -4,6 +4,24 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-25
 
+### Phase 1, part 10: the retest's results, and the capital T
+The user's answers (one screenshot):
+- **The scrub's line fits its box** on two lines ("Ah, the boss key (Forest temple)!" / "It's 40 rupees. Wanna
+  buy it?"). The whole name is red there, as the game colours an item's name in a talk line; the dungeon's own
+  colour (green) is in the get window's text.
+- **A key from a person counts:** with only the Kokiri's key, the first locked door of the Forest Temple opened.
+- **"Temple should have a capital T".** Found in the game's texts: a talk line that names an item in a
+  sentence (the tag (201, 15) in front of the name, in the shop's and the scrubs' lines) writes the name's
+  words small, and the game's own names mark each word that keeps its capital with the tag (201, 13) in front
+  of it ("Deku Shield": one before each word; "Bigger Deku-Stick Bag": one before "Deku-Stick"; 57 of the 185
+  item names have it). Our names for a dungeon's key, boss key, map and compass had none. **Fixed:** in the
+  `_Name` text every capitalised word of the dungeon's name gets that tag (`dungeon_keys.proper`), so the line
+  says "boss key (Forest Temple)". To see in game.
+- **The staff roll:** "no easy way to check". The credits' colours stay with the areas, as the roadmap says for
+  that case.
+- **Tests:** `dungeon_keys_check` (it reads the tag now), `boss_check`, `forest_temple_keys_check`,
+  `hint_check`, the two Forest Temple build scripts and `kokiri_neighbours_check` pass.
+
 ### Phase 1, part 10: in-game results and one fix
 The user's answers (new file, child; two screenshots):
 - **The start of a new file:** 5 hearts, 50 rupees, the Fairy Slingshot with 30 Deku Seeds (one shot: 29),

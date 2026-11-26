@@ -185,7 +185,7 @@
      -27.8
     ],
     "randomizable": "yes",
-    "randomizable_note": "changed in game on 2026-11-17 with --fix kokiri_circle_after_dungeons (tools/build_mod.py sets the ActorName of his Dm_SY_GetInEvent call): gave a gold rupee; on 2026-11-25 (part 10) a small key of the Forest Temple: the Kokiri gave it, \"(Forest Temple)\" in green (the count is not shown anywhere outside the temple: to see at a door of the temple)"
+    "randomizable_note": "changed in game on 2026-11-17 with --fix kokiri_circle_after_dungeons (tools/build_mod.py sets the ActorName of his Dm_SY_GetInEvent call): gave a gold rupee; on 2026-11-25 (part 10) a small key of the Forest Temple: the Kokiri gave it, \"(Forest Temple)\" in green (the count is not shown anywhere outside the temple: to see at a door of the temple); retest 2026-11-25: with only this key a locked door of the Forest Temple opened (the key counts)"
    },
    "KF Child Rock Circle 1": {
     "id": "KF_CIRCLE_CHILD_ROCK_01",
@@ -1113,7 +1113,7 @@
      }
     ],
     "randomizable": "untested",
-    "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Forest Temple's boss key: sold for 40 rupees, \"You found the boss key! (Forest Temple)\", the scrub left, the temple's map shows the boss key (the scrub's line ran out of its box on one line: two lines now)"
+    "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Forest Temple's boss key: sold for 40 rupees, \"You found the boss key! (Forest Temple)\", the scrub left, the temple's map shows the boss key (the scrub's line ran out of its box on one line: two lines now); retest 2026-11-25: the line fits its box on two lines (\"Forest temple\" had a small t: the dungeon's name in an item's name now has the game's \"keeps its capital\" tag)"
    },
    "LW Bridge Chest": {
     "id": "LW_BRIDGE_CHEST",
