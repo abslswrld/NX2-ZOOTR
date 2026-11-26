@@ -4,6 +4,26 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-26
 
+### Phase 2, part 1: in-game results of the shelf pair, and two fixes
+The user's answers (new file, child; two screenshots):
+- **The method works.** The pair Silver Scale > Golden Scale on `KF_KOKIRI_CHILD_SHOP_01` and `_02`: the first
+  one bought was the Silver Scale (line, window, price, menu), the second gave "You got a golden scale!" and
+  the Golden Scale in the menu, the price taken. Each shelf was empty after its sale, nothing was sold twice,
+  and it held after save and reload. (Leaving the shop and coming back was left blank.)
+- **"Scale in shelf, needs to be raised"** (the screenshot: both scales half inside their shelves). Measured
+  on the models as the other lifts were: the Silver Scale's pose is centred, its lowest vertex 0.192 m under
+  the shelf point, the Golden Scale's 0.203 m. **Fixed:** `shop_items.SHELF_LIFT` gets both (0.19, 0.20 m).
+- **The shopkeeper's line called the second shelf "Silver Scale".** Found: his line ("The <item>? That'll
+  cost...", `Shop_01`) reads `Shop_SelectItemName` too, but it is shown before the "can Link carry it"
+  question, where the name was written. The flow runs `Npc_EventStarter.EventTriggerShopItemFocus` when a
+  shelf is picked (two such steps), then asks about the name and shows the line. **Fixed:** the question
+  "is it First? Link has First?" and the write now stand right behind each of those two steps
+  (`shop_focus_steps`), so the line, the question and everything after name Second. To see in game.
+- **Link holds up the Silver Scale's model when he gets the Golden Scale** (the screenshot). As expected: the
+  shelf is one object and shows its own model. Not changed: the user's decision.
+- **Tests:** `tests/shop_family_check.py` (it reads the new place of the write) and
+  `tests/shop_shelf_keys_check.py` pass.
+
 ### Phase 2, part 1: an upgrade pair on a shop shelf, a trial (to test in game)
 Branch `claude/shop-families-trial`. Phase 2's eight parts are in the roadmap since today (decision 49). Test
 build and checklist: `out\TEST_CHECKLIST.md`.

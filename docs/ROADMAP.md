@@ -349,6 +349,13 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    Second is added in its place. **Known before the test:** the shelf itself is one actor, so it shows First's
    model on the shelf and held up, whichever level it sells. The test build has the pair on two shelves, so
    one file sees both levels.
+   **In game 2026-11-26: the method works.** The first shelf bought gave the Silver Scale, the second the
+   Golden Scale ("You got a golden scale!", in the menu); both shelves empty after, also after save and
+   reload. Three things seen: the scale sat in its shelf (**fixed:** lifted 0.19 m, measured on the model);
+   the shopkeeper's line still named the Silver Scale for the second shelf (**fixed:** the line comes before
+   the point the name was written at, so it is written right after the shelf is picked now; to see once
+   more); Link holds up the Silver Scale's model when he gets the Golden one (the shelf is one object: the
+   user's decision whether that is good enough).
 2. **Shop families, the rest** (only if part 1 passes): a three-level family, one family on two shelves, and
    the setting for how many shelves per shop are randomized (D37).
 3. **Kokiri Forest closed out:** its every-spot build script, the Kokiri Forest exit setting (D14: closed until

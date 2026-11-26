@@ -2867,7 +2867,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Goron Ruby for 15 rupees: bought, its name in red, on the Key Items tab, the shelf empty after leaving and coming back; on 2026-11-25 (part 12) a small key of the Forest Temple for 15 rupees: bought, \"(Forest Temple)\" in green, the shelf empty and still empty after coming back (that it counts: not seen yet, the door in the temple was skipped); retest 2026-11-26: with only this key the first locked door of the Forest Temple opened (a key from a shelf counts)",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Goron Ruby for 15 rupees: bought, its name in red, on the Key Items tab, the shelf empty after leaving and coming back; on 2026-11-25 (part 12) a small key of the Forest Temple for 15 rupees: bought, \"(Forest Temple)\" in green, the shelf empty and still empty after coming back (that it counts: not seen yet, the door in the temple was skipped); retest 2026-11-26: with only this key the first locked door of the Forest Temple opened (a key from a shelf counts); on 2026-11-26 (phase 2, part 1) the pair Silver Scale > Golden Scale on this shelf and on shelf 2: the first one bought gave the Silver Scale, the second the Golden Scale (\"You got a golden scale!\", in the menu); both shelves empty after, also after save and reload. The scale sat in the shelf (lifted 0.19 m now), the shopkeeper's line still said \"Silver Scale\" for the second (the name is written earlier now), Link holds up the Silver Scale's model (one shelf, one model)",
   "requirements": {
    "child": [
     []
@@ -2915,7 +2915,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 12) the Forest Temple's boss key for 20 rupees: bought, \"You found the Boss Key! (Forest Temple)\", on the temple's map, the shelf empty (the model sat in the shelf: lifted 0.22 m now); retest 2026-11-26: the boss key stands on its shelf",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 12) the Forest Temple's boss key for 20 rupees: bought, \"You found the Boss Key! (Forest Temple)\", on the temple's map, the shelf empty (the model sat in the shelf: lifted 0.22 m now); retest 2026-11-26: the boss key stands on its shelf; on 2026-11-26 (phase 2, part 1) the pair Silver Scale > Golden Scale: see shelf 1",
   "requirements": {
    "child": [
     []

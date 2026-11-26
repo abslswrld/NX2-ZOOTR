@@ -7,9 +7,9 @@ What it checks:
   with one of five steps, each with a next step; no shelf of the game is named as a pair's second level; the
   game's own inventory question and its name write (the scrubs') are found.
 - A build with Silver Scale > Gold Scale on a Kokiri Shop shelf, read back: the shelf is the Silver Scale's
-  shop version, sold once; in front of the flow's "can Link carry it" question stands "is it the Silver
-  Scale?" -> "Link has the Silver Scale?" -> yes: the Gold Scale's name is written into Shop_SelectItemName, two
-  frames pass, then the game's question; in front of each of the five giving steps stands "is it the Gold
+  shop version, sold once; behind each of the flow's two "shelf picked" steps, before the shopkeeper names the
+  item, stands "is it the Silver Scale?" -> "Link has the Silver Scale?" -> yes: the Gold Scale's name is written
+  into Shop_SelectItemName, two frames pass, then on; in front of each of the five giving steps stands "is it the Gold
   Scale?" -> yes: the Gold Scale is added and the shelf's own step is passed by. Nothing else of the flow
   changed.
 - The same build with a dungeon's small key on another shelf: both changes stand in the flow.
@@ -65,6 +65,7 @@ def main(romfs):
     game = evfl.loads(plain(build_mod.SHOP_SALE_FLOW)).flowchart
     sold, can, name_params = build_mod.shop_flow_parts(game)
     gives = build_mod.shop_give_steps(game)
+    picked = build_mod.shop_focus_steps(game)
     rows = {r['__RowId']: r for r in byml.loads(plain(ground_items.table_path('ActorInfo'))).root}
     shelf_names = {r.get('ActorName') for n, r in rows.items() if n.startswith('Shop_')}
     ask = build_mod.gift_pair_template(evfl.loads(plain(build_mod.GIFT_PAIR_FLOW)).flowchart)
@@ -134,20 +135,25 @@ def main(romfs):
                 return [e for e in back.events[n0:] if e.type == 'switch' and name_of(e) == build_mod.SHOP_NAME_QUERY
                         and dict(e.params) == dict(name_params, Value=value)]
 
-            head = asks(FIRST)
-            q = back.events[dict(head[0].cases)[0]] if len(head) == 1 else None
-            wr = back.events[dict(q.cases)[ask[2]]] if q is not None and q.type == 'switch' else None
-            wait = back.events[wr.next] if wr is not None and wr.type == 'action' and wr.next is not None else None
-            good &= check('%s: in front of "can Link carry it": is it %s? -> Link has %s? -> yes: %s written into %s, '
-                          '%d frames, then the game\'s question; no: the game\'s question'
-                          % (build, FIRST, FIRST, SECOND, build_mod.SHOP_ITEM_VAR, build_mod.SCRUB_WRITE_WAIT),
-                          q is not None and name_of(q) == (build_mod.GIFT_PAIR_ACTOR, build_mod.GIFT_PAIR_QUERY)
-                          and dict(q.params) == {'Num': 1, 'Actor': FIRST} and wait is not None
-                          and name_of(wr) == ('GameDataActor', build_mod.SCRUB_NAME_WRITE)
-                          and dict(wr.params) == {'GameDataName': build_mod.SHOP_ITEM_VAR, 'Index': -1, 'Value': SECOND}
-                          and name_of(wait) == ('EventSystemActor', 'EventWait')
-                          and dict(wait.params).get('Frames') == build_mod.SCRUB_WRITE_WAIT and wait.next == can
-                          and dict(q.cases)[ask[3]] == dict(head[0].cases)[1])
+            heads = asks(FIRST)
+            ok = len(heads) == len(picked) and sorted(back.events[f].next for f in picked) == sorted(
+                back.events.index(h) for h in heads)
+            for head in heads:                          # behind each "shelf picked" step
+                on = dict(head.cases)[1]
+                q = back.events[dict(head.cases)[0]]
+                wr = back.events[dict(q.cases)[ask[2]]] if q.type == 'switch' else None
+                wait = back.events[wr.next] if wr is not None and wr.type == 'action' and wr.next is not None else None
+                ok &= (wait is not None and name_of(q) == (build_mod.GIFT_PAIR_ACTOR, build_mod.GIFT_PAIR_QUERY)
+                       and dict(q.params) == {'Num': 1, 'Actor': FIRST}
+                       and name_of(wr) == ('GameDataActor', build_mod.SCRUB_NAME_WRITE)
+                       and dict(wr.params) == {'GameDataName': build_mod.SHOP_ITEM_VAR, 'Index': -1, 'Value': SECOND}
+                       and name_of(wait) == ('EventSystemActor', 'EventWait')
+                       and dict(wait.params).get('Frames') == build_mod.SCRUB_WRITE_WAIT and wait.next == on
+                       and dict(q.cases)[ask[3]] == on and on in [game.events[f].next for f in picked])
+            good &= check('%s: behind each of the %d "shelf picked" steps, before the shopkeeper names the item: is '
+                          'it %s? -> Link has %s? -> yes: %s written into %s, %d frames, then on; no: on'
+                          % (build, len(picked), FIRST, FIRST, SECOND, build_mod.SHOP_ITEM_VAR,
+                             build_mod.SCRUB_WRITE_WAIT), ok)
             placed = asks(SECOND)
             adds = [back.events[dict(e.cases)[0]] for e in placed]
             good &= check('%s: in front of each of the %d giving steps: is it %s? -> yes: %s added, then on behind the '
@@ -156,7 +162,7 @@ def main(romfs):
                           and all(a.type == 'action' and name_of(a) == build_mod.SHOP_ADD
                                   and dict(a.params) == dict(build_mod.shop_add_params(SECOND))
                                   and a.next == game.events[dict(e.cases)[1]].next for a, e in zip(adds, placed))
-                          and len(back.events) == n0 + 4 + 2 * len(gives), len(back.events) - n0)
+                          and len(back.events) == n0 + 4 * len(picked) + 2 * len(gives), len(back.events) - n0)
             kept = all((o.type, o.name, o.params) == (b.type, b.name, b.params) for o, b in zip(game.events, back.events))
             good &= check('%s: the game\'s %d events are there as they were (their leads apart)' % (build, len(game.events)),
                           kept)
