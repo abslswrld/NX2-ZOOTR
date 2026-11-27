@@ -4,6 +4,40 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-27
 
+### Phase 2, part 3, in game: the bomb bag shelf said "Sold out"; a family's shelf is a shelf of its own now
+- **In game (the user, 2026-11-27, run 1 of the checklist):** one middle chest in Mido's house gave the Bomb
+  Bag: good. Then the bomb bag shelf (Kokiri Shop, left alcove, top right) was empty and its label said
+  "Bomb Bag", "Sold out"; the test stopped there. **The Fairy Bow** (right alcove, top left, 30 rupees): stands
+  right on its shelf, its size is all right, it came with 30 arrows. Not reached: the shelf's second and
+  third level, the shelves after leaving, the other chest.
+- **Cause, as far as the files show it:** a shop does not sell an item Link has. The shopkeeper's list had
+  stock and names no flag, so the answer comes from the shelf's item itself; the shelf was the Bomb Bag's shop
+  version, and Link had a Bomb Bag. (The Silver Scale's shelf did sell with a Silver Scale in the inventory,
+  2026-11-26; what makes the two differ is not in the files. The Bomb Bag's row has what the scale's has not:
+  `MaxNumGameData`, `AfterExpansionMaxNum`, `ExpansionMaxNumActor`, `IsItemStockMaxIfGet`.) A family's shelf
+  is there exactly for a Link who has the first level, so it cannot be the first level's shop version.
+- **Fix: a family's shelf is a shelf of its own that Link can never have** (`shop_items.build(family=True)`,
+  named `Shop_NX2_<First>_<price>_Family`). From the game's files: a shop knows a shelf's item by the
+  `ActorName` of its `ActorInfo` row (the mask shelves: `Armor_Child_Mask_Keaton`, while their item settings
+  name `Item_Mask_Keaton`); the game has shelves named themselves (`Shop_DekuNutBundle_01`) and shelves that
+  put nothing in the inventory (`Shop_Heart`: `NotPushToPouch`). Ours is both: named itself in its row and
+  its name file, its `_Name` text the first level's (added to `ActorMsg/PouchContent.msbt` in every language),
+  "not put in the inventory" in its item settings and its row, and its row without what the item does when
+  it is got. It keeps the first level's model, pose, price and shelf lift.
+- **The sale flow does all of it now** (`shop_family_edit`): behind each "shelf picked" step "is it the
+  shelf?" -> the inventory questions, the highest level first -> the name of the level Link gets next is
+  written into `Shop_SelectItemName` (**the first level's when Link has none**, which the shelf's own name
+  gave before); in front of each of the five giving steps "is it <that level>?" -> the level is added (the
+  first level with what it needs, the Fairy Slingshot with its seed bag) and the shelf's own step is passed
+  by. A first weapon alone on a shelf is unchanged (its own shop version, its bag added in front of the
+  shelf's step): the Fairy Bow passed that way.
+- **`tests/shop_family_check.py`** rewritten for it (the shelf's row, name file, item settings and label; the
+  flow for the pair, the three bomb bags and the Fairy Slingshot's family).
+- **Retest build:** the same items on the same spots. Three short runs on new files, since the first
+  level's way through the sale is new too: no chest opened (the shelf sells the Bomb Bag), one (the bigger
+  one), both (the biggest).
+- **Tests:** the full run (`python tests/run_all.py`, 32 scripts) passed with the fix.
+
 ### Phase 2, part 3: three levels on a shelf, a first weapon's bag, the shelf order (to test in game)
 Branch `claude/shop-families-rest`. Test build and checklist: `out\TEST_CHECKLIST.md`.
 

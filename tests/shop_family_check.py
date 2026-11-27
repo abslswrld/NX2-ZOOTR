@@ -1,4 +1,4 @@
-"""Phase 2, part 1: an upgrade pair on a shop shelf (a trial, to test in game).
+"""Phase 2, parts 1 and 3: an upgrade family on a shop shelf (to test in game).
 
     python tests/shop_family_check.py "<romfs>"
 
@@ -6,20 +6,21 @@ What it checks:
 - From the game's files: the shops' shared sale flow (DisplayShop) puts the shelf's item in the inventory
   with one of five steps, each with a next step; no shelf of the game is named as a pair's second level; the
   game's own inventory question and its name write (the scrubs') are found.
-- A build with Silver Scale > Gold Scale on a Kokiri Shop shelf, read back: the shelf is the Silver Scale's
-  shop version, sold once; behind each of the flow's two "shelf picked" steps, before the shopkeeper names the
-  item, stands "is it the Silver Scale?" -> "Link has the Silver Scale?" -> yes: the Gold Scale's name is written
-  into Shop_SelectItemName, two frames pass, then on; in front of each of the five giving steps stands "is it the Gold
-  Scale?" -> yes: the Gold Scale is added and the shelf's own step is passed by. Nothing else of the flow
+- A family's shelf is a shelf of its own that Link can never have (in game 2026-11-27 the Bomb Bag's shop
+  version said "Sold out" once Link had a Bomb Bag): named itself in its row and its name file, its label the
+  first level's name, "not put in the inventory" in its item settings and its row as the game's heart shelf.
+- The sale flow does the rest, read back for Silver Scale > Gold Scale, for the three bomb bags and for the
+  Fairy Slingshot's family: behind each of the two "shelf picked" steps, before the shopkeeper names the item,
+  "is it the shelf?" -> the inventory questions, the highest level first -> the name of the level Link gets
+  next written into Shop_SelectItemName (the first level's when Link has none), two frames, then on; in front
+  of each of the five giving steps "is it <that level>?" -> the level added (the first level with what it
+  needs: the Fairy Slingshot with its seed bag) and the shelf's own step passed by. Nothing else of the flow
   changed.
-- The same build with a dungeon's small key on another shelf: both changes stand in the flow.
+- The pair's build with a dungeon's small key on another shelf: both changes stand in the flow.
 - Refused: two upgrades of one family in one shop (decision 51): the pair on two shelves, the pair beside its
   first level alone, one level alone on two shelves.
-- Three levels on a shelf (phase 2, part 3): the three bomb bags; two inventory questions behind each "shelf
-  picked" step, the higher level first, and in front of each giving step the second or the third level added
-  in the shelf item's place.
-- A first weapon on a shelf comes with its small bag: the Fairy Slingshot as the first level of its family,
-  and the Fairy Bow alone on a shelf (from the game's files: a shelf's own steps give nothing but its item).
+- A first weapon alone on a shelf (the Fairy Bow) is its own shop version and comes with its small bag (from
+  the game's files: a shelf's own steps give nothing but its item).
 - How many shelves per shop are randomized (decision 37): every shop shelf of the data has a place in its
   shop's order ("shelf_rank"), and `World.shop_shelves(n)` names the first n of each shop and age.
 """
@@ -39,7 +40,7 @@ import dungeon_keys  # noqa: E402
 import ground_items  # noqa: E402
 import item_pose  # noqa: E402
 import shop_items  # noqa: E402
-from formats import zstd, byml, evfl, restbl, sarc  # noqa: E402
+from formats import zstd, byml, evfl, restbl, sarc, msbt  # noqa: E402
 from logic.world import World  # noqa: E402
 
 FIX = ['--fix', 'kokiri_shop_full_stock']
@@ -138,69 +139,45 @@ def main(romfs):
             good &= check('build "%s": %d files written' % (name, len(files)),
                           build_mod.SHOP_SALE_FLOW + '.zs' in files)
 
-        # ---- the pair
-        out, folder, files = builds['pair']
-        shop = [f for f in files if f.startswith('Pack/Actor/%s%s_' % (shop_items.PREFIX, FIRST[len('Item_'):]))]
-        name = os.path.basename(shop[0])[:-len('.pack.zs')] if len(shop) == 1 else None
-        r, _, loc = build_mod.find_check(w, SHELF)
-        maps = [plain('Banc/%s/%s' % (scene, fn[:-3] if fn.endswith('.zs') else fn), folder)
-                for scene, _, p in w.placements_of(r, loc) for fn in p['files']]
-        good &= check('%s (%s > %s): the shelf is %s, the first level\'s shop version, sold once; no shop version of '
-                      'the second level is made' % (SHELF, FIRST, SECOND, name),
-                      name is not None and name.endswith('_Once') and any(m is not None and name.encode() in m
-                                                                         for m in maps)
-                      and not [f for f in files if SECOND[len('Item_'):] in f], shop)
+        # ---- a family's shelf: a shelf of its own that Link can never have; the sale flow does the rest
+        heart = sarc.Sarc.read(plain(ground_items.pack_path(shop_items.NOT_PUSHED_SHELF))).files
+        not_pushed = byml.loads(heart[ground_items._ref_path(ground_items.resolved_components(
+            heart, shop_items.NOT_PUSHED_SHELF)['PouchContentRef'])]).root['SpecialDeal']
 
-        def read(build, before):
-            """(the flow of a build, the number of events it had before the pair's edit)"""
-            return evfl.loads(plain(build_mod.SHOP_SALE_FLOW, builds[build][1])).flowchart, before
-
-        for build, n0 in (('pair', len(game.events)), ('both', len(game.events) + len(sold) * 2 + 1)):
-            back, _ = read(build, n0)
-
-            def name_of(e):
-                return back.actors[e.actor].name, (back.actors[e.actor].actions[e.action] if e.type == 'action'
-                                                   else back.actors[e.actor].queries[e.query])
-
-            def asks(value):
-                return [e for e in back.events[n0:] if e.type == 'switch' and name_of(e) == build_mod.SHOP_NAME_QUERY
-                        and dict(e.params) == dict(name_params, Value=value)]
-
-            heads = asks(FIRST)
-            ok = len(heads) == len(picked) and sorted(back.events[f].next for f in picked) == sorted(
-                back.events.index(h) for h in heads)
-            for head in heads:                          # behind each "shelf picked" step
-                on = dict(head.cases)[1]
-                q = back.events[dict(head.cases)[0]]
-                wr = back.events[dict(q.cases)[ask[2]]] if q.type == 'switch' else None
-                wait = back.events[wr.next] if wr is not None and wr.type == 'action' and wr.next is not None else None
-                ok &= (wait is not None and name_of(q) == (build_mod.GIFT_PAIR_ACTOR, build_mod.GIFT_PAIR_QUERY)
-                       and dict(q.params) == {'Num': 1, 'Actor': FIRST}
-                       and name_of(wr) == ('GameDataActor', build_mod.SCRUB_NAME_WRITE)
-                       and dict(wr.params) == {'GameDataName': build_mod.SHOP_ITEM_VAR, 'Index': -1, 'Value': SECOND}
-                       and name_of(wait) == ('EventSystemActor', 'EventWait')
-                       and dict(wait.params).get('Frames') == build_mod.SCRUB_WRITE_WAIT and wait.next == on
-                       and dict(q.cases)[ask[3]] == on and on in [game.events[f].next for f in picked])
-            good &= check('%s: behind each of the %d "shelf picked" steps, before the shopkeeper names the item: is '
-                          'it %s? -> Link has %s? -> yes: %s written into %s, %d frames, then on; no: on'
-                          % (build, len(picked), FIRST, FIRST, SECOND, build_mod.SHOP_ITEM_VAR,
-                             build_mod.SCRUB_WRITE_WAIT), ok)
-            placed = asks(SECOND)
-            adds = [back.events[dict(e.cases)[0]] for e in placed]
-            good &= check('%s: in front of each of the %d giving steps: is it %s? -> yes: %s added, then on behind the '
-                          'step; no: the step' % (build, len(gives), SECOND, SECOND),
-                          sorted(dict(e.cases)[1] for e in placed) == sorted(gives)
-                          and all(a.type == 'action' and name_of(a) == build_mod.SHOP_ADD
-                                  and dict(a.params) == dict(build_mod.shop_add_params(SECOND))
-                                  and a.next == game.events[dict(e.cases)[1]].next for a, e in zip(adds, placed))
-                          and len(back.events) == n0 + 4 * len(picked) + 2 * len(gives), len(back.events) - n0)
-            kept = all((o.type, o.name, o.params) == (b.type, b.name, b.params) for o, b in zip(game.events, back.events))
-            good &= check('%s: the game\'s %d events are there as they were (their leads apart)' % (build, len(game.events)),
-                          kept)
-        # ---- three levels, and a first weapon's bag
-        def flow_of(build):
-            fc = evfl.loads(plain(build_mod.SHOP_SALE_FLOW, builds[build][1])).flowchart
-            n0 = len(game.events)
+        def family(build, shelf, levels, names, comes_with, n0):
+            """the checks of one family's shelf in a build; levels: the items; names: what the inventory knows
+            them by; comes_with: what the first level needs; n0: the flow's events before the family's edit"""
+            ok_all = True
+            out, folder, files = builds[build]
+            first = levels[0]
+            packs = [f for f in files if f.startswith('Pack/Actor/%s%s_' % (shop_items.PREFIX, first[len('Item_'):]))]
+            name = os.path.basename(packs[0])[:-len('.pack.zs')] if len(packs) == 1 else ''
+            r, _, loc = build_mod.find_check(w, shelf)
+            maps = [plain('Banc/%s/%s' % (scene, fn[:-3] if fn.endswith('.zs') else fn), folder)
+                    for scene, _, pl in w.placements_of(r, loc) for fn in pl['files']]
+            pack = sarc.Sarc.read(plain(packs[0][:-3], folder)).files if name else {}
+            comp = ground_items.resolved_components(pack, name) if name else {}
+            sroot = byml.loads(pack[ground_items._ref_path(comp['PouchContentRef'])]).root if name else {}
+            arow = {x['__RowId']: x for x in byml.loads(plain(ground_items.table_path('ActorInfo'), folder)).root}
+            prow = {x['__RowId']: x for x in byml.loads(plain(ground_items.table_path('PouchActorInfo'), folder)).root}
+            mals = [f for f in files if f.startswith('Mals/USen')]
+            texts = msbt.Msbt.read(sarc.Sarc.read(plain(mals[0][:-3], folder)).files[
+                dungeon_keys.MESSAGE_FILE]).texts if mals else {}
+            ok_all &= check('%s: %s (%s): the shelf is %s, a shelf of its own: in the map, named itself (row and name '
+                            'file), its label the first level\'s name, "not put in the inventory" in its item '
+                            'settings and its row (as the game\'s %s); no shop version of another level'
+                            % (build, shelf, ' > '.join(levels), name, shop_items.NOT_PUSHED_SHELF),
+                            name.endswith('_Family') and any(m is not None and name.encode() in m for m in maps)
+                            and arow.get(name, {}).get('ActorName') == name
+                            and comp.get('ActorNameRef') == shop_items.NAME_REF % name
+                            and sroot.get('SpecialDeal') == not_pushed and 'PouchActor' not in sroot
+                            and prow.get(name, {}).get('PouchSpecialDeal') == shop_items.NOT_PUSHED
+                            and not set(prow.get(name, {})) - set(shop_items.FAMILY_ROW)
+                            and texts.get(name + '_Name') == texts.get(names[0] + '_Name') is not None
+                            and not [f for f in files for x in levels[1:] if x[len('Item_'):] + '_' in f
+                                     and f.startswith('Pack/Actor/' + shop_items.PREFIX)],
+                            (packs, sroot, prow.get(name)))
+            fc = evfl.loads(plain(build_mod.SHOP_SALE_FLOW, folder)).flowchart
 
             def name_of(e):
                 return fc.actors[e.actor].name, (fc.actors[e.actor].actions[e.action] if e.type == 'action'
@@ -214,49 +191,85 @@ def main(romfs):
                 return e.type == 'action' and name_of(e) == build_mod.SHOP_ADD \
                     and dict(e.params) == dict(build_mod.shop_add_params(item))
 
-            return fc, n0, name_of, asks, adds
+            def writes(i, value, on):
+                wr = fc.events[i]
+                wait = fc.events[wr.next] if wr.type == 'action' and wr.next is not None else None
+                return (wait is not None and name_of(wr) == ('GameDataActor', build_mod.SCRUB_NAME_WRITE)
+                        and dict(wr.params) == {'GameDataName': build_mod.SHOP_ITEM_VAR, 'Index': -1, 'Value': value}
+                        and name_of(wait) == ('EventSystemActor', 'EventWait')
+                        and dict(wait.params).get('Frames') == build_mod.SCRUB_WRITE_WAIT and wait.next == on)
 
-        fc, n0, name_of, asks, adds = flow_of('three')
-        heads = [e for e in asks(BAGS[0])]
-        ok = len(heads) == len(picked)
-        for head in heads:
-            on = dict(head.cases)[1]
-            q2 = fc.events[dict(head.cases)[0]]                    # "has the second level?" stands first
-            q1 = fc.events[dict(q2.cases)[ask[3]]] if q2.type == 'switch' else None
-            for q, owned, written in ((q2, BAGS[1], BAGS[2]), (q1, BAGS[0], BAGS[1])):
-                wr = fc.events[dict(q.cases)[ask[2]]] if q is not None and q.type == 'switch' else None
-                wait = fc.events[wr.next] if wr is not None and wr.type == 'action' and wr.next is not None else None
-                ok &= (wait is not None and name_of(q) == (build_mod.GIFT_PAIR_ACTOR, build_mod.GIFT_PAIR_QUERY)
-                       and dict(q.params) == {'Num': 1, 'Actor': owned}
-                       and dict(wr.params) == {'GameDataName': build_mod.SHOP_ITEM_VAR, 'Index': -1, 'Value': written}
-                       and dict(wait.params).get('Frames') == build_mod.SCRUB_WRITE_WAIT and wait.next == on)
-            ok &= q1 is not None and dict(q1.cases)[ask[3]] == on
-        good &= check('three: behind each "shelf picked" step: is it %s? -> has %s? -> %s written; else has %s? -> %s '
-                      'written; else on' % (BAGS[0], BAGS[1], BAGS[2], BAGS[0], BAGS[1]), ok)
-        ok = True
-        for later in BAGS[1:]:
-            placed = asks(later)
-            ok &= len(placed) == len(gives) and all(
-                adds(fc.events[dict(e.cases)[0]], later) for e in placed)
-        good &= check('three: in front of each of the %d giving steps: is it %s? -> added; is it %s? -> added; '
-                      '%d new events in all' % (len(gives), BAGS[1], BAGS[2], len(fc.events) - n0),
-                      ok and len(fc.events) == n0 + len(picked) * 7 + len(gives) * 4
-                      and not [f for f in builds['three'][2] if 'BombBag_Medium' in f or 'BombBag_Large' in f])
+            heads = asks(name)
+            ok = len(heads) == len(picked) and sorted(fc.events[f].next for f in picked) == sorted(
+                fc.events.index(h) for h in heads)
+            for head in heads:                          # behind each "shelf picked" step
+                on = dict(head.cases)[1]
+                ok &= on in [game.events[f].next for f in picked]
+                at = dict(head.cases)[0]
+                for k in reversed(range(1, len(levels))):          # the highest level is asked about first
+                    q = fc.events[at]
+                    ok &= (q.type == 'switch' and name_of(q) == (build_mod.GIFT_PAIR_ACTOR, build_mod.GIFT_PAIR_QUERY)
+                           and dict(q.params) == {'Num': 1, 'Actor': names[k - 1]}
+                           and writes(dict(q.cases)[ask[2]], names[k], on))
+                    if not ok:
+                        break
+                    at = dict(q.cases)[ask[3]]
+                ok = ok and writes(at, names[0], on)
+            ok_all &= check('%s: behind each of the %d "shelf picked" steps, before the shopkeeper names the item: is '
+                            'it %s? -> %s; has none -> %s; each written into %s, %d frames, then on'
+                            % (build, len(picked), name, '; '.join(
+                                'has %s -> %s' % (names[k - 1], names[k]) for k in reversed(range(1, len(levels)))),
+                               names[0], build_mod.SHOP_ITEM_VAR, build_mod.SCRUB_WRITE_WAIT), ok)
+            ok = True
+            for k, (item, known) in enumerate(zip(levels, names)):
+                placed = asks(known)
+                ok &= len(placed) == len(gives)
+                for e in placed:
+                    at = dict(e.cases)[0]
+                    for c in (comes_with if k == 0 else ()):
+                        ok &= adds(fc.events[at], c)
+                        at = fc.events[at].next
+                    ok &= adds(fc.events[at], item) and fc.events[at].next in [game.events[g].next for g in gives]
+            new = len(picked) * 3 * len(levels) + len(gives) * (2 * len(levels) + len(comes_with))
+            ok_all &= check('%s: in front of each of the %d giving steps: is it %s? -> %sadded, then on behind the '
+                            'step (the shelf itself gives nothing); %d new events'
+                            % (build, len(gives), '? / '.join(names),
+                               '%s and the first level ' % ', '.join(comes_with) if comes_with else 'that level ', new),
+                            ok and len(asks(name)) == len(picked), (len(fc.events) - n0, new))
+            return ok_all, fc, new
 
-        fc, n0, name_of, asks, adds = flow_of('weapons')
+        n_game = len(game.events)
+        n_key = len(sold) * 2 + 1
+        ok, fc, new = family('pair', SHELF, (FIRST, SECOND), (FIRST, SECOND), [], n_game)
+        good &= ok
+        good &= check('pair: the game\'s %d events are there as they were (their leads apart); %d events in all'
+                      % (n_game, len(fc.events)),
+                      all((o.type, o.name, o.params) == (b.type, b.name, b.params) for o, b in zip(game.events, fc.events))
+                      and len(fc.events) == n_game + new)
+        ok, fc, new = family('both', SHELF, (FIRST, SECOND), (FIRST, SECOND), [], n_game + n_key)
+        good &= ok and len(fc.events) == n_game + n_key + new
+        ok, fc, new = family('three', SHELF, BAGS, BAGS, [], n_game)
+        good &= ok and len(fc.events) == n_game + new
+        ok, fc, new = family('weapons', SHELF, SEEDS, (SLING,) + SEEDS[1:], ['Item_BulletBag_Small'], n_game)
+        good &= ok
+
+        # ---- a first weapon alone on a shelf: its own shop version, and its bag in front of the shelf's step
         game_adds = [e for e in game.events if e.type == 'action'
                      and (game.actors[e.actor].name, game.actors[e.actor].actions[e.action]) == build_mod.SHOP_ADD]
-        ok = True
-        for weapon, bag, family in ((SLING, 'Item_BulletBag_Small', True), (BOW, 'Item_Quiver_Small', False)):
-            comes = [e for e in asks(weapon) if fc.events[dict(e.cases)[0]].type == 'action']
-            ok &= len(comes) == len(gives) and all(
-                adds(fc.events[dict(e.cases)[0]], bag) and fc.events[dict(e.cases)[0]].next is not None for e in comes)
-            ok &= (len(asks(weapon)) - len(comes)) == (len(picked) if family else 0)
-        good &= check('weapons: the game\'s sale flow adds nothing to the inventory by itself (%d %s steps); in front '
-                      'of each giving step the Fairy Slingshot (a family\'s first level) comes with %s and the Fairy '
-                      'Bow (alone on a shelf) with %s; the Slingshot\'s later levels are chosen as any family\'s'
-                      % (len(game_adds), build_mod.SHOP_ADD[1], 'Item_BulletBag_Small', 'Item_Quiver_Small'),
-                      ok and not game_adds and len(asks(SEEDS[1])) == len(gives) == len(asks(SEEDS[2])))
+        alone = [e for e in fc.events[n_game:] if e.type == 'switch'
+                 and (fc.actors[e.actor].name, fc.actors[e.actor].queries[e.query]) == build_mod.SHOP_NAME_QUERY
+                 and dict(e.params) == dict(name_params, Value=BOW)]
+        bags = [fc.events[dict(e.cases)[0]] for e in alone]
+        good &= check('weapons: the game\'s sale flow adds nothing to the inventory by itself (%d %s steps); the Fairy '
+                      'Bow alone on a shelf is its own shop version (%s), and in front of each of the %d giving steps '
+                      '"is it %s?" adds %s and leads on to the shelf\'s own step'
+                      % (len(game_adds), build_mod.SHOP_ADD[1], 'sold once', len(gives), BOW, 'Item_Quiver_Small'),
+                      not game_adds and len(alone) == len(gives)
+                      and all(b.type == 'action' and dict(b.params) == dict(build_mod.shop_add_params('Item_Quiver_Small'))
+                              and b.next is not None for b in bags)
+                      and len(fc.events) == n_game + new + len(gives) * 2
+                      and any(f for f in builds['weapons'][2] if f.startswith('Pack/Actor/%sRange_Bow_' % shop_items.PREFIX)
+                              and f.endswith('_Once.pack.zs')), len(fc.events) - n_game)
 
         # the Bomb Bag, the Fairy Slingshot and the Fairy Bow have a centred pose: lifted on the shelf by what
         # their model hangs under the shelf point (as the scales, tests/shop_shelf_keys_check.py)

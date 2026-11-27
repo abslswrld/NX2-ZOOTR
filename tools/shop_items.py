@@ -62,6 +62,18 @@ Found in the game's files:
   Deku Shield shelf `Weapon_Shield_Deku`, the Bombchu shelves `Item_Bombchu`). A shop version has item
   settings of its own doing the same: the item's settings as parent, `PouchActor` the item.
 
+- A shelf Link already has the item of says "Sold out" and shows no model (in game 2026-11-27: with a Bomb
+  Bag from a chest, the Bomb Bag's shelf; nothing in the files says so: the shopkeeper's list had stock, and
+  no flag). What a shop knows a shelf's item by is the `ActorName` of its `ActorInfo` row (the mask shelves:
+  `Armor_Child_Mask_Keaton`, while their item settings name `Item_Mask_Keaton`): that name goes into
+  `Shop_SelectItemName`, and it is the name the shelf's label shows. The game also has shelves named
+  themselves (`Shop_DekuNutBundle_01`: row and name file its own, texts under its own name) and shelves that
+  put nothing in the inventory (`Shop_Heart`: `PouchSpecialDeal: NotPushToPouch`).
+  So the shelf of an upgrade family (`family=True`; tools/build_mod.py: shop_family_edit) is a shelf Link can
+  never have: named itself (row, name file; its `_Name` text is the first level's, added by the builder),
+  "not put in the inventory" in its item settings and its row, the row without what the item does when it
+  is got. What Link gets is added by the sale flow.
+
 A shop version of item X is built from the game's own files only: the shield shelf's pack without its item
 and price files, X's model, animation and item settings (with the files they inherit from, when X's pack has
 them), the shop base's price files, and two small files of its own (price table and price). The name is
@@ -128,6 +140,13 @@ HELD_LOWER = {}
 SHELF_BASE = 'Item_DekuSeed_Animation'
 COMMON_ANIM = 'Item_Common_Animation'
 NO_RESPAWN = '?Component/ActorGameDataSetting/NoRespawn.game__component__ActorGameDataSetting.bgyml'
+# a family's shelf (family=True): a shelf Link can never have
+NAME_REF = '?ActorSystem/ActorName/%s.engine__actor__ActorName.bgyml'    # an actor file's ActorNameRef
+NOT_PUSHED_SHELF = 'Shop_Heart'                    # a shelf of the game that puts nothing in the inventory
+NOT_PUSHED = 'NotPushToPouch'                      # PouchSpecialDeal (PouchActorInfo)
+# what a family shelf's row keeps of the item's row: where it is listed and how it is got, nothing it does
+FAMILY_ROW = ('__RowId', 'BundleActorNum', 'BuyingPrice', 'SellingPrice', 'IsAutoSaveAfterGet', 'PouchCategory',
+              'PouchGetType', 'PouchSpecialDeal', 'PouchTabCategory')
 # sold once, for good: the AI of the shop versions (the shelf's own with one addition, sold_for_good_ai)
 BASE_AI = 'Shop_Item_Base'                    # the AI of every shelf
 ONCE_AI = 'Shop_NX2_Once'
@@ -141,9 +160,19 @@ BOOL_SELECTOR, SIMULTANEOUS = 7, 3            # node types (formats/ainb.py NODE
 FLOW = 2                                      # link type: flow to child nodes
 
 
-def shop_name(item, price, once=False):
+def shop_name(item, price, once=False, family=False):
     base = item[5:] if item.startswith('Item_') else item
-    return '%s%s_%d%s' % (PREFIX, base, price, '_Once' if once else '')
+    return '%s%s_%d%s' % (PREFIX, base, price, '_Family' if family else '_Once' if once else '')
+
+
+def not_pushed_value(read_pack):
+    """the item settings' SpecialDeal value "not put in the inventory", read from the game's own heart shelf"""
+    files = sarc.Sarc.read(read_pack(pack_path(NOT_PUSHED_SHELF))).files
+    comp = resolved_components(files, NOT_PUSHED_SHELF)
+    root = byml.loads(files[_ref_path(comp['PouchContentRef'])]).root
+    if 'SpecialDeal' not in root:
+        raise SystemExit('%s: its item settings name no SpecialDeal as expected' % NOT_PUSHED_SHELF)
+    return root['SpecialDeal']
 
 
 def gpt_path(actor):
@@ -413,12 +442,14 @@ def shelf_pose(item, project, row, read_pack):
                   'held_lo': held_lo, 'held_hi': held_hi}
 
 
-def build(item, price, read_pack, read_table_rows, once=False):
-    """the shop version of `item` at `price` rupees.
+def build(item, price, read_pack, read_table_rows, once=False, family=False):
+    """the shop version of `item` at `price` rupees. family: the shelf of an upgrade family whose first level is
+    `item`: sold once, named itself, never in the inventory (the sale flow adds the level Link gets).
     Returns (name, pack data, {inner path: (data, similar game file)} for files new to the game, {table: row},
     {loose file new to the game: (data, the game file it is a copy of, what shelf_pose says about it)}: the
     animation project of an item with a shelf pose of its own, SHELF_POSE)."""
-    name = shop_name(item, price, once)
+    once = once or family
+    name = shop_name(item, price, once, family)
     tpl = sarc.Sarc.read(read_pack(pack_path(TEMPLATE)))
     base = sarc.Sarc.read(read_pack(pack_path(PRICE_TEMPLATE)))
     itm = sarc.Sarc.read(read_pack(pack_path(item)))
@@ -497,7 +528,12 @@ def build(item, price, read_pack, read_table_rows, once=False):
     pdoc = byml.loads(tpl.files[tpp])
     pdoc.root = type(pdoc.root)()
     pdoc.root['$parent'] = 'Work/' + _ref_path(ic['PouchContentRef'])[:-len('.bgyml')] + '.gyml'
-    pdoc.root['PouchActor'] = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
+    if family:
+        # never in the inventory, and named itself (the name file is not in a pack, as the game's own)
+        pdoc.root['SpecialDeal'] = not_pushed_value(read_pack)
+        comp['ActorNameRef'] = NAME_REF % name
+    else:
+        pdoc.root['PouchActor'] = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
     new_inner[pouch_param_path(name)] = (byml.dumps(pdoc), tpp)
     comp['PouchContentRef'] = '?' + pouch_param_path(name)
     if once:
@@ -572,6 +608,14 @@ def build(item, price, read_pack, read_table_rows, once=False):
     pa['BuyingPrice'] = type(tp['BuyingPrice'])(price)
     pa['SellingPrice'] = tp['SellingPrice']
     pa['__RowId'] = name
+    if family:
+        heart = tables['PouchActorInfo'][NOT_PUSHED_SHELF]
+        if heart.get('PouchSpecialDeal') != NOT_PUSHED or 'PouchSpecialDeal' not in pa:
+            raise SystemExit('%s: its row is not "%s" as expected' % (NOT_PUSHED_SHELF, NOT_PUSHED))
+        pa['PouchSpecialDeal'] = type(heart['PouchSpecialDeal'])(NOT_PUSHED)
+        for k in [k for k in pa if k not in FAMILY_ROW]:
+            del pa[k]
+        ai['ActorName'] = type(ai_t['ActorName'])(name)
     rows = {'ActorInfo': ai, 'GameActorInfo': ga, 'PouchActorInfo': pa}
 
     back = sarc.Sarc.read(pack)
@@ -588,4 +632,11 @@ def build(item, price, read_pack, read_table_rows, once=False):
                 != 'Work/AI/Root/%s.root.ain' % ONCE_AI \
                 or ainb.loads(back.files[ai_path(ONCE_AI)]).filename != ONCE_AI + '.root':
             raise SystemExit('read-back: the sold-once AI of %s differs' % name)
+    if family:
+        got = resolved_components(back.files, name)
+        sroot = byml.loads(back.files[_ref_path(got['PouchContentRef'])]).root
+        if got.get('ActorNameRef') != NAME_REF % name or 'PouchActor' in sroot \
+                or sroot.get('SpecialDeal') != not_pushed_value(read_pack) or ai.get('ActorName') != name \
+                or pa.get('PouchSpecialDeal') != NOT_PUSHED or set(pa) - set(FAMILY_ROW):
+            raise SystemExit('read-back: the family shelf %s is not named itself and out of the inventory' % name)
     return name, pack, new_inner, rows, loose

@@ -415,6 +415,11 @@ checks, none with an ID; Inside the Deku Tree no data yet.
      for a setting of n. **The Kokiri Shop's order is a proposal, the user to confirm:** Deku Seeds x30, Deku
      Nuts x10, Deku Sticks x5, the Recovery Heart, Deku Seeds x10, Deku Nuts x5, the Deku Stick, the Deku
      Shield (last). The generator that will use it is phase 5.
+   - **in game 2026-11-27:** the Fairy Bow on a shelf: good (stands right, 30 arrows). With a Bomb Bag from
+     a chest the bomb bag shelf said "Sold out" (a shop does not sell an item Link has). **Fixed, to retest:**
+     a family's shelf is a shelf of its own that Link can never have (`Shop_NX2_<First>_<price>_Family`: named
+     itself, the first level's look and name, never in the inventory), and the sale flow writes the name of
+     the level Link gets next and adds that level, the first one included;
    - shelf lifts for the Bomb Bag (0.19 m), the Fairy Bow (0.42 m) and the Fairy Slingshot (0.18 m), measured
      as the scales'. The Fairy Bow is 0.91 m tall on a shelf (the shop's rows are 0.64 m apart): its look is
      part of the test.
