@@ -386,6 +386,15 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    sold count kept; a shelf with the `Presence` setting and no twin; the twin as built; the twin linked from
    the shopkeeper before the shelf; the twin not linked from the shopkeeper. A Silver Scale in Mido's first
    chest switches them over.
+   **The diagnostic in game, 2026-11-26: the shop takes one object per shelf number, the one its last link
+   for that number points at, whether that object is there or not.** Without the Silver Scale: the ordinary
+   item worked (the kept sold count is fine), the shelf with only the `Presence` setting worked, the twin
+   linked last could not be chosen (the last link pointed at the absent twin), the twin linked first and the
+   twin not linked worked (the shelf was the last link). With the Silver Scale it turned round: only the twin
+   linked last could be chosen, and it was right: "Golden Scale", 30 rupees, bought. So `Presence` works on a
+   shelf, a second object is labelled and priced right, and the switch needs no reload, but **one
+   shopkeeper cannot serve two objects of one shelf number**. What is left: two shopkeepers on one spot, one
+   per state, each linked to its own object (the game's own way in this shop: its two sets); to try next.
 3. **Shop families, the rest:** a three-level family, one family on two shelves, and the setting for how many
    shelves per shop are randomized (D37).
 4. **Kokiri Forest closed out:** its every-spot build script, the Kokiri Forest exit setting (D14: closed until

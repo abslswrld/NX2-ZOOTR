@@ -4,6 +4,32 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-26
 
+### Phase 2, part 2: what the diagnostic build showed
+The user's answers (new file, child; the five shelves, then again with the Silver Scale from Mido's chest):
+
+| Shelf | Arrangement | Without the Silver Scale | With the Silver Scale |
+|---|---|---|---|
+| 1 | a Boomerang, its sold count kept | chosen, "Boomerang", 15 rupees; bought, empty after coming back | |
+| 2 | Silver Scale with `Presence` only, no twin | chosen, "Silver Scale", 20 | nothing there, cannot be chosen |
+| 3 | twin linked from the shopkeeper after the shelf | **cannot be chosen** | chosen, "Golden Scale", 30; bought |
+| 4 | twin linked before the shelf | chosen, "Silver Scale", 30 | **cannot be chosen** |
+| 5 | twin not linked | chosen, "Silver Scale", 40 | **cannot be chosen** |
+
+- **Found: the shop takes one object per shelf number, the one the shopkeeper's last link for that number
+  points at, whether that object is there or not.** If it is absent the shelf cannot be chosen; the cursor
+  goes round it.
+- **What works:** the kept sold count (shelf 1); a `Presence` setting on a shelf (shelf 2); a second object
+  under the same shelf number is labelled and priced as itself ("Golden Scale", 30 rupees) and sells
+  (shelf 3); the switch between the two objects needs no reload of the area (the Silver Scale came from
+  Mido's house, the shop was entered again).
+- **What does not:** one shopkeeper serving two objects of one shelf number. Whichever is linked last is the
+  only one that can ever be chosen.
+- **What is left for decision 50:** two shopkeepers on one spot, one there while Link has no first level and
+  one while he has, each linked to its own object for the family's shelf. It is the game's own way in this
+  very shop (its two sets of shopkeeper and shelves by one flag). Limits seen already: it is one pair of
+  states per shop, so two different families, or three levels, in one shop need more than two states.
+  Nothing of it is built yet.
+
 ### Phase 2, part 2: the two-object shelf failed in game; a diagnostic build
 - **In game (the user):** "i cannot move my cursor to either scale. and the cursor starts in the top left so
   its stuck there. i can leave the menu tho." The pair was on `KF_KOKIRI_CHILD_SHOP_01` and `_02`, the two
