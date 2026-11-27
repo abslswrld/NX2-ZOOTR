@@ -102,9 +102,14 @@ ROW_FROM_ITEM = ('ActorName', 'FmdbName', 'ModelAabbMax', 'ModelAabbMin', 'Model
 # item it is made of (tools/build_mod.py: on_shelf).
 # The Silver and the Golden Scale (phase 2, part 1; in game 2026-11-26 the Silver Scale sat in its shelf): centred
 # poses, lowest vertex 0.192 and 0.203 under the point.
+# The Bomb Bag, the Fairy Bow and the Fairy Slingshot (phase 2, part 3; measured the same way before their first
+# test on a shelf): centred poses, lowest vertex 0.193, 0.416 and 0.182 under the point. (The Fairy Bow stands
+# 0.91 m tall and 0.63 m wide then; the shop's two rows are 0.64 m apart, so on a lower shelf it reaches the
+# shelf above.)
 SHELF_LIFT = {'Item_Hookshot': 0.25, 'Item_HoverBoot': 0.19,
               'Item_Dungeon_BossKey': 0.22, 'Item_Dungeon_Compass': 0.13, 'Item_Dungeon_Map': 0.20,
-              'Item_Scale_Silver': 0.19, 'Item_Scale_Gold': 0.20}
+              'Item_Scale_Silver': 0.19, 'Item_Scale_Gold': 0.20,
+              'Item_BombBag_Small': 0.19, 'Item_Range_Bow': 0.42, 'Item_Range_SlingShot': 0.18}
 # SHELF_POSE: items that get a shelf pose (Pose_Shop) of their own, as the game's own shelf items have (bomb, Deku
 # Stick, arrows, Hylian Shield: their Pose_Common times one number): how many times its Pose_Common the item is on
 # the shelf. The Giant's Knife's pose lays it nearly flat, 1.53 m wide (0.50 m tall, 0.56 m deep), centred on the

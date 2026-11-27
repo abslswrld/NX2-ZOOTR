@@ -179,8 +179,10 @@ def main(romfs):
                   and FAMILY[:2] not in build_mod.PROGRESSIVE_PAIRS and FAMILY[1:] not in build_mod.PROGRESSIVE_PAIRS)
     # (a Gold Skulltula takes a family in a form of its own since 2026-11-22, and a pot a turning item: left to
     # them, as a rock's is)
-    good &= check("refused: on a shelf; on a Gold Skulltula it is left to the skulltula's own form",
-                  refused(build_mod.three_level_parse, world, [(REFUSED[0], text)])
+    # (and a shelf to the shops' sale flow since 2026-11-27: tests/shop_family_check.py)
+    good &= check("on a shelf it is left to the shops' sale flow, on a Gold Skulltula to the skulltula's own form",
+                  build_mod.three_level_parse(world, [(REFUSED[0], text)]) == {}
+                  and build_mod.shop_pair_kind(world, REFUSED[0])
                   and build_mod.three_level_parse(world, [(REFUSED[1], text)]) == {}
                   and build_mod.skulltula_pair_kind(world, REFUSED[1]))
     left = [(c, text) for c in OTHER_WAYS]

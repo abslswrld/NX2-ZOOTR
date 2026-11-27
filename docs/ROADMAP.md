@@ -402,6 +402,22 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    round: the rule only refuses builds, and part 1's way passed in game.
 3. **Shop families, the rest:** a three-level family on a shelf, and the setting for how many shelves per shop
    are randomized (D37). (One family on two shelves of a shop is ruled out by D51.)
+   **Built 2026-11-27, to test in game** (`tests/shop_family_check.py`):
+   - **three levels on a shelf** (`SHELF=First>Second>Third`): the sale flow asks "has Second?" and then "has
+     First?" right after the shelf is picked and writes the next level's name; in front of each giving step
+     the second or the third level is added in the shelf item's place;
+   - **a first weapon on a shelf comes with its small bag** (found here: a Fairy Slingshot or Fairy Bow on a
+     shelf, alone or as its family's first level, came with no bag, since a shelf gives nothing but its own
+     item): the bag is added in the sale flow in front of each giving step;
+   - **the shelf-count setting (D37)** needs nothing in the game's files (a build already changes only the
+     shelves it is given). What it needs is the order in which a shop's shelves are randomized as the number
+     goes up: each shop shelf has a `shelf_rank` in `data/world`, and `World.shop_shelves(n)` names the shelves
+     for a setting of n. **The Kokiri Shop's order is a proposal, the user to confirm:** Deku Seeds x30, Deku
+     Nuts x10, Deku Sticks x5, the Recovery Heart, Deku Seeds x10, Deku Nuts x5, the Deku Stick, the Deku
+     Shield (last). The generator that will use it is phase 5.
+   - shelf lifts for the Bomb Bag (0.19 m), the Fairy Bow (0.42 m) and the Fairy Slingshot (0.18 m), measured
+     as the scales'. The Fairy Bow is 0.91 m tall on a shelf (the shop's rows are 0.64 m apart): its look is
+     part of the test.
 4. **Kokiri Forest closed out:** its every-spot build script, the Kokiri Forest exit setting (D14: closed until
    the Deku Tree / open), and the check that its cutscenes can be skipped (D48).
 5. **Lost Woods, the map spots:** check IDs, regions and rules for the 22 spots, the every-spot script, an

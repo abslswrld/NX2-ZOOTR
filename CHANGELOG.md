@@ -2,6 +2,50 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-27
+
+### Phase 2, part 3: three levels on a shelf, a first weapon's bag, the shelf order (to test in game)
+Branch `claude/shop-families-rest`. Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **Three levels on a shop shelf** (`SHELF=First>Second>Third`, refused until now): the same way as a pair
+  (part 1), with one more level. Right after the shelf is picked the sale flow asks "has Second?" (yes:
+  Third's name is written) and then "has First?" (yes: Second's name), the higher level first, as gifts and
+  scrubs ask; in front of each of the five giving steps "is it Second?" and "is it Third?" add that level in
+  the shelf item's place. `shop_family_edit` and `shop_family_check` take any number of levels now;
+  `three_level_parse` leaves a shelf to them.
+- **A first weapon on a shelf comes with its small bag.** Found while building this: a Fairy Slingshot or
+  Fairy Bow on a shelf, alone or as its family's first level, was sold with no bag (the game's sale flow has
+  no step that adds anything to the inventory; the shelf gives its own item and nothing else, and only chests
+  give the bag with the weapon). Now, in front of each giving step, "is it <the weapon>?" adds its small bag
+  (`SCRUB_COMPANIONS`, the step the scrubs add it with) and then lets the shelf give the weapon. This is the
+  shelf's part of what part 10 of phase 1 did for the ground, pots and Gold Skulltulas.
+- **The shelf-count setting (decision 37):** nothing in the game's files is needed for it; a build changes
+  only the shelves it is given, and the others keep the game's items (seen in every shelf test). What the
+  generator will need is which shelves come first as the number goes up, so each shop shelf of
+  `data/world/KokiriForest.json` has a `shelf_rank` (1 = randomized first; the child's and the adult's shelf
+  of one number have the same rank), `World.shop_shelves(n)` (`logic/world.py`) names the shelves for a
+  setting of n, and `World.problems()` checks that a shop's ranks are 1 to n, each once.
+  **The Kokiri Shop's order is a proposal for the user to confirm:** 1 Deku Seeds x30 (shelf 04), 2 Deku
+  Nuts x10 (03), 3 Deku Sticks x5 (05), 4 the Recovery Heart (08), 5 Deku Seeds x10 (01), 6 Deku Nuts x5
+  (02), 7 the Deku Stick (07), 8 the Deku Shield (06). The idea: the bigger bundle of a kind goes first, so
+  one of each kind stays for sale as long as possible, and the Deku Shield goes last.
+- **`tests/shop_family_check.py`:** four more checks (three levels; the weapons' bags; the shelf order).
+  `tests/three_chest_check.py`, `tests/families_check.py`, `tests/pairs_more_check.py` and
+  `tests/skulltula_prog_check.py` expected three levels on a shelf to be refused; they check what holds now.
+- **Shelf lifts for the Bomb Bag, the Fairy Bow and the Fairy Slingshot** (`SHELF_LIFT`, `tools/shop_items.py`):
+  0.19, 0.42 and 0.18 m. Their poses are centred on the shelf point as the scales' were (lowest vertex 0.193,
+  0.416 and 0.182 m under it, measured the same way), so they would have sat in the shelf. The Fairy Bow is
+  0.91 m tall and 0.63 m wide standing on a shelf, and the shop's two rows are 0.64 m apart: on a lower shelf
+  it reaches the shelf above. The test build has it on a top shelf; whether it needs a smaller shelf pose (as
+  the Giant's Knife has) is for the in-game look to say. One more check in `tests/shop_family_check.py`.
+- **Test build:** the six standing fixes and `kokiri_shop_full_stock`; `KF_SHOP_RUPEE_ITEM=Obj_Rupee_Gold`;
+  `KF_KOKIRI_CHILD_SHOP_01` (left alcove, top right, 15 rupees) and `KF_MIDO_CHEST_01` / `_02` (the two middle
+  chests) = `Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large`; `KF_KOKIRI_CHILD_SHOP_04` (right
+  alcove, top left, 30 rupees) = `Item_Range_Bow`. Two short runs on new files (one chest opened: the shelf
+  sells the second level; both: the third), since a shop holds one shelf of a family.
+- **Tests:** the full run (`python tests/run_all.py`, 32 scripts) passed before the lifts were added; after
+  them `tests/shop_family_check.py` and `tests/shop_shelf_keys_check.py` (the two that look at lifts) pass.
+
 ## 2026-11-26
 
 ### Phase 2, part 2 closed: part 1's look stays, one upgrade of a family per shop (decision 51)

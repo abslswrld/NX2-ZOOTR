@@ -47,12 +47,14 @@ The same on a liftable rock, a solid bush, a pot or a Gold Skulltula (passed in 
 (Drop__DropActor) names the first level's one-time turning item (tools/once_items.py). It turns into the next
 level on the ground once Link owns its own, and marks what dropped it when it turns or is picked up (given
 once).
-The same on a shop shelf (phase 2, part 1; a trial, to test in game; pairs only): the shelf is First's shop
+The same on a shop shelf (phase 2, parts 1 and 3; three levels to test in game): the shelf is First's shop
 version, sold once, and the shops' shared sale flow (DisplayShop) chooses the level: when Link has First it
 writes Second's name where the flow keeps the picked item's name, right after the shelf is picked, so the
 shopkeeper's line, the flow's own questions, its get window and its texts are Second's, and in front of each
 step that puts the shelf's item in the inventory Second is added in its place (shop_family_edit). The shelf
 itself still shows First's model.
+Three levels on a shelf: two inventory questions, the higher level first. A first weapon on a shelf (the Fairy
+Slingshot, the Fairy Bow), alone or as a family's first level, comes with its small bag, added in the same flow.
 A shop holds at most one upgrade of a family (decision 51, the user 2026-11-26): two shelves of one shop with
 levels of the same family, as pairs or alone, stop the build (shop_family_guard).
 Three-level family (to test in game): CHECK_ID=First>Second>Third on a small chest makes it a chest of our own
@@ -314,9 +316,9 @@ PROGRESSIVE_WHERE = ('in a chest (a big one becomes a small checking chest), on 
 def three_level_parse(world, assignments):
     """takes the three-level families (CHECK_ID=First>Second>Third) in chests out of `assignments`: each becomes
     (CHECK_ID, First), as a pair's; returns {check id: family}. Stops the build for a family that is not in
-    THREE_LEVEL_FAMILIES, and for a check of a kind no progressive form can be put on (a shelf). A family
-    on a freestanding item, a rock, a bush, a pot, a Gold Skulltula, a scrub or a gift is left as it is: sorted out
-    with the pairs (main). A big chest becomes a small one when its map is changed (patch_file, BIG_CHEST)."""
+    THREE_LEVEL_FAMILIES, and for a check of a kind no progressive form can be put on. A family
+    on a freestanding item, a rock, a bush, a pot, a Gold Skulltula, a scrub, a shelf or a gift is left as it is:
+    sorted out with the pairs (main). A big chest becomes a small one when its map is changed (patch_file, BIG_CHEST)."""
     out = {}
     for k, (cid, item) in enumerate(assignments):
         if item.count('>') != 2:
@@ -327,9 +329,9 @@ def three_level_parse(world, assignments):
                 '>'.join(x) for x in sorted(THREE_LEVEL_FAMILIES))))
         r, name, loc = find_check(world, cid)
         kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
-        if not kinds or kinds == {'scrub'} or (len(kinds) == 1 and kinds <= set(TURN_KINDS)) \
+        if not kinds or kinds == {'scrub'} or kinds == {'shop'} or (len(kinds) == 1 and kinds <= set(TURN_KINDS)) \
                 or kinds == GS_KINDS:
-            continue                                   # a gift, a scrub, a turning item: with the pairs
+            continue                                   # a gift, a scrub, a shelf, a turning item: with the pairs
         if kinds != {'chest'}:
             raise SystemExit('%s: a three-level family (First>Second>Third) can only be put %s (this check: %s)'
                              % (cid, PROGRESSIVE_WHERE, ', '.join(sorted(kinds))))
@@ -839,6 +841,13 @@ def shop_key_check(orig, back, sales):
 #                                                      no  -> the step
 # The game sells nothing named as a family's later level, so "is it <Second>" is only true after our write
 # (checked: shop_family_edit refuses a Second the game's own shelves are named as).
+# Three levels (phase 2, part 3; to test in game): two inventory questions behind the "shelf picked" steps, the
+# higher level first ("has Second?" -> Third's name; else "has First?" -> Second's name), and one more "is it
+# <Third>?" in front of each giving step.
+# A first weapon on a shelf (the Fairy Slingshot, the Fairy Bow), alone or as a family's first level, came
+# with no bag: a shelf puts its own item in the inventory and nothing else (only chests give the bag with the
+# weapon). So in front of each giving step: "is it <the weapon>?" -> its small bag is added (SCRUB_COMPANIONS,
+# the step the scrubs add it with), then the shelf's own step.
 SHOP_GIVES = (('Npc_EventStarter', 'EventTriggerGetItemAtShop'), ('Npc_EventStarter', 'EventTriggerShopItemPutInPouch'))
 SHOP_ADD = ('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent')
 SHOP_FOCUS = ('Npc_EventStarter', 'EventTriggerShopItemFocus')
@@ -869,48 +878,73 @@ def shop_add_params(item):
 
 
 def shop_family_edit(fc, families, ask, write):
-    """families: {the name the shop asks about First by: (First's name in the inventory question, the name
-    written for Second, Second as it is added)}. ask: the game's inventory question (gift_pair_template);
-    write: the scrubs' name write and wait (scrub_pair_template). Returns lines saying what was changed."""
+    """families: {the name the shop asks about the first level by: (asked, written, items, with_first)}, for a
+    family First>Second[>Third] on a shelf, or a first weapon alone (no later levels):
+      asked       the names the inventory is asked about, for every level but the last (First, Second)
+      written     the names written for the later levels (Second, Third)
+      items       the later levels as they are added
+      with_first  what the first level needs when it is sold as itself (SCRUB_COMPANIONS: the small bag)
+    ask: the game's inventory question (gift_pair_template); write: the scrubs' name write and wait
+    (scrub_pair_template). Returns lines saying what was changed."""
     sold, can, name_params = shop_flow_parts(fc)
     gives = shop_give_steps(fc)
     picked = shop_focus_steps(fc)
     by, said = fc.events, []
     _, q_params, has, has_not = ask
     w_params, _, wait_params = write
-    for shown, (first, second_name, second) in sorted(families.items()):
-        # behind each "shelf picked" step: First owned -> the flow's name becomes Second's
+
+    def named(value):
+        prm = evfl.Params(name_params)
+        prm['Value'] = value
+        return prm
+
+    for shown, (asked, written, items, with_first) in sorted(families.items()):
+        # behind each "shelf picked" step: the highest level owned decides the name the flow goes on with
         writes = []
-        for f in picked:
+        for f in picked if written else ():
             nxt = by[f].next
-            wait_p = evfl.Params(wait_params)
-            wait_p['Frames'] = SCRUB_WRITE_WAIT
-            wait = fc.add_action(('EventSystemActor', ''), 'EventWait', wait_p, next=nxt)
-            w = evfl.Params(w_params)
-            w['GameDataName'], w['Value'] = SHOP_ITEM_VAR, second_name
-            written = fc.add_action('GameDataActor', SCRUB_NAME_WRITE, w, next=wait)
-            owns = evfl.Params(q_params)
-            owns['Actor'] = first
-            q = fc.add_switch(GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY, [(has, written), (has_not, nxt)], owns)
-            is_first = evfl.Params(name_params)
-            is_first['Value'] = shown
-            by[f].next = fc.add_switch(SHOP_NAME_QUERY[0], SHOP_NAME_QUERY[1], [(0, q), (1, nxt)], is_first)
-            writes.append(by[written].name)
-        # in front of each step that gives the shelf's item: Second is added in its place
-        is_second = evfl.Params(name_params)
-        is_second['Value'] = second_name
+            chain = nxt
+            for k in range(len(written)):           # the question about the highest level ends up first
+                wait_p = evfl.Params(wait_params)
+                wait_p['Frames'] = SCRUB_WRITE_WAIT
+                wait = fc.add_action(('EventSystemActor', ''), 'EventWait', wait_p, next=nxt)
+                w = evfl.Params(w_params)
+                w['GameDataName'], w['Value'] = SHOP_ITEM_VAR, written[k]
+                write_ev = fc.add_action('GameDataActor', SCRUB_NAME_WRITE, w, next=wait)
+                owns = evfl.Params(q_params)
+                owns['Actor'] = asked[k]
+                chain = fc.add_switch(GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY, [(has, write_ev), (has_not, chain)], owns)
+                writes.append(by[write_ev].name)
+            by[f].next = fc.add_switch(SHOP_NAME_QUERY[0], SHOP_NAME_QUERY[1], [(0, chain), (1, nxt)], named(shown))
         new = []
         for g in gives:
-            add = fc.add_action(SHOP_ADD[0], SHOP_ADD[1], shop_add_params(second), next=by[g].next)
-            gsw = fc.add_switch(SHOP_NAME_QUERY[0], SHOP_NAME_QUERY[1], [(0, add), (1, g)], evfl.Params(is_second))
-            if fc.repoint(g, gsw, keep=(gsw,)) < 1:
-                raise SystemExit('%s: nothing led to its step %s' % (SHOP_SALE_FLOW, by[g].name))
-            new.append(by[gsw].name)
-        said.append('%s on a shelf: behind each of the %d "shelf picked" steps: Link has %s -> %s is written into '
-                    '%s (%s), %d frames pass; in front of each of the %d steps that give the shelf\'s item (%s): '
-                    '%s is added in its place'
-                    % (shown, len(picked), first, second_name, SHOP_ITEM_VAR, ', '.join(writes), SCRUB_WRITE_WAIT,
-                       len(gives), ', '.join(new), second))
+            # in front of each step that gives the shelf's item: a later level is added in its place
+            for name, item in zip(written, items):
+                add = fc.add_action(SHOP_ADD[0], SHOP_ADD[1], shop_add_params(item), next=by[g].next)
+                gsw = fc.add_switch(SHOP_NAME_QUERY[0], SHOP_NAME_QUERY[1], [(0, add), (1, g)], named(name))
+                if fc.repoint(g, gsw, keep=(gsw,)) < 1:
+                    raise SystemExit('%s: nothing led to its step %s' % (SHOP_SALE_FLOW, by[g].name))
+                new.append(by[gsw].name)
+            # the first level sold as itself: what it needs is added in front of the shelf's own step
+            if with_first:
+                nxt, last = g, None
+                for c in reversed(with_first):
+                    nxt = fc.add_action(SHOP_ADD[0], SHOP_ADD[1], shop_add_params(c), next=nxt)
+                    last = nxt if last is None else last
+                csw = fc.add_switch(SHOP_NAME_QUERY[0], SHOP_NAME_QUERY[1], [(0, nxt), (1, g)], named(shown))
+                if fc.repoint(g, csw, keep=(csw, last)) < 1:
+                    raise SystemExit('%s: nothing led to its step %s' % (SHOP_SALE_FLOW, by[g].name))
+                new.append(by[csw].name)
+        said.append('%s on a shelf%s%s%s' % (
+            shown,
+            ': behind each of the %d "shelf picked" steps the highest level Link has decides the name written '
+            'into %s (%s; %d frames after it): %s' % (len(picked), SHOP_ITEM_VAR, ', '.join(writes), SCRUB_WRITE_WAIT,
+                                                       ', '.join('has %s -> %s' % (a, n) for a, n in zip(asked, written)))
+            if written else '',
+            '; in front of each of the %d steps that give the shelf\'s item: %s added in its place'
+            % (len(gives), ' or '.join(items)) if written else '',
+            '; sold as itself it comes with %s (added in front of each giving step)' % ', '.join(with_first)
+            if with_first else ''))
     fc.update_entry_points()
     return said
 
@@ -926,8 +960,11 @@ def shop_family_check(orig, back, families, ask, write):
     picked = shop_focus_steps(orig)
     n0 = len(orig.events)
     _, q_params, has, has_not = ask
-    if len(back.events) != n0 + len(families) * (4 * len(picked) + 2 * len(gives)):
-        fail('%d events, expected %d' % (len(back.events), n0 + len(families) * (4 * len(picked) + 2 * len(gives))))
+    expect = n0 + sum((len(picked) * (1 + 3 * len(written)) if written else 0)
+                      + len(gives) * (2 * len(written) + (1 + len(with_first) if with_first else 0))
+                      for asked, written, items, with_first in families.values())
+    if len(back.events) != expect:
+        fail('%d events, expected %d' % (len(back.events), expect))
 
     def name_of(e):
         return back.actors[e.actor].name, (back.actors[e.actor].actions[e.action] if e.type == 'action'
@@ -949,36 +986,57 @@ def shop_family_check(orig, back, families, ask, write):
                 or [own(x) for x in _flow_links(b)] != _flow_links(o):
             fail('the event %s changed otherwise than intended' % o.name)
     new = back.events[n0:]
-    for shown, (first, second_name, second) in sorted(families.items()):
-        heads = [e for e in new if asks(e, shown)]
-        if len(heads) != len(picked):
-            fail('%d name questions for %s, expected %d' % (len(heads), shown, len(picked)))
+
+    def adds(e, item):
+        return e.type == 'action' and name_of(e) == SHOP_ADD and dict(e.params) == dict(shop_add_params(item))
+
+    for shown, (asked, written, items, with_first) in sorted(families.items()):
+        firsts = [e for e in new if asks(e, shown)]
+        heads = [e for e in firsts if back.events[dict(e.cases)[0]].type == 'switch']
+        if len(heads) != (len(picked) if written else 0):
+            fail('%d questions for %s behind the "shelf picked" steps, expected %d' % (len(heads), shown, len(picked)))
         behind = []
         for head in heads:
             on = own(dict(head.cases)[1])              # where the "shelf picked" step led before
             behind.append(on)
-            q = back.events[dict(head.cases)[0]]
-            if q.type != 'switch' or name_of(q) != (GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY) \
-                    or dict(q.params) != dict(q_params, Actor=first) or own(dict(q.cases)[has_not]) != on:
-                fail('%s: "Link has %s" is not asked as intended' % (shown, first))
-            w = back.events[dict(q.cases)[has]]
-            wait = back.events[w.next] if w.type == 'action' and w.next is not None else None
-            if name_of(w) != ('GameDataActor', SCRUB_NAME_WRITE) \
-                    or dict(w.params).get('GameDataName') != SHOP_ITEM_VAR \
-                    or dict(w.params).get('Value') != second_name or wait is None \
-                    or name_of(wait) != ('EventSystemActor', 'EventWait') \
-                    or dict(wait.params).get('Frames') != SCRUB_WRITE_WAIT or own(wait.next) != on:
-                fail('%s: %s is not written and waited for behind a "shelf picked" step' % (shown, second_name))
-        if sorted(behind) != sorted(orig.events[f].next for f in picked):
+            at = dict(head.cases)[0]
+            for k in reversed(range(len(written))):    # the highest level is asked about first
+                q = back.events[at]
+                if q.type != 'switch' or name_of(q) != (GIFT_PAIR_ACTOR, GIFT_PAIR_QUERY) \
+                        or dict(q.params) != dict(q_params, Actor=asked[k]):
+                    fail('%s: "Link has %s" is not asked as intended' % (shown, asked[k]))
+                w = back.events[dict(q.cases)[has]]
+                wait = back.events[w.next] if w.type == 'action' and w.next is not None else None
+                if name_of(w) != ('GameDataActor', SCRUB_NAME_WRITE) \
+                        or dict(w.params).get('GameDataName') != SHOP_ITEM_VAR \
+                        or dict(w.params).get('Value') != written[k] or wait is None \
+                        or name_of(wait) != ('EventSystemActor', 'EventWait') \
+                        or dict(wait.params).get('Frames') != SCRUB_WRITE_WAIT or own(wait.next) != on:
+                    fail('%s: %s is not written and waited for behind a "shelf picked" step' % (shown, written[k]))
+                at = dict(q.cases)[has_not]
+            if own(at) != on:
+                fail('%s: with no level owned the flow does not go on as before' % shown)
+        if written and sorted(behind) != sorted(orig.events[f].next for f in picked):
             fail('%s: its questions do not stand behind the "shelf picked" steps' % shown)
-        placed = [e for e in new if asks(e, second_name)]
-        targets = sorted(dict(e.cases)[1] for e in placed)
-        if targets != sorted(gives) or any(
-                back.events[dict(e.cases)[0]].type != 'action'
-                or name_of(back.events[dict(e.cases)[0]]) != SHOP_ADD
-                or dict(back.events[dict(e.cases)[0]].params) != dict(shop_add_params(second))
-                or back.events[dict(e.cases)[0]].next != orig.events[dict(e.cases)[1]].next for e in placed):
-            fail('%s: %s is not added in place of the shelf\'s item in front of each giving step' % (shown, second))
+        for name, item in zip(written, items):
+            placed = [e for e in new if asks(e, name)]
+            if sorted(own(dict(e.cases)[1]) for e in placed) != sorted(gives) or any(
+                    not adds(back.events[dict(e.cases)[0]], item)
+                    or back.events[dict(e.cases)[0]].next != orig.events[own(dict(e.cases)[1])].next for e in placed):
+                fail('%s: %s is not added in place of the shelf\'s item in front of each giving step' % (shown, item))
+        comes = [e for e in firsts if e not in heads]
+        if len(comes) != (len(gives) if with_first else 0):
+            fail('%s: %d questions in front of the giving steps, expected %d' % (shown, len(comes), len(gives)))
+        for e in comes:
+            at = dict(e.cases)[0]
+            for c in with_first:
+                if not adds(back.events[at], c):
+                    fail('%s: %s is not added with it in front of a giving step' % (shown, c))
+                at = back.events[at].next
+            if own(at) not in gives or own(at) != own(dict(e.cases)[1]):
+                fail('%s: what comes with it does not lead on to the giving step' % shown)
+        if with_first and sorted(own(dict(e.cases)[1]) for e in comes) != sorted(gives):
+            fail('%s: what comes with it does not stand in front of each giving step' % shown)
 
 
 def shop_family_guard(world, assignments):
@@ -4598,9 +4656,6 @@ def main(argv):
                 scrub_pairs[cid] = pair            # planned as First; the question goes in the scrub's branch
                 assignments[k] = (cid, pair[0])
             elif shop_pair_kind(world, cid):
-                if len(pair) != 2:
-                    raise SystemExit('%s: only a pair (First>Second) can be put on a shop shelf yet, not three '
-                                     'levels (phase 2, part 2)' % cid)
                 shop_pairs[cid] = pair             # planned as First; the level is chosen in the sale flow
                 assignments[k] = (cid, pair[0])
             elif skulltula_pair_kind(world, cid):
@@ -6043,20 +6098,31 @@ def main(argv):
 
     # a pair on a shop shelf: the level is chosen in the shops' shared sale flow (after the dungeon items'
     # steps above, so each read-back is against the flow as it was before its own edit)
-    if shop_pairs:
+    # (and a first weapon alone on a shelf: its bag comes with it, added in the same flow)
+    shelf_weapons = sorted({FAMILY_ALIASES.get(i, i) for c, i in given if '>' not in i
+                            and FAMILY_ALIASES.get(i, i) in SCRUB_COMPANIONS and check_kind(world, c) == 'shop'})
+    if shop_pairs or shelf_weapons:
         alone = sorted(c for c, i in given if '>' not in i and check_kind(world, c) == 'shop'
-                       and i in {p[0] for p in shop_pairs.values()})
+                       and FAMILY_ALIASES.get(i, i) in {p[0] for p in shop_pairs.values()})
         if alone:
-            raise SystemExit('%s: the first level of a pair alone on a shelf, and its pair on another (%s): the '
-                             'sale flow cannot tell the two shelves apart' % (', '.join(alone), ', '.join(
+            raise SystemExit('%s: the first level of a family alone on a shelf, and its family on another (%s): '
+                             'the sale flow cannot tell the two shelves apart' % (', '.join(alone), ', '.join(
                                  sorted(shop_pairs))))
-        shelf_names = {r.get('ActorName') for r in table_rows('ActorInfo') if str(r['__RowId']).startswith('Shop_')}
+        shelf_names = {r.get('ActorName') for r in table_rows('ActorInfo') if str(r['__RowId']).startswith('Shop_')
+                       and not str(r['__RowId']).startswith(shop_items.PREFIX)}   # the game's, not ours
         families = {}
-        for cid, (first, second) in sorted(shop_pairs.items()):
-            if flow_name(second) in shelf_names:
-                raise SystemExit('%s: the game\'s own shelves sell %s: the sale flow could not tell them from this '
-                                 'pair\'s second level' % (cid, flow_name(second)))
-            families[flow_name(first)] = (flow_name(first), flow_name(second), second)
+        for cid, levels in sorted(shop_pairs.items()):
+            for later in levels[1:]:
+                if flow_name(later) in shelf_names:
+                    raise SystemExit('%s: the game\'s own shelves sell %s: the sale flow could not tell them from '
+                                     'this family\'s later level' % (cid, flow_name(later)))
+                if SCRUB_COMPANIONS.get(later):
+                    raise SystemExit('%s: %s: a later level that needs another item given with it is not '
+                                     'supported on a shelf' % (cid, '>'.join(levels)))
+            families[flow_name(levels[0])] = ([flow_name(x) for x in levels[:-1]], [flow_name(x) for x in levels[1:]],
+                                              list(levels[1:]), SCRUB_COMPANIONS.get(levels[0], []))
+        for weapon in shelf_weapons:
+            families[flow_name(weapon)] = ([], [], [], SCRUB_COMPANIONS[weapon])
         src, old = out.read(SHOP_SALE_FLOW)
         ef = evfl.loads(old)
         ask = gift_pair_template(evfl.loads(plain(GIFT_PAIR_FLOW)).flowchart)

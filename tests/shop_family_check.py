@@ -13,8 +13,15 @@ What it checks:
   Scale?" -> yes: the Gold Scale is added and the shelf's own step is passed by. Nothing else of the flow
   changed.
 - The same build with a dungeon's small key on another shelf: both changes stand in the flow.
-- Refused: three levels on a shelf; two upgrades of one family in one shop (decision 51): the pair on two
-  shelves, the pair beside its first level alone, one level alone on two shelves.
+- Refused: two upgrades of one family in one shop (decision 51): the pair on two shelves, the pair beside its
+  first level alone, one level alone on two shelves.
+- Three levels on a shelf (phase 2, part 3): the three bomb bags; two inventory questions behind each "shelf
+  picked" step, the higher level first, and in front of each giving step the second or the third level added
+  in the shelf item's place.
+- A first weapon on a shelf comes with its small bag: the Fairy Slingshot as the first level of its family,
+  and the Fairy Bow alone on a shelf (from the game's files: a shelf's own steps give nothing but its item).
+- How many shelves per shop are randomized (decision 37): every shop shelf of the data has a place in its
+  shop's order ("shelf_rank"), and `World.shop_shelves(n)` names the first n of each shop and age.
 """
 import contextlib
 import io
@@ -30,8 +37,9 @@ sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import build_mod  # noqa: E402
 import dungeon_keys  # noqa: E402
 import ground_items  # noqa: E402
+import item_pose  # noqa: E402
 import shop_items  # noqa: E402
-from formats import zstd, byml, evfl, restbl  # noqa: E402
+from formats import zstd, byml, evfl, restbl, sarc  # noqa: E402
 from logic.world import World  # noqa: E402
 
 FIX = ['--fix', 'kokiri_shop_full_stock']
@@ -39,11 +47,15 @@ SHELF, SHELF2 = 'KF_KOKIRI_CHILD_SHOP_01', 'KF_KOKIRI_CHILD_SHOP_02'
 FIRST, SECOND = 'Item_Scale_Silver', 'Item_Scale_Gold'
 PAIR = '%s=%s>%s' % (SHELF, FIRST, SECOND)
 D = 'ForestTemple'
+BAGS = ('Item_BombBag_Small', 'Item_BombBag_Medium', 'Item_BombBag_Large')
+SEEDS = ('Item_Range_SlingShot', 'Item_BulletBag_Medium', 'Item_BulletBag_Large')
+SLING, BOW = 'Weapon_Range_SlingShot', 'Weapon_Range_Bow'      # the names the inventory and the shop know them by
 BUILDS = {'pair': FIX + [PAIR],
-          'both': FIX + [PAIR, '%s=Item_Dungeon_SmallKey@%s' % (SHELF2, D)]}
+          'both': FIX + [PAIR, '%s=Item_Dungeon_SmallKey@%s' % (SHELF2, D)],
+          'three': FIX + ['%s=%s' % (SHELF, '>'.join(BAGS))],
+          'weapons': FIX + ['%s=%s' % (SHELF, '>'.join(SEEDS)), '%s=Item_Range_Bow' % SHELF2]}
 ONE_PER_SHOP = 'a shop holds at most one upgrade of a family'
-REFUSED = [(FIX + ['%s=Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large' % SHELF], None),
-           (FIX + [PAIR, '%s=%s>%s' % (SHELF2, FIRST, SECOND)], ONE_PER_SHOP),
+REFUSED = [(FIX + [PAIR, '%s=%s>%s' % (SHELF2, FIRST, SECOND)], ONE_PER_SHOP),
            (FIX + [PAIR, '%s=%s' % (SHELF2, FIRST)], ONE_PER_SHOP),
            (FIX + ['%s=Item_BombBag_Small' % SHELF, 'KF_KOKIRI_ADULT_SHOP_03=Item_BombBag_Small'], ONE_PER_SHOP)]
 
@@ -87,6 +99,21 @@ def main(romfs):
                   % (build_mod.GIFT_PAIR_QUERY, build_mod.SCRUB_NAME_WRITE),
                   ask[2:] == (0, 1) and list(ask[1]) == ['Num', 'Actor']
                   and sorted(write[0]) == ['GameDataName', 'Index', 'Value'])
+
+    # ---- how many shelves per shop are randomized (decision 37)
+    shelves = sorted(loc['id'] for reg in w.regions.values() for loc in reg.locations.values()
+                     if loc.get('kind') == 'shop')
+    ranks = {loc['id']: loc.get('shelf_rank') for reg in w.regions.values() for loc in reg.locations.values()
+             if loc.get('kind') == 'shop'}
+    last = sorted(c for c, k in ranks.items() if k == 8)
+    good &= check('the %d shop shelves of the data each have a place in their shop\'s order; World.shop_shelves(n) '
+                  'names none for 0, the first of each age for 1, all for 8 and more; the Deku Shield\'s shelf is last'
+                  % len(shelves),
+                  not w.problems() and len(shelves) == 16 and w.shop_shelves(0) == []
+                  and w.shop_shelves(1) == sorted(c for c, k in ranks.items() if k == 1) and len(w.shop_shelves(1)) == 2
+                  and all(set(w.shop_shelves(n)) < set(w.shop_shelves(n + 1)) for n in range(8))
+                  and w.shop_shelves(8) == shelves == w.shop_shelves(20)
+                  and last == ['KF_KOKIRI_ADULT_SHOP_06', 'KF_KOKIRI_CHILD_SHOP_06'], (ranks, w.problems()))
 
     # ---- refused before anything is written
     for args, said in REFUSED:
@@ -170,6 +197,88 @@ def main(romfs):
             kept = all((o.type, o.name, o.params) == (b.type, b.name, b.params) for o, b in zip(game.events, back.events))
             good &= check('%s: the game\'s %d events are there as they were (their leads apart)' % (build, len(game.events)),
                           kept)
+        # ---- three levels, and a first weapon's bag
+        def flow_of(build):
+            fc = evfl.loads(plain(build_mod.SHOP_SALE_FLOW, builds[build][1])).flowchart
+            n0 = len(game.events)
+
+            def name_of(e):
+                return fc.actors[e.actor].name, (fc.actors[e.actor].actions[e.action] if e.type == 'action'
+                                                 else fc.actors[e.actor].queries[e.query])
+
+            def asks(value):
+                return [e for e in fc.events[n0:] if e.type == 'switch' and name_of(e) == build_mod.SHOP_NAME_QUERY
+                        and dict(e.params) == dict(name_params, Value=value)]
+
+            def adds(e, item):
+                return e.type == 'action' and name_of(e) == build_mod.SHOP_ADD \
+                    and dict(e.params) == dict(build_mod.shop_add_params(item))
+
+            return fc, n0, name_of, asks, adds
+
+        fc, n0, name_of, asks, adds = flow_of('three')
+        heads = [e for e in asks(BAGS[0])]
+        ok = len(heads) == len(picked)
+        for head in heads:
+            on = dict(head.cases)[1]
+            q2 = fc.events[dict(head.cases)[0]]                    # "has the second level?" stands first
+            q1 = fc.events[dict(q2.cases)[ask[3]]] if q2.type == 'switch' else None
+            for q, owned, written in ((q2, BAGS[1], BAGS[2]), (q1, BAGS[0], BAGS[1])):
+                wr = fc.events[dict(q.cases)[ask[2]]] if q is not None and q.type == 'switch' else None
+                wait = fc.events[wr.next] if wr is not None and wr.type == 'action' and wr.next is not None else None
+                ok &= (wait is not None and name_of(q) == (build_mod.GIFT_PAIR_ACTOR, build_mod.GIFT_PAIR_QUERY)
+                       and dict(q.params) == {'Num': 1, 'Actor': owned}
+                       and dict(wr.params) == {'GameDataName': build_mod.SHOP_ITEM_VAR, 'Index': -1, 'Value': written}
+                       and dict(wait.params).get('Frames') == build_mod.SCRUB_WRITE_WAIT and wait.next == on)
+            ok &= q1 is not None and dict(q1.cases)[ask[3]] == on
+        good &= check('three: behind each "shelf picked" step: is it %s? -> has %s? -> %s written; else has %s? -> %s '
+                      'written; else on' % (BAGS[0], BAGS[1], BAGS[2], BAGS[0], BAGS[1]), ok)
+        ok = True
+        for later in BAGS[1:]:
+            placed = asks(later)
+            ok &= len(placed) == len(gives) and all(
+                adds(fc.events[dict(e.cases)[0]], later) for e in placed)
+        good &= check('three: in front of each of the %d giving steps: is it %s? -> added; is it %s? -> added; '
+                      '%d new events in all' % (len(gives), BAGS[1], BAGS[2], len(fc.events) - n0),
+                      ok and len(fc.events) == n0 + len(picked) * 7 + len(gives) * 4
+                      and not [f for f in builds['three'][2] if 'BombBag_Medium' in f or 'BombBag_Large' in f])
+
+        fc, n0, name_of, asks, adds = flow_of('weapons')
+        game_adds = [e for e in game.events if e.type == 'action'
+                     and (game.actors[e.actor].name, game.actors[e.actor].actions[e.action]) == build_mod.SHOP_ADD]
+        ok = True
+        for weapon, bag, family in ((SLING, 'Item_BulletBag_Small', True), (BOW, 'Item_Quiver_Small', False)):
+            comes = [e for e in asks(weapon) if fc.events[dict(e.cases)[0]].type == 'action']
+            ok &= len(comes) == len(gives) and all(
+                adds(fc.events[dict(e.cases)[0]], bag) and fc.events[dict(e.cases)[0]].next is not None for e in comes)
+            ok &= (len(asks(weapon)) - len(comes)) == (len(picked) if family else 0)
+        good &= check('weapons: the game\'s sale flow adds nothing to the inventory by itself (%d %s steps); in front '
+                      'of each giving step the Fairy Slingshot (a family\'s first level) comes with %s and the Fairy '
+                      'Bow (alone on a shelf) with %s; the Slingshot\'s later levels are chosen as any family\'s'
+                      % (len(game_adds), build_mod.SHOP_ADD[1], 'Item_BulletBag_Small', 'Item_Quiver_Small'),
+                      ok and not game_adds and len(asks(SEEDS[1])) == len(gives) == len(asks(SEEDS[2])))
+
+        # the Bomb Bag, the Fairy Slingshot and the Fairy Bow have a centred pose: lifted on the shelf by what
+        # their model hangs under the shelf point (as the scales, tests/shop_shelf_keys_check.py)
+        lows = {}
+        for item in (BAGS[0], SEEDS[0], 'Item_Range_Bow'):
+            pack = sarc.Sarc.read(plain(ground_items.pack_path(item))).files
+            anims = byml.loads(pack[ground_items._ref_path(ground_items.resolved_components(pack, item)[
+                'AnimationRef'])]).root['AnimationResources']
+            project, = [x['ModelProjectName'] for x in anims if x['ModelProjectName'] != shop_items.COMMON_ANIM]
+            pose = item_pose.read_pose(plain(item_pose.model_path(project)))
+            points, bind, _ = item_pose.model_points(plain('Model/%s.%s.bfres' % (rows[item]['ModelProjectName'],
+                                                                                  rows[item]['FmdbName'])))
+            lows[item] = item_pose.extent(points, bind, pose['scale'], pose['rot'], pose['move'])[0][1]
+        said = builds['three'][0] + builds['weapons'][0]
+        good &= check('shelf lifts: the Bomb Bag, the Fairy Slingshot and the Fairy Bow stand on the shelf (lifted by '
+                      'what hangs under the shelf point: %s)'
+                      % ', '.join('%s %.2f for %.3f' % (k, shop_items.SHELF_LIFT.get(k, 0), -v)
+                                  for k, v in sorted(lows.items())),
+                      all(abs(shop_items.SHELF_LIFT.get(k, 0) + v) <= 0.01 for k, v in lows.items())
+                      and said.count('shelf lift') == 3 and '0.19 m higher' in builds['three'][0]
+                      and '0.18 m higher' in builds['weapons'][0] and '0.42 m higher' in builds['weapons'][0], lows)
+
         key = dungeon_keys.name(D, 'chest', True)
         both = evfl.loads(plain(build_mod.SHOP_SALE_FLOW, builds['both'][1])).flowchart
         good &= check('both: the dungeon key\'s questions (%d) stand in the flow beside the pair\'s' % (len(sold) + 1),
