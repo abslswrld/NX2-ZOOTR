@@ -53,6 +53,8 @@ writes Second's name where the flow keeps the picked item's name, right after th
 shopkeeper's line, the flow's own questions, its get window and its texts are Second's, and in front of each
 step that puts the shelf's item in the inventory Second is added in its place (shop_family_edit). The shelf
 itself still shows First's model.
+A shop holds at most one upgrade of a family (decision 51, the user 2026-11-26): two shelves of one shop with
+levels of the same family, as pairs or alone, stop the build (shop_family_guard).
 Three-level family (to test in game): CHECK_ID=First>Second>Third on a small chest makes it a chest of our own
 (tools/three_chest.py: the checking chest with a third held item and a second question) that gives Third when
 Link has Second, else Second when Link has First, else First; only the families in THREE_LEVEL_FAMILIES:
@@ -977,6 +979,28 @@ def shop_family_check(orig, back, families, ask, write):
                 or dict(back.events[dict(e.cases)[0]].params) != dict(shop_add_params(second))
                 or back.events[dict(e.cases)[0]].next != orig.events[dict(e.cases)[1]].next for e in placed):
             fail('%s: %s is not added in place of the shelf\'s item in front of each giving step' % (shown, second))
+
+
+def shop_family_guard(world, assignments):
+    """stops the build when two shelves of one shop hold upgrades of the same family (decision 51: "2 upgrades
+    of the same family cannot be placed in the same shop"). A shelf with a family shows the first level's look
+    whichever level it sells (decision 50's two-object way does not work: the shop takes one object per shelf
+    number), so one shop never has two of them. A shop is the region its shelves are in (both ages'
+    shelves); a shelf's family is that of the item it is given, a pair (First>Second) or one level alone."""
+    seen = {}
+    for cid, item in assignments:
+        r, _, loc = find_check(world, cid)
+        kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
+        if kinds != {'shop'}:
+            continue
+        first = item.split('>')[0]
+        level = upgrade_level(FAMILY_ALIASES.get(first, first))
+        if level is None:
+            continue
+        other = seen.setdefault((r.name, level[0]), cid)
+        if other != cid:
+            raise SystemExit('%s and %s: two upgrades of one family (%s) in one shop (%s): a shop holds at most '
+                             'one upgrade of a family (decision 51)' % (other, cid, ' > '.join(level[0]), r.name))
 
 
 def shop_pair_kind(world, cid):
@@ -4550,6 +4574,7 @@ def main(argv):
     scrub_pairs = {}                                   # check id -> (first, second): scrubs (scrub_flow_edit)
     shop_pairs = {}                                    # check id -> (first, second): shop shelves (shop_family_edit)
     world = World()
+    shop_family_guard(world, assignments)              # one upgrade of a family per shop (decision 51)
     # CHECK_ID=First>Second>Third: a three-level family (THREE_LEVEL_FAMILIES). In a small chest: planned as
     # First, the chest made the family's own chest further down (tools/three_chest.py). Anywhere else a pair can
     # go: as a pair, with one level more (the loop below)

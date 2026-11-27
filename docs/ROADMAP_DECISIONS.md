@@ -172,6 +172,14 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     shelf's label and model and what Link holds up stayed the first level's. So a family shelf is one shelf
     object per level on the same spot, each shown only while it is that level's turn. It is its own part
     (phase 2, part 2), which makes phase 2 nine parts.
+    **Given up by decision 51:** the shop takes one object per shelf number.
+51. **A family's shelf keeps the first level's look, and a shop holds at most one upgrade of a family** (the
+    user, 2026-11-26, after the two-object way failed in game: "keep part 1's look, but make a rule that 2
+    upgrades of the same family cannot be placed in the same shop"). Part 1's way stays: one shelf object,
+    the level chosen in the sale flow, the right item, window and shopkeeper's line; the shelf's label and
+    model and what Link holds up are the first level's. The builder stops a build with levels of one family
+    on two shelves of one shop (`shop_family_guard`); the rule is in `CLAUDE.md`. The two-shopkeeper way was
+    not tried.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".

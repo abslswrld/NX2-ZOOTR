@@ -13,7 +13,8 @@ What it checks:
   Scale?" -> yes: the Gold Scale is added and the shelf's own step is passed by. Nothing else of the flow
   changed.
 - The same build with a dungeon's small key on another shelf: both changes stand in the flow.
-- Refused: three levels on a shelf; the first level alone on one shelf and its pair on another.
+- Refused: three levels on a shelf; two upgrades of one family in one shop (decision 51): the pair on two
+  shelves, the pair beside its first level alone, one level alone on two shelves.
 """
 import contextlib
 import io
@@ -40,8 +41,11 @@ PAIR = '%s=%s>%s' % (SHELF, FIRST, SECOND)
 D = 'ForestTemple'
 BUILDS = {'pair': FIX + [PAIR],
           'both': FIX + [PAIR, '%s=Item_Dungeon_SmallKey@%s' % (SHELF2, D)]}
+ONE_PER_SHOP = 'a shop holds at most one upgrade of a family'
 REFUSED = [(FIX + ['%s=Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large' % SHELF], None),
-           (FIX + [PAIR, '%s=%s' % (SHELF2, FIRST)], 'alone on a shelf')]
+           (FIX + [PAIR, '%s=%s>%s' % (SHELF2, FIRST, SECOND)], ONE_PER_SHOP),
+           (FIX + [PAIR, '%s=%s' % (SHELF2, FIRST)], ONE_PER_SHOP),
+           (FIX + ['%s=Item_BombBag_Small' % SHELF, 'KF_KOKIRI_ADULT_SHOP_03=Item_BombBag_Small'], ONE_PER_SHOP)]
 
 
 def check(name, ok, detail=''):

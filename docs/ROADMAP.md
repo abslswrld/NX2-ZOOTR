@@ -368,8 +368,40 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    such a condition is looked at while Link is in the shop or only when the area is loaded. Part 1's name
    swap in the sale flow stays for the case it is only on load (a second shelf of the pair bought in the same
    visit).
-3. **Shop families, the rest:** a three-level family, one family on two shelves, and the setting for how many
-   shelves per shop are randomized (D37).
+   **Built 2026-11-26, to test in game** (`tests/shop_family_check.py`). Read from the game's maps: a
+   placement can have a `Presence` setting (`FlagName`, `IsCheckLazy`, `IsNegation`): it is only there while
+   the saved flag holds. 2,793 placements have one; the game uses `IsGet.<item>` flags for it, and the Kokiri
+   Shop has two placements of one shelf number on one spot. So the shelf (First's shop version) gets "not
+   `IsGet.<First>`", and a twin of it (Second's shop version, under the hash the shelf had in the game) gets
+   "`IsGet.<First>`", both `IsCheckLazy` false, as the Happy Mask Shop's masks, which appear while Link is in
+   the shop. The shopkeeper links to both. **So that the two objects sell one item:** both have the same
+   shelf number, the shopkeeper counts a sale under that number, and the count (a saved number of its own,
+   `Shop_SoldNum.<shopkeeper>.<number>`) is no longer reset when the shops restock. **Not known from the
+   files:** whether the second object appears at once or only when the area is loaded again; whether the
+   shopkeeper names and prices the twin right (his list names the first object for that shelf).
+   **In game 2026-11-26: failed.** With the pair on two shelves the shop's cursor would not go onto either of
+   them, and since they are the two shelves next to the Recovery Heart it could not leave the top left; the
+   shop could be left. Why is not in the game's files. **A diagnostic build** (not a candidate; built with
+   a temporary change that is not in the repository) has one arrangement per shelf: an ordinary item with the
+   sold count kept; a shelf with the `Presence` setting and no twin; the twin as built; the twin linked from
+   the shopkeeper before the shelf; the twin not linked from the shopkeeper. A Silver Scale in Mido's first
+   chest switches them over.
+   **The diagnostic in game, 2026-11-26: the shop takes one object per shelf number, the one its last link
+   for that number points at, whether that object is there or not.** Without the Silver Scale: the ordinary
+   item worked (the kept sold count is fine), the shelf with only the `Presence` setting worked, the twin
+   linked last could not be chosen (the last link pointed at the absent twin), the twin linked first and the
+   twin not linked worked (the shelf was the last link). With the Silver Scale it turned round: only the twin
+   linked last could be chosen, and it was right: "Golden Scale", 30 rupees, bought. So `Presence` works on a
+   shelf, a second object is labelled and priced right, and the switch needs no reload, but **one
+   shopkeeper cannot serve two objects of one shelf number**. What is left: two shopkeepers on one spot, one
+   per state, each linked to its own object (the game's own way in this shop: its two sets); to try next.
+   **Closed 2026-11-26 by the user's decision (D51): "keep part 1's look, but make a rule that 2 upgrades of
+   the same family cannot be placed in the same shop".** The two-object code is taken out again (nothing of
+   it is in the builder), the two-shopkeeper way was not tried, and the builder now stops a build with levels
+   of one family on two shelves of one shop (`shop_family_guard`; `tests/shop_family_check.py`). No in-game
+   round: the rule only refuses builds, and part 1's way passed in game.
+3. **Shop families, the rest:** a three-level family on a shelf, and the setting for how many shelves per shop
+   are randomized (D37). (One family on two shelves of a shop is ruled out by D51.)
 4. **Kokiri Forest closed out:** its every-spot build script, the Kokiri Forest exit setting (D14: closed until
    the Deku Tree / open), and the check that its cutscenes can be skipped (D48).
 5. **Lost Woods, the map spots:** check IDs, regions and rules for the 22 spots, the every-spot script, an
