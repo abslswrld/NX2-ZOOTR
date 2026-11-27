@@ -53,13 +53,8 @@ writes Second's name where the flow keeps the picked item's name, right after th
 shopkeeper's line, the flow's own questions, its get window and its texts are Second's, and in front of each
 step that puts the shelf's item in the inventory Second is added in its place (shop_family_edit). The shelf
 itself still shows First's model.
-So that the shelf looks like the level it sells (decision 50; phase 2, part 2; to test in game) it is two shelf
-objects on one spot: First's shop version, placed only while Link does not have First, and Second's, placed
-only while he does (the map's own Presence setting on the saved flag IsGet.<First>, as the game places its
-objects by flags; shelf_twin_map_edit). Both stand for the same shelf of the shop, and the shopkeeper's count
-of what that shelf has sold is never reset (keep_sold_counts), so the shelf sells one level, once. The sale
-flow's choice above stays for a second shelf of the pair, should the game only place objects when the area is
-loaded.
+A shop holds at most one upgrade of a family (decision 51, the user 2026-11-26): two shelves of one shop with
+levels of the same family, as pairs or alone, stop the build (shop_family_guard).
 Three-level family (to test in game): CHECK_ID=First>Second>Third on a small chest makes it a chest of our own
 (tools/three_chest.py: the checking chest with a third held item and a second question) that gives Third when
 Link has Second, else Second when Link has First, else First; only the families in THREE_LEVEL_FAMILIES:
@@ -984,6 +979,28 @@ def shop_family_check(orig, back, families, ask, write):
                 or dict(back.events[dict(e.cases)[0]].params) != dict(shop_add_params(second))
                 or back.events[dict(e.cases)[0]].next != orig.events[dict(e.cases)[1]].next for e in placed):
             fail('%s: %s is not added in place of the shelf\'s item in front of each giving step' % (shown, second))
+
+
+def shop_family_guard(world, assignments):
+    """stops the build when two shelves of one shop hold upgrades of the same family (decision 51: "2 upgrades
+    of the same family cannot be placed in the same shop"). A shelf with a family shows the first level's look
+    whichever level it sells (decision 50's two-object way does not work: the shop takes one object per shelf
+    number), so one shop never has two of them. A shop is the region its shelves are in (both ages'
+    shelves); a shelf's family is that of the item it is given, a pair (First>Second) or one level alone."""
+    seen = {}
+    for cid, item in assignments:
+        r, _, loc = find_check(world, cid)
+        kinds = {world.checks[scene][spot_id]['kind'] for scene, spot_id, _ in world.placements_of(r, loc)}
+        if kinds != {'shop'}:
+            continue
+        first = item.split('>')[0]
+        level = upgrade_level(FAMILY_ALIASES.get(first, first))
+        if level is None:
+            continue
+        other = seen.setdefault((r.name, level[0]), cid)
+        if other != cid:
+            raise SystemExit('%s and %s: two upgrades of one family (%s) in one shop (%s): a shop holds at most '
+                             'one upgrade of a family (decision 51)' % (other, cid, ' > '.join(level[0]), r.name))
 
 
 def shop_pair_kind(world, cid):
@@ -4276,166 +4293,6 @@ def shelf_flag_map_edit(data, moves):
     return out, {str(k): count[k] for k in table}
 
 
-# A pair on a shelf as two shelf objects on one spot (decision 50; phase 2, part 2; to test in game). Found in
-# the game's maps: a placement can have a `Presence` setting, {FlagName, IsCheckLazy, IsNegation}: it is only
-# there while the saved flag is set (IsNegation: while it is not). 2,793 placements have one, on 424 flags;
-# among them IsGet.<item> (IsGet.Item_FairyBless_MP), and the Kokiri Shop's two sets of shelves, where two
-# placements of one shelf number stand on one spot, one for each answer of one flag. The Happy Mask Shop's
-# masks, which appear while Link is in the shop, have IsCheckLazy false; the Kokiri Shop's sets true.
-# So for First>Second on a shelf: the shelf's placement (First's shop version) gets Presence "not
-# IsGet.<First>", and a twin of it (the same placement under another hash, Second's shop version) "IsGet.<First>",
-# both IsCheckLazy false. Whatever the shopkeeper links to the shelf it links to the twin too, and the twin is
-# in the same groups.
-# Two objects on one shelf must not sell two items. A shelf's sale is counted by the shopkeeper under the
-# shelf's number (Shop_SoldNum.<shopkeeper>.<number>, a saved Int), and both objects have the same number: once
-# one is sold the other is "sold out" and hides. That count is reset when the shops restock (reset type 2; our
-# shop versions mark their own placement instead, shelf_flag_map_edit), so for such a shelf the count is made
-# to last (the reset type of an ordinary saved flag): keep_sold_counts.
-SHOP_SOLD_NUM = 'Shop_SoldNum.%s.%d'
-SOLD_RESTOCK, SOLD_KEPT = 2, 8
-PRESENCE = 'Presence'
-OWNED_FLAG = 'IsGet.%s'
-
-
-def keep_sold_counts(data, names):
-    """the shopkeepers' sold counts with these names (SHOP_SOLD_NUM) are no longer reset when the shops
-    restock; read back: nothing else changes. Returns (new data, {name: reset type it had})."""
-    want = {start_state.name_hash(n): n for n in names}
-    doc = byml.loads(data)
-    root = type(doc.root)(doc.root)
-    table = type(root['Data'])(root['Data'])
-    ints = list(table['Int'])
-    was = {}
-    for i, e in enumerate(ints):
-        n = want.get(int(e['Hash']))
-        if n is None:
-            continue
-        was[n] = int(e['ResetTypeValue'])
-        if was[n] not in (SOLD_RESTOCK, SOLD_KEPT):
-            raise SystemExit('%s: %s has reset type %d, expected %d' % (GAME_DATA, n, was[n], SOLD_RESTOCK))
-        e = type(e)(e)
-        e['ResetTypeValue'] = type(e['ResetTypeValue'])(SOLD_KEPT)
-        ints[i] = e
-    if set(was) != set(names):
-        raise SystemExit('%s: sold counts not found: %s' % (GAME_DATA, ', '.join(sorted(set(names) - set(was)))))
-    table['Int'] = ints
-    root['Data'] = table
-    doc.root = root
-    new = byml.dumps(doc)
-    before, after = byml.loads(data).root, byml.loads(new).root
-    if list(before) != list(after) or list(before['Data']) != list(after['Data']) \
-            or any(after[k] != before[k] for k in before if k != 'Data') \
-            or any(after['Data'][k] != before['Data'][k] for k in before['Data'] if k != 'Int') \
-            or len(after['Data']['Int']) != len(before['Data']['Int']):
-        raise SystemExit('read-back: %s differs from what was intended' % GAME_DATA)
-    for o, n in zip(before['Data']['Int'], after['Data']['Int']):
-        expect = dict(o)
-        if int(o['Hash']) in want:
-            expect['ResetTypeValue'] = SOLD_KEPT
-        if dict(n) != expect:
-            raise SystemExit('read-back: %s: the sold count %d differs from what was intended' % (GAME_DATA, int(o['Hash'])))
-    return new, was
-
-
-def shelf_twin_map_edit(data, twins):
-    """twins {shelf hash: (the twin's hash, the twin's shelf actor, the flag, metres the twin stands higher)}:
-    each shelf is only there while the flag is not set, and a twin of it (the same placement under the other
-    hash, with the other actor) only while it is; every link to the shelf is also made to the twin, and the
-    twin is in the shelf's groups. Read back. Returns (new data, lines saying what was done)."""
-    table = {int(h): t for h, t in twins.items()}
-    doc = byml.loads(data)
-    root = type(doc.root)(doc.root)
-    acts = list(root['Actors'])
-    here = collections.Counter(int(a['Hash']) for a in acts)
-    for h, (twin, _, _, _) in table.items():
-        if here[h] != 1 or here[int(twin)]:
-            raise SystemExit('shelf %d: not once in the map, or its twin\'s hash %s is taken' % (h, twin))
-    like = next((a[PRESENCE] for a in acts if a.get(PRESENCE) is not None), None)
-
-    def presence(flag, negated):
-        p = type(like)() if like is not None else {}
-        p['FlagName'] = type(like['FlagName'])(flag) if like is not None else flag
-        p['IsCheckLazy'] = False
-        p['IsNegation'] = negated
-        return p
-
-    out, said = [], []
-    for act in acts:
-        h = int(act['Hash'])
-        if h in table:
-            twin_hash, actor, flag, lift = table[h]
-            if act.get(PRESENCE) is not None:
-                raise SystemExit('shelf %d already has a %s setting' % (h, PRESENCE))
-            twin = type(act)(_swap_hashes(act, {h: int(twin_hash)}, collections.Counter()))
-            twin['Gyaml'] = type(act['Gyaml'])(actor)
-            twin[PRESENCE] = presence(flag, False)
-            if lift:
-                t = list(twin['Translate'])
-                t[1] = type(t[1])(float(t[1]) + lift)
-                twin['Translate'] = t
-            first = type(act)(act)
-            first[PRESENCE] = presence(flag, True)
-            out += [first, twin]
-            said.append('shelf %d (%s) is there while %s is not set; its twin %s (%s) while it is%s'
-                        % (h, act['Gyaml'], flag, twin_hash, actor, ', %.2f m higher' % lift if lift else ''))
-            continue
-        links = act.get('Links')
-        if links and any(int(l['Dst']) in table for l in links):
-            more = []
-            for l in links:
-                more.append(l)
-                if int(l['Dst']) in table:
-                    l2 = type(l)(l)
-                    l2['Dst'] = type(l['Dst'])(int(table[int(l['Dst'])][0]))
-                    more.append(l2)
-            act = type(act)(act)
-            act['Links'] = more
-        out.append(act)
-    root['Actors'] = out
-    for key in GROUP_LISTS:
-        if key in root:
-            root[key] = [g if not any(int(x) in table for x in g) else type(g)(
-                list(g) + [type(x)(int(table[int(x)][0])) for x in g if int(x) in table]) for g in root[key]]
-    doc.root = root
-    new = byml.dumps(doc)
-
-    before, back = byml.loads(data).root, byml.loads(new).root
-    by = {int(a['Hash']): a for a in back['Actors']}
-    orig = {int(a['Hash']): a for a in before['Actors']}
-    if len(back['Actors']) != len(before['Actors']) + len(table) or set(by) != set(orig) | {
-            int(t[0]) for t in table.values()}:
-        raise SystemExit('read-back: the map\'s placements differ from what was intended')
-    for h, a in orig.items():
-        b = by[h]
-        if h in table:
-            twin_hash, actor, flag, lift = table[h]
-            t = by[int(twin_hash)]
-            want_twin = dict(_swap_hashes(a, {h: int(twin_hash)}, collections.Counter()))
-            got_twin = dict(t)
-            if dict(b.get(PRESENCE) or {}) != {'FlagName': flag, 'IsCheckLazy': False, 'IsNegation': True} \
-                    or {k: v for k, v in b.items() if k != PRESENCE} != dict(a) \
-                    or dict(t.get(PRESENCE) or {}) != {'FlagName': flag, 'IsCheckLazy': False, 'IsNegation': False} \
-                    or t['Gyaml'] != actor or abs(float(t['Translate'][1]) - float(a['Translate'][1]) - lift) > 1e-4 \
-                    or {k: v for k, v in got_twin.items() if k not in (PRESENCE, 'Gyaml', 'Translate')} \
-                    != {k: v for k, v in want_twin.items() if k not in ('Gyaml', 'Translate')}:
-                raise SystemExit('read-back: shelf %d or its twin differs from what was intended' % h)
-        else:
-            want = dict(a)
-            if a.get('Links') and any(int(l['Dst']) in table for l in a['Links']):
-                want['Links'] = [x for l in a['Links'] for x in (
-                    [l, dict(l, Dst=int(table[int(l['Dst'])][0]))] if int(l['Dst']) in table else [l])]
-                got = dict(b)
-                got['Links'] = [dict(l, Dst=int(l['Dst'])) if int(l['Dst']) in {int(t[0]) for t in table.values()}
-                                else l for l in b['Links']]
-                if got != want:
-                    raise SystemExit('read-back: the links of placement %d differ from what was intended' % h)
-            elif dict(b) != want:
-                raise SystemExit('read-back: placement %d differs from what was intended' % h)
-    if any(k not in GROUP_LISTS and k != 'Actors' and back[k] != before[k] for k in before):
-        raise SystemExit('read-back: the map differs outside its placements and groups')
-    return new, said
-
-
 def lift_shelves(data, lifts):
     """raise shelf actors: lifts {hash: metres}; returns new data"""
     doc = byml.loads(data)
@@ -4717,6 +4574,7 @@ def main(argv):
     scrub_pairs = {}                                   # check id -> (first, second): scrubs (scrub_flow_edit)
     shop_pairs = {}                                    # check id -> (first, second): shop shelves (shop_family_edit)
     world = World()
+    shop_family_guard(world, assignments)              # one upgrade of a family per shop (decision 51)
     # CHECK_ID=First>Second>Third: a three-level family (THREE_LEVEL_FAMILIES). In a small chest: planned as
     # First, the chest made the family's own chest further down (tools/three_chest.py). Anywhere else a pair can
     # go: as a pair, with one level more (the loop below)
@@ -5247,12 +5105,6 @@ def main(argv):
                 goods[age][idx] = item
         if not planned[path]:
             del planned[path]
-    # a pair on a shelf: the second level's shop version, for the shelf's twin (decision 50)
-    shelf_twins = {}                                   # (map path, shelf hash) -> the twin's shelf actor
-    for path, changes in planned.items():
-        for h, (cid, item, old, kind) in changes.items():
-            if kind == 'shop' and cid in shop_pairs:
-                shelf_twins[path, h] = on_shelf(shop_pairs[cid][1], old)
 
     # what rocks, bushes and pots drop is given once (tools/once_items.py): the placements it is for. Each must
     # have the two saved flags the token's node sets: the one that is reset (its hash) and hash ^ 2 (never
@@ -5715,38 +5567,6 @@ def main(argv):
             for donor, cid in sorted(kept.items(), key=lambda x: x[1]):
                 print('%-18s %s: flag %s reset type %d -> %d (never reset: set by the shelf when sold, it stays sold)'
                       % (cid, GAME_DATA.split('/')[-1], donor, was[donor], FLAG_KEPT))
-        # a pair on a shelf: its twin for the second level, and the shelf's sold count kept (decision 50)
-        if shelf_twins:
-            twins, counts = {}, {}
-            owned = start_state.GameData(plain(GAME_DATA))
-            for (path, h), actor in sorted(shelf_twins.items()):
-                cid = planned[path][h][0]
-                flag = OWNED_FLAG % flow_name(shop_pairs[cid][0])
-                found = owned.find(flag)
-                if not found or found[0] != 'Bool':
-                    raise SystemExit('%s: no saved flag %s to place the shelf\'s two objects by' % (cid, flag))
-                donor = moves.get(path, {}).get(h)
-                if donor is None:
-                    raise SystemExit('%s: no saved flag is free for this shelf, so its twin would have no hash '
-                                     'of its own' % cid)
-                # the twin takes the hash the shelf had before it took over a flag: free, and with no flag
-                twins.setdefault(path, {})[donor] = (h, actor, flag, shelf_lift.get(actor, 0.0) - shelf_lift.get(
-                    planned[path][h][1], 0.0))
-                ages, idx = shelf_of[h]
-                for age in ages:
-                    counts[SHOP_SOLD_NUM % (SHOP_KEEPERS[age], idx)] = cid
-            for path, tw in sorted(twins.items()):
-                src, old = out.read(path)
-                new, said = shelf_twin_map_edit(old, tw)
-                out.write(path, src, old, new)
-                for line in said:
-                    print('%-18s %s: %s' % ('shelf twin', path.split('/')[-1], line))
-            src_g, old_g = out.read(GAME_DATA)
-            new_g, was = keep_sold_counts(old_g, set(counts))
-            out.write(GAME_DATA, src_g, old_g, new_g)
-            for n, cid in sorted(counts.items()):
-                print('%-18s %s: %s reset type %d -> %d (the shelf\'s sold count is kept: its two objects sell '
-                      'one level, once)' % (cid, GAME_DATA.split('/')[-1], n, was[n], SOLD_KEPT))
 
     if shop_fix:
         # the child shopkeeper's list (also copied in the adult shopkeeper's pack: kept identical), and a list
@@ -6230,8 +6050,7 @@ def main(argv):
             raise SystemExit('%s: the first level of a pair alone on a shelf, and its pair on another (%s): the '
                              'sale flow cannot tell the two shelves apart' % (', '.join(alone), ', '.join(
                                  sorted(shop_pairs))))
-        shelf_names = {r.get('ActorName') for r in table_rows('ActorInfo') if str(r['__RowId']).startswith('Shop_')
-                       and not str(r['__RowId']).startswith(shop_items.PREFIX)}   # the game's, not ours
+        shelf_names = {r.get('ActorName') for r in table_rows('ActorInfo') if str(r['__RowId']).startswith('Shop_')}
         families = {}
         for cid, (first, second) in sorted(shop_pairs.items()):
             if flow_name(second) in shelf_names:

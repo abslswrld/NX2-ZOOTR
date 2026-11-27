@@ -20,6 +20,8 @@ These are the project owner's standing rules. Every session follows them, in thi
 
 ## Randomizer rules
 - **Upgrade families never skip a level.** Never put the same item on two checks, except levels of one family.
+- **A shop holds at most one upgrade of a family.** Never two shelves of one shop with levels of the same
+  family (a family's shelf shows its first level whichever level it sells).
 - **Families** (the user's design): Slingshot (with its first seed bag) > bigger > biggest; Bow (with its first
   quiver) > bigger > biggest; Bomb Bag > bigger > biggest; bigger Deku Nut bag > biggest; bigger Deku Stick bag >
   biggest; Adult's Wallet > Giant's Wallet; Goron Bracelet > Silver Gauntlets > Golden Gauntlets; half magic > full

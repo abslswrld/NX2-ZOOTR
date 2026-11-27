@@ -395,8 +395,13 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    shelf, a second object is labelled and priced right, and the switch needs no reload, but **one
    shopkeeper cannot serve two objects of one shelf number**. What is left: two shopkeepers on one spot, one
    per state, each linked to its own object (the game's own way in this shop: its two sets); to try next.
-3. **Shop families, the rest:** a three-level family, one family on two shelves, and the setting for how many
-   shelves per shop are randomized (D37).
+   **Closed 2026-11-26 by the user's decision (D51): "keep part 1's look, but make a rule that 2 upgrades of
+   the same family cannot be placed in the same shop".** The two-object code is taken out again (nothing of
+   it is in the builder), the two-shopkeeper way was not tried, and the builder now stops a build with levels
+   of one family on two shelves of one shop (`shop_family_guard`; `tests/shop_family_check.py`). No in-game
+   round: the rule only refuses builds, and part 1's way passed in game.
+3. **Shop families, the rest:** a three-level family on a shelf, and the setting for how many shelves per shop
+   are randomized (D37). (One family on two shelves of a shop is ruled out by D51.)
 4. **Kokiri Forest closed out:** its every-spot build script, the Kokiri Forest exit setting (D14: closed until
    the Deku Tree / open), and the check that its cutscenes can be skipped (D48).
 5. **Lost Woods, the map spots:** check IDs, regions and rules for the 22 spots, the every-spot script, an

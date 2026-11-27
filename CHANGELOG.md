@@ -4,6 +4,24 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-26
 
+### Phase 2, part 2 closed: part 1's look stays, one upgrade of a family per shop (decision 51)
+- **The user's decision** after the diagnostic: "keep part 1's look, but make a rule that 2 upgrades of the
+  same family cannot be placed in the same shop". A family's shelf is one shelf object, the first level's
+  shop version; the sale flow gives the level that is Link's turn (part 1, passed in game). Its label and
+  model, and what Link holds up, are the first level's.
+- **The two-object code is out again:** `shelf_twin_map_edit`, `keep_sold_counts` and their wiring are
+  removed; `tools/build_mod.py` has part 1's way only. The two-shopkeeper way was not tried. What the game
+  showed stays written down here and in the roadmap (the `Presence` setting, one object per shelf number,
+  the sold count that can be kept).
+- **The rule** (`shop_family_guard`, run before anything is planned): two shelves of one shop given levels of
+  the same family stop the build, whether as pairs (`First>Second`) or one level alone. A shop is the region
+  its shelves are in, so the child's and the adult's shelves of the Kokiri Shop count together. The rule is
+  in `CLAUDE.md` under the randomizer rules.
+- **`tests/shop_family_check.py`:** three builds it must refuse (the pair on two shelves, the pair beside its
+  first level alone, one level alone on a child's and an adult's shelf).
+- **Roadmap:** part 3 loses "one family on two shelves".
+- **Tests:** the full run (`tests/run_all.py`): all 32 checks passed.
+
 ### Phase 2, part 2: what the diagnostic build showed
 The user's answers (new file, child; the five shelves, then again with the Silver Scale from Mido's chest):
 

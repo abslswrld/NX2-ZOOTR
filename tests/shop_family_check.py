@@ -13,13 +13,8 @@ What it checks:
   Scale?" -> yes: the Gold Scale is added and the shelf's own step is passed by. Nothing else of the flow
   changed.
 - The same build with a dungeon's small key on another shelf: both changes stand in the flow.
-- Refused: three levels on a shelf; the first level alone on one shelf and its pair on another.
-- The right look (phase 2, part 2; decision 50). From the game's files: a placement is only there while a
-  saved flag holds (its Presence setting), the game uses IsGet.<item> for it, and the Kokiri Shop itself has two
-  placements of one shelf number on one spot; a shelf's sold count is a saved number of its own that the game
-  resets. In the build: the shelf is there while Link does not have the first level, a twin of it with the
-  second level's shop version while he does, both with the same shelf number and both linked from the
-  shopkeeper; the shelf's sold count is no longer reset.
+- Refused: three levels on a shelf; two upgrades of one family in one shop (decision 51): the pair on two
+  shelves, the pair beside its first level alone, one level alone on two shelves.
 """
 import contextlib
 import io
@@ -36,7 +31,6 @@ import build_mod  # noqa: E402
 import dungeon_keys  # noqa: E402
 import ground_items  # noqa: E402
 import shop_items  # noqa: E402
-import start_state  # noqa: E402
 from formats import zstd, byml, evfl, restbl  # noqa: E402
 from logic.world import World  # noqa: E402
 
@@ -47,8 +41,11 @@ PAIR = '%s=%s>%s' % (SHELF, FIRST, SECOND)
 D = 'ForestTemple'
 BUILDS = {'pair': FIX + [PAIR],
           'both': FIX + [PAIR, '%s=Item_Dungeon_SmallKey@%s' % (SHELF2, D)]}
+ONE_PER_SHOP = 'a shop holds at most one upgrade of a family'
 REFUSED = [(FIX + ['%s=Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large' % SHELF], None),
-           (FIX + [PAIR, '%s=%s' % (SHELF2, FIRST)], 'alone on a shelf')]
+           (FIX + [PAIR, '%s=%s>%s' % (SHELF2, FIRST, SECOND)], ONE_PER_SHOP),
+           (FIX + [PAIR, '%s=%s' % (SHELF2, FIRST)], ONE_PER_SHOP),
+           (FIX + ['%s=Item_BombBag_Small' % SHELF, 'KF_KOKIRI_ADULT_SHOP_03=Item_BombBag_Small'], ONE_PER_SHOP)]
 
 
 def check(name, ok, detail=''):
@@ -121,61 +118,11 @@ def main(romfs):
         r, _, loc = build_mod.find_check(w, SHELF)
         maps = [plain('Banc/%s/%s' % (scene, fn[:-3] if fn.endswith('.zs') else fn), folder)
                 for scene, _, p in w.placements_of(r, loc) for fn in p['files']]
-        twin_name = name.replace(FIRST[len('Item_'):], SECOND[len('Item_'):]) if name else None
-        good &= check('%s (%s > %s): the shelf is %s, the first level\'s shop version, sold once; the second '
-                      'level\'s, %s, is made too' % (SHELF, FIRST, SECOND, name, twin_name),
+        good &= check('%s (%s > %s): the shelf is %s, the first level\'s shop version, sold once; no shop version of '
+                      'the second level is made' % (SHELF, FIRST, SECOND, name),
                       name is not None and name.endswith('_Once') and any(m is not None and name.encode() in m
                                                                          for m in maps)
-                      and 'Pack/Actor/%s.pack.zs' % twin_name in files, shop)
-
-        # ---- the right look: two shelf objects on one spot (decision 50)
-        game_data = start_state.GameData(plain(start_state.GAME_DATA))
-        count = build_mod.SHOP_SOLD_NUM % (build_mod.SHOP_KEEPERS['child'], 1)
-        flag = build_mod.OWNED_FLAG % FIRST
-        game_map = byml.loads(plain(build_mod.SHOP_MAP)).root['Actors']
-        shared = {}
-        for a in game_map:
-            if str(a['Gyaml']).startswith('Shop_') and a.get('Presence') is not None \
-                    and 'ShopItemIndex' in (a.get('Dynamic') or {}):
-                shared.setdefault(int(a['Dynamic']['ShopItemIndex']), set()).add(bool(a['Presence']['IsNegation']))
-        good &= check('the game places an object only while a saved flag holds (Presence), with IsGet flags too; the '
-                      'Kokiri Shop has two placements of one shelf number, one for each answer of one flag; a '
-                      'shelf\'s sold count (%s) is a saved number the game resets (type %d)'
-                      % (count, build_mod.SOLD_RESTOCK),
-                      shared and all(v == {True, False} for v in shared.values())
-                      and game_data.find(flag) and game_data.find(flag)[0] == 'Bool'
-                      and game_data.find(count) and int(game_data.find(count)[1]['ResetTypeValue']) == build_mod.SOLD_RESTOCK)
-        places = [p for _, _, p in w.placements_of(r, loc) if build_mod.SHOP_MAP.split('/')[-1] in
-                  [fn[:-3] if fn.endswith('.zs') else fn for fn in p['files']] and p['actor'] == 'Shop_DekuSeedBundle_02']
-        built_map = byml.loads(plain(build_mod.SHOP_MAP, folder)).root
-        acts = {str(a['Gyaml']): a for a in built_map['Actors'] if str(a['Gyaml']).startswith(shop_items.PREFIX)}
-        first, twin = acts.get(name), acts.get(twin_name)
-        keeper = next(a for a in built_map['Actors'] if a['Gyaml'] == build_mod.SHOP_KEEPERS['child'])
-        linked = [int(l['Dst']) for l in keeper['Links']]
-        game_hashes = {int(p['hash']) for p in places}
-        good &= check('pair: the shelf (%s) is there while %s is not set; its twin (%s) while it is, under the hash '
-                      'the shelf had in the game, with the same shelf number, both checked while Link is there '
-                      '(IsCheckLazy false), both linked from the shopkeeper as often'
-                      % (name, flag, twin_name),
-                      first is not None and twin is not None
-                      and dict(first['Presence']) == {'FlagName': flag, 'IsCheckLazy': False, 'IsNegation': True}
-                      and dict(twin['Presence']) == {'FlagName': flag, 'IsCheckLazy': False, 'IsNegation': False}
-                      and int(twin['Hash']) in game_hashes and int(first['Hash']) not in game_hashes
-                      and dict(first['Dynamic']) == dict(twin['Dynamic'])
-                      and int(twin['Phive']['Placement']['ID']) == int(twin['Hash'])
-                      and linked.count(int(first['Hash'])) == linked.count(int(twin['Hash'])) > 0
-                      and abs(float(twin['Translate'][1]) - float(first['Translate'][1])
-                              - (shop_items.SHELF_LIFT[SECOND] - shop_items.SHELF_LIFT[FIRST])) < 1e-4
-                      and len(built_map['Actors']) == len([a for a in game_map if not (
-                          a.get('Presence') is not None and a['Presence']['IsNegation']
-                          and a['Presence']['FlagName'] == build_mod.SHOP_FLAG)]),
-                      (first and dict(first.get('Presence') or {}), twin and dict(twin.get('Presence') or {})))
-        built_data = start_state.GameData(plain(start_state.GAME_DATA, folder))
-        other = build_mod.SHOP_SOLD_NUM % (build_mod.SHOP_KEEPERS['child'], 2)
-        good &= check('pair: the shelf\'s sold count is kept (reset type %d), so its two objects sell one level, '
-                      'once; the next shelf\'s is as the game has it' % build_mod.SOLD_KEPT,
-                      int(built_data.find(count)[1]['ResetTypeValue']) == build_mod.SOLD_KEPT
-                      and int(built_data.find(other)[1]['ResetTypeValue']) == build_mod.SOLD_RESTOCK)
+                      and not [f for f in files if SECOND[len('Item_'):] in f], shop)
 
         def read(build, before):
             """(the flow of a build, the number of events it had before the pair's edit)"""
