@@ -2,6 +2,32 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-28
+
+### The test launcher starts the new Longshot (nightly-884)
+The user updated Longshot and asked for the test launcher to move to it. No code changed: the third test
+build of phase 2, part 3 was built again with the builder's own `--longshot` option pointing at the new
+game folder, which rewrites `out\Launch NX2-ZOOTR test.bat`.
+
+- **Where the new Longshot is:** `%LOCALAPPDATA%\Longshot\data\versions\f494107cc8121bf5\builds\default`
+  (`longshot.exe`), with the launcher's own `Longshot.exe` two folders up. The old one (nightly-402) is still
+  in `C:\Users\4bsol\Games\Longshot`.
+- **The game's files:** the new Longshot has no extracted `romfs` folder (it reads the `.nup`). The builder
+  and the tests still read the old install's `romfs` (`romfs_path.txt`), which must stay.
+- **Started once from here to see it work (2026-11-28):** `longshot.exe --user <out\user>` hands over to
+  `Longshot.exe play -- --user ...`, which built the game again (28 s) and prepared its shaders (about three
+  minutes, a first start) before the game came up. Its log
+  (`builds\default\diagnostics\logs\longshot_log.txt`): "mods: 1 mods from
+  C:\Emulation\Mods\NX2-ZOOTR\out\mods: 57 RomFS entries", and our files are served (`RSDB/ActorInfo`,
+  `Mals/USen`, `GameDataList`, the shopkeeper's pack). Longshot now merges the mods' resource size tables
+  itself ("1 tables of mods merged (49 entries), 24 entries raised").
+- **Saves are no longer apart:** the new Longshot keeps saves in its profile
+  (`%LOCALAPPDATA%\Longshot\data\profiles\default\saves`), whatever `--user` says (that folder only gets
+  `temp`). So test files and the user's normal file share one list of save slots now, and the launcher's
+  line "your normal saves are not touched" no longer holds. Open, the user to decide: leave it so, or give
+  the test launcher a profile of its own (`Longshot.exe play --profile <folder>`, from its usage text; not
+  tried yet).
+
 ## 2026-11-27
 
 ### Phase 2, part 3, in game again: still "Sold out", on a new file; the cause is the bomb bags' own settings
