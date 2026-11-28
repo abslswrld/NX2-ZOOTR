@@ -499,14 +499,16 @@ def checks(romfs, builds):
             asked_ = [(c, text[n])]
             # (a Gold Skulltula takes the families in a form of its own since 2026-11-22: no turning item there,
             # tests/skulltula_prog_check.py)
-            ok &= (refused(build_mod.three_level_parse, world, asked_) != build_mod.skulltula_pair_kind(world, c)) \
+            # (and a shelf in the shops' sale flow since 2026-11-27: tests/shop_family_check.py)
+            ok &= (build_mod.three_level_parse(world, asked_) == {} and (
+                build_mod.skulltula_pair_kind(world, c) or build_mod.shop_pair_kind(world, c))) \
                 if len(f) == 3 else refused(build_mod.pair_kind, world, c)
         ok &= build_mod.cutscene_pair_kind(world, REFUSED[2]) and build_mod.song_pair_kind(world, REFUSED[3]) \
             and build_mod.gift_pair_kind(world, REFUSED[2]) is False and build_mod.gift_pair_kind(world, REFUSED[3]) is False
         ok &= (build_mod.pair_kind(world, POTS[0]) == 'pot' if len(f) == 2
                else build_mod.three_level_parse(world, [(POTS[0], text[n])]) == {})
-    good &= check('refused for every family: a shelf; no turning item on a Gold Skulltula; a pot takes it; a '
-                  'cutscene gift and a song take it their own way', ok)
+    good &= check('for every family: no turning item on a shelf or a Gold Skulltula (each takes it its own way); '
+                  'a pot takes it; a cutscene gift and a song take it their own way', ok)
 
     # ------------------------------------------------------------------------------------- whole builds
     names = list(FAMILIES)

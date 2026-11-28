@@ -2,6 +2,165 @@
 
 Newest first. Dates are when the work was done.
 
+## 2026-11-28
+
+### Phase 2, part 3 passed in game (third build)
+- **In game (the user, 2026-11-28, on the new Longshot), every line good:**
+  - **Run 1, no chest opened:** the bomb bag shelf (left alcove, top right) and the Silver Scale shelf (left
+    alcove, bottom left) are there, not "Sold out". The bomb bag shelf sold the Bomb Bag (line, window, menu;
+    20 bombs); the scale shelf sold the Silver Scale. The two middle chests then gave the bigger and the
+    biggest bomb bag.
+  - **Run 2, one chest opened:** the shelf is still there and sold the bigger bomb bag (30 bombs). The Fairy
+    Bow bought too; both shelves empty after leaving and coming back.
+  - **Run 3, both chests opened:** the shelf is still there and sold the biggest bomb bag; still empty after
+    save and reload.
+- **So the cause found in the second round holds:** the bomb bags' item settings
+  (`IsPlayGetEventPouchMax: False`) made a shelf that inherited them "Sold out"; the family's shelf now says
+  True. Three levels on a shelf, the first level sold by the flow, a first weapon with its bag, and two
+  families in one shop work.
+- **The Kokiri Shop's shelf order (decision 37) is confirmed by the user:** "good" (decision 52).
+- **Seen, the user's words:** "bomb bags/progressive items dont change model on shelves. which is fine for
+  now." (Known since decision 51: a family's shelf keeps the first level's look.)
+- **The test saves stay shared** with the user's normal file in the new Longshot's profile (the user: "Leave
+  it shared"). The launcher's own comment line still says the normal saves are not touched, which is no
+  longer true with the new Longshot (not changed: a suggestion).
+
+### The test launcher starts the new Longshot (nightly-884)
+The user updated Longshot and asked for the test launcher to move to it. No code changed: the third test
+build of phase 2, part 3 was built again with the builder's own `--longshot` option pointing at the new
+game folder, which rewrites `out\Launch NX2-ZOOTR test.bat`.
+
+- **Where the new Longshot is:** `%LOCALAPPDATA%\Longshot\data\versions\f494107cc8121bf5\builds\default`
+  (`longshot.exe`), with the launcher's own `Longshot.exe` two folders up. The old one (nightly-402) is still
+  in `C:\Users\4bsol\Games\Longshot`.
+- **The game's files:** the new Longshot has no extracted `romfs` folder (it reads the `.nup`). The builder
+  and the tests still read the old install's `romfs` (`romfs_path.txt`), which must stay.
+- **Started once from here to see it work (2026-11-28):** `longshot.exe --user <out\user>` hands over to
+  `Longshot.exe play -- --user ...`, which built the game again (28 s) and prepared its shaders (about three
+  minutes, a first start) before the game came up. Its log
+  (`builds\default\diagnostics\logs\longshot_log.txt`): "mods: 1 mods from
+  C:\Emulation\Mods\NX2-ZOOTR\out\mods: 57 RomFS entries", and our files are served (`RSDB/ActorInfo`,
+  `Mals/USen`, `GameDataList`, the shopkeeper's pack). Longshot now merges the mods' resource size tables
+  itself ("1 tables of mods merged (49 entries), 24 entries raised").
+- **Saves are no longer apart:** the new Longshot keeps saves in its profile
+  (`%LOCALAPPDATA%\Longshot\data\profiles\default\saves`), whatever `--user` says (that folder only gets
+  `temp`). So test files and the user's normal file share one list of save slots now, and the launcher's
+  line "your normal saves are not touched" no longer holds. The user chose to leave it so ("Leave it
+  shared"); a profile of its own (`Longshot.exe play --profile <folder>`) was not tried.
+
+## 2026-11-27
+
+### Phase 2, part 3, in game again: still "Sold out", on a new file; the cause is the bomb bags' own settings
+- **In game (the user, 2026-11-27, second build):** "bombbag is sold out on shelf at start": the family's own
+  shelf (below) was sold out on a new file, before any chest. So the cause given below ("a shop does not sell
+  an item Link has") was **wrong**: Link had no bomb bag.
+- **What the files say this time:**
+  - The shopkeeper's own "sold out" question is in a file that can be read
+    (`EventQueryCheckIsSoldOutSelectItem`, `AI/NpcKokiri.event.root.ainb` in the shopkeeper's pack): sold out
+    when the list entry's flag says so (`IsSoldOutByGameData`), or when `StockNum` is above 0 and not above
+    the sold count (`Shop_SoldNum.<shopkeeper>.<shelf>`). Its "can Link buy it" (`EventQueryCheckBuyResult`)
+    only compares rupees with the price. Neither made this shelf sold out (stock 1, count 0, no flag), so
+    the shelf's "Sold out" (asked by the shelf's AI in the game's code, `QueryShopItemIsSoldOut`) comes
+    from the item on it.
+  - Both shelves that were sold out had one thing of the Bomb Bag that no shelf that ever sold had: its item
+    settings (`BombBag.game__component__PouchContentParam`), the only settings among the game's items with
+    **`IsPlayGetEventPouchMax: False`** (hearts, magic jars, rupees and Deku Sticks say True; every other
+    item says nothing). Our shelves' own settings have the item's as parent, so both said False: the Bomb
+    Bag's shop version (sold out with a bag and full bombs), and the family's shelf, which is never in the
+    inventory (sold out from the start). The game's heart shelf, which is not put in the inventory either,
+    says True.
+  - This is read from the files by ruling the rest out. It is not proven until the shelf is seen in game.
+- **Fix:** a family's shelf says `IsPlayGetEventPouchMax: True` in its own settings (`shop_items.FULL_FLAG`).
+  And the sale flow no longer asks "can Link carry it" about a family's level: in front of that question "is
+  it <a level>?" leads to its "yes", as for a dungeon's key (what the game answers for a bomb bag while
+  Link's bombs are full is not known, and the level sold is always one Link has not).
+- **Two families in one shop** (each on its own shelf, which decision 51 allows) stopped the build's own
+  read-back; fixed, and in the test script.
+- **`tests/shop_family_check.py`:** the game's item settings that say `IsPlayGetEventPouchMax` (False: the
+  bomb bags' only); the family shelf's True; the questions in front of "can Link carry it"; a build with two
+  families.
+- **Retest build:** as before, plus **Silver Scale > Golden Scale** on `KF_KOKIRI_CHILD_SHOP_02` (left
+  alcove, bottom left, 20 rupees): a family shelf of an item that sold before, to tell a bomb bag problem
+  from a problem of every family shelf. Step 1 of the checklist is "are both shelves there".
+- **Tests:** the full run (`python tests/run_all.py`, 32 scripts) passed; `tests/shop_family_check.py` again
+  after the two-family fix.
+
+### Phase 2, part 3, in game: the bomb bag shelf said "Sold out"; a family's shelf is a shelf of its own now
+- **In game (the user, 2026-11-27, run 1 of the checklist):** one middle chest in Mido's house gave the Bomb
+  Bag: good. Then the bomb bag shelf (Kokiri Shop, left alcove, top right) was empty and its label said
+  "Bomb Bag", "Sold out"; the test stopped there. **The Fairy Bow** (right alcove, top left, 30 rupees): stands
+  right on its shelf, its size is all right, it came with 30 arrows. Not reached: the shelf's second and
+  third level, the shelves after leaving, the other chest.
+- **Cause, as far as the files show it (wrong, see above):** a shop does not sell an item Link has. The shopkeeper's list had
+  stock and names no flag, so the answer comes from the shelf's item itself; the shelf was the Bomb Bag's shop
+  version, and Link had a Bomb Bag. (The Silver Scale's shelf did sell with a Silver Scale in the inventory,
+  2026-11-26; what makes the two differ is not in the files. The Bomb Bag's row has what the scale's has not:
+  `MaxNumGameData`, `AfterExpansionMaxNum`, `ExpansionMaxNumActor`, `IsItemStockMaxIfGet`.) A family's shelf
+  is there exactly for a Link who has the first level, so it cannot be the first level's shop version.
+- **Fix: a family's shelf is a shelf of its own that Link can never have** (`shop_items.build(family=True)`,
+  named `Shop_NX2_<First>_<price>_Family`). From the game's files: a shop knows a shelf's item by the
+  `ActorName` of its `ActorInfo` row (the mask shelves: `Armor_Child_Mask_Keaton`, while their item settings
+  name `Item_Mask_Keaton`); the game has shelves named themselves (`Shop_DekuNutBundle_01`) and shelves that
+  put nothing in the inventory (`Shop_Heart`: `NotPushToPouch`). Ours is both: named itself in its row and
+  its name file, its `_Name` text the first level's (added to `ActorMsg/PouchContent.msbt` in every language),
+  "not put in the inventory" in its item settings and its row, and its row without what the item does when
+  it is got. It keeps the first level's model, pose, price and shelf lift.
+- **The sale flow does all of it now** (`shop_family_edit`): behind each "shelf picked" step "is it the
+  shelf?" -> the inventory questions, the highest level first -> the name of the level Link gets next is
+  written into `Shop_SelectItemName` (**the first level's when Link has none**, which the shelf's own name
+  gave before); in front of each of the five giving steps "is it <that level>?" -> the level is added (the
+  first level with what it needs, the Fairy Slingshot with its seed bag) and the shelf's own step is passed
+  by. A first weapon alone on a shelf is unchanged (its own shop version, its bag added in front of the
+  shelf's step): the Fairy Bow passed that way.
+- **`tests/shop_family_check.py`** rewritten for it (the shelf's row, name file, item settings and label; the
+  flow for the pair, the three bomb bags and the Fairy Slingshot's family).
+- **Retest build:** the same items on the same spots. Three short runs on new files, since the first
+  level's way through the sale is new too: no chest opened (the shelf sells the Bomb Bag), one (the bigger
+  one), both (the biggest).
+- **Tests:** the full run (`python tests/run_all.py`, 32 scripts) passed with the fix.
+
+### Phase 2, part 3: three levels on a shelf, a first weapon's bag, the shelf order (to test in game)
+Branch `claude/shop-families-rest`. Test build and checklist: `out\TEST_CHECKLIST.md`.
+
+- **Three levels on a shop shelf** (`SHELF=First>Second>Third`, refused until now): the same way as a pair
+  (part 1), with one more level. Right after the shelf is picked the sale flow asks "has Second?" (yes:
+  Third's name is written) and then "has First?" (yes: Second's name), the higher level first, as gifts and
+  scrubs ask; in front of each of the five giving steps "is it Second?" and "is it Third?" add that level in
+  the shelf item's place. `shop_family_edit` and `shop_family_check` take any number of levels now;
+  `three_level_parse` leaves a shelf to them.
+- **A first weapon on a shelf comes with its small bag.** Found while building this: a Fairy Slingshot or
+  Fairy Bow on a shelf, alone or as its family's first level, was sold with no bag (the game's sale flow has
+  no step that adds anything to the inventory; the shelf gives its own item and nothing else, and only chests
+  give the bag with the weapon). Now, in front of each giving step, "is it <the weapon>?" adds its small bag
+  (`SCRUB_COMPANIONS`, the step the scrubs add it with) and then lets the shelf give the weapon. This is the
+  shelf's part of what part 10 of phase 1 did for the ground, pots and Gold Skulltulas.
+- **The shelf-count setting (decision 37):** nothing in the game's files is needed for it; a build changes
+  only the shelves it is given, and the others keep the game's items (seen in every shelf test). What the
+  generator will need is which shelves come first as the number goes up, so each shop shelf of
+  `data/world/KokiriForest.json` has a `shelf_rank` (1 = randomized first; the child's and the adult's shelf
+  of one number have the same rank), `World.shop_shelves(n)` (`logic/world.py`) names the shelves for a
+  setting of n, and `World.problems()` checks that a shop's ranks are 1 to n, each once.
+  **The Kokiri Shop's order is a proposal for the user to confirm:** 1 Deku Seeds x30 (shelf 04), 2 Deku
+  Nuts x10 (03), 3 Deku Sticks x5 (05), 4 the Recovery Heart (08), 5 Deku Seeds x10 (01), 6 Deku Nuts x5
+  (02), 7 the Deku Stick (07), 8 the Deku Shield (06). The idea: the bigger bundle of a kind goes first, so
+  one of each kind stays for sale as long as possible, and the Deku Shield goes last.
+- **`tests/shop_family_check.py`:** four more checks (three levels; the weapons' bags; the shelf order).
+  `tests/three_chest_check.py`, `tests/families_check.py`, `tests/pairs_more_check.py` and
+  `tests/skulltula_prog_check.py` expected three levels on a shelf to be refused; they check what holds now.
+- **Shelf lifts for the Bomb Bag, the Fairy Bow and the Fairy Slingshot** (`SHELF_LIFT`, `tools/shop_items.py`):
+  0.19, 0.42 and 0.18 m. Their poses are centred on the shelf point as the scales' were (lowest vertex 0.193,
+  0.416 and 0.182 m under it, measured the same way), so they would have sat in the shelf. The Fairy Bow is
+  0.91 m tall and 0.63 m wide standing on a shelf, and the shop's two rows are 0.64 m apart: on a lower shelf
+  it reaches the shelf above. The test build has it on a top shelf; whether it needs a smaller shelf pose (as
+  the Giant's Knife has) is for the in-game look to say. One more check in `tests/shop_family_check.py`.
+- **Test build:** the six standing fixes and `kokiri_shop_full_stock`; `KF_SHOP_RUPEE_ITEM=Obj_Rupee_Gold`;
+  `KF_KOKIRI_CHILD_SHOP_01` (left alcove, top right, 15 rupees) and `KF_MIDO_CHEST_01` / `_02` (the two middle
+  chests) = `Item_BombBag_Small>Item_BombBag_Medium>Item_BombBag_Large`; `KF_KOKIRI_CHILD_SHOP_04` (right
+  alcove, top left, 30 rupees) = `Item_Range_Bow`. Two short runs on new files (one chest opened: the shelf
+  sells the second level; both: the third), since a shop holds one shelf of a family.
+- **Tests:** the full run (`python tests/run_all.py`, 32 scripts) passed before the lifts were added; after
+  them `tests/shop_family_check.py` and `tests/shop_shelf_keys_check.py` (the two that look at lifts) pass.
+
 ## 2026-11-26
 
 ### Phase 2, part 2 closed: part 1's look stays, one upgrade of a family per shop (decision 51)

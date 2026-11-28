@@ -128,6 +128,12 @@ class World:
                     elif loc.get('age') and not any(loc['age'] in p['ages']
                                                     for p in self.checks[scene][spot]['placements']):
                         out.append('%s: %s: spot %s has no %s object' % (r.name, n, spot, loc['age']))
+        # a shop's shelves have an order to be randomized in (decision 37): 1..n for each age, each once
+        for r in self.regions.values():
+            for age, ranks in sorted(self._shelf_ranks(r).items()):
+                if sorted(x for x, _ in ranks) != list(range(1, len(ranks) + 1)):
+                    out.append('%s: the %s shelves\' shelf_rank are %s, expected 1 to %d, each once'
+                               % (r.name, age, sorted(x for x, _ in ranks), len(ranks)))
         # every object (placement) belongs to at most one location
         placed = collections.Counter((sc, sp, p['hash']) for r in self.regions.values()
                                      for l in r.locations.values() for sc, sp, p in self.placements_of(r, l))
@@ -135,6 +141,25 @@ class World:
             if n > 1:
                 out.append('%s: spot %s object %s used by %d locations' % (scene, spot, h, n))
         return out
+
+    @staticmethod
+    def _shelf_ranks(region):
+        """{age: [(shelf_rank, check id)]} of a region's shop shelves"""
+        out = {}
+        for loc in region.locations.values():
+            if loc.get('kind') == 'shop':
+                out.setdefault(loc.get('age') or 'both', []).append((loc.get('shelf_rank'), loc.get('id')))
+        return out
+
+    def shop_shelves(self, count):
+        """the check IDs of the shop shelves that are randomized when the shop setting is `count` shelves per
+        shop (decision 37: the same number in every shop, from none to all): in each shop, for each age, the
+        `count` shelves with the lowest "shelf_rank". The other shelves keep the game's own items."""
+        out = []
+        for r in self.regions.values():
+            for age, ranks in sorted(self._shelf_ranks(r).items()):
+                out += [cid for _, cid in sorted(ranks)[:max(count, 0)]]
+        return sorted(out)
 
     @staticmethod
     def spots_of(region, loc):
