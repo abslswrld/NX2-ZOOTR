@@ -402,7 +402,8 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    round: the rule only refuses builds, and part 1's way passed in game.
 3. **Shop families, the rest:** a three-level family on a shelf, and the setting for how many shelves per shop
    are randomized (D37). (One family on two shelves of a shop is ruled out by D51.)
-   **Built 2026-11-27, to test in game** (`tests/shop_family_check.py`):
+   **Done 2026-11-28, passed in game** (third build; `tests/shop_family_check.py`). The Kokiri Shop's shelf
+   order confirmed by the user (D52). What was built, and the two rounds before it:
    - **three levels on a shelf** (`SHELF=First>Second>Third`): the sale flow asks "has Second?" and then "has
      First?" right after the shelf is picked and writes the next level's name; in front of each giving step
      the second or the third level is added in the shelf item's place;
@@ -412,9 +413,9 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    - **the shelf-count setting (D37)** needs nothing in the game's files (a build already changes only the
      shelves it is given). What it needs is the order in which a shop's shelves are randomized as the number
      goes up: each shop shelf has a `shelf_rank` in `data/world`, and `World.shop_shelves(n)` names the shelves
-     for a setting of n. **The Kokiri Shop's order is a proposal, the user to confirm:** Deku Seeds x30, Deku
+     for a setting of n. **The Kokiri Shop's order (proposed, then confirmed):** Deku Seeds x30, Deku
      Nuts x10, Deku Sticks x5, the Recovery Heart, Deku Seeds x10, Deku Nuts x5, the Deku Stick, the Deku
-     Shield (last). The generator that will use it is phase 5.
+     Shield (last): **confirmed by the user 2026-11-28 (D52).** The generator that will use it is phase 5.
    - **in game 2026-11-27:** the Fairy Bow on a shelf: good (stands right, 30 arrows). With a Bomb Bag from
      a chest the bomb bag shelf said "Sold out" (a shop does not sell an item Link has). **Fixed, to retest:**
      a family's shelf is a shelf of its own that Link can never have (`Shop_NX2_<First>_<price>_Family`: named
@@ -423,7 +424,10 @@ checks, none with an ID; Inside the Deku Tree no data yet.
    - **in game 2026-11-27, second build:** that shelf was "Sold out" on a new file, so "Link has it" was not
      the cause. The bomb bags' item settings are the only ones with `IsPlayGetEventPouchMax: False`, and the
      shelf inherited it; a family's shelf says True now, and "can Link carry it" is not asked about a
-     family's level. **To retest** (with a Silver Scale > Golden Scale shelf beside it for comparison);
+     family's level. **Passed in game 2026-11-28** (with a Silver Scale > Golden Scale shelf beside it): all
+     three levels sold from the shelf (20, 30 and the biggest bag's bombs), the scale shelf too, the shelves
+     empty after leaving and after save and reload. The shelf keeps the first level's model (D51: "fine for
+     now", the user);
    - shelf lifts for the Bomb Bag (0.19 m), the Fairy Bow (0.42 m) and the Fairy Slingshot (0.18 m), measured
      as the scales'. The Fairy Bow is 0.91 m tall on a shelf (the shop's rows are 0.64 m apart): its look is
      part of the test.

@@ -4,6 +4,27 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-28
 
+### Phase 2, part 3 passed in game (third build)
+- **In game (the user, 2026-11-28, on the new Longshot), every line good:**
+  - **Run 1, no chest opened:** the bomb bag shelf (left alcove, top right) and the Silver Scale shelf (left
+    alcove, bottom left) are there, not "Sold out". The bomb bag shelf sold the Bomb Bag (line, window, menu;
+    20 bombs); the scale shelf sold the Silver Scale. The two middle chests then gave the bigger and the
+    biggest bomb bag.
+  - **Run 2, one chest opened:** the shelf is still there and sold the bigger bomb bag (30 bombs). The Fairy
+    Bow bought too; both shelves empty after leaving and coming back.
+  - **Run 3, both chests opened:** the shelf is still there and sold the biggest bomb bag; still empty after
+    save and reload.
+- **So the cause found in the second round holds:** the bomb bags' item settings
+  (`IsPlayGetEventPouchMax: False`) made a shelf that inherited them "Sold out"; the family's shelf now says
+  True. Three levels on a shelf, the first level sold by the flow, a first weapon with its bag, and two
+  families in one shop work.
+- **The Kokiri Shop's shelf order (decision 37) is confirmed by the user:** "good" (decision 52).
+- **Seen, the user's words:** "bomb bags/progressive items dont change model on shelves. which is fine for
+  now." (Known since decision 51: a family's shelf keeps the first level's look.)
+- **The test saves stay shared** with the user's normal file in the new Longshot's profile (the user: "Leave
+  it shared"). The launcher's own comment line still says the normal saves are not touched, which is no
+  longer true with the new Longshot (not changed: a suggestion).
+
 ### The test launcher starts the new Longshot (nightly-884)
 The user updated Longshot and asked for the test launcher to move to it. No code changed: the third test
 build of phase 2, part 3 was built again with the builder's own `--longshot` option pointing at the new
@@ -24,9 +45,8 @@ game folder, which rewrites `out\Launch NX2-ZOOTR test.bat`.
 - **Saves are no longer apart:** the new Longshot keeps saves in its profile
   (`%LOCALAPPDATA%\Longshot\data\profiles\default\saves`), whatever `--user` says (that folder only gets
   `temp`). So test files and the user's normal file share one list of save slots now, and the launcher's
-  line "your normal saves are not touched" no longer holds. Open, the user to decide: leave it so, or give
-  the test launcher a profile of its own (`Longshot.exe play --profile <folder>`, from its usage text; not
-  tried yet).
+  line "your normal saves are not touched" no longer holds. The user chose to leave it so ("Leave it
+  shared"); a profile of its own (`Longshot.exe play --profile <folder>`) was not tried.
 
 ## 2026-11-27
 

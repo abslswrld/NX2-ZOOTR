@@ -2867,7 +2867,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Goron Ruby for 15 rupees: bought, its name in red, on the Key Items tab, the shelf empty after leaving and coming back; on 2026-11-25 (part 12) a small key of the Forest Temple for 15 rupees: bought, \"(Forest Temple)\" in green, the shelf empty and still empty after coming back (that it counts: not seen yet, the door in the temple was skipped); retest 2026-11-26: with only this key the first locked door of the Forest Temple opened (a key from a shelf counts); on 2026-11-26 (phase 2, part 1) the pair Silver Scale > Golden Scale on this shelf and on shelf 2: the first one bought gave the Silver Scale, the second the Golden Scale (\"You got a golden scale!\", in the menu); both shelves empty after, also after save and reload. The scale sat in the shelf (lifted 0.19 m now), the shopkeeper's line still said \"Silver Scale\" for the second (the name is written earlier now), Link holds up the Silver Scale's model (one shelf, one model); retest 2026-11-26: the scales stand on their shelves, the shopkeeper's line names the Golden Scale for the second shelf, both shelves still empty after coming back. The shelf's own label still says \"Silver Scale\". The user: not good enough, two shelf objects on one spot instead (decision 50)",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 10) the Goron Ruby for 15 rupees: bought, its name in red, on the Key Items tab, the shelf empty after leaving and coming back; on 2026-11-25 (part 12) a small key of the Forest Temple for 15 rupees: bought, \"(Forest Temple)\" in green, the shelf empty and still empty after coming back (that it counts: not seen yet, the door in the temple was skipped); retest 2026-11-26: with only this key the first locked door of the Forest Temple opened (a key from a shelf counts); on 2026-11-26 (phase 2, part 1) the pair Silver Scale > Golden Scale on this shelf and on shelf 2: the first one bought gave the Silver Scale, the second the Golden Scale (\"You got a golden scale!\", in the menu); both shelves empty after, also after save and reload. The scale sat in the shelf (lifted 0.19 m now), the shopkeeper's line still said \"Silver Scale\" for the second (the name is written earlier now), Link holds up the Silver Scale's model (one shelf, one model); retest 2026-11-26: the scales stand on their shelves, the shopkeeper's line names the Golden Scale for the second shelf, both shelves still empty after coming back. The shelf's own label still says \"Silver Scale\". The user: not good enough, two shelf objects on one spot instead (decision 50); on 2026-11-27/28 (phase 2, part 3) the three bomb bags on this shelf (15 rupees): first the shelf said \"Sold out\" (the Bomb Bag's item settings, inherited by the shelf); with the family's own shelf it sold the Bomb Bag (no bag owned), the bigger one (one owned) and the biggest (two owned), 20 / 30 bombs, empty after leaving and after save and reload; the model stays the Bomb Bag's",
   "requirements": {
    "child": [
     []
@@ -2915,7 +2915,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 12) the Forest Temple's boss key for 20 rupees: bought, \"You found the Boss Key! (Forest Temple)\", on the temple's map, the shelf empty (the model sat in the shelf: lifted 0.22 m now); retest 2026-11-26: the boss key stands on its shelf; on 2026-11-26 (phase 2, part 1) the pair Silver Scale > Golden Scale: see shelf 1",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 12) the Forest Temple's boss key for 20 rupees: bought, \"You found the Boss Key! (Forest Temple)\", on the temple's map, the shelf empty (the model sat in the shelf: lifted 0.22 m now); retest 2026-11-26: the boss key stands on its shelf; on 2026-11-26 (phase 2, part 1) the pair Silver Scale > Golden Scale: see shelf 1; on 2026-11-28 (phase 2, part 3) Silver Scale > Golden Scale on the family's own shelf (20 rupees): there from the start and sold the Silver Scale",
   "requirements": {
    "child": [
     []
@@ -3011,7 +3011,7 @@
    "note": null
   },
   "randomizable": "untested",
-  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 12) the Forest Temple's compass for 30 rupees: bought, on the temple's map, the shelf empty (the model sat in the shelf: lifted 0.13 m now); retest 2026-11-26: the compass stands on its shelf",
+  "randomizable_note": "not yet changed in game; on 2026-11-25 (part 12) the Forest Temple's compass for 30 rupees: bought, on the temple's map, the shelf empty (the model sat in the shelf: lifted 0.13 m now); retest 2026-11-26: the compass stands on its shelf; on 2026-11-27 (phase 2, part 3) the Fairy Bow alone (30 rupees, lifted 0.42 m): stands right on the shelf, came with 30 arrows, empty after leaving and coming back",
   "requirements": {
    "child": [
     []

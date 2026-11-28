@@ -180,6 +180,12 @@ The roadmap built on it is `docs/ROADMAP.md` (approved 2026-11-23).
     model and what Link holds up are the first level's. The builder stops a build with levels of one family
     on two shelves of one shop (`shop_family_guard`); the rule is in `CLAUDE.md`. The two-shopkeeper way was
     not tried.
+52. **The Kokiri Shop's shelves are randomized in this order** as the shop setting (D37) goes up (the user,
+    2026-11-28, to the proposal: "good"): Deku Seeds x30, Deku Nuts x10, Deku Sticks x5, the Recovery Heart,
+    Deku Seeds x10, Deku Nuts x5, the Deku Stick, the Deku Shield last. The idea: the bigger bundle of a kind
+    first, so one of each kind stays for sale as long as possible. It is `shelf_rank` in
+    `data/world/KokiriForest.json`, read by `World.shop_shelves(n)`; the same for the child's and the adult's
+    shelves.
 
 ## Flagged as unknown (research before any promise)
 - Changing when the bridge appears, when the Light Arrow cutscene plays, and a "reward for a condition".
