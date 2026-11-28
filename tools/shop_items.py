@@ -62,17 +62,25 @@ Found in the game's files:
   Deku Shield shelf `Weapon_Shield_Deku`, the Bombchu shelves `Item_Bombchu`). A shop version has item
   settings of its own doing the same: the item's settings as parent, `PouchActor` the item.
 
-- A shelf Link already has the item of says "Sold out" and shows no model (in game 2026-11-27: with a Bomb
-  Bag from a chest, the Bomb Bag's shelf; nothing in the files says so: the shopkeeper's list had stock, and
-  no flag). What a shop knows a shelf's item by is the `ActorName` of its `ActorInfo` row (the mask shelves:
+- "Sold out" on a bomb bag shelf (in game 2026-11-27, twice): the Bomb Bag's shop version once Link had a
+  Bomb Bag from a chest; then the family's own shelf (below) on a new file, from the start. The shopkeeper's
+  own "sold out" question (`EventQueryCheckIsSoldOutSelectItem`, `AI/NpcKokiri.event.root.ainb`) only knows
+  the list's flag (`IsSoldOutByGameData`) and `StockNum` against the sold count, and neither applied; so the
+  answer came from the shelf's item. What both shelves had of the Bomb Bag and no shelf that sold had: its
+  item settings (`BombBag.game__component__PouchContentParam`), the only settings of the game with
+  `IsPlayGetEventPouchMax: False` ("not handed over while the pouch is full of it"; hearts, magic jars,
+  rupees and Deku Sticks say True, every other item nothing). A shelf's settings of ours have the item's as
+  parent, so they said False too. A family's shelf says True, as the game's heart shelf (`Shop_Heart`: not
+  put in the inventory, True).
+- What a shop knows a shelf's item by is the `ActorName` of its `ActorInfo` row (the mask shelves:
   `Armor_Child_Mask_Keaton`, while their item settings name `Item_Mask_Keaton`): that name goes into
   `Shop_SelectItemName`, and it is the name the shelf's label shows. The game also has shelves named
   themselves (`Shop_DekuNutBundle_01`: row and name file its own, texts under its own name) and shelves that
   put nothing in the inventory (`Shop_Heart`: `PouchSpecialDeal: NotPushToPouch`).
-  So the shelf of an upgrade family (`family=True`; tools/build_mod.py: shop_family_edit) is a shelf Link can
-  never have: named itself (row, name file; its `_Name` text is the first level's, added by the builder),
-  "not put in the inventory" in its item settings and its row, the row without what the item does when it
-  is got. What Link gets is added by the sale flow.
+  The shelf of an upgrade family (`family=True`; tools/build_mod.py: shop_family_edit) is a shelf of its own
+  that Link never has: named itself (row, name file; its `_Name` text is the first level's, added by the
+  builder), "not put in the inventory" and `IsPlayGetEventPouchMax: True` in its item settings, its row
+  without what the item does when it is got. What Link gets is added by the sale flow.
 
 A shop version of item X is built from the game's own files only: the shield shelf's pack without its item
 and price files, X's model, animation and item settings (with the files they inherit from, when X's pack has
@@ -144,6 +152,7 @@ NO_RESPAWN = '?Component/ActorGameDataSetting/NoRespawn.game__component__ActorGa
 NAME_REF = '?ActorSystem/ActorName/%s.engine__actor__ActorName.bgyml'    # an actor file's ActorNameRef
 NOT_PUSHED_SHELF = 'Shop_Heart'                    # a shelf of the game that puts nothing in the inventory
 NOT_PUSHED = 'NotPushToPouch'                      # PouchSpecialDeal (PouchActorInfo)
+FULL_FLAG = 'IsPlayGetEventPouchMax'               # item settings: True on the heart shelf, False on the bomb bags
 # what a family shelf's row keeps of the item's row: where it is listed and how it is got, nothing it does
 FAMILY_ROW = ('__RowId', 'BundleActorNum', 'BuyingPrice', 'SellingPrice', 'IsAutoSaveAfterGet', 'PouchCategory',
               'PouchGetType', 'PouchSpecialDeal', 'PouchTabCategory')
@@ -530,7 +539,9 @@ def build(item, price, read_pack, read_table_rows, once=False, family=False):
     pdoc.root['$parent'] = 'Work/' + _ref_path(ic['PouchContentRef'])[:-len('.bgyml')] + '.gyml'
     if family:
         # never in the inventory, and named itself (the name file is not in a pack, as the game's own)
+        # (and handed over whatever the pouch holds: the bomb bags' own settings say it is not, FULL_FLAG)
         pdoc.root['SpecialDeal'] = not_pushed_value(read_pack)
+        pdoc.root[FULL_FLAG] = True
         comp['ActorNameRef'] = NAME_REF % name
     else:
         pdoc.root['PouchActor'] = 'Work/' + ap_path(item)[:-len('.bgyml')] + '.gyml'
@@ -637,6 +648,7 @@ def build(item, price, read_pack, read_table_rows, once=False, family=False):
         sroot = byml.loads(back.files[_ref_path(got['PouchContentRef'])]).root
         if got.get('ActorNameRef') != NAME_REF % name or 'PouchActor' in sroot \
                 or sroot.get('SpecialDeal') != not_pushed_value(read_pack) or ai.get('ActorName') != name \
+                or sroot.get(FULL_FLAG) is not True \
                 or pa.get('PouchSpecialDeal') != NOT_PUSHED or set(pa) - set(FAMILY_ROW):
             raise SystemExit('read-back: the family shelf %s is not named itself and out of the inventory' % name)
     return name, pack, new_inner, rows, loose

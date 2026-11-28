@@ -4,13 +4,48 @@ Newest first. Dates are when the work was done.
 
 ## 2026-11-27
 
+### Phase 2, part 3, in game again: still "Sold out", on a new file; the cause is the bomb bags' own settings
+- **In game (the user, 2026-11-27, second build):** "bombbag is sold out on shelf at start": the family's own
+  shelf (below) was sold out on a new file, before any chest. So the cause given below ("a shop does not sell
+  an item Link has") was **wrong**: Link had no bomb bag.
+- **What the files say this time:**
+  - The shopkeeper's own "sold out" question is in a file that can be read
+    (`EventQueryCheckIsSoldOutSelectItem`, `AI/NpcKokiri.event.root.ainb` in the shopkeeper's pack): sold out
+    when the list entry's flag says so (`IsSoldOutByGameData`), or when `StockNum` is above 0 and not above
+    the sold count (`Shop_SoldNum.<shopkeeper>.<shelf>`). Its "can Link buy it" (`EventQueryCheckBuyResult`)
+    only compares rupees with the price. Neither made this shelf sold out (stock 1, count 0, no flag), so
+    the shelf's "Sold out" (asked by the shelf's AI in the game's code, `QueryShopItemIsSoldOut`) comes
+    from the item on it.
+  - Both shelves that were sold out had one thing of the Bomb Bag that no shelf that ever sold had: its item
+    settings (`BombBag.game__component__PouchContentParam`), the only settings among the game's items with
+    **`IsPlayGetEventPouchMax: False`** (hearts, magic jars, rupees and Deku Sticks say True; every other
+    item says nothing). Our shelves' own settings have the item's as parent, so both said False: the Bomb
+    Bag's shop version (sold out with a bag and full bombs), and the family's shelf, which is never in the
+    inventory (sold out from the start). The game's heart shelf, which is not put in the inventory either,
+    says True.
+  - This is read from the files by ruling the rest out. It is not proven until the shelf is seen in game.
+- **Fix:** a family's shelf says `IsPlayGetEventPouchMax: True` in its own settings (`shop_items.FULL_FLAG`).
+  And the sale flow no longer asks "can Link carry it" about a family's level: in front of that question "is
+  it <a level>?" leads to its "yes", as for a dungeon's key (what the game answers for a bomb bag while
+  Link's bombs are full is not known, and the level sold is always one Link has not).
+- **Two families in one shop** (each on its own shelf, which decision 51 allows) stopped the build's own
+  read-back; fixed, and in the test script.
+- **`tests/shop_family_check.py`:** the game's item settings that say `IsPlayGetEventPouchMax` (False: the
+  bomb bags' only); the family shelf's True; the questions in front of "can Link carry it"; a build with two
+  families.
+- **Retest build:** as before, plus **Silver Scale > Golden Scale** on `KF_KOKIRI_CHILD_SHOP_02` (left
+  alcove, bottom left, 20 rupees): a family shelf of an item that sold before, to tell a bomb bag problem
+  from a problem of every family shelf. Step 1 of the checklist is "are both shelves there".
+- **Tests:** the full run (`python tests/run_all.py`, 32 scripts) passed; `tests/shop_family_check.py` again
+  after the two-family fix.
+
 ### Phase 2, part 3, in game: the bomb bag shelf said "Sold out"; a family's shelf is a shelf of its own now
 - **In game (the user, 2026-11-27, run 1 of the checklist):** one middle chest in Mido's house gave the Bomb
   Bag: good. Then the bomb bag shelf (Kokiri Shop, left alcove, top right) was empty and its label said
   "Bomb Bag", "Sold out"; the test stopped there. **The Fairy Bow** (right alcove, top left, 30 rupees): stands
   right on its shelf, its size is all right, it came with 30 arrows. Not reached: the shelf's second and
   third level, the shelves after leaving, the other chest.
-- **Cause, as far as the files show it:** a shop does not sell an item Link has. The shopkeeper's list had
+- **Cause, as far as the files show it (wrong, see above):** a shop does not sell an item Link has. The shopkeeper's list had
   stock and names no flag, so the answer comes from the shelf's item itself; the shelf was the Bomb Bag's shop
   version, and Link had a Bomb Bag. (The Silver Scale's shelf did sell with a Silver Scale in the inventory,
   2026-11-26; what makes the two differ is not in the files. The Bomb Bag's row has what the scale's has not:

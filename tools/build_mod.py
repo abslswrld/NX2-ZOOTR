@@ -858,6 +858,12 @@ def shop_key_check(orig, back, sales):
 #   in front of each giving step:     is it <First>? -> what First needs, First, then on behind the step; the
 #                                     same for <Second> and <Third>; the shelf's own step gives nothing and is
 #                                     passed by
+# In game 2026-11-27 that shelf said "Sold out" on a new file: the cause was not that Link has the item but
+# the bomb bags' own item settings, which the shelf's settings inherit (tools/shop_items.py, FULL_FLAG); the
+# family's shelf says the opposite now. For the same reason the flow's "can Link carry it" question is not
+# asked about a family's level (what it answers for a bomb bag while Link's bombs are full is not known, and
+# the level sold is always one Link has not): in front of it, "is it <a level>?" leads to its "yes", as for a
+# dungeon's key (shop_key_edit).
 SHOP_GIVES = (('Npc_EventStarter', 'EventTriggerGetItemAtShop'), ('Npc_EventStarter', 'EventTriggerShopItemPutInPouch'))
 SHOP_ADD = ('PouchSystemActor', 'EventTriggerAddOrRemovePouchContent')
 SHOP_FOCUS = ('Npc_EventStarter', 'EventTriggerShopItemFocus')
@@ -954,6 +960,12 @@ def shop_family_edit(fc, families, ask, write):
                 if fc.repoint(g, csw, keep=(csw, last)) < 1:
                     raise SystemExit('%s: nothing led to its step %s' % (SHOP_SALE_FLOW, by[g].name))
                 new.append(by[csw].name)
+        # Link can always carry the level a family's shelf sells: in front of "can Link carry it"
+        for name in written:
+            csw = fc.add_switch(SHOP_NAME_QUERY[0], SHOP_NAME_QUERY[1], [(0, dict(by[can].cases)[0]), (1, can)],
+                                named(name))
+            if fc.repoint(can, csw, keep=(csw,)) < 1:
+                raise SystemExit('%s: nothing led to its "can Link carry it" question' % SHOP_SALE_FLOW)
         if written:
             said.append('%s, a family\'s shelf: behind each of the %d "shelf picked" steps the level Link gets next '
                         'is written into %s (%s; %d frames after it): %s; in front of each of the %d giving steps '
@@ -962,7 +974,8 @@ def shop_family_edit(fc, families, ask, write):
                            ', '.join(['has none -> %s' % written[0]]
                                      + ['has %s -> %s' % (a, n) for a, n in zip(asked, written[1:])]),
                            len(gives), ' or '.join(items),
-                           '; %s comes with %s' % (items[0], ', '.join(with_first)) if with_first else ''))
+                           '; %s comes with %s' % (items[0], ', '.join(with_first)) if with_first else '')
+                        + '; "can Link carry it" is not asked about them')
         else:
             said.append('%s on a shelf; sold as itself it comes with %s (added in front of each giving step)'
                         % (shown, ', '.join(with_first)))
@@ -972,7 +985,8 @@ def shop_family_edit(fc, families, ask, write):
 
 def shop_family_events(picked, gives, families):
     """how many events shop_family_edit adds"""
-    return sum((len(picked) * (3 * len(written)) + len(gives) * (2 * len(written) + len(with_first))) if written
+    return sum((len(picked) * (3 * len(written)) + len(gives) * (2 * len(written) + len(with_first))
+                + len(written)) if written
                else len(gives) * (1 + len(with_first)) for asked, written, items, with_first in families.values())
 
 
@@ -1033,8 +1047,8 @@ def shop_family_check(orig, back, families, ask, write):
                      % (len(firsts), shown, len(picked)))
             behind = []
             for head in firsts:
-                on = dict(head.cases)[1]               # where the "shelf picked" step led before
-                behind.append(on)
+                on = dict(head.cases)[1]               # where the "shelf picked" step led before this family
+                behind.append(own(on))                 # (another family's question, or the flow as it was)
                 at = dict(head.cases)[0]
                 for k in reversed(range(1, len(written))):   # the highest level is asked about first
                     q = back.events[at]
@@ -1049,7 +1063,11 @@ def shop_family_check(orig, back, families, ask, write):
             if sorted(behind) != sorted(orig.events[f].next for f in picked):
                 fail('%s: its questions do not stand behind the "shelf picked" steps' % shown)
             for k, (name, item) in enumerate(zip(written, items)):
-                placed = [e for e in new if asks(e, name)]
+                carry = [e for e in new if asks(e, name) and dict(e.cases)[0] == dict(orig.events[can].cases)[0]]
+                if len(carry) != 1 or own(dict(carry[0].cases)[1]) != can:
+                    fail('%s: "is it %s" does not stand in front of "can Link carry it", leading to its yes'
+                         % (shown, name))
+                placed = [e for e in new if asks(e, name) and e not in carry]
                 if sorted(own(dict(e.cases)[1]) for e in placed) != sorted(gives):
                     fail('%s: "is it %s" does not stand in front of each giving step' % (shown, name))
                 for e in placed:

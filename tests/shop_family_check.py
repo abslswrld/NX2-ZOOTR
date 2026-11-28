@@ -6,16 +6,18 @@ What it checks:
 - From the game's files: the shops' shared sale flow (DisplayShop) puts the shelf's item in the inventory
   with one of five steps, each with a next step; no shelf of the game is named as a pair's second level; the
   game's own inventory question and its name write (the scrubs') are found.
-- A family's shelf is a shelf of its own that Link can never have (in game 2026-11-27 the Bomb Bag's shop
-  version said "Sold out" once Link had a Bomb Bag): named itself in its row and its name file, its label the
-  first level's name, "not put in the inventory" in its item settings and its row as the game's heart shelf.
+- From the game's files: the bomb bags' item settings are the only ones that say IsPlayGetEventPouchMax
+  False (in game 2026-11-27 a bomb bag shelf said "Sold out", twice); the heart shelf says True.
+- A family's shelf is a shelf of its own that Link never has: named itself in its row and its name file, its
+  label the first level's name, "not put in the inventory" and IsPlayGetEventPouchMax True in its item
+  settings as the game's heart shelf, "not put in the inventory" in its row.
 - The sale flow does the rest, read back for Silver Scale > Gold Scale, for the three bomb bags and for the
   Fairy Slingshot's family: behind each of the two "shelf picked" steps, before the shopkeeper names the item,
   "is it the shelf?" -> the inventory questions, the highest level first -> the name of the level Link gets
   next written into Shop_SelectItemName (the first level's when Link has none), two frames, then on; in front
   of each of the five giving steps "is it <that level>?" -> the level added (the first level with what it
-  needs: the Fairy Slingshot with its seed bag) and the shelf's own step passed by. Nothing else of the flow
-  changed.
+  needs: the Fairy Slingshot with its seed bag) and the shelf's own step passed by; in front of "can Link
+  carry it" the same questions lead to its "yes". Nothing else of the flow changed.
 - The pair's build with a dungeon's small key on another shelf: both changes stand in the flow.
 - Refused: two upgrades of one family in one shop (decision 51): the pair on two shelves, the pair beside its
   first level alone, one level alone on two shelves.
@@ -54,7 +56,8 @@ SLING, BOW = 'Weapon_Range_SlingShot', 'Weapon_Range_Bow'      # the names the i
 BUILDS = {'pair': FIX + [PAIR],
           'both': FIX + [PAIR, '%s=Item_Dungeon_SmallKey@%s' % (SHELF2, D)],
           'three': FIX + ['%s=%s' % (SHELF, '>'.join(BAGS))],
-          'weapons': FIX + ['%s=%s' % (SHELF, '>'.join(SEEDS)), '%s=Item_Range_Bow' % SHELF2]}
+          'weapons': FIX + ['%s=%s' % (SHELF, '>'.join(SEEDS)), '%s=Item_Range_Bow' % SHELF2],
+          'two': FIX + ['%s=%s' % (SHELF, '>'.join(BAGS)), '%s=%s>%s' % (SHELF2, FIRST, SECOND)]}
 ONE_PER_SHOP = 'a shop holds at most one upgrade of a family'
 REFUSED = [(FIX + [PAIR, '%s=%s>%s' % (SHELF2, FIRST, SECOND)], ONE_PER_SHOP),
            (FIX + [PAIR, '%s=%s' % (SHELF2, FIRST)], ONE_PER_SHOP),
@@ -139,6 +142,24 @@ def main(romfs):
             good &= check('build "%s": %d files written' % (name, len(files)),
                           build_mod.SHOP_SALE_FLOW + '.zs' in files)
 
+        # ---- the bomb bags' item settings are the only ones of the game's items that say "not handed over while
+        # the pouch is full" (the heart shelf says the opposite)
+        said_false, said_true = set(), set()
+        for fn in sorted(os.listdir(os.path.join(romfs, 'Pack', 'Actor'))):
+            if not fn.startswith(('Item_', 'Shop_', 'Weapon_', 'Armor_', 'Obj_Heart', 'Obj_Rupee', 'Obj_Magic')):
+                continue
+            for path, data in sarc.Sarc.read(plain('Pack/Actor/' + fn[:-3])).files.items():
+                if '/PouchContentParam/' in path:
+                    flag = byml.loads(data).root.get(shop_items.FULL_FLAG)
+                    (said_false if flag is False else said_true if flag is True else set()).add(
+                        path.split('/')[-1].split('.')[0])
+        heart_files = sarc.Sarc.read(plain(ground_items.pack_path(shop_items.NOT_PUSHED_SHELF))).files
+        heart_flag = byml.loads(heart_files[ground_items._ref_path(ground_items.resolved_components(
+            heart_files, shop_items.NOT_PUSHED_SHELF)['PouchContentRef'])]).root.get(shop_items.FULL_FLAG)
+        good &= check('the game\'s item settings that say %s False: %s (the bomb bags\'); True: %s; the heart shelf: %s'
+                      % (shop_items.FULL_FLAG, ', '.join(sorted(said_false)), ', '.join(sorted(said_true)), heart_flag),
+                      said_false == {'BombBag'} and heart_flag is True and 'Obj_Heart' in said_true)
+
         # ---- a family's shelf: a shelf of its own that Link can never have; the sale flow does the rest
         heart = sarc.Sarc.read(plain(ground_items.pack_path(shop_items.NOT_PUSHED_SHELF))).files
         not_pushed = byml.loads(heart[ground_items._ref_path(ground_items.resolved_components(
@@ -171,6 +192,7 @@ def main(romfs):
                             and arow.get(name, {}).get('ActorName') == name
                             and comp.get('ActorNameRef') == shop_items.NAME_REF % name
                             and sroot.get('SpecialDeal') == not_pushed and 'PouchActor' not in sroot
+                            and sroot.get(shop_items.FULL_FLAG) is True
                             and prow.get(name, {}).get('PouchSpecialDeal') == shop_items.NOT_PUSHED
                             and not set(prow.get(name, {})) - set(shop_items.FAMILY_ROW)
                             and texts.get(name + '_Name') == texts.get(names[0] + '_Name') is not None
@@ -199,12 +221,17 @@ def main(romfs):
                         and name_of(wait) == ('EventSystemActor', 'EventWait')
                         and dict(wait.params).get('Frames') == build_mod.SCRUB_WRITE_WAIT and wait.next == on)
 
+            def own(i):
+                """the first event the flow had before any family that event `i` leads to by "no" answers"""
+                while i is not None and i >= n0:
+                    i = dict(fc.events[i].cases).get(1) if fc.events[i].type == 'switch' else fc.events[i].next
+                return i
+
             heads = asks(name)
-            ok = len(heads) == len(picked) and sorted(fc.events[f].next for f in picked) == sorted(
-                fc.events.index(h) for h in heads)
+            ok = len(heads) == len(picked) and sorted(own(dict(h.cases)[1]) for h in heads) == sorted(
+                game.events[f].next for f in picked)
             for head in heads:                          # behind each "shelf picked" step
-                on = dict(head.cases)[1]
-                ok &= on in [game.events[f].next for f in picked]
+                on = dict(head.cases)[1]                # (another family's question, or the flow as it was)
                 at = dict(head.cases)[0]
                 for k in reversed(range(1, len(levels))):          # the highest level is asked about first
                     q = fc.events[at]
@@ -221,21 +248,28 @@ def main(romfs):
                                 'has %s -> %s' % (names[k - 1], names[k]) for k in reversed(range(1, len(levels)))),
                                names[0], build_mod.SHOP_ITEM_VAR, build_mod.SCRUB_WRITE_WAIT), ok)
             ok = True
+            yes = dict(game.events[can].cases)[0]
+            carried = 0
             for k, (item, known) in enumerate(zip(levels, names)):
-                placed = asks(known)
-                ok &= len(placed) == len(gives)
+                carry = [e for e in asks(known) if dict(e.cases)[0] == yes]
+                carried += len(carry)
+                placed = [e for e in asks(known) if e not in carry]
+                ok &= len(placed) == len(gives) and len(carry) == 1
                 for e in placed:
                     at = dict(e.cases)[0]
                     for c in (comes_with if k == 0 else ()):
                         ok &= adds(fc.events[at], c)
                         at = fc.events[at].next
                     ok &= adds(fc.events[at], item) and fc.events[at].next in [game.events[g].next for g in gives]
-            new = len(picked) * 3 * len(levels) + len(gives) * (2 * len(levels) + len(comes_with))
+            new = len(picked) * 3 * len(levels) + len(gives) * (2 * len(levels) + len(comes_with)) + len(levels)
             ok_all &= check('%s: in front of each of the %d giving steps: is it %s? -> %sadded, then on behind the '
-                            'step (the shelf itself gives nothing); %d new events'
+                            'step (the shelf itself gives nothing); in front of "can Link carry it" the same %d '
+                            'questions lead to its "yes"; %d new events'
                             % (build, len(gives), '? / '.join(names),
-                               '%s and the first level ' % ', '.join(comes_with) if comes_with else 'that level ', new),
-                            ok and len(asks(name)) == len(picked), (len(fc.events) - n0, new))
+                               '%s and the first level ' % ', '.join(comes_with) if comes_with else 'that level ',
+                               carried, new),
+                            ok and len(asks(name)) == len(picked) and carried == len(levels),
+                            (len(fc.events) - n0, new))
             return ok_all, fc, new
 
         n_game = len(game.events)
@@ -250,6 +284,10 @@ def main(romfs):
         good &= ok and len(fc.events) == n_game + n_key + new
         ok, fc, new = family('three', SHELF, BAGS, BAGS, [], n_game)
         good &= ok and len(fc.events) == n_game + new
+        # two families in one shop, each on its own shelf: each shelf's questions stand in the flow
+        ok, fc, new = family('two', SHELF, BAGS, BAGS, [], n_game)
+        ok2, fc, new2 = family('two', SHELF2, (FIRST, SECOND), (FIRST, SECOND), [], n_game)
+        good &= ok and ok2 and len(fc.events) == n_game + new + new2
         ok, fc, new = family('weapons', SHELF, SEEDS, (SLING,) + SEEDS[1:], ['Item_BulletBag_Small'], n_game)
         good &= ok
 

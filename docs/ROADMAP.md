@@ -420,6 +420,10 @@ checks, none with an ID; Inside the Deku Tree no data yet.
      a family's shelf is a shelf of its own that Link can never have (`Shop_NX2_<First>_<price>_Family`: named
      itself, the first level's look and name, never in the inventory), and the sale flow writes the name of
      the level Link gets next and adds that level, the first one included;
+   - **in game 2026-11-27, second build:** that shelf was "Sold out" on a new file, so "Link has it" was not
+     the cause. The bomb bags' item settings are the only ones with `IsPlayGetEventPouchMax: False`, and the
+     shelf inherited it; a family's shelf says True now, and "can Link carry it" is not asked about a
+     family's level. **To retest** (with a Silver Scale > Golden Scale shelf beside it for comparison);
    - shelf lifts for the Bomb Bag (0.19 m), the Fairy Bow (0.42 m) and the Fairy Slingshot (0.18 m), measured
      as the scales'. The Fairy Bow is 0.91 m tall on a shelf (the shop's rows are 0.64 m apart): its look is
      part of the test.
